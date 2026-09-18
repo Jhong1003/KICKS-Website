@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PartnerGrid from "../components/PartnerGrid.astro";
+import PartnerInquiryForm from "../components/PartnerInquiryForm.astro";
+import partners from "../data/partners.json";
+---
+
+<BaseLayout title="Partners | KICKS" description="KICKS partners and sponsorship inquiries.">
+	<main>
+		<section class="content-section" aria-labelledby="partners-title">
+			<p class="section-label">PARTNERS</p>
+			<h1 id="partners-title">Our Partners</h1>
+			<PartnerGrid partners={partners} />
+		</section>
+
+		<section class="content-section" aria-labelledby="inquiry-title">
+			<h2 id="inquiry-title">Partnership Inquiry</h2>
+			<p class="about-description">Interested in partnering with KICKS? Fill out the form below.</p>
+			<PartnerInquiryForm />
+		</section>
+	</main>
+</BaseLayout>

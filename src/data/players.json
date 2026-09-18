@@ -1,0 +1,8 @@
+[
+  { "player_id": "p01", "name": "Alex Kim", "team_id": "team-a", "appearances": 3, "goals": 5, "assists": 2 },
+  { "player_id": "p02", "name": "Jordan Lee", "team_id": "team-a", "appearances": 3, "goals": 2, "assists": 4 },
+  { "player_id": "p03", "name": "Sam Park", "team_id": "team-b", "appearances": 3, "goals": 3, "assists": 1 },
+  { "player_id": "p04", "name": "Chris Yoon", "team_id": "team-b", "appearances": 2, "goals": 1, "assists": 1 },
+  { "player_id": "p05", "name": "Jamie Choi", "team_id": "team-c", "appearances": 3, "goals": 4, "assists": 3 },
+  { "player_id": "p06", "name": "Taylor Han", "team_id": "team-c", "appearances": 3, "goals": 2, "assists": 2 }
+]

@@ -1,0 +1,40 @@
+---
+interface Match {
+	match_id: string;
+	date: string;
+	matchday: number;
+	home_team_id: string;
+	away_team_id: string;
+	home_score: number | null;
+	away_score: number | null;
+	status: "completed" | "scheduled";
+}
+
+interface Team {
+	id: string;
+	name: string;
+}
+
+interface Props {
+	matches: Match[];
+	teams: Team[];
+}
+
+const { matches, teams } = Astro.props;
+
+const teamName = (id: string) => teams.find((team) => team.id === id)?.name ?? id;
+---
+
+<ul class="match-list">
+	{
+		matches.map((match) => (
+			<li class="match-item">
+				<span class="match-date">{match.date}</span>
+				<span class="match-teams">
+					{teamName(match.home_team_id)} <strong>{match.home_score}</strong> — <strong>{match.away_score}</strong>{" "}
+					{teamName(match.away_team_id)}
+				</span>
+			</li>
+		))
+	}
+</ul>

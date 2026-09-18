@@ -1,0 +1,31 @@
+---
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+	title: string;
+	description?: string;
+	header?: "default" | "custom";
+}
+
+const {
+	title,
+	description = "KICKS is a student-run futsal league and community at UIUC.",
+	header = "default",
+} = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<title>{title}</title>
+	</head>
+	<body>
+		{header === "default" && <Header variant="default" />}
+		<slot />
+		<Footer />
+	</body>
+</html>

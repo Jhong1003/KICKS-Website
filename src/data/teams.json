@@ -1,0 +1,5 @@
+[
+  { "id": "team-a", "name": "Team Falcons", "color": "#3f5128" },
+  { "id": "team-b", "name": "Team Hawks", "color": "#7a3b3b" },
+  { "id": "team-c", "name": "Team Kestrels", "color": "#3b5a7a" }
+]

@@ -1,0 +1,93 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import aboutImage from "../assets/about.jpg";
+
+const features = [
+	{
+		title: "Season League with Fixed Teams",
+		description:
+			"Members are divided into 3–4 teams that compete in a season-long league throughout the semester. Playing with the same teammates builds real chemistry, and teams are reshuffled mid-semester so you get to play with even more members.",
+	},
+	{
+		title: "A Close-Knit Community",
+		description:
+			"We're more than just a place to play. By showing up and playing together every week, we get to know each other and create lasting friendships.",
+	},
+	{
+		title: "Friendly Matches with Other Teams",
+		description:
+			"We play friendly matches against international student soccer and futsal clubs across UIUC, creating chances to meet new people and connect through the game.",
+	},
+	{
+		title: "Every Moment, Captured",
+		description:
+			"We record every match through photos and videos, from full games to highlights, so the moments we share on the court become memories that last.",
+	},
+];
+---
+
+<BaseLayout title="About | KICKS" description="Learn more about KICKS, UIUC's student-run futsal community.">
+	<main>
+		<section class="content-section" aria-labelledby="about-page-title">
+			<div class="about-intro">
+				<div class="about-intro-text">
+					<p class="section-label">WHO WE ARE</p>
+					<h1 id="about-page-title">About KICKS</h1>
+					<p class="about-description">
+						KICKS (Korean-Inspired Community for Kicking Sports) is a small Korean futsal club at UIUC
+						for people who love the game. Playing together every week, we get to know each other
+						naturally and build a tight-knit team, on and off the court.
+					</p>
+					<p class="about-description">
+						Because KICKS runs on a competitive season league with fixed teams, we're looking for
+						members with some prior game experience. KICKS is best suited for players who love futsal
+						and want to compete, improve, and grow alongside their teammates.
+					</p>
+				</div>
+				<div class="split-photo">
+					<Image src={aboutImage} alt="KICKS club members playing futsal" width={640} quality={85} />
+				</div>
+			</div>
+		</section>
+
+		<section class="content-section" aria-labelledby="differences-title">
+			<h2 id="differences-title">What Makes KICKS Different</h2>
+			<div class="feature-grid">
+				{
+					features.map((feature) => (
+						<div class="feature-card">
+							<h3>{feature.title}</h3>
+							<p>{feature.description}</p>
+						</div>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="content-section" aria-labelledby="what-we-do-title">
+			<h2 id="what-we-do-title">What We Do</h2>
+			<ul class="about-list">
+				<li>Weekly futsal league every Sunday</li>
+				<li>Sports events throughout the semester</li>
+				<li>Social activities: team dinners, BBQs, and watching matches together</li>
+			</ul>
+		</section>
+
+		<section class="content-section" aria-labelledby="who-should-join-title">
+			<h2 id="who-should-join-title">Who Should Join</h2>
+			<p class="about-description">
+				Freshmen, current students, transfer students, and graduate students are all welcome to
+				apply. If you have game experience, love futsal, and want to compete, stay active, and
+				make great memories in college, we'd love to have you.
+			</p>
+			<p class="about-description">
+				Questions? Reach out on Instagram
+				<a href="https://www.instagram.com/kicks.uiuc" target="_blank" rel="noopener noreferrer">
+					@kicks.uiuc
+				</a>
+			</p>
+			<a class="button-primary" href="/join">Join KICKS</a>
+		</section>
+	</main>
+</BaseLayout>

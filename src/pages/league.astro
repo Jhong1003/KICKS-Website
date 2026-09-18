@@ -1,0 +1,39 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import StandingsTable from "../components/StandingsTable.astro";
+import MatchList from "../components/MatchList.astro";
+import PlayerStatsTable from "../components/PlayerStatsTable.astro";
+import teams from "../data/teams.json";
+import matches from "../data/matches.json";
+import players from "../data/players.json";
+import { computeStandings } from "../lib/standings.js";
+import { getRecentMatches } from "../lib/matches.js";
+
+const standings = computeStandings(matches, teams);
+const allMatches = getRecentMatches(matches);
+---
+
+<BaseLayout title="League | KICKS" description="KICKS season league standings, match results, and player stats.">
+	<main>
+		<section class="content-section" aria-labelledby="league-title">
+			<p class="section-label">SEASON LEAGUE</p>
+			<h1 id="league-title">Standings & Results</h1>
+		</section>
+
+		<section class="content-section" aria-labelledby="standings-title">
+			<h2 id="standings-title">League Table</h2>
+			<StandingsTable rows={standings} />
+		</section>
+
+		<section class="content-section" aria-labelledby="results-title">
+			<h2 id="results-title">Match Results</h2>
+			<MatchList matches={allMatches} teams={teams} />
+		</section>
+
+		<section class="content-section" aria-labelledby="player-stats-title">
+			<h2 id="player-stats-title">Player Stats</h2>
+			<p class="about-description">Click a column header to sort.</p>
+			<PlayerStatsTable players={players} teams={teams} />
+		</section>
+	</main>
+</BaseLayout>

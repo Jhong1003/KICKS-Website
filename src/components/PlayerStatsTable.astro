@@ -1,0 +1,92 @@
+---
+interface Player {
+	player_id: string;
+	name: string;
+	team_id: string;
+	appearances: number;
+	goals: number;
+	assists: number;
+}
+
+interface Team {
+	id: string;
+	name: string;
+}
+
+interface Props {
+	players: Player[];
+	teams: Team[];
+}
+
+const { players, teams } = Astro.props;
+
+const teamName = (id: string) => teams.find((team) => team.id === id)?.name ?? id;
+
+const columns = [
+	{ key: "name", label: "Player", type: "string" },
+	{ key: "team", label: "Team", type: "string" },
+	{ key: "appearances", label: "Appearances", type: "number" },
+	{ key: "goals", label: "Goals", type: "number" },
+	{ key: "assists", label: "Assists", type: "number" },
+] as const;
+---
+
+<div class="table-scroll">
+	<table class="player-stats-table">
+		<thead>
+			<tr>
+				{
+					columns.map((column) => (
+						<th data-sortable data-type={column.type}>
+							{column.label}
+						</th>
+					))
+				}
+			</tr>
+		</thead>
+		<tbody>
+			{
+				players.map((player) => (
+					<tr>
+						<td data-sort-value={player.name.toLowerCase()}>{player.name}</td>
+						<td data-sort-value={teamName(player.team_id).toLowerCase()}>{teamName(player.team_id)}</td>
+						<td data-sort-value={player.appearances}>{player.appearances}</td>
+						<td data-sort-value={player.goals}>{player.goals}</td>
+						<td data-sort-value={player.assists}>{player.assists}</td>
+					</tr>
+				))
+			}
+		</tbody>
+	</table>
+</div>
+
+<script>
+	const table = document.querySelector<HTMLTableElement>(".player-stats-table");
+	const headers = table ? Array.from(table.querySelectorAll<HTMLTableCellElement>("th[data-sortable]")) : [];
+
+	headers.forEach((header, columnIndex) => {
+		header.addEventListener("click", () => {
+			const currentDirection = header.dataset.direction === "asc" ? "asc" : "desc";
+			const nextDirection = currentDirection === "asc" ? "desc" : "asc";
+
+			headers.forEach((otherHeader) => {
+				otherHeader.removeAttribute("aria-sort");
+				delete otherHeader.dataset.direction;
+			});
+			header.dataset.direction = nextDirection;
+			header.setAttribute("aria-sort", nextDirection === "asc" ? "ascending" : "descending");
+
+			const isNumeric = header.dataset.type === "number";
+			const rows = Array.from(table!.tBodies[0].rows);
+
+			rows.sort((rowA, rowB) => {
+				const valueA = rowA.cells[columnIndex].dataset.sortValue ?? "";
+				const valueB = rowB.cells[columnIndex].dataset.sortValue ?? "";
+				const comparison = isNumeric ? Number(valueA) - Number(valueB) : valueA.localeCompare(valueB);
+				return nextDirection === "asc" ? comparison : -comparison;
+			});
+
+			rows.forEach((row) => table!.tBodies[0].appendChild(row));
+		});
+	});
+</script>

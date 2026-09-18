@@ -1,0 +1,90 @@
+---
+// Photos: drop any .jpg/.jpeg/.png/.webp file (upper- or lowercase extension)
+// into src/assets/gallery/ and it appears here automatically on the next
+// dev reload or build. Prefix filenames with 01-, 02-, ... to control display
+// order, or just use plain numbers (1.jpg, 2.jpg, ...) — those sort naturally
+// (1, 2, ... 10, 11) rather than as text (1, 10, 11, 2, ...).
+// Descriptive filenames (e.g. team-huddle-matchday3.jpg) become the alt text;
+// filenames that are just a number (e.g. 7.jpg) become "KICKS futsal photo 7".
+import { Image } from "astro:assets";
+
+const galleryModules = import.meta.glob<{ default: ImageMetadata }>(
+	"/src/assets/gallery/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}",
+	{ eager: true }
+);
+
+const images = Object.entries(galleryModules)
+	.sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
+	.map(([path, mod]) => {
+		const baseName = path.split("/").pop()!.replace(/\.[^.]+$/, "");
+		const alt = /^\d+$/.test(baseName) ? `KICKS futsal photo ${baseName}` : baseName.replace(/[-_]/g, " ");
+
+		return { src: mod.default, alt };
+	});
+---
+
+{
+	images.length === 0 ? (
+		<p class="gallery-empty">No photos yet — add files to src/assets/gallery/ to fill this gallery.</p>
+	) : (
+		<div class="gallery-grid">
+			{images.map((image, index) => (
+				<button class="gallery-item" type="button" data-index={index} aria-label={`View photo: ${image.alt}`}>
+					<Image src={image.src} alt={image.alt} width={480} />
+				</button>
+			))}
+		</div>
+	)
+}
+
+<div class="lightbox" id="lightbox" hidden>
+	<button class="lightbox-close" type="button" aria-label="Close">✕</button>
+	<button class="lightbox-prev" type="button" aria-label="Previous photo">‹</button>
+	<img class="lightbox-image" id="lightbox-image" src="" alt="" />
+	<button class="lightbox-next" type="button" aria-label="Next photo">›</button>
+</div>
+
+<script>
+	const items = Array.from(document.querySelectorAll<HTMLButtonElement>(".gallery-item"));
+	const lightbox = document.getElementById("lightbox");
+	const lightboxImage = document.getElementById("lightbox-image") as HTMLImageElement | null;
+	let currentIndex = 0;
+
+	function openLightbox(index: number) {
+		currentIndex = index;
+		const img = items[currentIndex]?.querySelector("img");
+		if (!img || !lightboxImage || !lightbox) return;
+		lightboxImage.src = img.src;
+		lightboxImage.alt = img.alt;
+		lightbox.hidden = false;
+	}
+
+	function closeLightbox() {
+		if (lightbox) lightbox.hidden = true;
+	}
+
+	function showRelative(delta: number) {
+		if (items.length === 0) return;
+		currentIndex = (currentIndex + delta + items.length) % items.length;
+		openLightbox(currentIndex);
+	}
+
+	items.forEach((item, index) => {
+		item.addEventListener("click", () => openLightbox(index));
+	});
+
+	document.querySelector(".lightbox-close")?.addEventListener("click", closeLightbox);
+	document.querySelector(".lightbox-prev")?.addEventListener("click", () => showRelative(-1));
+	document.querySelector(".lightbox-next")?.addEventListener("click", () => showRelative(1));
+
+	lightbox?.addEventListener("click", (event) => {
+		if (event.target === lightbox) closeLightbox();
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if (lightbox?.hidden) return;
+		if (event.key === "Escape") closeLightbox();
+		if (event.key === "ArrowLeft") showRelative(-1);
+		if (event.key === "ArrowRight") showRelative(1);
+	});
+</script>

@@ -1,0 +1,34 @@
+---
+interface Partner {
+	partner_id: string;
+	name: string;
+	logo: string | null;
+	url: string | null;
+}
+
+interface Props {
+	partners: Partner[];
+}
+
+const { partners } = Astro.props;
+---
+
+<div class="partner-grid">
+	{
+		partners.map((partner) => {
+			const card = partner.logo ? (
+				<img src={partner.logo} alt={partner.name} />
+			) : (
+				<span class="partner-logo-placeholder">{partner.name}</span>
+			);
+
+			return partner.url ? (
+				<a class="partner-card" href={partner.url} target="_blank" rel="noopener noreferrer">
+					{card}
+				</a>
+			) : (
+				<div class="partner-card">{card}</div>
+			);
+		})
+	}
+</div>

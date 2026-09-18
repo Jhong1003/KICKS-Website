@@ -1,0 +1,25 @@
+<!-- TODO: connect real submit handling here (e.g. a form service or serverless endpoint). -->
+<!-- The form has no `action`/`method` yet, so submitting it currently does nothing. -->
+<form class="inquiry-form">
+	<div class="form-field">
+		<label for="brand-name">Brand Name</label>
+		<input type="text" id="brand-name" name="brand-name" required />
+	</div>
+
+	<div class="form-field">
+		<label for="contact-name">Contact Name</label>
+		<input type="text" id="contact-name" name="contact-name" required />
+	</div>
+
+	<div class="form-field">
+		<label for="email">Email</label>
+		<input type="email" id="email" name="email" required />
+	</div>
+
+	<div class="form-field">
+		<label for="proposal">Proposal Details</label>
+		<textarea id="proposal" name="proposal" rows="5" required></textarea>
+	</div>
+
+	<button class="form-submit" type="submit">Send Inquiry</button>
+</form>

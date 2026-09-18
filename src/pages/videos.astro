@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import VideoGrid from "../components/VideoGrid.astro";
+import videos from "../data/videos.json";
+---
+
+<BaseLayout title="Videos | KICKS" description="Full match videos from the KICKS season league.">
+	<main>
+		<section class="content-section" aria-labelledby="videos-title">
+			<p class="section-label">VIDEOS</p>
+			<h1 id="videos-title">Full Match Replays</h1>
+			<VideoGrid videos={videos} />
+		</section>
+	</main>
+</BaseLayout>
