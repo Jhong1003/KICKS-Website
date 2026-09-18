@@ -1,0 +1,134 @@
+---
+interface Match {
+	week: number;
+	round: number;
+	home_team: string;
+	away_team: string;
+	home_score: number | null;
+	away_score: number | null;
+	status: "completed" | "scheduled";
+	date: string;
+}
+
+interface WeekSummaryRow {
+	week: number;
+	team: string;
+	wins: number;
+	draws: number;
+	losses: number;
+	points: number;
+}
+
+interface Week {
+	week: number;
+	date: string;
+	hasResults: boolean;
+	rounds: number[];
+	matches: Match[];
+	summary: WeekSummaryRow[];
+}
+
+interface Props {
+	weeks: Week[];
+	defaultWeek: number;
+}
+
+const { weeks, defaultWeek } = Astro.props;
+
+// "2026-09-13" -> "Sun, Sep 13". Appending a time forces the date to be
+// parsed in the local timezone instead of UTC, which would otherwise risk
+// showing the previous day in timezones behind UTC.
+const formatDate = (isoDate: string) =>
+	new Date(`${isoDate}T00:00:00`).toLocaleDateString("en-US", {
+		weekday: "short",
+		month: "short",
+		day: "numeric",
+	});
+
+const matchesForRound = (week: Week, round: number) => week.matches.filter((match) => match.round === round);
+---
+
+<div class="week-tabs">
+	<div class="week-tab-list" role="tablist">
+		{
+			weeks.map((week) => (
+				<button
+					class="week-tab"
+					type="button"
+					role="tab"
+					data-week={week.week}
+					aria-selected={week.week === defaultWeek ? "true" : "false"}
+				>
+					{week.hasResults ? `Week ${week.week}` : "Upcoming"}
+				</button>
+			))
+		}
+	</div>
+
+	{
+		weeks.map((week) => (
+			<div class="week-panel" data-week-panel={week.week} hidden={week.week !== defaultWeek}>
+				<p class="week-date">{formatDate(week.date)}</p>
+
+				{week.summary.length > 0 && (
+					<div class="week-summary">
+						{week.summary.map((row) => (
+							<div class="week-summary-row">
+								<span class="week-summary-team">{row.team}</span>
+								<span>
+									{row.wins}W {row.draws}D {row.losses}L
+								</span>
+								<span class="week-summary-points">{row.points} pts</span>
+							</div>
+						))}
+					</div>
+				)}
+
+				{week.rounds.map((round) => (
+					<div class="round-group">
+						<h3 class="round-label">Round {round}</h3>
+						<div class="match-cards">
+							{matchesForRound(week, round).map((match) => {
+								const homeWins = match.status === "completed" && match.home_score! > match.away_score!;
+								const awayWins = match.status === "completed" && match.away_score! > match.home_score!;
+								const teamClass = (isWinner: boolean, isLoser: boolean) =>
+									["match-card-team", isWinner && "match-card-team--winner", isLoser && "match-card-team--loser"]
+										.filter(Boolean)
+										.join(" ");
+								return (
+									<div class="match-card">
+										<span class={teamClass(homeWins, awayWins)}>{match.home_team}</span>
+										{match.status === "completed" ? (
+											<span class="match-score">
+												{match.home_score} – {match.away_score}
+											</span>
+										) : (
+											<span class="match-score match-score--vs">vs</span>
+										)}
+										<span class={teamClass(awayWins, homeWins)}>{match.away_team}</span>
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				))}
+			</div>
+		))
+	}
+</div>
+
+<script>
+	const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".week-tab"));
+	const panels = Array.from(document.querySelectorAll<HTMLDivElement>(".week-panel"));
+
+	tabs.forEach((tab) => {
+		tab.addEventListener("click", () => {
+			const week = tab.dataset.week;
+
+			tabs.forEach((otherTab) => otherTab.setAttribute("aria-selected", String(otherTab === tab)));
+			panels.forEach((panel) => {
+				panel.hidden = panel.dataset.weekPanel !== week;
+			});
+		});
+	});
+</script>

@@ -1,8 +1,7 @@
 ---
 interface StandingsRow {
 	rank: number;
-	team_id: string;
-	team_name: string;
+	team: string;
 	played: number;
 	wins: number;
 	draws: number;
@@ -11,6 +10,7 @@ interface StandingsRow {
 	goals_against: number;
 	goal_difference: number;
 	points: number;
+	participation_rate: number;
 }
 
 interface Props {
@@ -34,6 +34,7 @@ const { rows } = Astro.props;
 				<th>GA</th>
 				<th>GD</th>
 				<th>Pts</th>
+				<th>Participation</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -41,7 +42,7 @@ const { rows } = Astro.props;
 				rows.map((row) => (
 					<tr>
 						<td>{row.rank}</td>
-						<td class="team-name">{row.team_name}</td>
+						<td class="team-name">{row.team}</td>
 						<td>{row.played}</td>
 						<td>{row.wins}</td>
 						<td>{row.draws}</td>
@@ -50,6 +51,7 @@ const { rows } = Astro.props;
 						<td>{row.goals_against}</td>
 						<td>{row.goal_difference}</td>
 						<td class="points">{row.points}</td>
+						<td>{(row.participation_rate * 100).toFixed(1)}%</td>
 					</tr>
 				))
 			}

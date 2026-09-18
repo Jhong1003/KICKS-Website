@@ -3,12 +3,8 @@ import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Header from "../components/Header.astro";
 import StandingsTable from "../components/StandingsTable.astro";
-import teams from "../data/teams.json";
-import matches from "../data/matches.json";
-import { computeStandings } from "../lib/standings.js";
+import leagueTable from "../data/league_table.json";
 import heroImage from "../assets/hero.jpg";
-
-const standings = computeStandings(matches, teams);
 ---
 
 <BaseLayout
@@ -61,7 +57,7 @@ const standings = computeStandings(matches, teams);
 		<section class="content-section" aria-labelledby="standings-preview-title">
 			<p class="section-label">LEAGUE STANDINGS</p>
 			<h2 id="standings-preview-title">Current Season</h2>
-			<StandingsTable rows={standings} />
+			<StandingsTable rows={leagueTable} />
 			<a class="section-link" href="/league">View full league page →</a>
 		</section>
 	</main>

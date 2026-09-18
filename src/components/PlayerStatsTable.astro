@@ -1,33 +1,28 @@
 ---
 interface Player {
-	player_id: string;
-	name: string;
-	team_id: string;
-	appearances: number;
+	player: string;
+	team: string;
+	games: number;
 	goals: number;
 	assists: number;
-}
-
-interface Team {
-	id: string;
-	name: string;
+	attacking_points: number;
+	attacking_points_per_game: number;
 }
 
 interface Props {
 	players: Player[];
-	teams: Team[];
 }
 
-const { players, teams } = Astro.props;
-
-const teamName = (id: string) => teams.find((team) => team.id === id)?.name ?? id;
+const { players } = Astro.props;
 
 const columns = [
-	{ key: "name", label: "Player", type: "string" },
+	{ key: "player", label: "Player", type: "string" },
 	{ key: "team", label: "Team", type: "string" },
-	{ key: "appearances", label: "Appearances", type: "number" },
+	{ key: "games", label: "Games", type: "number" },
 	{ key: "goals", label: "Goals", type: "number" },
 	{ key: "assists", label: "Assists", type: "number" },
+	{ key: "attacking_points", label: "Attacking Pts", type: "number" },
+	{ key: "attacking_points_per_game", label: "Pts / Game", type: "number" },
 ] as const;
 ---
 
@@ -48,11 +43,13 @@ const columns = [
 			{
 				players.map((player) => (
 					<tr>
-						<td data-sort-value={player.name.toLowerCase()}>{player.name}</td>
-						<td data-sort-value={teamName(player.team_id).toLowerCase()}>{teamName(player.team_id)}</td>
-						<td data-sort-value={player.appearances}>{player.appearances}</td>
+						<td data-sort-value={player.player.toLowerCase()}>{player.player}</td>
+						<td data-sort-value={player.team.toLowerCase()}>{player.team}</td>
+						<td data-sort-value={player.games}>{player.games}</td>
 						<td data-sort-value={player.goals}>{player.goals}</td>
 						<td data-sort-value={player.assists}>{player.assists}</td>
+						<td data-sort-value={player.attacking_points}>{player.attacking_points}</td>
+						<td data-sort-value={player.attacking_points_per_game}>{player.attacking_points_per_game.toFixed(2)}</td>
 					</tr>
 				))
 			}

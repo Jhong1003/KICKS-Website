@@ -1,72 +1,272 @@
 [
   {
-    "match_id": "2026-09-06-A-B",
-    "date": "2026-09-06",
-    "matchday": 1,
-    "home_team_id": "team-a",
-    "away_team_id": "team-b",
-    "home_score": 3,
-    "away_score": 2,
-    "status": "completed"
-  },
-  {
-    "match_id": "2026-09-06-C-A",
-    "date": "2026-09-06",
-    "matchday": 1,
-    "home_team_id": "team-c",
-    "away_team_id": "team-a",
-    "home_score": 1,
+    "week": 1,
+    "round": 1,
+    "home_team": "이지선다",
+    "away_team": "문전박대",
+    "home_score": 2,
     "away_score": 1,
-    "status": "completed"
+    "status": "completed",
+    "date": "2026-09-06"
   },
   {
-    "match_id": "2026-09-13-B-C",
-    "date": "2026-09-13",
-    "matchday": 2,
-    "home_team_id": "team-b",
-    "away_team_id": "team-c",
+    "week": 1,
+    "round": 1,
+    "home_team": "문전박대",
+    "away_team": "오늘밤 샴페인",
+    "home_score": 2,
+    "away_score": 0,
+    "status": "completed",
+    "date": "2026-09-06"
+  },
+  {
+    "week": 1,
+    "round": 1,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "이지선다",
     "home_score": 0,
     "away_score": 2,
-    "status": "completed"
+    "status": "completed",
+    "date": "2026-09-06"
   },
   {
-    "match_id": "2026-09-13-A-B",
-    "date": "2026-09-13",
-    "matchday": 2,
-    "home_team_id": "team-a",
-    "away_team_id": "team-b",
-    "home_score": 4,
-    "away_score": 1,
-    "status": "completed"
+    "week": 1,
+    "round": 2,
+    "home_team": "이지선다",
+    "away_team": "문전박대",
+    "home_score": 0,
+    "away_score": 0,
+    "status": "completed",
+    "date": "2026-09-06"
   },
   {
-    "match_id": "2026-09-20-C-A",
-    "date": "2026-09-20",
-    "matchday": 3,
-    "home_team_id": "team-c",
-    "away_team_id": "team-a",
-    "home_score": 2,
-    "away_score": 2,
-    "status": "completed"
-  },
-  {
-    "match_id": "2026-09-20-B-C",
-    "date": "2026-09-20",
-    "matchday": 3,
-    "home_team_id": "team-b",
-    "away_team_id": "team-c",
+    "week": 1,
+    "round": 2,
+    "home_team": "문전박대",
+    "away_team": "오늘밤 샴페인",
     "home_score": 3,
-    "away_score": 3,
-    "status": "completed"
+    "away_score": 0,
+    "status": "completed",
+    "date": "2026-09-06"
   },
   {
-    "match_id": "2026-09-27-A-B",
-    "date": "2026-09-27",
-    "matchday": 4,
-    "home_team_id": "team-a",
-    "away_team_id": "team-b",
+    "week": 1,
+    "round": 2,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "이지선다",
+    "home_score": 2,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-06"
+  },
+  {
+    "week": 1,
+    "round": 3,
+    "home_team": "이지선다",
+    "away_team": "문전박대",
+    "home_score": 0,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-06"
+  },
+  {
+    "week": 1,
+    "round": 3,
+    "home_team": "문전박대",
+    "away_team": "오늘밤 샴페인",
+    "home_score": 1,
+    "away_score": 0,
+    "status": "completed",
+    "date": "2026-09-06"
+  },
+  {
+    "week": 1,
+    "round": 3,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "이지선다",
+    "home_score": 1,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-06"
+  },
+  {
+    "week": 2,
+    "round": 1,
+    "home_team": "문전박대",
+    "away_team": "이지선다",
+    "home_score": 0,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 2,
+    "round": 1,
+    "home_team": "이지선다",
+    "away_team": "오늘밤 샴페인",
+    "home_score": 2,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 2,
+    "round": 1,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "문전박대",
+    "home_score": 0,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 2,
+    "round": 2,
+    "home_team": "문전박대",
+    "away_team": "이지선다",
+    "home_score": 2,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 2,
+    "round": 2,
+    "home_team": "이지선다",
+    "away_team": "오늘밤 샴페인",
+    "home_score": 1,
+    "away_score": 0,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 2,
+    "round": 2,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "문전박대",
+    "home_score": 0,
+    "away_score": 2,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 2,
+    "round": 3,
+    "home_team": "문전박대",
+    "away_team": "이지선다",
+    "home_score": 1,
+    "away_score": 0,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 2,
+    "round": 3,
+    "home_team": "이지선다",
+    "away_team": "오늘밤 샴페인",
+    "home_score": 2,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 2,
+    "round": 3,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "문전박대",
+    "home_score": 0,
+    "away_score": 1,
+    "status": "completed",
+    "date": "2026-09-13"
+  },
+  {
+    "week": 3,
+    "round": 1,
+    "home_team": "문전박대",
+    "away_team": "오늘밤 샴페인",
     "home_score": null,
     "away_score": null,
-    "status": "scheduled"
+    "status": "scheduled",
+    "date": "2026-09-20"
+  },
+  {
+    "week": 3,
+    "round": 1,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "이지선다",
+    "home_score": null,
+    "away_score": null,
+    "status": "scheduled",
+    "date": "2026-09-20"
+  },
+  {
+    "week": 3,
+    "round": 1,
+    "home_team": "이지선다",
+    "away_team": "문전박대",
+    "home_score": null,
+    "away_score": null,
+    "status": "scheduled",
+    "date": "2026-09-20"
+  },
+  {
+    "week": 3,
+    "round": 2,
+    "home_team": "문전박대",
+    "away_team": "오늘밤 샴페인",
+    "home_score": null,
+    "away_score": null,
+    "status": "scheduled",
+    "date": "2026-09-20"
+  },
+  {
+    "week": 3,
+    "round": 2,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "이지선다",
+    "home_score": null,
+    "away_score": null,
+    "status": "scheduled",
+    "date": "2026-09-20"
+  },
+  {
+    "week": 3,
+    "round": 2,
+    "home_team": "이지선다",
+    "away_team": "문전박대",
+    "home_score": null,
+    "away_score": null,
+    "status": "scheduled",
+    "date": "2026-09-20"
+  },
+  {
+    "week": 3,
+    "round": 3,
+    "home_team": "문전박대",
+    "away_team": "오늘밤 샴페인",
+    "home_score": null,
+    "away_score": null,
+    "status": "scheduled",
+    "date": "2026-09-20"
+  },
+  {
+    "week": 3,
+    "round": 3,
+    "home_team": "오늘밤 샴페인",
+    "away_team": "이지선다",
+    "home_score": null,
+    "away_score": null,
+    "status": "scheduled",
+    "date": "2026-09-20"
+  },
+  {
+    "week": 3,
+    "round": 3,
+    "home_team": "이지선다",
+    "away_team": "문전박대",
+    "home_score": null,
+    "away_score": null,
+    "status": "scheduled",
+    "date": "2026-09-20"
   }
 ]

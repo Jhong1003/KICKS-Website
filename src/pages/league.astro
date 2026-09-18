@@ -1,16 +1,33 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import StandingsTable from "../components/StandingsTable.astro";
-import MatchList from "../components/MatchList.astro";
+import WeeklyResults from "../components/WeeklyResults.astro";
 import PlayerStatsTable from "../components/PlayerStatsTable.astro";
-import teams from "../data/teams.json";
+import leagueTable from "../data/league_table.json";
 import matches from "../data/matches.json";
-import players from "../data/players.json";
-import { computeStandings } from "../lib/standings.js";
-import { getRecentMatches } from "../lib/matches.js";
+import weekSummaries from "../data/week_summaries.json";
+import leaderboard from "../data/player_leaderboard.json";
 
-const standings = computeStandings(matches, teams);
-const allMatches = getRecentMatches(matches);
+// Group matches by week (most recent first) so the results section can show
+// one tab per week, each broken down by round. The points/W-D-L rule lives
+// only in scripts/update_data.py — this is just grouping already-computed data.
+const weekNumbers = [...new Set(matches.map((match) => match.week))].sort((a, b) => b - a);
+
+const weeks = weekNumbers.map((week) => {
+	const weekMatches = matches.filter((match) => match.week === week);
+	return {
+		week,
+		date: weekMatches[0].date,
+		hasResults: weekMatches.some((match) => match.status === "completed"),
+		rounds: [...new Set(weekMatches.map((match) => match.round))].sort((a, b) => a - b),
+		matches: weekMatches,
+		summary: weekSummaries
+			.filter((row) => row.week === week)
+			.sort((a, b) => b.points - a.points),
+	};
+});
+
+const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0].week;
 ---
 
 <BaseLayout title="League | KICKS" description="KICKS season league standings, match results, and player stats.">
@@ -22,18 +39,18 @@ const allMatches = getRecentMatches(matches);
 
 		<section class="content-section" aria-labelledby="standings-title">
 			<h2 id="standings-title">League Table</h2>
-			<StandingsTable rows={standings} />
+			<StandingsTable rows={leagueTable} />
 		</section>
 
 		<section class="content-section" aria-labelledby="results-title">
 			<h2 id="results-title">Match Results</h2>
-			<MatchList matches={allMatches} teams={teams} />
+			<WeeklyResults weeks={weeks} defaultWeek={defaultWeek} />
 		</section>
 
 		<section class="content-section" aria-labelledby="player-stats-title">
 			<h2 id="player-stats-title">Player Stats</h2>
 			<p class="about-description">Click a column header to sort.</p>
-			<PlayerStatsTable players={players} teams={teams} />
+			<PlayerStatsTable players={leaderboard} />
 		</section>
 	</main>
 </BaseLayout>
