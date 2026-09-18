@@ -1,17 +1,71 @@
 ---
 
+import "../styles/global.css";
+
 ---
 
 <html lang="en">
+
 	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1"
+		/>
+		<meta
+			name="description"
+			content="KICKS is a student-run futsal league and community at UIUC."
+		/>
+		<title>KICKS | UIUC Futsal Community</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<main>
+			<div class="hero">
+				<header class="site-header">
+					<a class="brand" href="/" aria-label="KICKS home">
+						<img
+							class="brand-logo"
+							src="/kicks-logo white.jpg"
+							alt="KICKS"
+						/>
+					</a>
+					<span class="season-label">FA26 SEASON</span>
+				</header>
+				<section class="hero-content" aria-labelledby="hero-title">
+					<p class="eyebrow">UIUC STUDENT FUTSAL LEAGUE</p>
+					<h1 id="hero-title">
+						Built for the game.<br />
+						Made for the community.
+					</h1>
+					<p class="hero-description">
+						A student-run futsal league bringing players together
+						through competition, community, and a shared passion
+						for the game.
+					</p>
+					<a class="hero-button" href="#about">
+						Discover KICKS
+						<span aria-hidden="true">↓</span>
+					</a>
+				</section>
+				<div class="hero-footer">
+					<span>Champaign–Urbana, Illinois</span>
+					<span>Student-run at UIUC</span>
+				</div>
+			</div>
+			<section
+				class="about-section"
+				id="about"
+				aria-labelledby="about-title"
+			>
+				<p class="section-label">ABOUT KICKS</p>
+				<h2 id="about-title">A shared love for futsal.</h2>
+				<p class="about-description">
+					KICKS stands for Korean-Inspired Community for Kicking
+					Sports. We are a student-run futsal community at UIUC,
+					bringing students together to play, compete, and connect.
+				</p>
+			</section>
+		</main>
 	</body>
+
 </html>
