@@ -11,7 +11,7 @@ const navLinks = [
 	{ href: "/join", label: "Join" },
 	{ href: "/league", label: "League" },
 	{ href: "/gallery", label: "Gallery" },
-	{ href: "/videos", label: "Videos" },
+	{ href: "/full-matches", label: "Full Matches", locked: true },
 	{ href: "/partners", label: "Partners" },
 ];
 
@@ -28,6 +28,14 @@ const currentPath = Astro.url.pathname;
 			navLinks.map((link) => (
 				<a href={link.href} aria-current={currentPath === link.href ? "page" : undefined}>
 					{link.label}
+					{link.locked && (
+						<svg class="nav-lock-icon" viewBox="0 0 16 16" aria-hidden="true">
+							<path
+								d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2h.75c.414 0 .75.336.75.75v5.5a.75.75 0 0 1-.75.75h-8.5a.75.75 0 0 1-.75-.75v-5.5c0-.414.336-.75.75-.75H4.5Zm1.5 0h4V5a2 2 0 0 0-4 0v2Z"
+								fill="currentColor"
+							/>
+						</svg>
+					)}
 				</a>
 			))
 		}

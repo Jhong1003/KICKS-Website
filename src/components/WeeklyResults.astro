@@ -67,51 +67,68 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 
 	{
 		weeks.map((week) => (
-			<div class="week-panel" data-week-panel={week.week} hidden={week.week !== defaultWeek}>
+			<div
+				class={`week-panel${week.week === defaultWeek ? " week-panel--visible" : ""}`}
+				data-week-panel={week.week}
+				hidden={week.week !== defaultWeek}
+			>
 				<p class="week-date">{formatDate(week.date)}</p>
 
 				{week.summary.length > 0 && (
-					<div class="week-summary">
-						{week.summary.map((row) => (
-							<div class="week-summary-row">
-								<span class="week-summary-team">{row.team}</span>
-								<span>
-									{row.wins}W {row.draws}D {row.losses}L
-								</span>
-								<span class="week-summary-points">{row.points} pts</span>
-							</div>
-						))}
-					</div>
+					<table class="week-summary-table">
+						<thead>
+							<tr>
+								<th>Team</th>
+								<th>W</th>
+								<th>D</th>
+								<th>L</th>
+								<th>Pts</th>
+							</tr>
+						</thead>
+						<tbody>
+							{week.summary.map((row) => (
+								<tr>
+									<td class="week-summary-team">{row.team}</td>
+									<td>{row.wins}</td>
+									<td>{row.draws}</td>
+									<td>{row.losses}</td>
+									<td class="week-summary-points">{row.points}</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
 				)}
 
-				{week.rounds.map((round) => (
-					<div class="round-group">
-						<h3 class="round-label">Round {round}</h3>
-						<div class="match-cards">
-							{matchesForRound(week, round).map((match) => {
-								const homeWins = match.status === "completed" && match.home_score! > match.away_score!;
-								const awayWins = match.status === "completed" && match.away_score! > match.home_score!;
-								const teamClass = (isWinner: boolean, isLoser: boolean) =>
-									["match-card-team", isWinner && "match-card-team--winner", isLoser && "match-card-team--loser"]
-										.filter(Boolean)
-										.join(" ");
-								return (
-									<div class="match-card">
-										<span class={teamClass(homeWins, awayWins)}>{match.home_team}</span>
-										{match.status === "completed" ? (
-											<span class="match-score">
-												{match.home_score} – {match.away_score}
-											</span>
-										) : (
-											<span class="match-score match-score--vs">vs</span>
-										)}
-										<span class={teamClass(awayWins, homeWins)}>{match.away_team}</span>
-									</div>
-								);
-							})}
+				<div class="week-rounds">
+					{week.rounds.map((round) => (
+						<div class="round-group">
+							<h3 class="round-label">Round {round}</h3>
+							<div class="match-cards">
+								{matchesForRound(week, round).map((match) => {
+									const homeWins = match.status === "completed" && match.home_score! > match.away_score!;
+									const awayWins = match.status === "completed" && match.away_score! > match.home_score!;
+									const teamClass = (isWinner: boolean, isLoser: boolean) =>
+										["match-card-team", isWinner && "match-card-team--winner", isLoser && "match-card-team--loser"]
+											.filter(Boolean)
+											.join(" ");
+									return (
+										<div class="match-card">
+											<span class={teamClass(homeWins, awayWins)}>{match.home_team}</span>
+											{match.status === "completed" ? (
+												<span class="match-score">
+													{match.home_score} – {match.away_score}
+												</span>
+											) : (
+												<span class="match-score match-score--vs">vs</span>
+											)}
+											<span class={teamClass(awayWins, homeWins)}>{match.away_team}</span>
+										</div>
+									);
+								})}
+							</div>
 						</div>
-					</div>
-				))}
+					))}
+				</div>
 			</div>
 		))
 	}
@@ -124,10 +141,24 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 	tabs.forEach((tab) => {
 		tab.addEventListener("click", () => {
 			const week = tab.dataset.week;
+			if (tab.getAttribute("aria-selected") === "true") return;
 
 			tabs.forEach((otherTab) => otherTab.setAttribute("aria-selected", String(otherTab === tab)));
+
 			panels.forEach((panel) => {
-				panel.hidden = panel.dataset.weekPanel !== week;
+				const isTarget = panel.dataset.weekPanel === week;
+				if (!isTarget) {
+					panel.classList.remove("week-panel--visible");
+					panel.hidden = true;
+					return;
+				}
+				panel.hidden = false;
+				// Force a style flush before adding the class so the opacity
+				// transition actually plays instead of jumping straight to visible.
+				panel.classList.remove("week-panel--visible");
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => panel.classList.add("week-panel--visible"));
+				});
 			});
 		});
 	});

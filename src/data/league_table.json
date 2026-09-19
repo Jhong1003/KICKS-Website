@@ -10,7 +10,7 @@
     "goals_against": 4,
     "points": 19,
     "goal_difference": 11,
-    "participation_rate": 0.889
+    "participation_rate": 0.944
   },
   {
     "rank": 2,
@@ -36,6 +36,6 @@
     "goals_against": 19,
     "points": 3,
     "goal_difference": -14,
-    "participation_rate": 0.667
+    "participation_rate": 0.889
   }
 ]

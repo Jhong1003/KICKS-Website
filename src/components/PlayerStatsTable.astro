@@ -1,12 +1,13 @@
 ---
 interface Player {
+	rank: number;
 	player: string;
 	team: string;
-	games: number;
 	goals: number;
 	assists: number;
 	attacking_points: number;
-	attacking_points_per_game: number;
+	weeks_attended: number;
+	weeks_played: number;
 }
 
 interface Props {
@@ -16,13 +17,13 @@ interface Props {
 const { players } = Astro.props;
 
 const columns = [
+	{ key: "rank", label: "Rank", type: "number" },
 	{ key: "player", label: "Player", type: "string" },
 	{ key: "team", label: "Team", type: "string" },
-	{ key: "games", label: "Games", type: "number" },
+	{ key: "attendance", label: "Attendance", type: "number" },
 	{ key: "goals", label: "Goals", type: "number" },
 	{ key: "assists", label: "Assists", type: "number" },
 	{ key: "attacking_points", label: "Attacking Pts", type: "number" },
-	{ key: "attacking_points_per_game", label: "Pts / Game", type: "number" },
 ] as const;
 ---
 
@@ -42,14 +43,18 @@ const columns = [
 		<tbody>
 			{
 				players.map((player) => (
-					<tr>
-						<td data-sort-value={player.player.toLowerCase()}>{player.player}</td>
+					<tr class={player.rank <= 3 ? "player-row-top" : undefined}>
+						<td data-sort-value={player.rank}>{player.rank}</td>
+						<td class="player-stats-name" data-sort-value={player.player.toLowerCase()}>
+							{player.player}
+						</td>
 						<td data-sort-value={player.team.toLowerCase()}>{player.team}</td>
-						<td data-sort-value={player.games}>{player.games}</td>
+						<td data-sort-value={player.weeks_attended}>
+							{player.weeks_attended} / {player.weeks_played}
+						</td>
 						<td data-sort-value={player.goals}>{player.goals}</td>
 						<td data-sort-value={player.assists}>{player.assists}</td>
 						<td data-sort-value={player.attacking_points}>{player.attacking_points}</td>
-						<td data-sort-value={player.attacking_points_per_game}>{player.attacking_points_per_game.toFixed(2)}</td>
 					</tr>
 				))
 			}

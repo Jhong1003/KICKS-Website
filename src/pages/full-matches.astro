@@ -1,0 +1,229 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// The encrypted data file only exists once someone has run
+// scripts/manage_full_matches.mjs at least once. Before that (or right
+// after wiping it to start over), there's nothing to decrypt yet — the
+// page shows a plain "no videos yet" message instead of a lock screen.
+// import.meta.glob (unlike a normal import) doesn't fail the build if the
+// file is missing — it just returns an empty object.
+const dataFiles = import.meta.glob<{ default: unknown }>("../data/full-matches.enc.json", { eager: true });
+const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
+---
+
+<BaseLayout
+	title="Full Matches | KICKS"
+	description="Members-only full match videos for KICKS."
+>
+	<main>
+		<section class="content-section" aria-labelledby="full-matches-title">
+			<p class="section-label">MEMBERS ONLY</p>
+			<h1 id="full-matches-title">Full Matches</h1>
+
+			<div id="lock-screen" class="lock-screen">
+				<svg class="lock-screen-icon" viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10H7Zm2 0h6V7a3 3 0 0 0-6 0v3Z"
+						fill="currentColor"
+					/>
+				</svg>
+				<h2 class="lock-screen-title">KICKS Members Only</h2>
+				<p class="lock-screen-text">Enter the club password to watch full match videos.</p>
+
+				<form id="unlock-form" class="unlock-form">
+					<div class="password-field">
+						<input
+							type="password"
+							id="password-input"
+							class="unlock-input"
+							placeholder="Club password"
+							autocomplete="current-password"
+							required
+						/>
+						<button
+							type="button"
+							id="toggle-password"
+							class="toggle-password-visibility"
+							aria-label="Show password"
+							aria-pressed="false"
+						>
+							<svg class="eye-icon eye-icon-open" viewBox="0 0 24 24" aria-hidden="true">
+								<path
+									d="M12 5c-5.5 0-9.5 4.5-10.7 7 1.2 2.5 5.2 7 10.7 7s9.5-4.5 10.7-7c-1.2-2.5-5.2-7-10.7-7Zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9Zm0-7.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
+									fill="currentColor"
+								/>
+							</svg>
+							<svg class="eye-icon eye-icon-closed" viewBox="0 0 24 24" aria-hidden="true">
+								<path
+									d="m3.3 2.3 18.4 18.4-1.4 1.4-3.1-3.1A11.6 11.6 0 0 1 12 20c-5.5 0-9.5-4.5-10.7-7a15.6 15.6 0 0 1 4.2-5.3L1.9 3.7l1.4-1.4ZM12 7.5c.4 0 .8.05 1.15.14l-1.5 1.5a3 3 0 0 0-3.51 3.51l-1.5 1.5A4.5 4.5 0 0 1 12 7.5Zm0-3.5c5.5 0 9.5 4.5 10.7 7a15.6 15.6 0 0 1-3 3.9l-1.42-1.42A11.9 11.9 0 0 0 20.7 11c-1.2-2.5-5.2-7-8.7-7-1.02 0-2 .16-2.9.44L7.6 3.03A11.6 11.6 0 0 1 12 4Zm-.1 9.86 2.24-2.24a3 3 0 0 1-2.24 2.24Z"
+									fill="currentColor"
+								/>
+							</svg>
+						</button>
+					</div>
+					<button class="button-primary unlock-button" type="submit">Unlock</button>
+				</form>
+				<p id="unlock-error" class="unlock-error" hidden>That password didn't work. Please try again.</p>
+			</div>
+
+			<div id="video-list" class="video-list" hidden></div>
+			<p id="no-videos-message" class="no-videos-message" hidden>No videos yet — check back soon!</p>
+		</section>
+	</main>
+</BaseLayout>
+
+<script type="application/json" id="full-matches-payload" set:html={JSON.stringify(encryptedPayload)} />
+
+<script>
+	interface FullMatchesPayload {
+		kdf: { iterations: number };
+		salt: string;
+		iv: string;
+		ciphertext: string;
+	}
+
+	interface VideoEntry {
+		week: number;
+		date: string;
+		title: string;
+		driveUrl: string;
+	}
+
+	// We cache the PASSWORD (not the decrypted videos) so every page load
+	// re-decrypts the payload that was just served. Caching the decrypted
+	// list instead would keep showing whatever was true at unlock time even
+	// after new videos are added and the page is refreshed.
+	const STORAGE_KEY = "kicks-full-matches-password";
+
+	const payloadEl = document.getElementById("full-matches-payload");
+	const payload: FullMatchesPayload | null = JSON.parse(payloadEl?.textContent ?? "null");
+
+	const lockScreen = document.getElementById("lock-screen") as HTMLDivElement;
+	const videoListEl = document.getElementById("video-list") as HTMLDivElement;
+	const noVideosEl = document.getElementById("no-videos-message") as HTMLParagraphElement;
+	const form = document.getElementById("unlock-form") as HTMLFormElement;
+	const passwordInput = document.getElementById("password-input") as HTMLInputElement;
+	const errorEl = document.getElementById("unlock-error") as HTMLParagraphElement;
+	const togglePasswordButton = document.getElementById("toggle-password") as HTMLButtonElement;
+
+	togglePasswordButton.addEventListener("click", () => {
+		const showing = passwordInput.type === "text";
+		passwordInput.type = showing ? "password" : "text";
+		togglePasswordButton.setAttribute("aria-pressed", String(!showing));
+		togglePasswordButton.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+	});
+
+	function base64ToBytes(b64: string): Uint8Array {
+		const binary = atob(b64);
+		const bytes = new Uint8Array(binary.length);
+		for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+		return bytes;
+	}
+
+	async function deriveKey(password: string, salt: Uint8Array, iterations: number): Promise<CryptoKey> {
+		const keyMaterial = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, [
+			"deriveKey",
+		]);
+		return crypto.subtle.deriveKey(
+			{ name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+			keyMaterial,
+			{ name: "AES-GCM", length: 256 },
+			false,
+			["decrypt"]
+		);
+	}
+
+	async function decryptVideos(password: string, activePayload: FullMatchesPayload): Promise<VideoEntry[]> {
+		const key = await deriveKey(password, base64ToBytes(activePayload.salt), activePayload.kdf.iterations);
+		const plaintext = await crypto.subtle.decrypt(
+			{ name: "AES-GCM", iv: base64ToBytes(activePayload.iv) },
+			key,
+			base64ToBytes(activePayload.ciphertext)
+		);
+		return JSON.parse(new TextDecoder().decode(plaintext));
+	}
+
+	function formatDate(isoDate: string): string {
+		return new Date(`${isoDate}T00:00:00`).toLocaleDateString("en-US", {
+			weekday: "short",
+			month: "short",
+			day: "numeric",
+		});
+	}
+
+	function renderVideos(videos: VideoEntry[]) {
+		const sorted = [...videos].sort((a, b) => b.week - a.week);
+		videoListEl.innerHTML = sorted
+			.map(
+				(video) => `
+					<div class="video-card">
+						<div class="video-card-meta">Week ${video.week} · ${formatDate(video.date)}</div>
+						<h3 class="video-card-title">${video.title}</h3>
+						<a class="button-primary" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">
+							Watch on Google Drive
+						</a>
+					</div>
+				`
+			)
+			.join("");
+	}
+
+	// No password has ever been set for this page yet (the data file
+	// doesn't exist) — nothing to unlock, so skip the lock screen entirely.
+	function showNoSetupYet() {
+		lockScreen.hidden = true;
+		videoListEl.hidden = true;
+		noVideosEl.hidden = false;
+	}
+
+	function showUnlocked(videos: VideoEntry[]) {
+		lockScreen.hidden = true;
+		if (videos.length === 0) {
+			videoListEl.hidden = true;
+			noVideosEl.hidden = false;
+			return;
+		}
+		renderVideos(videos);
+		videoListEl.hidden = false;
+		noVideosEl.hidden = true;
+	}
+
+	async function tryUnlockWith(password: string): Promise<boolean> {
+		if (!payload) return false;
+		try {
+			const videos = await decryptVideos(password, payload);
+			showUnlocked(videos);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	if (!payload) {
+		showNoSetupYet();
+	} else {
+		// If this browser session already unlocked the page, re-decrypt the
+		// payload that was just loaded (not a snapshot from last time) using
+		// the remembered password, so newly added videos show up right away.
+		const cachedPassword = sessionStorage.getItem(STORAGE_KEY);
+		if (cachedPassword) {
+			tryUnlockWith(cachedPassword).then((ok) => {
+				if (!ok) sessionStorage.removeItem(STORAGE_KEY);
+			});
+		}
+
+		form.addEventListener("submit", async (event) => {
+			event.preventDefault();
+			errorEl.hidden = true;
+
+			const ok = await tryUnlockWith(passwordInput.value);
+			if (ok) {
+				sessionStorage.setItem(STORAGE_KEY, passwordInput.value);
+			} else {
+				errorEl.hidden = false;
+				passwordInput.value = "";
+				passwordInput.focus();
+			}
+		});
+	}
+</script>

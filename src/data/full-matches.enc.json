@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "kdf": {
+    "algorithm": "PBKDF2",
+    "hash": "SHA-256",
+    "iterations": 250000
+  },
+  "salt": "tbpYmJ0Lk69fPGCIeBvuoA==",
+  "iv": "WhYPmjA78fz0RaLa",
+  "ciphertext": "zRmhkCkWt9DZiLZb5oJYyMO32kmt2pNKiOHn0nmX5qFIA1QUxqGHMyGWQj2UFKoIk4XCx4+LCUQQPS1p2s+Ss2VEliN2XjFciGfWjSPFafx4CsrOSHpitWJ6h/8VEGyrVVuCcAwQtfdnMqd0g5iBRefj+FYJm4e33j6bqP+vCv+jYhNkh7dUXt9uZunK+a0mp+bJNGWqnumMZ+vP0+5kcLcdqUVAWyv/nZwfAZ+SSLgNgrppU0BVhiyiqpPnC/TX5fi26lGIGFviPIiqYuBCRACmAqIaQn3bAoXQ44PRc5/WBW3Tr/P3xM6gT/gX3oexdxmDqp9mrluCq/z/fxvptqwU2j09TP2VuH5bCHvDppcDp1yaadaTg53/SmFQ8zfXa6J8ZSRSnzt6QPyEkIT7dRVoFimgxxWMIA=="
+}

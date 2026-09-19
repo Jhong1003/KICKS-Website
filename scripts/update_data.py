@@ -203,25 +203,38 @@ def build_week_summaries(matches: pd.DataFrame) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
+GAMES_PER_WEEK = 6  # a player who attends every game in a week racks up 6 games
+
+
 def build_leaderboard(player_stats: pd.DataFrame) -> list[dict]:
-    """Season totals per player, ranked by attacking output."""
+    """Season totals per player, ranked by attacking output.
+
+    We deliberately don't rank by a per-game rate: missing a week means a
+    player skipped attendance, which a per-game average would reward rather
+    than penalize. Instead the ranking is attacking_points -> goals ->
+    assists -> attendance (more weeks attended wins ties), all on raw
+    totals. Attendance itself is reported alongside as a secondary, human
+    -readable stat ("weeks attended / weeks played so far").
+    """
+    weeks_played = int(player_stats["week"].nunique())
+
     totals = (
         player_stats.fillna({"games": 0, "goals": 0, "assists": 0})
         .groupby(["player", "team"], as_index=False)
         .agg(games=("games", "sum"), goals=("goals", "sum"), assists=("assists", "sum"))
     )
 
-    totals["games"] = totals["games"].astype(int)
     totals["goals"] = totals["goals"].astype(int)
     totals["assists"] = totals["assists"].astype(int)
     totals["attacking_points"] = totals["goals"] + totals["assists"]
-    totals["attacking_points_per_game"] = totals.apply(
-        lambda row: round(row["attacking_points"] / row["games"], 2) if row["games"] else 0.0, axis=1
-    )
+    totals["weeks_attended"] = (totals["games"] / GAMES_PER_WEEK).astype(int)
+    totals["weeks_played"] = weeks_played
+    totals = totals.drop(columns=["games"])
 
     totals = totals.sort_values(
-        by=["attacking_points", "attacking_points_per_game", "goals"], ascending=False
+        by=["attacking_points", "goals", "assists", "weeks_attended"], ascending=False
     ).reset_index(drop=True)
+    totals.insert(0, "rank", range(1, len(totals) + 1))
 
     return totals.to_dict(orient="records")
 
