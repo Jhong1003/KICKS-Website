@@ -1,5 +1,5 @@
 ---
-import { BADGES, type PlayerProfile } from "../lib/players";
+import { BADGES, getContrastingTextColor, getReadableAccentColor, type PlayerProfile } from "../lib/players";
 
 interface Props {
 	player: PlayerProfile;
@@ -11,7 +11,9 @@ interface Props {
 
 const { player, teamColor, size = "default", href, avatarPhoto } = Astro.props;
 const Tag = href ? "a" : "div";
-const cardStyle = `--team-color: ${teamColor}`;
+const avatarTextColor = getContrastingTextColor(teamColor);
+const labelColor = getReadableAccentColor(teamColor);
+const cardStyle = `--team-color: ${teamColor}; --team-avatar-text: ${avatarTextColor}; --team-label-color: ${labelColor};`;
 ---
 
 <Tag

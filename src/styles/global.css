@@ -1965,7 +1965,7 @@ a.player-card:hover {
 .player-card-team {
 
 	overflow: hidden;
-	color: var(--team-color, var(--color-green));
+	color: var(--team-label-color, var(--team-color, var(--color-green)));
 	font-size: 0.72rem;
 	font-weight: 700;
 	letter-spacing: 0.02em;
@@ -1985,7 +1985,7 @@ a.player-card:hover {
 	border-radius: 50%;
 	overflow: hidden;
 	background-color: var(--team-color, var(--color-green));
-	color: var(--color-background);
+	color: var(--team-avatar-text, var(--color-background));
 	font-size: 1.4rem;
 	font-weight: 700;
 	letter-spacing: 0.02em;

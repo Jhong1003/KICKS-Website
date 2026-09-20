@@ -85,6 +85,41 @@ export function getTeamColor(team: string, colors: Record<string, string>): stri
 	return colors[team] ?? colors["_default"] ?? "#7f8c8d";
 }
 
+/** WCAG relative luminance of a hex color, or null if it doesn't parse. */
+function relativeLuminance(hex: string): number | null {
+	const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+	if (!match) return null;
+
+	const [r, g, b] = match.slice(1).map((channel) => {
+		const s = parseInt(channel, 16) / 255;
+		return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+	});
+	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * Dark or light text color, whichever reads better on top of `hex` — used
+ * for the player card avatar, which fills its circle with the team color.
+ * Computed (WCAG relative luminance) rather than hardcoded per team, so a
+ * future team-colors.json edit (e.g. real bib colors) can't accidentally
+ * ship unreadable white-on-yellow text again.
+ */
+export function getContrastingTextColor(hex: string): string {
+	const luminance = relativeLuminance(hex);
+	return luminance !== null && luminance > 0.5 ? "#292929" : "#f7f6f2";
+}
+
+/**
+ * The team color itself, used as *text* on the card's cream background
+ * (the small team-name label) — unless the color is too light to read
+ * there (e.g. a yellow), in which case this falls back to a dark neutral
+ * instead of shipping pale-on-cream text.
+ */
+export function getReadableAccentColor(hex: string): string {
+	const luminance = relativeLuminance(hex);
+	return luminance !== null && luminance > 0.5 ? "#292929" : hex;
+}
+
 export type PlayerSortKey = "name" | "team";
 
 /**
