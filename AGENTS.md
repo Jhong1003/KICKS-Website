@@ -18,25 +18,52 @@ site reads.
 ### Folder structure
 
 - [src/pages/](src/pages/) — one route per file (`index`, `about`,
-  `league`, `join`, `partners`, `gallery`, `full-matches`).
+  `league`, `schedule`, `join`, `partners`, `gallery`, `full-matches`).
 - [src/components/](src/components/) — Astro components used by the pages
   (e.g. `StandingsTable`, `PlayerStatsTable`, `WeeklyResults`,
-  `PhotoGallery`, `PartnerGrid`/`PartnerInquiryForm`, `Header`/`Footer`).
+  `ScheduleTimeline`, `PhotoGallery`, `PartnerGrid`/`PartnerInquiryForm`,
+  `Header`/`Footer`).
 - [src/layouts/BaseLayout.astro](src/layouts/BaseLayout.astro) — shared page
   shell.
 - [src/data/](src/data/) — generated JSON the pages read at build/render
   time (`league_table.json`, `matches.json`, `week_summaries.json`,
   `player_leaderboard.json`, `partners.json`, plus the encrypted
-  `full-matches.enc.json`). **Never hand-edit the generated files** —
-  regenerate them instead (see pipeline below).
-- [src/lib/](src/lib/) — currently empty; reserved for shared
-  TS/JS helpers if the site needs them later.
+  `full-matches.enc.json`), and [schedule.json](src/data/schedule.json) —
+  the hand-maintained season calendar (see below). **Never hand-edit the
+  generated files** — regenerate them instead (see pipeline below).
+  `schedule.json` is the one file in this folder that's edited by hand.
+- [src/lib/schedule.ts](src/lib/schedule.ts) — shared helpers (date
+  formatting, past/upcoming/next-up flags, month grouping) used by both
+  the Schedule page and the homepage's "Next up" card.
 - [scripts/update_data.py](scripts/update_data.py) — Google Sheets → JSON
   pipeline.
 - [scripts/manage_full_matches.mjs](scripts/manage_full_matches.mjs) —
   encrypt/decrypt tool for the Full Matches video list.
 - [public/](public/) — static assets served as-is (favicon, logos, partner
   logos).
+
+### Season schedule
+
+[src/data/schedule.json](src/data/schedule.json) is the single source of
+truth for the season calendar — the club's events, and the date each
+league week falls on. It's edited by hand (not generated), and read by
+two things:
+
+- The [Schedule page](src/pages/schedule.astro), which renders it as a
+  timeline grouped by month, plus the homepage's "Next up" card.
+- [scripts/update_data.py](scripts/update_data.py), which looks up each
+  league week's date here instead of computing it from a fixed weekly
+  cadence (see League rules below).
+
+Each entry has a `date` (`"YYYY-MM-DD"`, or `null` for fully TBD), a
+`title`, a `type` (`league` / `event` / `friendly` / `ceremony`), and for
+`league` entries a `week` number. A `league`-type entry's `date` is what
+`update_data.py` uses for that week — add or edit one whenever the
+season's calendar changes (a new week, a rescheduled event, a new
+season). Set `"tbd": true` on an entry that has a tentative date but
+still needs confirming — it renders with a "TBD" badge instead of `null`,
+which is reserved for events with no date at all (e.g. a friendly not
+yet scheduled).
 
 ### Google Sheets → Python → JSON pipeline
 
@@ -81,8 +108,12 @@ future season.
   attendance rather than something a rate should reward.
 - **Attendance**: reported as weeks attended out of weeks played so far
   (`GAMES_PER_WEEK = 6` games counts as one full week attended).
-- Match week dates come from `SEASON_START_DATE` (week 1) + 7 days per
-  week — update that one constant at the start of a new season.
+- Match week dates are looked up from
+  [src/data/schedule.json](src/data/schedule.json) (`_load_league_week_dates`),
+  not computed from a fixed weekly cadence — non-league events (friendlies,
+  sports day, etc.) interrupt what would otherwise be an every-7-days
+  rhythm. Add/edit `{"type": "league", "week": N, "date": "..."}` entries
+  there at the start of a new season or whenever the calendar changes.
 
 ### Full Matches encryption
 

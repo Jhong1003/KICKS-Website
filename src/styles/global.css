@@ -1533,3 +1533,308 @@ h1 {
 	}
 
 }
+
+/* 홈 화면: 다음 일정 카드 */
+
+.next-up-card {
+
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 20px;
+	margin-top: 32px;
+	padding: 20px 24px;
+	border: 1px solid var(--color-sage);
+	border-radius: 8px;
+	background-color: var(--color-background);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+}
+
+.next-up-card:hover {
+
+	border-color: var(--color-green);
+	box-shadow: 0 6px 16px rgba(41, 41, 41, 0.08);
+
+}
+
+.next-up-label {
+
+	padding: 4px 12px;
+	border-radius: 999px;
+	background-color: var(--color-green);
+	color: var(--color-background);
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	white-space: nowrap;
+
+}
+
+.next-up-body {
+
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 180px;
+	gap: 2px;
+
+}
+
+.next-up-date {
+
+	color: var(--color-dark);
+	opacity: 0.65;
+	font-size: 0.8rem;
+	font-weight: 600;
+
+}
+
+.next-up-title {
+
+	font-size: 1.05rem;
+	font-weight: 700;
+	color: var(--color-dark);
+
+}
+
+.next-up-link {
+
+	font-weight: 600;
+	white-space: nowrap;
+
+}
+
+.next-up-card:hover .next-up-link {
+
+	text-decoration: underline;
+
+}
+
+/* 일정 페이지: 세로 타임라인 (월별 그룹) */
+
+.schedule-timeline {
+
+	margin-top: 32px;
+
+}
+
+.schedule-month + .schedule-month {
+
+	margin-top: 40px;
+
+}
+
+.schedule-month-label {
+
+	margin: 0 0 20px;
+	color: var(--color-green);
+	font-size: 0.85rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+
+}
+
+.schedule-list {
+
+	position: relative;
+	margin: 0;
+	padding: 0 0 0 28px;
+	list-style: none;
+	border-left: 2px solid var(--color-sage);
+
+}
+
+.schedule-item {
+
+	position: relative;
+	padding-bottom: 20px;
+
+}
+
+.schedule-item:last-child {
+
+	padding-bottom: 0;
+
+}
+
+.schedule-item::before {
+
+	content: "";
+	position: absolute;
+	top: 18px;
+	left: -34px;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background-color: var(--color-green);
+	border: 2px solid var(--color-background);
+
+}
+
+.schedule-item--past::before {
+
+	background-color: var(--color-sage);
+
+}
+
+.schedule-item--next::before {
+
+	box-shadow: 0 0 0 3px rgba(63, 81, 40, 0.2);
+
+}
+
+.schedule-item-link {
+
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 16px;
+	padding: 14px 16px;
+	border: 1px solid var(--color-sage);
+	border-radius: 8px;
+	background-color: var(--color-background);
+	transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+
+}
+
+a.schedule-item-link:hover {
+
+	border-color: var(--color-green);
+	box-shadow: 0 6px 16px rgba(41, 41, 41, 0.08);
+	transform: translateY(-2px);
+
+}
+
+.schedule-item--next .schedule-item-link {
+
+	border-color: var(--color-green);
+	background-color: rgba(63, 81, 40, 0.05);
+
+}
+
+.schedule-item--past .schedule-item-link {
+
+	opacity: 0.5;
+
+}
+
+.schedule-item-date {
+
+	min-width: 100px;
+	color: var(--color-dark);
+	opacity: 0.6;
+	font-size: 0.8rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+
+}
+
+.schedule-item-body {
+
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	flex: 1;
+	min-width: 200px;
+	gap: 8px 12px;
+
+}
+
+.schedule-item-title {
+
+	margin: 0;
+	width: 100%;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--color-dark);
+
+}
+
+.schedule-next-label {
+
+	padding: 3px 10px;
+	border-radius: 999px;
+	background-color: var(--color-green);
+	color: var(--color-background);
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+
+}
+
+.schedule-type-badge {
+
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	white-space: nowrap;
+
+}
+
+.schedule-type-badge--league {
+
+	background-color: var(--color-green);
+	color: var(--color-background);
+
+}
+
+.schedule-type-badge--event {
+
+	background-color: var(--color-sage);
+	color: var(--color-green);
+
+}
+
+.schedule-type-badge--friendly {
+
+	border: 1px solid var(--color-dark);
+	color: var(--color-dark);
+	opacity: 0.75;
+
+}
+
+.schedule-type-badge--ceremony {
+
+	background-color: var(--color-dark);
+	color: var(--color-background);
+
+}
+
+.schedule-tbd-badge {
+
+	margin-left: 6px;
+	padding: 2px 8px;
+	border: 1px dashed var(--color-dark);
+	border-radius: 999px;
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	opacity: 0.7;
+
+}
+
+@media (max-width: 600px) {
+
+	.schedule-list {
+		padding-left: 20px;
+	}
+
+	.schedule-item::before {
+		left: -25px;
+	}
+
+	.schedule-item-date {
+		min-width: auto;
+		width: 100%;
+	}
+
+}

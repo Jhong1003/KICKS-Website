@@ -1,0 +1,16 @@
+[
+  { "date": "2026-09-06", "title": "League 1", "type": "league", "week": 1 },
+  { "date": "2026-09-13", "title": "League 2", "type": "league", "week": 2 },
+  { "date": "2026-09-20", "title": "League 3", "type": "league", "week": 3 },
+  { "date": "2026-09-27", "title": "League 4", "type": "league", "week": 4 },
+  { "date": "2026-10-04", "title": "11 vs 11 Event", "type": "event" },
+  { "date": "2026-10-11", "title": "League 5", "type": "league", "week": 5 },
+  { "date": "2026-10-18", "title": "League 6", "type": "league", "week": 6 },
+  { "date": "2026-10-25", "title": "League 7", "type": "league", "week": 7 },
+  { "date": "2026-11-01", "title": "League 8", "type": "league", "week": 8 },
+  { "date": "2026-11-08", "title": "KICKS Sports Day", "type": "event", "tbd": true },
+  { "date": "2026-11-15", "title": "Final Futsal of the Season", "type": "event" },
+  { "date": null, "title": "Friendly Match vs International Team", "type": "friendly" },
+  { "date": null, "title": "Friendly Match vs International Team", "type": "friendly" },
+  { "date": "2026-12-06", "title": "Awards Ceremony & End-of-Semester Dinner", "type": "ceremony" }
+]

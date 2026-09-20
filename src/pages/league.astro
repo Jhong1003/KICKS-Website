@@ -42,7 +42,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0].week
 			<StandingsTable rows={leagueTable} />
 		</section>
 
-		<section class="content-section" aria-labelledby="results-title">
+		<section class="content-section" id="results" aria-labelledby="results-title">
 			<h2 id="results-title">Match Results</h2>
 			<WeeklyResults weeks={weeks} defaultWeek={defaultWeek} />
 		</section>

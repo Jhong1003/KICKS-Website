@@ -1,0 +1,56 @@
+---
+import { TYPE_LABELS, type ScheduleMonthGroup } from "../lib/schedule";
+
+interface Props {
+	groups: ScheduleMonthGroup[];
+}
+
+const { groups } = Astro.props;
+---
+
+<div class="schedule-timeline">
+	{
+		groups.map((group) => (
+			<div class="schedule-month">
+				<h3 class="schedule-month-label">{group.label}</h3>
+				<ol class="schedule-list">
+					{group.events.map((event) => {
+						const itemClass = [
+							"schedule-item",
+							event.isPast && "schedule-item--past",
+							event.isNextUp && "schedule-item--next",
+						]
+							.filter(Boolean)
+							.join(" ");
+						const inner = (
+							<>
+								<div class="schedule-item-date">
+									{event.formattedDate ?? "TBD"}
+									{event.tbd && event.formattedDate && <span class="schedule-tbd-badge">TBD</span>}
+								</div>
+								<div class="schedule-item-body">
+									{event.isNextUp && <span class="schedule-next-label">Next up</span>}
+									<span class={`schedule-type-badge schedule-type-badge--${event.type}`}>
+										{TYPE_LABELS[event.type]}
+									</span>
+									<p class="schedule-item-title">{event.title}</p>
+								</div>
+							</>
+						);
+						return (
+							<li class={itemClass}>
+								{event.href ? (
+									<a class="schedule-item-link" href={event.href}>
+										{inner}
+									</a>
+								) : (
+									<div class="schedule-item-link">{inner}</div>
+								)}
+							</li>
+						);
+					})}
+				</ol>
+			</div>
+		))
+	}
+</div>

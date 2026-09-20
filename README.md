@@ -74,8 +74,39 @@ where to change them for a future season):
   per-game rate, since missing a week is a missed attendance, not something
   to reward. "Attendance" itself is reported as weeks attended out of weeks
   played so far (`GAMES_PER_WEEK = 6` games per week attended).
-- Match week dates come from `SEASON_START_DATE` (week 1) plus 7 days per
-  week — update that one constant at the start of a new season.
+- Match week dates are looked up from `src/data/schedule.json`, not
+  computed from a fixed weekly cadence — see "Updating the Season
+  Schedule" below.
+
+## Updating the Season Schedule
+
+`src/data/schedule.json` is the season calendar's source of truth — it's
+edited by hand (unlike the other files in `src/data/`, which are
+generated). It's read by two things:
+
+- The `/schedule` page and the homepage's "Next up" card.
+- `scripts/update_data.py`, which looks up each league week's date there
+  instead of computing it from `SEASON_START_DATE + 7 days`. That fixed
+  cadence broke once non-league events (friendlies, sports day, etc.)
+  started interrupting the weekly rhythm.
+
+To add or move an event, add/edit an entry in the JSON array:
+
+```json
+{ "date": "2026-10-11", "title": "League 5", "type": "league", "week": 5 }
+```
+
+- `date` is `"YYYY-MM-DD"`, or `null` if there's no date yet at all.
+- `type` is `"league"`, `"event"`, `"friendly"`, or `"ceremony"`.
+- `week` is required on `league`-type entries — it's what
+  `update_data.py` matches against the Google Sheet's `week` column.
+- Add `"tbd": true` on an entry that has a tentative date but still needs
+  confirming (shows a "TBD" badge on the Schedule page). Use `date: null`
+  instead for something with no date at all yet.
+
+After editing `schedule.json`, re-run `python scripts/update_data.py` if
+you changed or added a league week's date, then rebuild/restart the dev
+server.
 
 ## Managing Full Match Videos
 

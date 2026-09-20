@@ -12,7 +12,6 @@ Run manually after the Google Sheet is updated each week:
 from __future__ import annotations
 
 import json
-from datetime import date, timedelta
 from pathlib import Path
 
 import numpy as np
@@ -35,6 +34,7 @@ SHEET_URLS = {
 }
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "src" / "data"
+SCHEDULE_PATH = DATA_DIR / "schedule.json"
 
 # League points rule: wins are worth more in the final week.
 FINAL_WEEK = 4
@@ -43,14 +43,36 @@ WIN_POINTS_FINAL = 3  # week 4 (finals)
 DRAW_POINTS = 1
 LOSS_POINTS = 0
 
-# Week 1 falls on this date; every later week is exactly 7 days after the
-# last. Update this one line at the start of each new season.
-SEASON_START_DATE = date(2026, 9, 6)
+
+def _load_league_week_dates() -> dict[int, str]:
+    """Map league week number -> ISO date, read from schedule.json.
+
+    schedule.json is the season's single source of truth for dates, since
+    non-league events (friendlies, sports day, etc.) interrupt what would
+    otherwise be an every-7-days cadence — a fixed weeks-since-start formula
+    can't account for those gaps. Update schedule.json, not this function,
+    at the start of a new season or whenever the calendar changes.
+    """
+    schedule = json.loads(SCHEDULE_PATH.read_text(encoding="utf-8"))
+    return {
+        entry["week"]: entry["date"]
+        for entry in schedule
+        if entry.get("type") == "league" and entry.get("date")
+    }
+
+
+LEAGUE_WEEK_DATES = _load_league_week_dates()
 
 
 def _week_date(week: int) -> str:
-    """ISO date (YYYY-MM-DD) for the Sunday a given week falls on."""
-    return (SEASON_START_DATE + timedelta(weeks=week - 1)).isoformat()
+    """ISO date (YYYY-MM-DD) a given league week falls on, per schedule.json."""
+    try:
+        return LEAGUE_WEEK_DATES[week]
+    except KeyError:
+        raise ValueError(
+            f"No date for league week {week} in schedule.json — add a "
+            f'{{"type": "league", "week": {week}, ...}} entry there.'
+        ) from None
 
 
 # ---------------------------------------------------------------------------

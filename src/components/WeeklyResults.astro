@@ -162,4 +162,14 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 			});
 		});
 	});
+
+	// Deep link from the Schedule page (e.g. /league?week=5): select that
+	// week's tab on load if it exists. No-op if the week isn't in the sheet
+	// yet (future weeks are only added once the Google Sheet has rows for
+	// them).
+	const requestedWeek = new URLSearchParams(location.search).get("week");
+	const requestedTab = requestedWeek && tabs.find((tab) => tab.dataset.week === requestedWeek);
+	if (requestedTab && requestedTab.getAttribute("aria-selected") !== "true") {
+		requestedTab.click();
+	}
 </script>
