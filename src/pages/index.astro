@@ -58,22 +58,24 @@ const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
 			</div>
 		</div>
 
-		{
-			nextUpEvent && (
-				<section class="content-section" aria-labelledby="next-up-title">
-					<p class="section-label">FA26 SEASON</p>
-					<h2 id="next-up-title">What's Next</h2>
-					<a class="next-up-card" href="/schedule">
-						<span class="next-up-label">Next up</span>
-						<span class="next-up-body">
-							<span class="next-up-date">{nextUpEvent.formattedDate}</span>
-							<span class="next-up-title">{nextUpEvent.title}</span>
-						</span>
-						<span class="next-up-link">View full schedule →</span>
-					</a>
-				</section>
-			)
-		}
+		<section
+			class="content-section"
+			id="next-up-section"
+			aria-labelledby="next-up-title"
+			data-schedule-events={JSON.stringify(scheduleData)}
+			hidden={!nextUpEvent}
+		>
+			<p class="section-label">FA26 SEASON</p>
+			<h2 id="next-up-title">What's Next</h2>
+			<a class="next-up-card" href="/schedule">
+				<span class="next-up-label">Next up</span>
+				<span class="next-up-body">
+					<span class="next-up-date" id="next-up-date">{nextUpEvent?.formattedDate}</span>
+					<span class="next-up-title" id="next-up-event-title">{nextUpEvent?.title}</span>
+				</span>
+				<span class="next-up-link">View full schedule →</span>
+			</a>
+		</section>
 
 		<section class="content-section" aria-labelledby="standings-preview-title">
 			<p class="section-label">LEAGUE STANDINGS</p>
@@ -83,3 +85,25 @@ const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
 		</section>
 	</main>
 </BaseLayout>
+
+<script>
+	import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
+
+	// The card above reflects "today" as of the last build, which goes stale
+	// between deploys. Recompute against the visitor's actual current date
+	// and patch the text in place (or hide the card if nothing's upcoming).
+	const section = document.getElementById("next-up-section");
+	const raw = section?.dataset.scheduleEvents;
+	if (section && raw) {
+		const events = JSON.parse(raw) as ScheduleEvent[];
+		const next = getNextUpEvent(events);
+
+		section.hidden = !next;
+		if (next) {
+			const dateEl = document.getElementById("next-up-date");
+			const titleEl = document.getElementById("next-up-event-title");
+			if (dateEl) dateEl.textContent = next.formattedDate ?? "";
+			if (titleEl) titleEl.textContent = next.title;
+		}
+	}
+</script>

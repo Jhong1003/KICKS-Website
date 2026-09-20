@@ -1,11 +1,10 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScheduleTimeline from "../components/ScheduleTimeline.astro";
-import { buildScheduleView, groupByMonth, type ScheduleEvent } from "../lib/schedule";
+import type { ScheduleEvent } from "../lib/schedule";
 import scheduleData from "../data/schedule.json";
 
 const events = scheduleData as ScheduleEvent[];
-const groups = groupByMonth(buildScheduleView(events));
 ---
 
 <BaseLayout title="Schedule | KICKS" description="KICKS FA26 season schedule: league days, events, friendlies, and the awards ceremony.">
@@ -14,7 +13,7 @@ const groups = groupByMonth(buildScheduleView(events));
 			<p class="section-label">FA26 SEASON</p>
 			<h1 id="schedule-title">Schedule</h1>
 			<p class="about-description">Every league day, event, friendly, and ceremony this season.</p>
-			<ScheduleTimeline groups={groups} />
+			<ScheduleTimeline events={events} />
 		</section>
 	</main>
 </BaseLayout>

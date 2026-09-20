@@ -1,14 +1,15 @@
 ---
-import { TYPE_LABELS, type ScheduleMonthGroup } from "../lib/schedule";
+import { TYPE_LABELS, buildScheduleView, groupByMonth, type ScheduleEvent } from "../lib/schedule";
 
 interface Props {
-	groups: ScheduleMonthGroup[];
+	events: ScheduleEvent[];
 }
 
-const { groups } = Astro.props;
+const { events } = Astro.props;
+const groups = groupByMonth(buildScheduleView(events));
 ---
 
-<div class="schedule-timeline">
+<div class="schedule-timeline" data-schedule-events={JSON.stringify(events)}>
 	{
 		groups.map((group) => (
 			<div class="schedule-month">
@@ -38,7 +39,7 @@ const { groups } = Astro.props;
 							</>
 						);
 						return (
-							<li class={itemClass}>
+							<li class={itemClass} data-event-index={event.index}>
 								{event.href ? (
 									<a class="schedule-item-link" href={event.href}>
 										{inner}
@@ -54,3 +55,39 @@ const { groups } = Astro.props;
 		))
 	}
 </div>
+
+<script>
+	import { buildScheduleView, type ScheduleEvent } from "../lib/schedule";
+
+	// The timeline above is rendered with "today" as of the last build, which
+	// goes stale between deploys. Recompute past/next-up against the
+	// visitor's actual current date and patch the DOM to match — the item
+	// order and month grouping don't change (those depend only on each
+	// event's own date), so this only needs to touch classes and the
+	// "Next up" label.
+	const root = document.querySelector<HTMLDivElement>(".schedule-timeline");
+	const raw = root?.dataset.scheduleEvents;
+	if (root && raw) {
+		const events = JSON.parse(raw) as ScheduleEvent[];
+		const view = buildScheduleView(events);
+
+		root.querySelectorAll<HTMLLIElement>(".schedule-item[data-event-index]").forEach((item) => {
+			const info = view[Number(item.dataset.eventIndex)];
+			if (!info) return;
+
+			item.classList.toggle("schedule-item--past", info.isPast);
+			item.classList.toggle("schedule-item--next", info.isNextUp);
+
+			const body = item.querySelector(".schedule-item-body");
+			const existingLabel = body?.querySelector(".schedule-next-label");
+			if (info.isNextUp && !existingLabel) {
+				const label = document.createElement("span");
+				label.className = "schedule-next-label";
+				label.textContent = "Next up";
+				body?.prepend(label);
+			} else if (!info.isNextUp && existingLabel) {
+				existingLabel.remove();
+			}
+		});
+	}
+</script>

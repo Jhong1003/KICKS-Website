@@ -65,6 +65,16 @@ still needs confirming — it renders with a "TBD" badge instead of `null`,
 which is reserved for events with no date at all (e.g. a friendly not
 yet scheduled).
 
+Past/upcoming styling and the "Next up" pick are **not** just baked in at
+build time — this is a static site rebuilt manually, so "today" at build
+time would otherwise go stale until the next deploy. `ScheduleTimeline.astro`
+and `index.astro`'s "Next up" card each embed the raw schedule JSON in a
+`data-schedule-events` attribute and re-run `buildScheduleView`/
+`getNextUpEvent` (from `src/lib/schedule.ts`) client-side on load against
+the visitor's actual date, then patch classes/text/visibility to match.
+The server-rendered version (as of build time) is still there as the
+no-JS fallback and first paint.
+
 ### Google Sheets → Python → JSON pipeline
 
 The League page (standings, match results/fixtures, player leaderboard)

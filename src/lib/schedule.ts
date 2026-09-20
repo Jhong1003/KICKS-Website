@@ -14,6 +14,14 @@ export interface ScheduleEvent {
 }
 
 export interface ScheduleEventView extends ScheduleEvent {
+	/**
+	 * Position in buildScheduleView's own output, for a caller to re-run
+	 * buildScheduleView later (e.g. client-side, against the visitor's
+	 * actual date) and match results back to the elements rendered for the
+	 * first (build-time) call — see the client-hydration scripts in
+	 * ScheduleTimeline.astro and index.astro.
+	 */
+	index: number;
 	isPast: boolean;
 	isNextUp: boolean;
 	href: string | null;
@@ -91,14 +99,16 @@ export function buildScheduleView(events: ScheduleEvent[], today: Date = new Dat
 
 	const datedViews: ScheduleEventView[] = dated.map((event, index) => ({
 		...event,
+		index,
 		isPast: event.date < todayIso,
 		isNextUp: index === nextUpIndex,
 		href: eventHref(event),
 		formattedDate: formatEventDate(event.date),
 	}));
 
-	const undatedViews: ScheduleEventView[] = undated.map((event) => ({
+	const undatedViews: ScheduleEventView[] = undated.map((event, i) => ({
 		...event,
+		index: datedViews.length + i,
 		isPast: false,
 		isNextUp: false,
 		href: eventHref(event),
