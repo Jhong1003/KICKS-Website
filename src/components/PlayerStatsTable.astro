@@ -8,6 +8,7 @@ interface Player {
 	attacking_points: number;
 	weeks_attended: number;
 	weeks_played: number;
+	id: string;
 }
 
 interface Props {
@@ -46,7 +47,7 @@ const columns = [
 					<tr class={player.rank <= 3 ? "player-row-top" : undefined}>
 						<td data-sort-value={player.rank}>{player.rank}</td>
 						<td class="player-stats-name" data-sort-value={player.player.toLowerCase()}>
-							{player.player}
+							<a href={`/players/${player.id}`}>{player.player}</a>
 						</td>
 						<td data-sort-value={player.team.toLowerCase()}>{player.team}</td>
 						<td data-sort-value={player.weeks_attended}>

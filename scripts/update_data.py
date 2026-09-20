@@ -11,6 +11,7 @@ Run manually after the Google Sheet is updated each week:
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -228,6 +229,17 @@ def build_week_summaries(matches: pd.DataFrame) -> list[dict]:
 GAMES_PER_WEEK = 6  # a player who attends every game in a week racks up 6 games
 
 
+def _player_id(name: str) -> str:
+    """URL-safe id for a player, used in /players/<id> links.
+
+    Player names are Korean and shouldn't end up raw in a URL, so this
+    hashes the name into a short stable slug instead. It's deterministic
+    (same name -> same id every regen) and shared between the leaderboard
+    and the player profiles below, so links between the two always match.
+    """
+    return hashlib.sha1(name.encode("utf-8")).hexdigest()[:8]
+
+
 def build_leaderboard(player_stats: pd.DataFrame) -> list[dict]:
     """Season totals per player, ranked by attacking output.
 
@@ -251,6 +263,7 @@ def build_leaderboard(player_stats: pd.DataFrame) -> list[dict]:
     totals["attacking_points"] = totals["goals"] + totals["assists"]
     totals["weeks_attended"] = (totals["games"] / GAMES_PER_WEEK).astype(int)
     totals["weeks_played"] = weeks_played
+    totals["id"] = totals["player"].apply(_player_id)
     totals = totals.drop(columns=["games"])
 
     totals = totals.sort_values(
@@ -262,12 +275,191 @@ def build_leaderboard(player_stats: pd.DataFrame) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# Player profiles
+# ---------------------------------------------------------------------------
+
+# This is a friendly club site, not a scouting report: profiles celebrate
+# every player, so there are deliberately no overall ratings, scores, or
+# rankings here (that's what player_leaderboard.json is for). Everything
+# below is either a season stat, a single positive play-style tag, or a
+# badge — and every player ends up with at least one badge (see
+# _badges' "squad_member" fallback).
+
+# --- Play-style tag thresholds -------------------------------------------
+# Exactly one tag per player. Checked in this order, first match wins, so
+# the order below doubles as the priority when a player's stats could fit
+# more than one description. Tune these constants as the season's scoring
+# patterns become clearer.
+FINISHER_GOAL_MARGIN = 2  # goals must lead assists by at least this much
+ALL_ROUNDER_MAX_DIFF = 1  # goals/assists within this of each other counts as "balanced"
+IRON_MAN_MIN_WEEKS_PLAYED = 2  # need a couple of weeks on record before attendance is a "style"
+
+# --- Badge thresholds ------------------------------------------------------
+BRACE_GOALS = 2  # 2+ goals in a single week
+HAT_TRICK_GOALS = 3  # 3+ goals in a single week (also counts as a Brace)
+
+
+def _avatar_initials(name: str) -> str:
+    """Initials shown on the card in place of a photo.
+
+    For a 3+ character Korean name, the last two characters read as the
+    person's given name (e.g. 이종호 -> 종호); a 2-character name is short
+    enough to show in full. A real photo can replace this later per player
+    without touching this logic - see src/data/player-photos.json, which
+    is hand-edited and looked up separately at render time.
+    """
+    return name if len(name) <= 2 else name[-2:]
+
+
+def _team_segments(rows: pd.DataFrame) -> list[dict]:
+    """Collapse a player's week-by-week rows into contiguous team spans.
+
+    Almost always a single span (their one team all season). Merges
+    consecutive weeks with the same team so a mid-season move shows up as
+    exactly one extra span rather than one row per week.
+    """
+    rows = rows.sort_values("week")
+    segments: list[dict] = []
+    for _, row in rows.iterrows():
+        week, team = int(row["week"]), row["team"]
+        if segments and segments[-1]["team"] == team:
+            segments[-1]["to_week"] = week
+        else:
+            segments.append({"team": team, "from_week": week, "to_week": week})
+    return segments
+
+
+def _personal_best_week(rows: pd.DataFrame) -> dict | None:
+    """The player's highest attacking-points week, or None if they never
+    had one (no goals or assists all season) — nothing to celebrate yet,
+    so we skip it rather than spotlight a 0-0 week."""
+    weekly = rows.assign(attacking_points=rows["goals"] + rows["assists"])
+    best = weekly.loc[weekly["attacking_points"].idxmax()]
+    if best["attacking_points"] <= 0:
+        return None
+    return {
+        "week": int(best["week"]),
+        "goals": int(best["goals"]),
+        "assists": int(best["assists"]),
+        "attacking_points": int(best["attacking_points"]),
+    }
+
+
+def _play_style_tag(goals: int, assists: int, weeks_attended: int, weeks_played: int) -> str:
+    """One positive play-style tag — see the thresholds above for the rules."""
+    if goals > 0 and goals >= assists + FINISHER_GOAL_MARGIN:
+        return "Finisher"
+    if assists >= 1 and assists >= goals:
+        return "Playmaker"
+    if goals >= 1 and assists >= 1 and abs(goals - assists) <= ALL_ROUNDER_MAX_DIFF:
+        return "All-Rounder"
+    if weeks_played >= IRON_MAN_MIN_WEEKS_PLAYED and weeks_attended == weeks_played:
+        return "Iron Man"
+    return "Team Player"
+
+
+def _badges(rows: pd.DataFrame, goals: int, assists: int, weeks_attended: int, weeks_played: int) -> list[str]:
+    """Every achievement badge a player has earned (a player can have many).
+
+    Badge keys are looked up for their label/description/icon in
+    src/lib/players.ts (BADGES) — add a badge in both places if you add a
+    new one here. "squad_member" is a guaranteed fallback, not one of the
+    "achievements": if nothing else triggered, everyone still gets a
+    positive badge on their card.
+    """
+    first_week = int(rows["week"].min())
+    max_week_goals = int(rows["goals"].max())
+
+    badges = []
+    if goals >= 1:
+        badges.append("first_goal")
+    if assists >= 1:
+        badges.append("first_assist")
+    if max_week_goals >= BRACE_GOALS:
+        badges.append("brace")
+    if max_week_goals >= HAT_TRICK_GOALS:
+        badges.append("hat_trick")
+    if weeks_played >= 1 and weeks_attended == weeks_played:
+        badges.append("perfect_attendance")
+    if first_week == 1:
+        badges.append("week1_starter")
+    # A "new" first appearance only means something once the season has
+    # moved past week 1 - otherwise everyone would be a "Rookie".
+    if weeks_played > 1 and first_week == weeks_played:
+        badges.append("rookie")
+    if not badges:
+        badges.append("squad_member")
+    return badges
+
+
+def build_player_profiles(player_stats: pd.DataFrame) -> list[dict]:
+    """One celebratory profile per player who has recorded stats this season.
+
+    Players who haven't played a single game yet (sheet status "new", no
+    rows in player_stats) don't have anything to show on a card - they'll
+    get one automatically once their first week of stats is entered.
+    """
+    weeks_played = int(player_stats["week"].nunique())
+    player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0})
+
+    profiles = []
+    for name, rows in player_stats.groupby("player"):
+        rows = rows.sort_values("week")
+        goals = int(rows["goals"].sum())
+        assists = int(rows["assists"].sum())
+        weeks_attended = int((rows["games"].sum()) / GAMES_PER_WEEK)
+
+        segments = _team_segments(rows)
+
+        profiles.append(
+            {
+                "id": _player_id(name),
+                "name": name,
+                "avatar_initials": _avatar_initials(name),
+                "current_team": segments[-1]["team"],
+                "team_history": segments[:-1],
+                "season_totals": {
+                    "goals": goals,
+                    "assists": assists,
+                    "attacking_points": goals + assists,
+                    "weeks_attended": weeks_attended,
+                    "weeks_played": weeks_played,
+                },
+                "weekly_stats": [
+                    {
+                        "week": int(row["week"]),
+                        "team": row["team"],
+                        "games": int(row["games"]),
+                        "goals": int(row["goals"]),
+                        "assists": int(row["assists"]),
+                    }
+                    for _, row in rows.iterrows()
+                ],
+                "personal_best_week": _personal_best_week(rows),
+                "play_style_tag": _play_style_tag(goals, assists, weeks_attended, weeks_played),
+                "badges": _badges(rows, goals, assists, weeks_attended, weeks_played),
+            }
+        )
+
+    profiles.sort(key=lambda p: (p["current_team"], p["name"]))
+    return profiles
+
+
+# ---------------------------------------------------------------------------
 # Write
 # ---------------------------------------------------------------------------
 
 
 def _to_jsonable(value):
-    """Convert a numpy/pandas scalar to a plain JSON-safe Python value."""
+    """Convert a numpy/pandas scalar to a plain JSON-safe Python value.
+
+    Dicts/lists/None (e.g. player_profiles' nested season_totals,
+    weekly_stats, team_history) are already plain Python from their own
+    builder functions, so they pass through as-is - pd.isna() chokes on
+    array-likes (dicts/lists) and would otherwise need special-casing here.
+    """
+    if value is None or isinstance(value, (dict, list)):
+        return value
     if pd.isna(value):
         return None
     if isinstance(value, np.integer):
@@ -302,6 +494,7 @@ def main() -> None:
     write_json("matches.json", build_matches(matches))
     write_json("week_summaries.json", build_week_summaries(matches))
     write_json("player_leaderboard.json", build_leaderboard(player_stats))
+    write_json("player_profiles.json", build_player_profiles(player_stats))
 
 
 if __name__ == "__main__":

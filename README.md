@@ -42,8 +42,9 @@ All commands are run from the root of the project, from a terminal:
 
 The League page (standings, match results/fixtures, and the player leaderboard)
 reads from `src/data/league_table.json`, `src/data/matches.json`, and
-`src/data/player_leaderboard.json`. These are generated from the club's Google
-Sheet by `scripts/update_data.py` — don't edit them by hand.
+`src/data/player_leaderboard.json`. The Players pages read from
+`src/data/player_profiles.json`. All of these are generated from the club's
+Google Sheet by `scripts/update_data.py` — don't edit them by hand.
 
 **One-time setup:**
 
@@ -77,6 +78,41 @@ where to change them for a future season):
 - Match week dates are looked up from `src/data/schedule.json`, not
   computed from a fixed weekly cadence — see "Updating the Season
   Schedule" below.
+
+## Player Profiles
+
+The `/players` and `/players/[id]` pages are meant to celebrate every
+player — **there's no overall rating, score, or ranking on a player card,
+ever.** (Player *stats* are shown, but never a comparison or rank.)
+
+Each player who has recorded stats gets, from `build_player_profiles` in
+`scripts/update_data.py`:
+
+- Season totals, current team + team history (if they changed teams),
+  and week-by-week goals/assists.
+- A **personal best week** (most attacking points), skipped (`null`) if
+  they've never had one.
+- Exactly one **play-style tag** — `Finisher` / `Playmaker` / `All-Rounder`
+  / `Iron Man` / `Team Player` — picked by threshold checks in that order
+  (first match wins). The thresholds (e.g. `FINISHER_GOAL_MARGIN`,
+  `ALL_ROUNDER_MAX_DIFF`) are named constants right above
+  `_play_style_tag` in `scripts/update_data.py` — tune them there.
+- One or more **achievement badges** (`first_goal`, `first_assist`,
+  `brace`, `hat_trick`, `perfect_attendance`, `week1_starter`, `rookie`),
+  plus a guaranteed `squad_member` fallback so **every player has at least
+  one badge**. Badge label/description/icon text lives in `BADGES` in
+  `src/lib/players.ts`, keyed by the same badge key — update both files
+  together if you add a badge.
+
+**Avatars** are initials by default (last two characters of the name, or
+the full name if it's 2 characters — no photo is collected by the
+pipeline). To use a real photo for someone, add it to
+`src/data/player-photos.json` (hand-edited, keyed by that player's `id`,
+never overwritten by the script) with the image under `public/players/`.
+
+**Team colors** for the card accents come from `src/data/team-colors.json`
+(hand-edited, keyed by team name, with a `_default` fallback) — currently
+placeholders, swap in the real bib colors when they're decided.
 
 ## Updating the Season Schedule
 

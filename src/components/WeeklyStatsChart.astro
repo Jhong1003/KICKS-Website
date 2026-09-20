@@ -1,0 +1,47 @@
+---
+import type { WeeklyStat } from "../lib/players";
+
+interface Props {
+	weeklyStats: WeeklyStat[];
+}
+
+const { weeklyStats } = Astro.props;
+
+// At least 1 so a week with 0 goals/assists still renders a flat (not
+// divide-by-zero) bar.
+const maxValue = Math.max(1, ...weeklyStats.flatMap((week) => [week.goals, week.assists]));
+---
+
+<div class="weekly-chart">
+	<div class="weekly-chart-legend">
+		<span class="weekly-chart-legend-item">
+			<span class="weekly-chart-swatch weekly-chart-swatch--goals" />
+			Goals
+		</span>
+		<span class="weekly-chart-legend-item">
+			<span class="weekly-chart-swatch weekly-chart-swatch--assists" />
+			Assists
+		</span>
+	</div>
+	<div class="weekly-chart-bars">
+		{
+			weeklyStats.map((week) => (
+				<div class="weekly-chart-week">
+					<div class="weekly-chart-bar-group">
+						<div
+							class="weekly-chart-bar weekly-chart-bar--goals"
+							style={`height: ${(week.goals / maxValue) * 100}%`}
+							title={`Week ${week.week}: ${week.goals} goals`}
+						/>
+						<div
+							class="weekly-chart-bar weekly-chart-bar--assists"
+							style={`height: ${(week.assists / maxValue) * 100}%`}
+							title={`Week ${week.week}: ${week.assists} assists`}
+						/>
+					</div>
+					<span class="weekly-chart-week-label">W{week.week}</span>
+				</div>
+			))
+		}
+	</div>
+</div>

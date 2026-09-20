@@ -1,0 +1,81 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PlayerCard from "../components/PlayerCard.astro";
+import profilesData from "../data/player_profiles.json";
+import teamColorsData from "../data/team-colors.json";
+import playerPhotosData from "../data/player-photos.json";
+import { getTeamColor, sortPlayers, type PlayerProfile } from "../lib/players";
+
+const players = sortPlayers(profilesData as PlayerProfile[], "name");
+const teamColors = teamColorsData as Record<string, string>;
+const playerPhotos = playerPhotosData as Record<string, string>;
+---
+
+<BaseLayout
+	title="Players | KICKS"
+	description="Meet the KICKS roster — season stats, play styles, and achievement badges for every player."
+>
+	<main>
+		<section class="content-section" aria-labelledby="players-title">
+			<p class="section-label">FA26 ROSTER</p>
+			<h1 id="players-title">Players</h1>
+			<p class="about-description">
+				Every KICKS player this season — stats, play style, and badges earned along the way.
+			</p>
+
+			<div class="player-sort" role="group" aria-label="Sort players">
+				<span class="player-sort-label">Sort by</span>
+				<button class="player-sort-button" type="button" data-sort="name" aria-pressed="true">
+					Name
+				</button>
+				<button class="player-sort-button" type="button" data-sort="team" aria-pressed="false">
+					Team
+				</button>
+			</div>
+
+			<div class="player-grid" id="player-grid">
+				{
+					players.map((player) => (
+						<PlayerCard
+							player={player}
+							teamColor={getTeamColor(player.current_team, teamColors)}
+							href={`/players/${player.id}`}
+							avatarPhoto={playerPhotos[player.id]}
+						/>
+					))
+				}
+			</div>
+		</section>
+	</main>
+</BaseLayout>
+
+<script>
+	// Sort by re-ordering the already-rendered cards in the DOM (using the
+	// data-name/data-team attributes PlayerCard.astro sets on each card) —
+	// simplest and consistent with the sort-only-by-name-or-team rule: no
+	// performance stat is ever used to reorder these.
+	const grid = document.getElementById("player-grid");
+	const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(".player-sort-button"));
+	const collator = new Intl.Collator("ko");
+
+	buttons.forEach((button) => {
+		button.addEventListener("click", () => {
+			if (button.getAttribute("aria-pressed") === "true" || !grid) return;
+
+			buttons.forEach((otherButton) => otherButton.setAttribute("aria-pressed", String(otherButton === button)));
+
+			const sortBy = button.dataset.sort;
+			const cards = Array.from(grid.children) as HTMLElement[];
+
+			cards.sort((a, b) => {
+				const nameCompare = collator.compare(a.dataset.name ?? "", b.dataset.name ?? "");
+				if (sortBy === "team") {
+					return collator.compare(a.dataset.team ?? "", b.dataset.team ?? "") || nameCompare;
+				}
+				return nameCompare;
+			});
+
+			cards.forEach((card) => grid.appendChild(card));
+		});
+	});
+</script>

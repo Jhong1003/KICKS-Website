@@ -1,0 +1,97 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PlayerCard from "../../components/PlayerCard.astro";
+import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
+import profilesData from "../../data/player_profiles.json";
+import teamColorsData from "../../data/team-colors.json";
+import playerPhotosData from "../../data/player-photos.json";
+import { BADGES, getTeamColor, type PlayerProfile } from "../../lib/players";
+
+export function getStaticPaths() {
+	const profiles = profilesData as PlayerProfile[];
+	return profiles.map((player) => ({
+		params: { id: player.id },
+		props: { player },
+	}));
+}
+
+interface Props {
+	player: PlayerProfile;
+}
+
+const { player } = Astro.props;
+const teamColors = teamColorsData as Record<string, string>;
+const playerPhotos = playerPhotosData as Record<string, string>;
+const teamColor = getTeamColor(player.current_team, teamColors);
+
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+---
+
+<BaseLayout
+	title={`${player.name} | KICKS Players`}
+	description={`${player.name}'s KICKS player profile — season stats, play style, and badges.`}
+>
+	<main>
+		<section class="content-section" aria-labelledby="player-detail-title">
+			<a class="back-link" href="/players">← All players</a>
+			<p class="section-label">{player.current_team}</p>
+			<h1 id="player-detail-title">{player.name}</h1>
+
+			<div class="about-intro player-detail">
+				<div class="split-photo player-detail-card-col">
+					<PlayerCard player={player} teamColor={teamColor} size="large" avatarPhoto={playerPhotos[player.id]} />
+				</div>
+				<div class="about-intro-text">
+					{
+						player.team_history.length > 0 && (
+							<div class="player-detail-meta">
+								<p class="section-label">TEAM HISTORY</p>
+								<p class="about-description">
+									Previously played for {player.team_history.map((segment) => segment.team).join(", ")} earlier
+									this season.
+								</p>
+							</div>
+						)
+					}
+
+					{
+						player.personal_best_week && (
+							<div class="player-detail-meta">
+								<p class="section-label">PERSONAL BEST WEEK</p>
+								<p class="about-description">
+									Week {player.personal_best_week.week}: {plural(player.personal_best_week.goals, "goal")} and{" "}
+									{plural(player.personal_best_week.assists, "assist")} (
+									{plural(player.personal_best_week.attacking_points, "attacking point")}).
+								</p>
+							</div>
+						)
+					}
+
+					<div class="player-detail-meta">
+						<p class="section-label">BADGES</p>
+						<div class="player-badge-list">
+							{
+								player.badges.map((key) => (
+									<div class="player-badge-item">
+										<span class="player-badge-icon" aria-hidden="true">
+											{BADGES[key].icon}
+										</span>
+										<div>
+											<p class="player-badge-label">{BADGES[key].label}</p>
+											<p class="player-badge-description">{BADGES[key].description}</p>
+										</div>
+									</div>
+								))
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="content-section" aria-labelledby="player-chart-title">
+			<h2 id="player-chart-title">Week by Week</h2>
+			<WeeklyStatsChart weeklyStats={player.weekly_stats} />
+		</section>
+	</main>
+</BaseLayout>

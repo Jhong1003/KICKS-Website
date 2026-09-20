@@ -1,0 +1,59 @@
+---
+import { BADGES, type PlayerProfile } from "../lib/players";
+
+interface Props {
+	player: PlayerProfile;
+	teamColor: string;
+	size?: "default" | "large";
+	href?: string;
+	avatarPhoto?: string;
+}
+
+const { player, teamColor, size = "default", href, avatarPhoto } = Astro.props;
+const Tag = href ? "a" : "div";
+const cardStyle = `--team-color: ${teamColor}`;
+---
+
+<Tag
+	class={`player-card player-card--${size}`}
+	href={href}
+	style={cardStyle}
+	data-name={player.name}
+	data-team={player.current_team}
+>
+	<div class="player-card-header">
+		<span class="player-card-tag">{player.play_style_tag}</span>
+		<span class="player-card-team">{player.current_team}</span>
+	</div>
+
+	<div class="player-card-avatar">
+		{avatarPhoto ? <img src={avatarPhoto} alt="" /> : <span aria-hidden="true">{player.avatar_initials}</span>}
+	</div>
+
+	<p class="player-card-name">{player.name}</p>
+
+	<div class="player-card-stats">
+		<div class="player-card-stat">
+			<span class="player-card-stat-value">{player.season_totals.goals}</span>
+			<span class="player-card-stat-label">Goals</span>
+		</div>
+		<div class="player-card-stat">
+			<span class="player-card-stat-value">{player.season_totals.assists}</span>
+			<span class="player-card-stat-label">Assists</span>
+		</div>
+		<div class="player-card-stat">
+			<span class="player-card-stat-value">{player.season_totals.weeks_attended}</span>
+			<span class="player-card-stat-label">Weeks</span>
+		</div>
+	</div>
+
+	<div class="player-card-badges">
+		{
+			player.badges.map((key) => (
+				<span class="player-card-badge" title={BADGES[key].label} aria-label={BADGES[key].label}>
+					{BADGES[key].icon}
+				</span>
+			))
+		}
+	</div>
+</Tag>
