@@ -30,19 +30,21 @@ site reads.
   time (`league_table.json`, `matches.json`, `week_summaries.json`,
   `player_leaderboard.json`, `player_profiles.json`, `partners.json`, plus
   the encrypted `full-matches.enc.json`). **Never hand-edit the generated
-  files** — regenerate them instead (see pipeline below). Three files in
+  files** — regenerate them instead (see pipeline below). Four files in
   this folder are the hand-edited exception, never touched by the
   pipeline: [schedule.json](src/data/schedule.json) (season calendar, see
   below), [team-colors.json](src/data/team-colors.json) (player card
-  accent colors per team), and
-  [player-photos.json](src/data/player-photos.json) (optional real player
-  photos, see "Player profiles" below).
+  accent colors per team), [player-photos.json](src/data/player-photos.json)
+  (optional real player photos, see "Player profiles" below), and
+  [transfer-news.json](src/data/transfer-news.json) (homepage transfer
+  banner, see below).
 - [src/lib/schedule.ts](src/lib/schedule.ts) — shared helpers (date
   formatting, past/upcoming/next-up flags, month grouping) used by both
   the Schedule page and the homepage's "Next up" card.
 - [src/lib/players.ts](src/lib/players.ts) — shared types/helpers for
   player profiles: badge label/description/icon lookup, team color
-  lookup, and the name/team sort (see "Player profiles" below).
+  lookup, transfer resolution, and the name/team sort (see "Player
+  profiles" below).
 - [scripts/update_data.py](scripts/update_data.py) — Google Sheets → JSON
   pipeline.
 - [scripts/manage_full_matches.mjs](scripts/manage_full_matches.mjs) —
@@ -207,6 +209,36 @@ the Sheet is updated.
 keyed by team name, with a `_default` fallback for any team not yet
 listed there. Currently placeholder colors — swap in the real bib colors
 whenever they're decided.
+
+### Transfer news banner
+
+The homepage can show a dismissible banner above the hero announcing
+player moves — controlled entirely by
+[src/data/transfer-news.json](src/data/transfer-news.json) (hand-edited,
+never touched by the pipeline):
+
+- `"enabled"`: `false` hides the banner without deleting the file.
+- `"heading"`: the small label shown before the list (hidden on narrow
+  screens to save space, but still read by screen readers).
+- `"transfers"`: a list of `{"player": "<exact name>", "to": "<team>"}`.
+
+`resolveTransfers` in [src/lib/players.ts](src/lib/players.ts) looks each
+`player` up in `player_profiles.json` to get their id (for the profile
+link) and their team just *before* the move — preferring the last entry
+in `team_history` when one exists, and falling back to `current_team`
+when it doesn't (a transfer is often announced here before the Sheet has
+a new week recorded under the new team, so `team_history` may still be
+empty; once it updates, this automatically switches to reading the real
+history entry instead). An entry whose `player` doesn't match anyone in
+`player_profiles.json` is silently skipped rather than breaking the
+homepage build.
+
+Dismissing the banner (the ✕) only hides it for that browsing session —
+it's stored in `sessionStorage`, not `localStorage`, on purpose, so it
+reappears on a later visit rather than being gone for good. On narrow
+screens the transfer list scrolls horizontally instead of wrapping to
+multiple lines, so the banner stays a single compact row regardless of
+how many transfers are listed.
 
 ### Full Matches encryption
 

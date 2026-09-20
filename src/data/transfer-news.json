@@ -1,0 +1,11 @@
+{
+  "_comment": "Homepage transfer news banner — hand-edited, never touched by scripts/update_data.py. Set \"enabled\" to false to hide the banner without deleting this file. \"heading\" is the small label shown before the list. Each transfer needs \"player\" (must match a name in player_profiles.json exactly) and \"to\" (the destination team name, exactly as used elsewhere — see src/data/team-colors.json for the team names on record). The player's *previous* team is looked up automatically from player_profiles.json, not set here.",
+  "enabled": true,
+  "heading": "이적 소식",
+  "transfers": [
+    { "player": "김하주", "to": "오늘밤 샴페인" },
+    { "player": "홍지환", "to": "오늘밤 샴페인" },
+    { "player": "박경태", "to": "이지선다" },
+    { "player": "이재민", "to": "문전박대" }
+  ]
+}

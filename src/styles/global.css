@@ -2331,3 +2331,135 @@ a.player-card:hover {
 	}
 
 }
+
+/* 홈 화면: 이적 소식 배너 */
+
+.transfer-banner {
+
+	background-color: var(--color-sage);
+	border-bottom: 1px solid rgba(41, 41, 41, 0.1);
+
+}
+
+.transfer-banner[hidden] {
+
+	display: none;
+
+}
+
+.transfer-banner-inner {
+
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 12px clamp(24px, 6vw, 88px);
+
+}
+
+.transfer-banner-label {
+
+	flex-shrink: 0;
+	color: var(--color-green);
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	white-space: nowrap;
+
+}
+
+.transfer-banner-list {
+
+	display: flex;
+	flex: 1;
+	gap: 10px;
+	overflow-x: auto;
+	scrollbar-width: thin;
+
+}
+
+.transfer-chip {
+
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	border: 1px solid rgba(41, 41, 41, 0.12);
+	border-radius: 999px;
+	background-color: var(--color-background);
+	font-size: 0.8rem;
+	white-space: nowrap;
+
+}
+
+.transfer-chip-name {
+
+	font-weight: 700;
+	color: var(--color-dark);
+
+}
+
+.transfer-chip-name:hover {
+
+	text-decoration: underline;
+	text-underline-offset: 2px;
+
+}
+
+.transfer-chip-team {
+
+	font-weight: 600;
+
+}
+
+.transfer-chip-arrow {
+
+	color: var(--color-dark);
+	opacity: 0.45;
+
+}
+
+.transfer-banner-close {
+
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: none;
+	color: var(--color-dark);
+	font-size: 0.85rem;
+	opacity: 0.6;
+	cursor: pointer;
+
+}
+
+.transfer-banner-close:hover {
+
+	background-color: rgba(41, 41, 41, 0.08);
+	opacity: 1;
+
+}
+
+@media (max-width: 700px) {
+
+	.transfer-banner-inner {
+		gap: 10px;
+		padding: 10px 20px;
+	}
+
+	.transfer-banner-label {
+		display: none;
+	}
+
+	.transfer-chip {
+		padding: 5px 10px;
+		font-size: 0.75rem;
+	}
+
+}

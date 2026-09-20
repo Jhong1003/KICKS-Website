@@ -114,6 +114,26 @@ never overwritten by the script) with the image under `public/players/`.
 (hand-edited, keyed by team name, with a `_default` fallback) — currently
 placeholders, swap in the real bib colors when they're decided.
 
+## Transfer News Banner
+
+`src/data/transfer-news.json` (hand-edited) controls the dismissible
+banner above the homepage hero:
+
+```json
+{
+  "enabled": true,
+  "heading": "이적 소식",
+  "transfers": [{ "player": "김하주", "to": "오늘밤 샴페인" }]
+}
+```
+
+Set `"enabled": false` to turn it off without deleting anything. Each
+`player` must match a name in `player_profiles.json` exactly — their
+previous team is looked up automatically (from `team_history`, falling
+back to `current_team` if the Sheet hasn't recorded the move yet), not
+set in this file. Closing the banner only hides it for that browser
+session (`sessionStorage`) — it comes back on a later visit.
+
 ## Updating the Season Schedule
 
 `src/data/schedule.json` is the season calendar's source of truth — it's

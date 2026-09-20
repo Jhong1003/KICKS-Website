@@ -1,0 +1,61 @@
+---
+import { getReadableAccentColor, getTeamColor, type ResolvedTransfer } from "../lib/players";
+
+interface Props {
+	heading: string;
+	transfers: ResolvedTransfer[];
+	teamColors: Record<string, string>;
+}
+
+const { heading, transfers, teamColors } = Astro.props;
+
+const teamTextColor = (team: string) => getReadableAccentColor(getTeamColor(team, teamColors));
+---
+
+<div class="transfer-banner" id="transfer-banner">
+	<div class="transfer-banner-inner">
+		<span class="transfer-banner-label">{heading}</span>
+		<div class="transfer-banner-list">
+			{
+				transfers.map((transfer) => (
+					<div class="transfer-chip">
+						<a class="transfer-chip-name" href={`/players/${transfer.playerId}`}>
+							{transfer.playerName}
+						</a>
+						<span class="transfer-chip-team" style={`color: ${teamTextColor(transfer.fromTeam)}`}>
+							{transfer.fromTeam}
+						</span>
+						<span class="transfer-chip-arrow" aria-hidden="true">
+							→
+						</span>
+						<span class="transfer-chip-team" style={`color: ${teamTextColor(transfer.toTeam)}`}>
+							{transfer.toTeam}
+						</span>
+					</div>
+				))
+			}
+		</div>
+		<button class="transfer-banner-close" type="button" aria-label="Dismiss transfer news">
+			✕
+		</button>
+	</div>
+</div>
+
+<script>
+	// Dismissal only lasts the current browsing session (sessionStorage, not
+	// localStorage): closing hides it for the rest of this visit, but a
+	// fresh visit later (new tab/browser session) sees it again.
+	const DISMISSED_KEY = "kicks-transfer-banner-dismissed";
+	const banner = document.getElementById("transfer-banner");
+
+	if (banner) {
+		if (sessionStorage.getItem(DISMISSED_KEY) === "1") {
+			banner.hidden = true;
+		}
+
+		banner.querySelector(".transfer-banner-close")?.addEventListener("click", () => {
+			banner.hidden = true;
+			sessionStorage.setItem(DISMISSED_KEY, "1");
+		});
+	}
+</script>

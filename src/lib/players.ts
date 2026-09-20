@@ -120,6 +120,53 @@ export function getReadableAccentColor(hex: string): string {
 	return luminance !== null && luminance > 0.5 ? "#292929" : hex;
 }
 
+// --- Transfer news banner --------------------------------------------------
+// Config lives in src/data/transfer-news.json (hand-edited: on/off, heading
+// text, and the list of moves) — this only resolves each entry against
+// player_profiles.json to find the player's id (for the profile link) and
+// their team just before the move.
+
+export interface TransferEntry {
+	player: string;
+	to: string;
+}
+
+export interface ResolvedTransfer {
+	playerId: string;
+	playerName: string;
+	fromTeam: string;
+	toTeam: string;
+}
+
+/**
+ * Resolves each configured transfer against the generated player profiles.
+ *
+ * "From" team comes from the player's team_history when available (the
+ * most recently completed span) — but a transfer is often announced here
+ * before the Google Sheet has a new week recorded under the new team, in
+ * which case team_history is still empty and current_team *is* the
+ * pre-move team. Preferring team_history means this keeps reading
+ * correctly on its own once the sheet catches up, without editing this
+ * file again.
+ *
+ * Entries for a name not found in profiles (typo, or the profile hasn't
+ * been generated yet) are silently skipped rather than crashing the
+ * homepage build.
+ */
+export function resolveTransfers(entries: TransferEntry[], profiles: PlayerProfile[]): ResolvedTransfer[] {
+	const byName = new Map(profiles.map((profile) => [profile.name, profile]));
+
+	return entries.flatMap((entry) => {
+		const profile = byName.get(entry.player);
+		if (!profile) return [];
+
+		const lastSegment = profile.team_history[profile.team_history.length - 1];
+		const fromTeam = lastSegment ? lastSegment.team : profile.current_team;
+
+		return [{ playerId: profile.id, playerName: profile.name, fromTeam, toTeam: entry.to }];
+	});
+}
+
 export type PlayerSortKey = "name" | "team";
 
 /**
