@@ -7,13 +7,15 @@
 // Descriptive filenames (e.g. team-huddle-matchday3.jpg) become the alt text;
 // filenames that are just a number (e.g. 7.jpg) become "KICKS futsal photo 7".
 import { Image } from "astro:assets";
+import heroImage from "../assets/hero.jpg";
+import aboutImage from "../assets/about.jpg";
 
 const galleryModules = import.meta.glob<{ default: ImageMetadata }>(
 	"/src/assets/gallery/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}",
 	{ eager: true }
 );
 
-const images = Object.entries(galleryModules)
+const numberedImages = Object.entries(galleryModules)
 	.sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
 	.map(([path, mod]) => {
 		const baseName = path.split("/").pop()!.replace(/\.[^.]+$/, "");
@@ -21,6 +23,15 @@ const images = Object.entries(galleryModules)
 
 		return { src: mod.default, alt };
 	});
+
+// The homepage hero and About page photos, reused here (not copied into
+// src/assets/gallery/) so there's only ever one file on disk for each.
+// Appended after the numbered set.
+const images = [
+	...numberedImages,
+	{ src: heroImage, alt: "KICKS players in action" },
+	{ src: aboutImage, alt: "KICKS club members playing futsal" },
+];
 ---
 
 {
