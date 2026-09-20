@@ -74,7 +74,10 @@ where to change them for a future season):
   attendance (more weeks attended wins), all on season totals — not a
   per-game rate, since missing a week is a missed attendance, not something
   to reward. "Attendance" itself is reported as weeks attended out of weeks
-  played so far (`GAMES_PER_WEEK = 6` games per week attended).
+  played so far (`GAMES_PER_WEEK = 6` games per week attended). One row per
+  player even if they changed teams mid-season — the Team column shows
+  their current (most recent) team, and their stats are combined across
+  both teams, not split into two rows.
 - Match week dates are looked up from `src/data/schedule.json`, not
   computed from a fixed weekly cadence — see "Updating the Season
   Schedule" below.

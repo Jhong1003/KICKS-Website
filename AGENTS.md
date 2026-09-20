@@ -127,7 +127,11 @@ future season.
 - **Player leaderboard ranking order**: attacking points (goals + assists)
   → goals → assists → attendance (more weeks attended wins ties) — all on
   season totals, not a per-game rate, since missing a week is a missed
-  attendance rather than something a rate should reward.
+  attendance rather than something a rate should reward. One row per
+  player for the whole season (grouped by player, not by player+team), so
+  a mid-season team change doesn't split their totals into two rows — the
+  Team column shows their current team (most recent week's row), the same
+  way `build_player_profiles` picks `current_team`.
 - **Attendance**: reported as weeks attended out of weeks played so far
   (`GAMES_PER_WEEK = 6` games counts as one full week attended).
 - Match week dates are looked up from

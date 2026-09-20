@@ -243,6 +243,13 @@ def _player_id(name: str) -> str:
 def build_leaderboard(player_stats: pd.DataFrame) -> list[dict]:
     """Season totals per player, ranked by attacking output.
 
+    One row per player for the whole season, even if they changed teams
+    partway through (see build_player_profiles's _team_segments for the
+    full history) — grouping by player alone, not by (player, team), so a
+    mid-season move doesn't split someone's totals across two rows. The
+    Team column shows their *current* team (from their most recent week's
+    row), matching how build_player_profiles picks current_team.
+
     We deliberately don't rank by a per-game rate: missing a week means a
     player skipped attendance, which a per-game average would reward rather
     than penalize. Instead the ranking is attacking_points -> goals ->
@@ -251,12 +258,14 @@ def build_leaderboard(player_stats: pd.DataFrame) -> list[dict]:
     -readable stat ("weeks attended / weeks played so far").
     """
     weeks_played = int(player_stats["week"].nunique())
+    player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0})
 
-    totals = (
-        player_stats.fillna({"games": 0, "goals": 0, "assists": 0})
-        .groupby(["player", "team"], as_index=False)
-        .agg(games=("games", "sum"), goals=("goals", "sum"), assists=("assists", "sum"))
+    current_team = player_stats.sort_values("week").groupby("player")["team"].last()
+
+    totals = player_stats.groupby("player", as_index=False).agg(
+        games=("games", "sum"), goals=("goals", "sum"), assists=("assists", "sum")
     )
+    totals["team"] = totals["player"].map(current_team)
 
     totals["goals"] = totals["goals"].astype(int)
     totals["assists"] = totals["assists"].astype(int)
