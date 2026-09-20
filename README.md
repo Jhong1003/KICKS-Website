@@ -126,16 +126,22 @@ banner above the homepage hero:
 {
   "enabled": true,
   "heading": "이적 소식",
-  "transfers": [{ "player": "김하주", "to": "오늘밤 샴페인" }]
+  "transfers": [{ "player": "김하주", "from": "이지선다", "to": "오늘밤 샴페인" }]
 }
 ```
 
 Set `"enabled": false` to turn it off without deleting anything. Each
-`player` must match a name in `player_profiles.json` exactly — their
-previous team is looked up automatically (from `team_history`, falling
-back to `current_team` if the Sheet hasn't recorded the move yet), not
-set in this file. Closing the banner only hides it for that browser
-session (`sessionStorage`) — it comes back on a later visit.
+`player` must match a name in `player_profiles.json` exactly. `from` is
+optional — without it, the previous team is looked up automatically from
+`team_history` (falling back to `current_team`), which only works once
+the Sheet has a week recorded under the new team. **Until then, set
+`from` explicitly** — this bit us once already: the Sheet's week 1/2 rows
+got edited inconsistently for a real transfer, and without an explicit
+`from`, 3 of 4 players showed the wrong "previous team" (in one case
+literally "Team X → Team X"). If `from` and `to` ever end up equal, that
+entry is dropped instead of shown as a no-op line. Closing the banner
+only hides it for that browser session (`sessionStorage`) — it comes back
+on a later visit.
 
 ## Updating the Season Schedule
 

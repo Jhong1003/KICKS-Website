@@ -224,18 +224,29 @@ never touched by the pipeline):
 - `"enabled"`: `false` hides the banner without deleting the file.
 - `"heading"`: the small label shown before the list (hidden on narrow
   screens to save space, but still read by screen readers).
-- `"transfers"`: a list of `{"player": "<exact name>", "to": "<team>"}`.
+- `"transfers"`: a list of `{"player": "<exact name>", "to": "<team>",
+  "from": "<team>"}` — `from` is optional.
 
 `resolveTransfers` in [src/lib/players.ts](src/lib/players.ts) looks each
 `player` up in `player_profiles.json` to get their id (for the profile
-link) and their team just *before* the move — preferring the last entry
-in `team_history` when one exists, and falling back to `current_team`
-when it doesn't (a transfer is often announced here before the Sheet has
-a new week recorded under the new team, so `team_history` may still be
-empty; once it updates, this automatically switches to reading the real
-history entry instead). An entry whose `player` doesn't match anyone in
-`player_profiles.json` is silently skipped rather than breaking the
-homepage build.
+link). The team shown as *before* the move is `from` when given;
+otherwise it comes from the last entry in `team_history`, falling back to
+`current_team` if that's still empty (a transfer is often announced here
+before the Sheet has a new week recorded under the new team). **Set
+`from` explicitly whenever the Sheet hasn't caught up yet** —
+`current_team`/`team_history` can't be trusted as "the pre-move team" in
+that window (it may show the old team, or something edited ahead of
+time), and this is what actually happened the first time this shipped:
+three of four announced transfers ended up reading the wrong team because
+the Sheet's week 1/2 rows had been edited inconsistently, and the banner
+had no way to tell. `from` is safe to remove once the move shows up in
+`team_history` for real after a regen.
+
+Whatever the source, if `from` and `to` end up equal the entry is dropped
+rather than rendered as a nonsensical "Team X -> Team X" line — this is
+the safety net for exactly that kind of Sheet inconsistency. An entry
+whose `player` doesn't match anyone in `player_profiles.json` is also
+silently skipped rather than breaking the homepage build.
 
 Dismissing the banner (the ✕) only hides it for that browsing session —
 it's stored in `sessionStorage`, not `localStorage`, on purpose, so it

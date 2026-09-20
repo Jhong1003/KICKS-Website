@@ -129,6 +129,16 @@ export function getReadableAccentColor(hex: string): string {
 export interface TransferEntry {
 	player: string;
 	to: string;
+	/**
+	 * Optional explicit "from" team, overriding the automatic lookup from
+	 * player_profiles.json. Use this when the Sheet hasn't recorded the
+	 * move in a new week yet — team_history is still empty in that case
+	 * and current_team can't be trusted as "the team before the move"
+	 * (it may still show the old team, or may have been edited ahead of
+	 * time and show something else entirely). Safe to remove once a real
+	 * week under the new team has been entered and regenerated.
+	 */
+	from?: string;
 }
 
 export interface ResolvedTransfer {
@@ -141,13 +151,17 @@ export interface ResolvedTransfer {
 /**
  * Resolves each configured transfer against the generated player profiles.
  *
- * "From" team comes from the player's team_history when available (the
- * most recently completed span) — but a transfer is often announced here
- * before the Google Sheet has a new week recorded under the new team, in
- * which case team_history is still empty and current_team *is* the
- * pre-move team. Preferring team_history means this keeps reading
- * correctly on its own once the sheet catches up, without editing this
- * file again.
+ * "From" team is `entry.from` when given; otherwise it comes from the
+ * player's team_history (the most recently completed span), falling back
+ * to current_team if team_history is still empty (the Sheet hasn't
+ * recorded the move in a new week yet).
+ *
+ * An entry that resolves to the same "from" and "to" team is dropped
+ * rather than shown as a nonsensical "Team X -> Team X" line — this is
+ * usually the empty-team_history fallback landing on the pre-move team
+ * that happens to equal `to` (e.g. a data-entry mixup, or the Sheet
+ * genuinely hasn't caught up and no explicit `from` was given to work
+ * around that).
  *
  * Entries for a name not found in profiles (typo, or the profile hasn't
  * been generated yet) are silently skipped rather than crashing the
@@ -161,7 +175,9 @@ export function resolveTransfers(entries: TransferEntry[], profiles: PlayerProfi
 		if (!profile) return [];
 
 		const lastSegment = profile.team_history[profile.team_history.length - 1];
-		const fromTeam = lastSegment ? lastSegment.team : profile.current_team;
+		const fromTeam = entry.from ?? (lastSegment ? lastSegment.team : profile.current_team);
+
+		if (fromTeam === entry.to) return [];
 
 		return [{ playerId: profile.id, playerName: profile.name, fromTeam, toTeam: entry.to }];
 	});
