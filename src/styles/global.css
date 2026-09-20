@@ -1562,81 +1562,59 @@ h1 {
 
 }
 
-/* 홈 화면: 다음 일정 카드 */
+/* 히어로: 다음 일정 링크 (Join/View Standings 버튼 아래 한 줄) */
 
-.next-up-card {
+.hero-next-up {
 
-	display: flex;
+	display: inline-flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 8px 20px;
-	margin-top: 32px;
-	padding: 20px 24px;
-	border: 1px solid var(--color-sage);
-	border-radius: 8px;
-	background-color: var(--color-background);
-	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	gap: 9px;
+	margin-top: 28px;
+	color: var(--color-sage);
+	font-size: 0.9rem;
 
 }
 
-.next-up-card:hover {
+.hero-next-up[hidden] {
 
-	border-color: var(--color-green);
-	box-shadow: 0 6px 16px rgba(41, 41, 41, 0.08);
+	display: none;
 
 }
 
-.next-up-label {
+.hero-next-up:hover {
 
-	padding: 4px 12px;
-	border-radius: 999px;
-	background-color: var(--color-green);
 	color: var(--color-background);
-	font-size: 0.68rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	white-space: nowrap;
 
 }
 
-.next-up-body {
-
-	display: flex;
-	flex-direction: column;
-	flex: 1;
-	min-width: 180px;
-	gap: 2px;
-
-}
-
-.next-up-date {
-
-	color: var(--color-dark);
-	opacity: 0.65;
-	font-size: 0.8rem;
-	font-weight: 600;
-
-}
-
-.next-up-title {
-
-	font-size: 1.05rem;
-	font-weight: 700;
-	color: var(--color-dark);
-
-}
-
-.next-up-link {
-
-	font-weight: 600;
-	white-space: nowrap;
-
-}
-
-.next-up-card:hover .next-up-link {
+.hero-next-up:hover .hero-next-up-text {
 
 	text-decoration: underline;
+	text-underline-offset: 4px;
+
+}
+
+.hero-next-up-dot {
+
+	width: 7px;
+	height: 7px;
+	flex-shrink: 0;
+	border-radius: 50%;
+	background-color: var(--color-sage);
+
+}
+
+.hero-next-up:hover .hero-next-up-dot {
+
+	background-color: var(--color-background);
+
+}
+
+.hero-next-up-text strong {
+
+	color: var(--color-background);
+	font-weight: 700;
 
 }
 

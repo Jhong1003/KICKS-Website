@@ -24,6 +24,7 @@ export interface ScheduleEventView extends ScheduleEvent {
 	index: number;
 	isPast: boolean;
 	isNextUp: boolean;
+	isToday: boolean;
 	href: string | null;
 	formattedDate: string | null;
 }
@@ -102,6 +103,7 @@ export function buildScheduleView(events: ScheduleEvent[], today: Date = new Dat
 		index,
 		isPast: event.date < todayIso,
 		isNextUp: index === nextUpIndex,
+		isToday: event.date === todayIso,
 		href: eventHref(event),
 		formattedDate: formatEventDate(event.date),
 	}));
@@ -111,6 +113,7 @@ export function buildScheduleView(events: ScheduleEvent[], today: Date = new Dat
 		index: datedViews.length + i,
 		isPast: false,
 		isNextUp: false,
+		isToday: false,
 		href: eventHref(event),
 		formattedDate: null,
 	}));
