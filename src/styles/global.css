@@ -309,6 +309,26 @@ h1 {
 
 }
 
+/* "Join" 링크: 아웃라인 버튼으로 강조 (메인 CTA) */
+
+.nav-list a.nav-cta {
+
+	padding: 9px 18px;
+	border: 1px solid var(--color-background);
+	border-radius: 999px;
+	opacity: 1;
+
+}
+
+.nav-list a.nav-cta:hover,
+.nav-list a.nav-cta[aria-current="page"] {
+
+	background-color: var(--color-background);
+	color: var(--color-green);
+	text-decoration: none;
+
+}
+
 .nav-lock-icon {
 
 	width: 11px;
@@ -1279,6 +1299,14 @@ h1 {
 
 		width: 100%;
 		padding: 8px 0;
+
+	}
+
+	.nav-list a.nav-cta {
+
+		width: auto;
+		margin-top: 8px;
+		padding: 9px 18px;
 
 	}
 

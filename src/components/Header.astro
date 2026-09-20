@@ -6,14 +6,13 @@ interface Props {
 const { variant = "default" } = Astro.props;
 
 const navLinks = [
-	{ href: "/", label: "Home" },
 	{ href: "/about", label: "About" },
-	{ href: "/join", label: "Join" },
 	{ href: "/league", label: "League" },
 	{ href: "/schedule", label: "Schedule" },
 	{ href: "/gallery", label: "Gallery" },
 	{ href: "/full-matches", label: "Full Matches", locked: true },
 	{ href: "/partners", label: "Partners" },
+	{ href: "/join", label: "Join", cta: true },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -27,7 +26,11 @@ const currentPath = Astro.url.pathname;
 	<nav class="nav-list" id="site-nav" aria-label="Main navigation">
 		{
 			navLinks.map((link) => (
-				<a href={link.href} aria-current={currentPath === link.href ? "page" : undefined}>
+				<a
+						href={link.href}
+						class={link.cta ? "nav-cta" : undefined}
+						aria-current={currentPath === link.href ? "page" : undefined}
+					>
 					{link.label}
 					{link.locked && (
 						<svg class="nav-lock-icon" viewBox="0 0 16 16" aria-hidden="true">
