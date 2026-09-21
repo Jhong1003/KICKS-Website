@@ -141,14 +141,25 @@ def _participation_rates(team_rows: pd.DataFrame, player_stats: pd.DataFrame, ro
     attended every session that week share the same `games` value, so the
     week's max is that team's session size. Those weekly session sizes are
     summed across every week the team has games on record.
+
+    Deliberately computed from *every* recorded player_stats row, not just
+    the active roster: it's meant to be an objective fact ("how many
+    sessions did this team hold"), independent of anyone's current roster
+    status. If it were computed from the roster-filtered rows instead, a
+    player leaving mid-season (see AGENTS.md's "Player status" section)
+    would retroactively shrink *past* weeks' session size too whenever
+    they happened to be the one who set that week's max — silently
+    understating how much everyone still on the roster actually showed
+    up for. "Games played by the roster" (the numerator, just below) is
+    the one figure that's intentionally scoped to today's active roster.
     """
     roster_size = roster.groupby("team")["player"].nunique()
 
+    team_games_per_week = player_stats.groupby(["team", "week"])["games"].max()
+    team_total_games = team_games_per_week.groupby("team").sum()
+
     stats = player_stats.merge(roster[["player", "team"]], on="player", suffixes=("", "_roster"))
     games_played = stats.groupby("team")["games"].sum(min_count=1).fillna(0)
-
-    team_games_per_week = stats.groupby(["team", "week"])["games"].max()
-    team_total_games = team_games_per_week.groupby("team").sum()
 
     teams = team_rows["team"].unique()
     rates = {}

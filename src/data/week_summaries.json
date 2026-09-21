@@ -46,5 +46,29 @@
     "draws": 0,
     "losses": 6,
     "points": 0
+  },
+  {
+    "week": 3,
+    "team": "오늘밤 샴페인",
+    "wins": 3,
+    "draws": 2,
+    "losses": 1,
+    "points": 8
+  },
+  {
+    "week": 3,
+    "team": "문전박대",
+    "wins": 2,
+    "draws": 3,
+    "losses": 1,
+    "points": 7
+  },
+  {
+    "week": 3,
+    "team": "이지선다",
+    "wins": 0,
+    "draws": 3,
+    "losses": 3,
+    "points": 3
   }
 ]

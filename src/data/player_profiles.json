@@ -10,7 +10,7 @@
       "assists": 0,
       "attacking_points": 1,
       "weeks_attended": 1,
-      "weeks_played": 2
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -50,8 +50,8 @@
       "goals": 1,
       "assists": 0,
       "attacking_points": 1,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -63,6 +63,13 @@
       },
       {
         "week": 2,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 3,
         "team": "문전박대",
         "games": 6,
         "goals": 0,
@@ -92,8 +99,8 @@
       "goals": 0,
       "assists": 0,
       "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -105,6 +112,13 @@
       },
       {
         "week": 2,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 3,
         "team": "문전박대",
         "games": 6,
         "goals": 0,
@@ -126,10 +140,10 @@
     "team_history": [],
     "season_totals": {
       "goals": 3,
-      "assists": 0,
-      "attacking_points": 3,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "assists": 2,
+      "attacking_points": 5,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -145,6 +159,13 @@
         "games": 6,
         "goals": 1,
         "assists": 0
+      },
+      {
+        "week": 3,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 0,
+        "assists": 2
       }
     ],
     "personal_best_week": {
@@ -153,9 +174,10 @@
       "assists": 0,
       "attacking_points": 2
     },
-    "play_style_tag": "Finisher",
+    "play_style_tag": "All-Rounder",
     "badges": [
       "first_goal",
+      "first_assist",
       "brace",
       "perfect_attendance",
       "week1_starter"
@@ -168,11 +190,11 @@
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
-      "goals": 0,
+      "goals": 3,
       "assists": 4,
-      "attacking_points": 4,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "attacking_points": 7,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -188,6 +210,13 @@
         "games": 6,
         "goals": 0,
         "assists": 1
+      },
+      {
+        "week": 3,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 3,
+        "assists": 0
       }
     ],
     "personal_best_week": {
@@ -198,9 +227,49 @@
     },
     "play_style_tag": "Playmaker",
     "badges": [
+      "first_goal",
       "first_assist",
+      "brace",
+      "hat_trick",
       "perfect_attendance",
       "week1_starter"
+    ]
+  },
+  {
+    "id": "041dc3f4",
+    "name": "이관현",
+    "avatar_initials": "관현",
+    "current_team": "문전박대",
+    "team_history": [],
+    "season_totals": {
+      "goals": 3,
+      "assists": 1,
+      "attacking_points": 4,
+      "weeks_attended": 1,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 3,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 3,
+        "assists": 1
+      }
+    ],
+    "personal_best_week": {
+      "week": 3,
+      "goals": 3,
+      "assists": 1,
+      "attacking_points": 4
+    },
+    "play_style_tag": "Finisher",
+    "badges": [
+      "first_goal",
+      "first_assist",
+      "brace",
+      "hat_trick",
+      "rookie"
     ]
   },
   {
@@ -214,7 +283,7 @@
       "assists": 0,
       "attacking_points": 0,
       "weeks_attended": 2,
-      "weeks_played": 2
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -228,173 +297,60 @@
         "week": 2,
         "team": "문전박대",
         "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 3,
+        "team": "문전박대",
+        "games": 0,
         "goals": 0,
         "assists": 0
       }
     ],
     "personal_best_week": null,
-    "play_style_tag": "Iron Man",
+    "play_style_tag": "Team Player",
     "badges": [
-      "perfect_attendance",
       "week1_starter"
     ]
   },
   {
-    "id": "3c6929d0",
-    "name": "이현동",
-    "avatar_initials": "현동",
+    "id": "db1a5f56",
+    "name": "이재민",
+    "avatar_initials": "재민",
     "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 2,
-      "assists": 2,
-      "attacking_points": 4,
-      "weeks_attended": 2,
-      "weeks_played": 2
-    },
-    "weekly_stats": [
+    "team_history": [
       {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 2,
-        "assists": 1
+        "team": "오늘밤 샴페인",
+        "from_week": 1,
+        "to_week": 2
       }
     ],
-    "personal_best_week": {
-      "week": 2,
+    "season_totals": {
       "goals": 2,
       "assists": 1,
-      "attacking_points": 3
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "perfect_attendance",
-      "week1_starter"
-    ]
-  },
-  {
-    "id": "88c25e9d",
-    "name": "홍지환",
-    "avatar_initials": "지환",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 6,
-      "assists": 3,
-      "attacking_points": 9,
-      "weeks_attended": 2,
-      "weeks_played": 2
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 4,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 2,
-        "assists": 2
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 4,
-      "assists": 1,
-      "attacking_points": 5
-    },
-    "play_style_tag": "Finisher",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "hat_trick",
-      "perfect_attendance",
-      "week1_starter"
-    ]
-  },
-  {
-    "id": "ef395141",
-    "name": "황보준",
-    "avatar_initials": "보준",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 1,
-      "assists": 2,
       "attacking_points": 3,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
         "week": 1,
-        "team": "문전박대",
+        "team": "오늘밤 샴페인",
         "games": 6,
         "goals": 1,
+        "assists": 1
+      },
+      {
+        "week": 2,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
         "assists": 0
       },
       {
-        "week": 2,
+        "week": 3,
         "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 2
-      }
-    ],
-    "personal_best_week": {
-      "week": 2,
-      "goals": 0,
-      "assists": 2,
-      "attacking_points": 2
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "perfect_attendance",
-      "week1_starter"
-    ]
-  },
-  {
-    "id": "8cefcaea",
-    "name": "강경웅",
-    "avatar_initials": "경웅",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 2,
-      "assists": 1,
-      "attacking_points": 3,
-      "weeks_attended": 2,
-      "weeks_played": 2
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
         "games": 6,
         "goals": 1,
         "assists": 0
@@ -415,6 +371,157 @@
     ]
   },
   {
+    "id": "3c6929d0",
+    "name": "이현동",
+    "avatar_initials": "현동",
+    "current_team": "문전박대",
+    "team_history": [],
+    "season_totals": {
+      "goals": 3,
+      "assists": 2,
+      "attacking_points": 5,
+      "weeks_attended": 3,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 1,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 0,
+        "assists": 1
+      },
+      {
+        "week": 2,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 2,
+        "assists": 1
+      },
+      {
+        "week": 3,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 1,
+        "assists": 0
+      }
+    ],
+    "personal_best_week": {
+      "week": 2,
+      "goals": 2,
+      "assists": 1,
+      "attacking_points": 3
+    },
+    "play_style_tag": "All-Rounder",
+    "badges": [
+      "first_goal",
+      "first_assist",
+      "brace",
+      "perfect_attendance",
+      "week1_starter"
+    ]
+  },
+  {
+    "id": "ef395141",
+    "name": "황보준",
+    "avatar_initials": "보준",
+    "current_team": "문전박대",
+    "team_history": [],
+    "season_totals": {
+      "goals": 2,
+      "assists": 5,
+      "attacking_points": 7,
+      "weeks_attended": 3,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 1,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 1,
+        "assists": 0
+      },
+      {
+        "week": 2,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 0,
+        "assists": 2
+      },
+      {
+        "week": 3,
+        "team": "문전박대",
+        "games": 6,
+        "goals": 1,
+        "assists": 3
+      }
+    ],
+    "personal_best_week": {
+      "week": 3,
+      "goals": 1,
+      "assists": 3,
+      "attacking_points": 4
+    },
+    "play_style_tag": "Playmaker",
+    "badges": [
+      "first_goal",
+      "first_assist",
+      "perfect_attendance",
+      "week1_starter"
+    ]
+  },
+  {
+    "id": "8cefcaea",
+    "name": "강경웅",
+    "avatar_initials": "경웅",
+    "current_team": "오늘밤 샴페인",
+    "team_history": [],
+    "season_totals": {
+      "goals": 3,
+      "assists": 5,
+      "attacking_points": 8,
+      "weeks_attended": 3,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 1,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 1,
+        "assists": 1
+      },
+      {
+        "week": 2,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 1,
+        "assists": 0
+      },
+      {
+        "week": 3,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 1,
+        "assists": 4
+      }
+    ],
+    "personal_best_week": {
+      "week": 3,
+      "goals": 1,
+      "assists": 4,
+      "attacking_points": 5
+    },
+    "play_style_tag": "Playmaker",
+    "badges": [
+      "first_goal",
+      "first_assist",
+      "perfect_attendance",
+      "week1_starter"
+    ]
+  },
+  {
     "id": "d5cbda93",
     "name": "김민규",
     "avatar_initials": "민규",
@@ -424,8 +531,8 @@
       "goals": 1,
       "assists": 0,
       "attacking_points": 1,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -437,6 +544,13 @@
       },
       {
         "week": 2,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 3,
         "team": "오늘밤 샴페인",
         "games": 6,
         "goals": 0,
@@ -457,6 +571,62 @@
     ]
   },
   {
+    "id": "85804296",
+    "name": "김하주",
+    "avatar_initials": "하주",
+    "current_team": "오늘밤 샴페인",
+    "team_history": [
+      {
+        "team": "이지선다",
+        "from_week": 1,
+        "to_week": 2
+      }
+    ],
+    "season_totals": {
+      "goals": 2,
+      "assists": 2,
+      "attacking_points": 4,
+      "weeks_attended": 3,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 1,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 1,
+        "assists": 1
+      },
+      {
+        "week": 2,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 1,
+        "assists": 0
+      },
+      {
+        "week": 3,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 1
+      }
+    ],
+    "personal_best_week": {
+      "week": 1,
+      "goals": 1,
+      "assists": 1,
+      "attacking_points": 2
+    },
+    "play_style_tag": "Playmaker",
+    "badges": [
+      "first_goal",
+      "first_assist",
+      "perfect_attendance",
+      "week1_starter"
+    ]
+  },
+  {
     "id": "6b275000",
     "name": "남우현",
     "avatar_initials": "우현",
@@ -464,10 +634,10 @@
     "team_history": [],
     "season_totals": {
       "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "assists": 2,
+      "attacking_points": 2,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -483,47 +653,24 @@
         "games": 6,
         "goals": 0,
         "assists": 0
+      },
+      {
+        "week": 3,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 2
       }
     ],
-    "personal_best_week": null,
-    "play_style_tag": "Iron Man",
-    "badges": [
-      "perfect_attendance",
-      "week1_starter"
-    ]
-  },
-  {
-    "id": "dfe0850f",
-    "name": "박경태",
-    "avatar_initials": "경태",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
+    "personal_best_week": {
+      "week": 3,
       "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "assists": 2,
+      "attacking_points": 2
     },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Iron Man",
+    "play_style_tag": "Playmaker",
     "badges": [
+      "first_assist",
       "perfect_attendance",
       "week1_starter"
     ]
@@ -538,8 +685,8 @@
       "goals": 0,
       "assists": 1,
       "attacking_points": 1,
-      "weeks_attended": 1,
-      "weeks_played": 2
+      "weeks_attended": 2,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -555,6 +702,13 @@
         "games": 6,
         "goals": 0,
         "assists": 1
+      },
+      {
+        "week": 3,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
       }
     ],
     "personal_best_week": {
@@ -580,7 +734,7 @@
       "assists": 1,
       "attacking_points": 2,
       "weeks_attended": 1,
-      "weeks_played": 2
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -596,6 +750,13 @@
         "games": 6,
         "goals": 1,
         "assists": 1
+      },
+      {
+        "week": 3,
+        "team": "오늘밤 샴페인",
+        "games": 0,
+        "goals": 0,
+        "assists": 0
       }
     ],
     "personal_best_week": {
@@ -612,49 +773,6 @@
     ]
   },
   {
-    "id": "db1a5f56",
-    "name": "이재민",
-    "avatar_initials": "재민",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2,
-      "weeks_attended": 2,
-      "weeks_played": 2
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "perfect_attendance",
-      "week1_starter"
-    ]
-  },
-  {
     "id": "f591da0a",
     "name": "이지수",
     "avatar_initials": "지수",
@@ -664,8 +782,8 @@
       "goals": 0,
       "assists": 0,
       "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -677,6 +795,13 @@
       },
       {
         "week": 2,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 3,
         "team": "오늘밤 샴페인",
         "games": 6,
         "goals": 0,
@@ -691,6 +816,41 @@
     ]
   },
   {
+    "id": "43adbf2e",
+    "name": "최건",
+    "avatar_initials": "최건",
+    "current_team": "오늘밤 샴페인",
+    "team_history": [],
+    "season_totals": {
+      "goals": 1,
+      "assists": 1,
+      "attacking_points": 2,
+      "weeks_attended": 1,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 3,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 1,
+        "assists": 1
+      }
+    ],
+    "personal_best_week": {
+      "week": 3,
+      "goals": 1,
+      "assists": 1,
+      "attacking_points": 2
+    },
+    "play_style_tag": "Playmaker",
+    "badges": [
+      "first_goal",
+      "first_assist",
+      "rookie"
+    ]
+  },
+  {
     "id": "e3e80231",
     "name": "최민석",
     "avatar_initials": "민석",
@@ -700,8 +860,8 @@
       "goals": 1,
       "assists": 0,
       "attacking_points": 1,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -713,6 +873,13 @@
       },
       {
         "week": 2,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 3,
         "team": "오늘밤 샴페인",
         "games": 6,
         "goals": 0,
@@ -733,44 +900,108 @@
     ]
   },
   {
-    "id": "85804296",
-    "name": "김하주",
-    "avatar_initials": "하주",
-    "current_team": "이지선다",
-    "team_history": [],
+    "id": "88c25e9d",
+    "name": "홍지환",
+    "avatar_initials": "지환",
+    "current_team": "오늘밤 샴페인",
+    "team_history": [
+      {
+        "team": "문전박대",
+        "from_week": 1,
+        "to_week": 2
+      }
+    ],
     "season_totals": {
-      "goals": 2,
-      "assists": 1,
-      "attacking_points": 3,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "goals": 13,
+      "assists": 3,
+      "attacking_points": 16,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
         "week": 1,
-        "team": "이지선다",
+        "team": "문전박대",
         "games": 6,
-        "goals": 1,
+        "goals": 4,
         "assists": 1
       },
       {
         "week": 2,
-        "team": "이지선다",
+        "team": "문전박대",
         "games": 6,
-        "goals": 1,
+        "goals": 2,
+        "assists": 2
+      },
+      {
+        "week": 3,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 7,
         "assists": 0
       }
     ],
     "personal_best_week": {
-      "week": 1,
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2
+      "week": 3,
+      "goals": 7,
+      "assists": 0,
+      "attacking_points": 7
     },
-    "play_style_tag": "All-Rounder",
+    "play_style_tag": "Finisher",
     "badges": [
       "first_goal",
       "first_assist",
+      "brace",
+      "hat_trick",
+      "perfect_attendance",
+      "week1_starter"
+    ]
+  },
+  {
+    "id": "dfe0850f",
+    "name": "박경태",
+    "avatar_initials": "경태",
+    "current_team": "이지선다",
+    "team_history": [
+      {
+        "team": "오늘밤 샴페인",
+        "from_week": 1,
+        "to_week": 2
+      }
+    ],
+    "season_totals": {
+      "goals": 0,
+      "assists": 0,
+      "attacking_points": 0,
+      "weeks_attended": 3,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 1,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 2,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 3,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      }
+    ],
+    "personal_best_week": null,
+    "play_style_tag": "Iron Man",
+    "badges": [
       "perfect_attendance",
       "week1_starter"
     ]
@@ -783,10 +1014,10 @@
     "team_history": [],
     "season_totals": {
       "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "assists": 1,
+      "attacking_points": 1,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -802,11 +1033,24 @@
         "games": 6,
         "goals": 0,
         "assists": 0
+      },
+      {
+        "week": 3,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 0,
+        "assists": 1
       }
     ],
-    "personal_best_week": null,
-    "play_style_tag": "Iron Man",
+    "personal_best_week": {
+      "week": 3,
+      "goals": 0,
+      "assists": 1,
+      "attacking_points": 1
+    },
+    "play_style_tag": "Playmaker",
     "badges": [
+      "first_assist",
       "perfect_attendance",
       "week1_starter"
     ]
@@ -822,7 +1066,7 @@
       "assists": 2,
       "attacking_points": 2,
       "weeks_attended": 1,
-      "weeks_played": 2
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -838,6 +1082,13 @@
         "games": 6,
         "goals": 0,
         "assists": 2
+      },
+      {
+        "week": 3,
+        "team": "이지선다",
+        "games": 0,
+        "goals": 0,
+        "assists": 0
       }
     ],
     "personal_best_week": {
@@ -859,11 +1110,11 @@
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
-      "goals": 3,
+      "goals": 5,
       "assists": 3,
-      "attacking_points": 6,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "attacking_points": 8,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -879,6 +1130,13 @@
         "games": 6,
         "goals": 0,
         "assists": 1
+      },
+      {
+        "week": 3,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 2,
+        "assists": 0
       }
     ],
     "personal_best_week": {
@@ -887,7 +1145,7 @@
       "assists": 2,
       "attacking_points": 5
     },
-    "play_style_tag": "Playmaker",
+    "play_style_tag": "Finisher",
     "badges": [
       "first_goal",
       "first_assist",
@@ -904,11 +1162,11 @@
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
-      "goals": 8,
-      "assists": 3,
-      "attacking_points": 11,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "goals": 11,
+      "assists": 4,
+      "attacking_points": 15,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -923,6 +1181,13 @@
         "team": "이지선다",
         "games": 6,
         "goals": 6,
+        "assists": 1
+      },
+      {
+        "week": 3,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 3,
         "assists": 1
       }
     ],
@@ -949,11 +1214,11 @@
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
-      "goals": 0,
+      "goals": 1,
       "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "attacking_points": 1,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -969,11 +1234,24 @@
         "games": 6,
         "goals": 0,
         "assists": 0
+      },
+      {
+        "week": 3,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 1,
+        "assists": 0
       }
     ],
-    "personal_best_week": null,
+    "personal_best_week": {
+      "week": 3,
+      "goals": 1,
+      "assists": 0,
+      "attacking_points": 1
+    },
     "play_style_tag": "Iron Man",
     "badges": [
+      "first_goal",
       "perfect_attendance",
       "week1_starter"
     ]
@@ -989,7 +1267,7 @@
       "assists": 0,
       "attacking_points": 0,
       "weeks_attended": 2,
-      "weeks_played": 2
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -1008,9 +1286,8 @@
       }
     ],
     "personal_best_week": null,
-    "play_style_tag": "Iron Man",
+    "play_style_tag": "Team Player",
     "badges": [
-      "perfect_attendance",
       "week1_starter"
     ]
   },
@@ -1022,10 +1299,10 @@
     "team_history": [],
     "season_totals": {
       "goals": 0,
-      "assists": 2,
-      "attacking_points": 2,
-      "weeks_attended": 2,
-      "weeks_played": 2
+      "assists": 3,
+      "attacking_points": 3,
+      "weeks_attended": 3,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -1037,6 +1314,13 @@
       },
       {
         "week": 2,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 0,
+        "assists": 1
+      },
+      {
+        "week": 3,
         "team": "이지선다",
         "games": 6,
         "goals": 0,
@@ -1066,8 +1350,8 @@
       "goals": 0,
       "assists": 0,
       "attacking_points": 0,
-      "weeks_attended": 1,
-      "weeks_played": 2
+      "weeks_attended": 2,
+      "weeks_played": 3
     },
     "weekly_stats": [
       {
@@ -1079,6 +1363,13 @@
       },
       {
         "week": 2,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      },
+      {
+        "week": 3,
         "team": "이지선다",
         "games": 6,
         "goals": 0,

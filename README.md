@@ -82,6 +82,22 @@ where to change them for a future season):
   computed from a fixed weekly cadence — see "Updating the Season
   Schedule" below.
 
+## Player Status (`players` tab)
+
+The `status` column takes three values:
+
+- `active` — on the current roster, counts toward the League table's
+  participation rate.
+- `new` — hasn't played yet (no `player_stats` rows). Flip to `active`
+  once they have — nothing else to do, their stats already flow through
+  on their own.
+- `inactive` — **use this for someone who left mid-season.** Don't
+  delete their row or their past week's stats. Any status other than
+  `active` already excludes them from the participation-rate roster;
+  their `/players/[id]` profile page and League leaderboard row are
+  unaffected either way, since both are built from `player_stats`
+  directly and don't look at this column at all.
+
 ## Player Profiles
 
 The `/players` and `/players/[id]` pages are meant to celebrate every

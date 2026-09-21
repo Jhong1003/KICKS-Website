@@ -184,9 +184,9 @@
     "round": 1,
     "home_team": "문전박대",
     "away_team": "오늘밤 샴페인",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 0,
+    "away_score": 1,
+    "status": "completed",
     "date": "2026-09-20"
   },
   {
@@ -194,9 +194,9 @@
     "round": 1,
     "home_team": "오늘밤 샴페인",
     "away_team": "이지선다",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 2,
+    "away_score": 2,
+    "status": "completed",
     "date": "2026-09-20"
   },
   {
@@ -204,9 +204,9 @@
     "round": 1,
     "home_team": "이지선다",
     "away_team": "문전박대",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 0,
+    "away_score": 4,
+    "status": "completed",
     "date": "2026-09-20"
   },
   {
@@ -214,9 +214,9 @@
     "round": 2,
     "home_team": "문전박대",
     "away_team": "오늘밤 샴페인",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 1,
+    "away_score": 0,
+    "status": "completed",
     "date": "2026-09-20"
   },
   {
@@ -224,9 +224,9 @@
     "round": 2,
     "home_team": "오늘밤 샴페인",
     "away_team": "이지선다",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 2,
+    "away_score": 1,
+    "status": "completed",
     "date": "2026-09-20"
   },
   {
@@ -234,9 +234,9 @@
     "round": 2,
     "home_team": "이지선다",
     "away_team": "문전박대",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 0,
+    "away_score": 0,
+    "status": "completed",
     "date": "2026-09-20"
   },
   {
@@ -244,9 +244,9 @@
     "round": 3,
     "home_team": "문전박대",
     "away_team": "오늘밤 샴페인",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 2,
+    "away_score": 2,
+    "status": "completed",
     "date": "2026-09-20"
   },
   {
@@ -254,9 +254,9 @@
     "round": 3,
     "home_team": "오늘밤 샴페인",
     "away_team": "이지선다",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 2,
+    "away_score": 1,
+    "status": "completed",
     "date": "2026-09-20"
   },
   {
@@ -264,9 +264,9 @@
     "round": 3,
     "home_team": "이지선다",
     "away_team": "문전박대",
-    "home_score": null,
-    "away_score": null,
-    "status": "scheduled",
+    "home_score": 2,
+    "away_score": 2,
+    "status": "completed",
     "date": "2026-09-20"
   }
 ]

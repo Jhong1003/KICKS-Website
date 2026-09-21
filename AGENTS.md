@@ -141,6 +141,43 @@ future season.
   rhythm. Add/edit `{"type": "league", "week": N, "date": "..."}` entries
   there at the start of a new season or whenever the calendar changes.
 
+### Player status
+
+The `players` tab's `status` column has three values:
+
+- **`active`** — on the current active roster. Counts toward
+  [League rules](#league-rules)' participation-rate roster (both the
+  roster-size denominator and the "games played by the roster"
+  numerator) via `active_roster` in `main()`.
+- **`new`** — hasn't recorded any `player_stats` rows yet (no team,
+  usually). Excluded from the active roster the same way `inactive` is;
+  the only difference is what it communicates to a human reading the
+  sheet. Once they've played and have a `team`, flip this to `active` —
+  nothing else needs to change, their `player_stats` rows already exist
+  and drive their profile/leaderboard entry regardless of this column.
+- **`inactive`** — a player who has left partway through the season.
+  **Don't delete their `players` row or their past `player_stats`
+  rows.** Just change `status` to `inactive`; any value other than
+  `active` already excludes someone from the participation-rate roster
+  (the code only checks `status == "active"`), so `inactive` isn't
+  special-cased, it's just the clear, human-readable choice.
+
+What staying off the active roster does *not* affect: `player_profiles.json`
+and `player_leaderboard.json` are both built straight from `player_stats`
+(see [Player profiles](#player-profiles) below), with no roster-status
+filter at all — an inactive player keeps their profile page, leaderboard
+row, and every stat/badge they earned while they were playing. Only the
+League table's participation-rate tiebreaker (and, by extension, the
+active roster used for the OTHER participation-rate factor, "games the
+team played") reads this column.
+
+One subtlety worth knowing if you're changing `_participation_rates`
+again: "games the team played" (the session-size half of the
+denominator) is computed from *every* `player_stats` row, not just the
+active roster, specifically so that a departing player doesn't
+retroactively shrink a past week's session size just because they're no
+longer active today — see that function's docstring.
+
 ### Player profiles
 
 The `/players` grid and `/players/[id]` detail pages are a celebration of
