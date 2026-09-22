@@ -1280,6 +1280,34 @@
     ]
   },
   {
+    "id": "86b16786",
+    "name": "정경섭",
+    "avatar_initials": "경섭",
+    "current_team": "이지선다",
+    "team_history": [],
+    "season_totals": {
+      "goals": 0,
+      "assists": 0,
+      "attacking_points": 0,
+      "weeks_attended": 1,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 3,
+        "team": "이지선다",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      }
+    ],
+    "personal_best_week": null,
+    "play_style_tag": "Team Player",
+    "badges": [
+      "rookie"
+    ]
+  },
+  {
     "id": "f0c6f90d",
     "name": "조우진",
     "avatar_initials": "우진",
