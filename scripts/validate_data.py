@@ -1,0 +1,270 @@
+"""Validate the club's Google Sheet before scripts/update_data.py turns it
+into the site's JSON. Every rule here is documented in README.md's
+"자동 업데이트 (GitHub Actions)" section — keep both in sync if you change
+a rule.
+
+Run manually:
+
+    python scripts/validate_data.py
+
+Exit code 0 means no errors (warnings, if any, are still printed but don't
+fail the run). Exit code 1 means at least one error was found — in the
+GitHub Actions workflow this stops the run before update_data.py touches
+anything, so nothing bad ever gets committed.
+
+Strictness: a week's matches are often entered before that week is fully
+played, so a mismatch caused purely by an incomplete week isn't a real
+error. When this runs from a GitHub Actions `schedule` trigger, that kind
+of mismatch is logged and skipped instead of failing the run. Any other
+trigger (workflow_dispatch, or running this locally) checks every week
+as-is, including incomplete ones — override either way with
+VALIDATE_STRICT=1 or VALIDATE_STRICT=0.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from update_data import GAMES_PER_WEEK, load_sheets  # noqa: E402 (needs sys.path set first)
+
+# ---------------------------------------------------------------------------
+# Config — the rules themselves live in the check_* functions below; these
+# are just the constants they check against.
+# ---------------------------------------------------------------------------
+
+VALID_TEAMS = {"이지선다", "문전박대", "오늘밤 샴페인"}
+MATCHES_PER_WEEK = 9  # 3 teams round-robin, 3 rounds/week -> 9 matches
+
+CheckResult = tuple[list[str], list[str]]  # (errors, warnings)
+
+
+def _is_strict() -> bool:
+    override = os.environ.get("VALIDATE_STRICT")
+    if override is not None:
+        return override not in ("0", "false", "False", "")
+    # GitHub sets GITHUB_EVENT_NAME automatically; anything other than a
+    # scheduled run (workflow_dispatch, or no value at all when run locally)
+    # is treated as strict.
+    return os.environ.get("GITHUB_EVENT_NAME") != "schedule"
+
+
+def _sheet_row(index: int) -> int:
+    """Turn a pandas row index into an approximate sheet row number (the
+    header is row 1, so data starts at row 2). Approximate because a
+    published CSV export doesn't carry the sheet's real row numbers if
+    rows were ever reordered — good enough to find the row quickly."""
+    return index + 2
+
+
+# ---------------------------------------------------------------------------
+# Individual rules
+# ---------------------------------------------------------------------------
+
+
+def check_team_names(matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame) -> CheckResult:
+    """Rule: every team name must be exactly one of the 3 canonical names
+    (spacing included) — catches typos that would silently create a 4th
+    team bucket somewhere in the pipeline."""
+    errors = []
+    for label, df, cols in [
+        ("matches", matches, ["home_team", "away_team"]),
+        ("player_stats", player_stats, ["team"]),
+        ("players", players, ["team"]),
+    ]:
+        for col in cols:
+            for idx, value in df[col].items():
+                if pd.isna(value):
+                    continue  # e.g. a "new" status player with no team yet
+                if value not in VALID_TEAMS:
+                    errors.append(
+                        f"{label} {_sheet_row(idx)}행: {col} 값 '{value}' — 허용된 팀명이 아닙니다 "
+                        f"(허용: {', '.join(sorted(VALID_TEAMS))})"
+                    )
+    return errors, []
+
+
+def check_games_values(player_stats: pd.DataFrame) -> CheckResult:
+    """Rule: games must be within 0..GAMES_PER_WEEK. Exactly 0 or
+    GAMES_PER_WEEK is the normal case (absent all week / present all
+    week); anything else in between is unusual but not necessarily wrong
+    (partial attendance), so it's a warning, not an error."""
+    errors, warnings = [], []
+    for idx, row in player_stats.iterrows():
+        games = row["games"]
+        if pd.isna(games):
+            continue
+        where = f"player_stats {_sheet_row(idx)}행 ({row['week']}주차, {row['player']})"
+        if games < 0 or games > GAMES_PER_WEEK:
+            errors.append(f"{where}: games 값이 {games} — 0~{GAMES_PER_WEEK} 범위를 벗어났습니다")
+        elif games not in (0, GAMES_PER_WEEK):
+            warnings.append(
+                f"{where}: games 값이 {games} — 보통 0 또는 {GAMES_PER_WEEK}인데 다른 값입니다 "
+                "(오류는 아니니 확인만 해주세요)"
+            )
+    return errors, warnings
+
+
+def check_player_names_known(player_stats: pd.DataFrame, players: pd.DataFrame) -> CheckResult:
+    """Rule: every name in player_stats must exist in the players tab.
+    (The reverse isn't checked — a "new" status player with no games yet
+    is normal.)"""
+    errors = []
+    known = set(players["player"])
+    for idx, row in player_stats.iterrows():
+        if row["player"] not in known:
+            errors.append(f"player_stats {_sheet_row(idx)}행: '{row['player']}'은(는) players 탭에 없는 이름입니다")
+    return errors, []
+
+
+def check_scores_valid(matches: pd.DataFrame) -> CheckResult:
+    """Rule: a filled-in score must be a non-negative integer. A blank
+    score means the match hasn't been played yet and is out of scope for
+    this check entirely (not an error)."""
+    errors = []
+    for idx, row in matches.iterrows():
+        for col in ("home_score", "away_score"):
+            value = row[col]
+            if pd.isna(value):
+                continue
+            if value < 0 or value != int(value):
+                errors.append(
+                    f"matches {_sheet_row(idx)}행 ({row['week']}주차): {col} 값이 {value} — "
+                    "0 이상의 정수여야 합니다"
+                )
+    return errors, []
+
+
+def check_matches_per_week(matches: pd.DataFrame) -> CheckResult:
+    """Rule: every week must have exactly MATCHES_PER_WEEK rows, regardless
+    of whether scores are filled in yet — this is a row-count/structure
+    check, not a "did they play" check."""
+    errors = []
+    for week, count in matches.groupby("week").size().items():
+        if count != MATCHES_PER_WEEK:
+            errors.append(f"matches: {week}주차 행이 {count}개 — {MATCHES_PER_WEEK}개여야 합니다")
+    return errors, []
+
+
+def check_team_goal_sums(matches: pd.DataFrame, player_stats: pd.DataFrame, strict: bool) -> CheckResult:
+    """Rule: for each (week, team), the team's total goals from the match
+    results must equal the sum of that team's players' goals in
+    player_stats.
+
+    A team whose matches for that week aren't all scored yet is
+    "incomplete" - the two sheets are expected to disagree until the week
+    is finished. In non-strict (scheduled) runs that's just a skipped,
+    logged note; in strict runs it's still checked, and a mismatch is
+    still reported as an error (with a note that it may just be an
+    incomplete week) since the point of a manual/strict run is to
+    surface exactly that kind of thing for a human to look at.
+
+    An own goal is also a legitimate reason for a mismatch even in a
+    fully-played week: it counts toward the *scoring* team's match score,
+    but there's no "own goal" field in player_stats to attribute it to
+    any player - see the error message.
+    """
+    errors, warnings = [], []
+
+    played = matches.dropna(subset=["home_score", "away_score"])
+    home = played.rename(columns={"home_team": "team", "home_score": "goals"})[["week", "team", "goals"]]
+    away = played.rename(columns={"away_team": "team", "away_score": "goals"})[["week", "team", "goals"]]
+    match_goals = pd.concat([home, away]).groupby(["week", "team"])["goals"].sum()
+
+    player_goals = player_stats.fillna({"goals": 0}).groupby(["week", "team"])["goals"].sum()
+
+    weeks = sorted(set(matches["week"].unique()) | set(player_stats["week"].unique()))
+    for week in weeks:
+        week_matches = matches[matches["week"] == week]
+        for team in VALID_TEAMS:
+            team_matches = week_matches[(week_matches["home_team"] == team) | (week_matches["away_team"] == team)]
+            if team_matches.empty:
+                continue
+
+            is_complete = not team_matches[["home_score", "away_score"]].isna().any().any()
+            if not is_complete and not strict:
+                warnings.append(f"{week}주차 {team}: 아직 경기 결과가 다 채워지지 않아 골 합계 검증을 건너뜁니다")
+                continue
+
+            m_goals = int(match_goals.get((week, team), 0))
+            p_goals = int(player_goals.get((week, team), 0))
+            if m_goals != p_goals:
+                incomplete_note = " (이 주차는 아직 경기 결과가 다 채워지지 않았습니다 — 그래서일 수도 있습니다)"
+                errors.append(
+                    f"{week}주차 {team}: 경기 기록 득점 합({m_goals}) ≠ 선수 기록 골 합({p_goals})"
+                    f"{incomplete_note if not is_complete else ''} — 자책골이 있었다면 정상적으로 날 수 있는 "
+                    "차이입니다 (자책골은 상대팀 득점으로 잡히지만 어느 선수의 개인 기록에도 반영되지 않기 "
+                    "때문입니다). 자책골이 없었는데도 이 오류가 떴다면 실제 입력 오류일 가능성이 높습니다."
+                )
+    return errors, warnings
+
+
+def check_active_players_have_finished_weeks(
+    matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame
+) -> CheckResult:
+    """Warning only: an active-status player with no player_stats row at
+    all for a week that's already fully played might mean the sheet
+    entry was missed, or that the player quietly stopped coming without
+    their status being updated to "inactive" (see AGENTS.md's "Player
+    status" section) - either way, worth a human glancing at it."""
+    warnings = []
+    finished_weeks = [
+        week
+        for week, group in matches.groupby("week")
+        if not group[["home_score", "away_score"]].isna().any().any()
+    ]
+    have_row = set(zip(player_stats["player"], player_stats["week"]))
+    active_players = players[players["status"] == "active"]["player"]
+    for player in active_players:
+        for week in finished_weeks:
+            if (player, week) not in have_row:
+                warnings.append(f"{player} (active 상태): {week}주차가 끝났는데 player_stats에 기록이 없습니다")
+    return [], warnings
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+
+def main() -> None:
+    sheets = load_sheets()
+    matches, player_stats, players = sheets["matches"], sheets["player_stats"], sheets["players"]
+    strict = _is_strict()
+
+    print(f"검증 모드: {'엄격 (수동 실행/로컬)' if strict else '완화 (자동 스케줄 실행)'}\n")
+
+    checks: list[CheckResult] = [
+        check_team_names(matches, player_stats, players),
+        check_games_values(player_stats),
+        check_player_names_known(player_stats, players),
+        check_scores_valid(matches),
+        check_matches_per_week(matches),
+        check_team_goal_sums(matches, player_stats, strict),
+        check_active_players_have_finished_weeks(matches, player_stats, players),
+    ]
+
+    all_errors = [message for errors, _ in checks for message in errors]
+    all_warnings = [message for _, warnings in checks for message in warnings]
+
+    if all_warnings:
+        print(f"⚠️  경고 {len(all_warnings)}건 (실패 처리는 안 됨):")
+        for message in all_warnings:
+            print(f"  - {message}")
+        print()
+
+    if all_errors:
+        print(f"❌ 오류 {len(all_errors)}건 — 시트를 수정한 뒤 다시 실행해주세요:")
+        for message in all_errors:
+            print(f"  - {message}")
+        sys.exit(1)
+
+    print("✅ 검증 통과 — 오류 없음.")
+
+
+if __name__ == "__main__":
+    main()

@@ -47,8 +47,13 @@ site reads.
   profiles" below).
 - [scripts/update_data.py](scripts/update_data.py) — Google Sheets → JSON
   pipeline.
+- [scripts/validate_data.py](scripts/validate_data.py) — sanity-checks the
+  Sheet before `update_data.py` runs; see "Automated updates" below.
 - [scripts/manage_full_matches.mjs](scripts/manage_full_matches.mjs) —
   encrypt/decrypt tool for the Full Matches video list.
+- [.github/workflows/update-data.yml](.github/workflows/update-data.yml) —
+  runs the two scripts above on a schedule (or on demand) and pushes the
+  regenerated JSON if it changed.
 - [public/](public/) — static assets served as-is (favicon, logos, partner
   logos).
 
@@ -109,8 +114,42 @@ stats, roster changes), regenerate the JSON:
 python scripts/update_data.py
 ```
 
-Then restart/refresh the dev server (or rebuild) to see the changes — this
-is a manual step, there's no automatic sync.
+Then restart/refresh the dev server (or rebuild) to see the changes. This
+also happens automatically — see "Automated updates" next — but running it
+locally is still useful to preview a change or debug something.
+
+### Automated updates
+
+[.github/workflows/update-data.yml](.github/workflows/update-data.yml) runs
+the whole pipeline unattended: validate → regenerate → commit-and-push only
+if the JSON actually changed. Cloudflare deploys on that push, so a Sheet
+edit alone is enough to update the live site.
+
+- **Triggers**: `schedule` (3x/day baseline, plus every 30 min from Sunday
+  9pm to Monday 3am Central — see the cron comments in the workflow file
+  for the UTC math) and `workflow_dispatch` (manual run from the Actions
+  tab or GitHub mobile app). Cron is UTC-only and doesn't observe DST, so
+  the local times drift ±1 hour twice a year — accepted rather than
+  worked around.
+- **Validation gate**: [scripts/validate_data.py](scripts/validate_data.py)
+  runs *before* `update_data.py`. Any error fails that step, which stops
+  the job before anything is regenerated or committed — bad Sheet data
+  never reaches the site. Full rule list and rationale in README.md's
+  "자동 업데이트 (GitHub Actions)" section (keep both in sync if a rule
+  changes).
+- **Strictness depends on the trigger**: a `schedule` run treats an
+  incomplete week (some of a team's matches for that week still unscored)
+  as expected mid-entry, and skips just that week's goal-sum cross-check
+  with a logged note instead of failing. `workflow_dispatch` (and running
+  the script locally) checks every week as-is, incomplete or not — the
+  `_is_strict()` helper reads `GITHUB_EVENT_NAME`, overridable with
+  `VALIDATE_STRICT=1`/`0`.
+- **One-time repo setting required**: Settings → Actions → General →
+  Workflow permissions must be "Read and write permissions", or the
+  commit step's push is rejected. Also check `main` isn't branch-protected
+  in a way that blocks `github-actions[bot]`.
+- Needs no secrets — the Sheet is read via the same public "publish to
+  web" CSV links `update_data.py` already uses.
 
 ### League rules
 

@@ -59,8 +59,12 @@ stats, roster changes), regenerate the JSON files:
 python scripts/update_data.py
 ```
 
-Then restart/refresh the dev server (or rebuild) to see the changes. This is a
-manual step for now — there's no automatic sync set up yet.
+Then restart/refresh the dev server (or rebuild) to see the changes.
+
+This also runs automatically on a schedule and pushes the result straight to
+`main` — see "자동 업데이트 (GitHub Actions)" below. Running it locally is
+still useful for previewing changes before they'd go live, or for
+troubleshooting.
 
 **Scoring/ranking rules** (implemented in `scripts/update_data.py`, so this is
 where to change them for a future season):
@@ -81,6 +85,62 @@ where to change them for a future season):
 - Match week dates are looked up from `src/data/schedule.json`, not
   computed from a fixed weekly cadence — see "Updating the Season
   Schedule" below.
+
+## 자동 업데이트 (GitHub Actions)
+
+`.github/workflows/update-data.yml`이 구글 시트 → JSON 파이프라인을
+자동으로 돌립니다: 시트 입력만 해두면, 검증 → `update_data.py` 재생성 →
+(값이 바뀌었을 때만) `main`에 커밋·푸시까지 자동으로 됩니다. Cloudflare가
+그 푸시를 보고 알아서 재배포합니다.
+
+**실행 시간표** (전부 UTC 기준 cron이라 서머타임을 못 따라가서, 연 2회
+±1시간 밀리는 건 감수합니다):
+
+| 용도 | Cron (UTC) | 대략 현지시각(CDT) |
+|---|---|---|
+| 평상시 매일 3회 | `0 13,19,1 * * *` | 오전 8시 / 오후 2시 / 오후 8시 |
+| 일요일 경기 집중 (30분마다) | `*/30 2-8 * * 1` | 일요일 밤 9시 ~ 월요일 새벽 3시 |
+
+**수동 실행**: GitHub 저장소 → Actions 탭 → "Update League Data" →
+"Run workflow" 버튼. (모바일 GitHub 앱에서도 동일하게 가능합니다.)
+
+**검증 (`scripts/validate_data.py`)**: `update_data.py`를 돌리기 *전에*
+먼저 시트를 검사합니다. 오류가 하나라도 있으면 그 자리에서 실패 처리되고
+이후 단계(재생성·커밋)는 아예 실행되지 않습니다 — 잘못된 데이터가
+사이트에 올라가는 일은 없습니다. 실패하면 GitHub이 저장소 관리자에게
+자동으로 이메일을 보냅니다.
+
+| 규칙 | 오류/경고 | 설명 |
+|---|---|---|
+| 팀 이름이 정해진 3팀인지 | 오류 | `matches`/`player_stats`/`players` 전체에서, 띄어쓰기까지 정확히 일치해야 함 |
+| 선수 이름 일치 | 오류 | `player_stats`의 모든 이름이 `players` 탭에 있어야 함 (역방향은 검사 안 함 — 아직 기록 없는 신규 멤버는 정상) |
+| 점수는 0 이상 정수 | 오류 | 빈 점수(아직 안 한 경기)는 검사 대상에서 제외 |
+| 주차별 경기 수 9개 | 오류 | 3팀 라운드로빈 × 3라운드 |
+| 팀별 주차 득점 합 일치 | 오류 | 경기 기록 득점 합 = 그 팀 선수 골 합. 자책골이 있으면 정상적으로 차이 날 수 있음 (오류 메시지에 안내). 자동 실행 중 아직 다 안 끝난 주차는 실패 대신 로그만 남기고 건너뜀 — 수동 실행/로컬에서는 건너뛰지 않고 그대로 검사 |
+| games 값 | 경고 | 0 또는 6이 정상, 그 사이 값은 오류는 아니고 경고만 |
+| active인데 기록 누락 | 경고 | 끝난 주차에 active 선수의 player_stats 행이 없으면 경고 (players 탭 상태값은 "Player Status" 섹션 참고) |
+
+로컬에서 직접 확인하고 싶으면:
+
+```sh
+python scripts/validate_data.py
+```
+
+기본은 "엄격" 모드(수동 실행과 동일)로 검사합니다 — `VALIDATE_STRICT=0`
+환경변수로 완화 모드(자동 스케줄 실행과 동일)를 흉내낼 수 있습니다.
+
+**한 번만 해두면 되는 저장소 설정**: 이 워크플로가 커밋·푸시하려면
+저장소의 Actions 권한이 "Read and write"로 되어 있어야 합니다 (기본값은
+읽기 전용이라 안 바꾸면 푸시가 거부됩니다):
+
+1. GitHub 저장소 페이지 → **Settings** 탭
+2. 왼쪽 메뉴에서 **Actions** → **General**
+3. 아래로 스크롤해서 **Workflow permissions** 섹션
+4. **Read and write permissions** 선택
+5. **Save**
+
+`main` 브랜치에 브랜치 보호 규칙이 걸려 있다면, 그 규칙이 `github-actions[bot]`의
+푸시도 막을 수 있으니 함께 확인해주세요.
 
 ## Player Status (`players` tab)
 

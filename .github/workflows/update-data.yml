@@ -1,0 +1,60 @@
+name: Update League Data
+
+# Keeps src/data/*.json in sync with the club's Google Sheet automatically.
+# See README.md's "자동 업데이트 (GitHub Actions)" section for the full
+# writeup (schedule in local time, validation rules, how to run manually).
+
+on:
+  schedule:
+    # All times UTC — cron can't follow daylight saving time, so these
+    # drift by an hour against Central time twice a year. Comments below
+    # assume CDT (UTC-5, roughly March-November).
+    - cron: "0 13,19,1 * * *" # daily baseline: ~8am / 2pm / 8pm Central
+    - cron: "*/30 2-8 * * 1" # Sunday 9pm - Monday 3am Central, every 30 min
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+# Don't let two runs race each other's commit/push.
+concurrency:
+  group: update-league-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate Google Sheet data
+        run: python scripts/validate_data.py
+
+      - name: Regenerate JSON from the Sheet
+        run: python scripts/update_data.py
+
+      - name: Commit and push if the data changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            src/data/league_table.json \
+            src/data/matches.json \
+            src/data/week_summaries.json \
+            src/data/player_leaderboard.json \
+            src/data/player_profiles.json
+          if git diff --cached --quiet; then
+            echo "No data changes — nothing to commit."
+          else
+            git commit -m "Auto-update league data from Google Sheet"
+            git push
+          fi
