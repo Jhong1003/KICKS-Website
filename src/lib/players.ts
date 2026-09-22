@@ -44,6 +44,7 @@ export type BadgeKey =
 	| "perfect_attendance"
 	| "week1_starter"
 	| "rookie"
+	| "own_goal_award"
 	| "squad_member";
 
 export interface PlayerProfile {
@@ -78,6 +79,11 @@ export const BADGES: Record<BadgeKey, { label: string; description: string; icon
 		icon: "🚩",
 	},
 	rookie: { label: "Rookie", description: "Just joined the squad this season.", icon: "🌱" },
+	own_goal_award: {
+		label: "Own Goal Award",
+		description: "Generously contributed a goal to the other team's tally. It happens to the best of us!",
+		icon: "🪃",
+	},
 	squad_member: { label: "Squad Member", description: "A valued part of the KICKS roster.", icon: "🤝" },
 };
 

@@ -83,7 +83,18 @@ def _week_date(week: int) -> str:
 
 def load_sheets() -> dict[str, pd.DataFrame]:
     """Download the three published sheet tabs as DataFrames."""
-    return {name: pd.read_csv(url) for name, url in SHEET_URLS.items()}
+    sheets = {name: pd.read_csv(url) for name, url in SHEET_URLS.items()}
+
+    # own_goals is a newer player_stats column (blank/absent means 0) -
+    # default it in here, once, so every caller (this script and
+    # validate_data.py) can just assume the column exists.
+    player_stats = sheets["player_stats"]
+    if "own_goals" not in player_stats.columns:
+        player_stats["own_goals"] = 0
+    else:
+        player_stats["own_goals"] = player_stats["own_goals"].fillna(0)
+
+    return sheets
 
 
 # ---------------------------------------------------------------------------
@@ -317,6 +328,7 @@ IRON_MAN_MIN_WEEKS_PLAYED = 2  # need a couple of weeks on record before attenda
 # --- Badge thresholds ------------------------------------------------------
 BRACE_GOALS = 2  # 2+ goals in a single week
 HAT_TRICK_GOALS = 3  # 3+ goals in a single week (also counts as a Brace)
+OWN_GOAL_AWARD_MIN = 1  # 1+ own goal this season
 
 
 def _avatar_initials(name: str) -> str:
@@ -378,7 +390,9 @@ def _play_style_tag(goals: int, assists: int, weeks_attended: int, weeks_played:
     return "Team Player"
 
 
-def _badges(rows: pd.DataFrame, goals: int, assists: int, weeks_attended: int, weeks_played: int) -> list[str]:
+def _badges(
+    rows: pd.DataFrame, goals: int, assists: int, own_goals: int, weeks_attended: int, weeks_played: int
+) -> list[str]:
     """Every achievement badge a player has earned (a player can have many).
 
     Badge keys are looked up for their label/description/icon in
@@ -407,6 +421,10 @@ def _badges(rows: pd.DataFrame, goals: int, assists: int, weeks_attended: int, w
     # moved past week 1 - otherwise everyone would be a "Rookie".
     if weeks_played > 1 and first_week == weeks_played:
         badges.append("rookie")
+    # A fun one, not a real "achievement" — the club tracks an own-goal
+    # award, so this celebrates it rather than hiding it.
+    if own_goals >= OWN_GOAL_AWARD_MIN:
+        badges.append("own_goal_award")
     if not badges:
         badges.append("squad_member")
     return badges
@@ -420,13 +438,14 @@ def build_player_profiles(player_stats: pd.DataFrame) -> list[dict]:
     get one automatically once their first week of stats is entered.
     """
     weeks_played = int(player_stats["week"].nunique())
-    player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0})
+    player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0, "own_goals": 0})
 
     profiles = []
     for name, rows in player_stats.groupby("player"):
         rows = rows.sort_values("week")
         goals = int(rows["goals"].sum())
         assists = int(rows["assists"].sum())
+        own_goals = int(rows["own_goals"].sum())
         weeks_attended = int((rows["games"].sum()) / GAMES_PER_WEEK)
 
         segments = _team_segments(rows)
@@ -457,7 +476,7 @@ def build_player_profiles(player_stats: pd.DataFrame) -> list[dict]:
                 ],
                 "personal_best_week": _personal_best_week(rows),
                 "play_style_tag": _play_style_tag(goals, assists, weeks_attended, weeks_played),
-                "badges": _badges(rows, goals, assists, weeks_attended, weeks_played),
+                "badges": _badges(rows, goals, assists, own_goals, weeks_attended, weeks_played),
             }
         )
 

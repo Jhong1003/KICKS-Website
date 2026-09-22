@@ -210,17 +210,6 @@
   },
   {
     "rank": 20,
-    "player": "최민석",
-    "goals": 1,
-    "assists": 0,
-    "team": "오늘밤 샴페인",
-    "attacking_points": 1,
-    "weeks_attended": 3,
-    "weeks_played": 3,
-    "id": "e3e80231"
-  },
-  {
-    "rank": 21,
     "player": "김민서",
     "goals": 1,
     "assists": 0,
@@ -231,7 +220,7 @@
     "id": "02c74af3"
   },
   {
-    "rank": 22,
+    "rank": 21,
     "player": "배성민",
     "goals": 0,
     "assists": 1,
@@ -242,7 +231,7 @@
     "id": "2619e3b6"
   },
   {
-    "rank": 23,
+    "rank": 22,
     "player": "서지현",
     "goals": 0,
     "assists": 1,
@@ -253,7 +242,7 @@
     "id": "66ec6daf"
   },
   {
-    "rank": 24,
+    "rank": 23,
     "player": "문재홍",
     "goals": 0,
     "assists": 0,
@@ -264,7 +253,7 @@
     "id": "e1f2e6b2"
   },
   {
-    "rank": 25,
+    "rank": 24,
     "player": "박경태",
     "goals": 0,
     "assists": 0,
@@ -275,7 +264,7 @@
     "id": "dfe0850f"
   },
   {
-    "rank": 26,
+    "rank": 25,
     "player": "이지수",
     "goals": 0,
     "assists": 0,
@@ -284,6 +273,17 @@
     "weeks_attended": 3,
     "weeks_played": 3,
     "id": "f591da0a"
+  },
+  {
+    "rank": 26,
+    "player": "최민석",
+    "goals": 0,
+    "assists": 0,
+    "team": "오늘밤 샴페인",
+    "attacking_points": 0,
+    "weeks_attended": 3,
+    "weeks_played": 3,
+    "id": "e3e80231"
   },
   {
     "rank": 27,
@@ -317,5 +317,16 @@
     "weeks_attended": 2,
     "weeks_played": 3,
     "id": "bb68b4a4"
+  },
+  {
+    "rank": 30,
+    "player": "진홍주",
+    "goals": 0,
+    "assists": 0,
+    "team": "오늘밤 샴페인",
+    "attacking_points": 0,
+    "weeks_attended": 1,
+    "weeks_played": 3,
+    "id": "37bdae54"
   }
 ]

@@ -816,6 +816,34 @@
     ]
   },
   {
+    "id": "37bdae54",
+    "name": "진홍주",
+    "avatar_initials": "홍주",
+    "current_team": "오늘밤 샴페인",
+    "team_history": [],
+    "season_totals": {
+      "goals": 0,
+      "assists": 0,
+      "attacking_points": 0,
+      "weeks_attended": 1,
+      "weeks_played": 3
+    },
+    "weekly_stats": [
+      {
+        "week": 3,
+        "team": "오늘밤 샴페인",
+        "games": 6,
+        "goals": 0,
+        "assists": 0
+      }
+    ],
+    "personal_best_week": null,
+    "play_style_tag": "Team Player",
+    "badges": [
+      "rookie"
+    ]
+  },
+  {
     "id": "43adbf2e",
     "name": "최건",
     "avatar_initials": "최건",
@@ -857,9 +885,9 @@
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
-      "goals": 1,
+      "goals": 0,
       "assists": 0,
-      "attacking_points": 1,
+      "attacking_points": 0,
       "weeks_attended": 3,
       "weeks_played": 3
     },
@@ -868,7 +896,7 @@
         "week": 1,
         "team": "오늘밤 샴페인",
         "games": 6,
-        "goals": 1,
+        "goals": 0,
         "assists": 0
       },
       {
@@ -886,17 +914,12 @@
         "assists": 0
       }
     ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1
-    },
+    "personal_best_week": null,
     "play_style_tag": "Iron Man",
     "badges": [
-      "first_goal",
       "perfect_attendance",
-      "week1_starter"
+      "week1_starter",
+      "own_goal_award"
     ]
   },
   {

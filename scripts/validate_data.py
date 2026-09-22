@@ -151,55 +151,56 @@ def check_matches_per_week(matches: pd.DataFrame) -> CheckResult:
 
 
 def check_team_goal_sums(matches: pd.DataFrame, player_stats: pd.DataFrame, strict: bool) -> CheckResult:
-    """Rule: for each (week, team), the team's total goals from the match
-    results must equal the sum of that team's players' goals in
-    player_stats.
+    """Rule: each week's total match goals (summed across all teams) must
+    equal that week's total player goals plus that week's total own goals.
 
-    A team whose matches for that week aren't all scored yet is
-    "incomplete" - the two sheets are expected to disagree until the week
-    is finished. In non-strict (scheduled) runs that's just a skipped,
-    logged note; in strict runs it's still checked, and a mismatch is
-    still reported as an error (with a note that it may just be an
-    incomplete week) since the point of a manual/strict run is to
+    This checks the whole week rather than one team at a time on purpose:
+    a week is a 3-team round robin (3 rounds x 3 pairings = 9 matches),
+    so any given team actually plays *both* other teams multiple times
+    that week. An own goal recorded in player_stats is a weekly total per
+    player, not tied to a specific match/round, so there's no way to tell
+    from this data alone which of a team's two opponents it should be
+    credited to - only the league-wide weekly total can be checked
+    exactly. (own_goals column: see AGENTS.md's "Player profiles" section
+    on the Own Goal Award badge.)
+
+    A week whose matches aren't all scored yet is "incomplete" - the two
+    sheets are expected to disagree until it's finished. In non-strict
+    (scheduled) runs that's just a skipped, logged note; strict runs
+    (workflow_dispatch or local) check it anyway and report a mismatch as
+    an error regardless, since the point of a manual/strict run is to
     surface exactly that kind of thing for a human to look at.
-
-    An own goal is also a legitimate reason for a mismatch even in a
-    fully-played week: it counts toward the *scoring* team's match score,
-    but there's no "own goal" field in player_stats to attribute it to
-    any player - see the error message.
     """
     errors, warnings = [], []
 
     played = matches.dropna(subset=["home_score", "away_score"])
-    home = played.rename(columns={"home_team": "team", "home_score": "goals"})[["week", "team", "goals"]]
-    away = played.rename(columns={"away_team": "team", "away_score": "goals"})[["week", "team", "goals"]]
-    match_goals = pd.concat([home, away]).groupby(["week", "team"])["goals"].sum()
+    home = played[["week", "home_score"]].rename(columns={"home_score": "goals"})
+    away = played[["week", "away_score"]].rename(columns={"away_score": "goals"})
+    week_match_goals = pd.concat([home, away]).groupby("week")["goals"].sum()
 
-    player_goals = player_stats.fillna({"goals": 0}).groupby(["week", "team"])["goals"].sum()
+    stats = player_stats.fillna({"goals": 0, "own_goals": 0})
+    week_player_goals = stats.groupby("week")["goals"].sum()
+    week_own_goals = stats.groupby("week")["own_goals"].sum()
 
     weeks = sorted(set(matches["week"].unique()) | set(player_stats["week"].unique()))
     for week in weeks:
         week_matches = matches[matches["week"] == week]
-        for team in VALID_TEAMS:
-            team_matches = week_matches[(week_matches["home_team"] == team) | (week_matches["away_team"] == team)]
-            if team_matches.empty:
-                continue
+        is_complete = not week_matches[["home_score", "away_score"]].isna().any().any()
+        if not is_complete and not strict:
+            warnings.append(f"{week}주차: 아직 경기 결과가 다 채워지지 않아 득점 합계 검증을 건너뜁니다")
+            continue
 
-            is_complete = not team_matches[["home_score", "away_score"]].isna().any().any()
-            if not is_complete and not strict:
-                warnings.append(f"{week}주차 {team}: 아직 경기 결과가 다 채워지지 않아 골 합계 검증을 건너뜁니다")
-                continue
-
-            m_goals = int(match_goals.get((week, team), 0))
-            p_goals = int(player_goals.get((week, team), 0))
-            if m_goals != p_goals:
-                incomplete_note = " (이 주차는 아직 경기 결과가 다 채워지지 않았습니다 — 그래서일 수도 있습니다)"
-                errors.append(
-                    f"{week}주차 {team}: 경기 기록 득점 합({m_goals}) ≠ 선수 기록 골 합({p_goals})"
-                    f"{incomplete_note if not is_complete else ''} — 자책골이 있었다면 정상적으로 날 수 있는 "
-                    "차이입니다 (자책골은 상대팀 득점으로 잡히지만 어느 선수의 개인 기록에도 반영되지 않기 "
-                    "때문입니다). 자책골이 없었는데도 이 오류가 떴다면 실제 입력 오류일 가능성이 높습니다."
-                )
+        m_goals = int(week_match_goals.get(week, 0))
+        p_goals = int(week_player_goals.get(week, 0))
+        og = int(week_own_goals.get(week, 0))
+        if m_goals != p_goals + og:
+            incomplete_note = " (이 주차는 아직 경기 결과가 다 채워지지 않았습니다 — 그래서일 수도 있습니다)"
+            errors.append(
+                f"{week}주차: 경기 기록 득점 합({m_goals}) ≠ 선수 골 합({p_goals}) + 자책골 합({og}) = "
+                f"{p_goals + og}{incomplete_note if not is_complete else ''} — 어느 팀·선수가 원인인지는 이 "
+                "검증만으로 특정하기 어려우니 (한 주에 두 팀을 상대하기 때문), player_stats의 goals/own_goals "
+                "값을 확인해주세요."
+            )
     return errors, warnings
 
 

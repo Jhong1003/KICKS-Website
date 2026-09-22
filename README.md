@@ -116,7 +116,7 @@ where to change them for a future season):
 | 선수 이름 일치 | 오류 | `player_stats`의 모든 이름이 `players` 탭에 있어야 함 (역방향은 검사 안 함 — 아직 기록 없는 신규 멤버는 정상) |
 | 점수는 0 이상 정수 | 오류 | 빈 점수(아직 안 한 경기)는 검사 대상에서 제외 |
 | 주차별 경기 수 9개 | 오류 | 3팀 라운드로빈 × 3라운드 |
-| 팀별 주차 득점 합 일치 | 오류 | 경기 기록 득점 합 = 그 팀 선수 골 합. 자책골이 있으면 정상적으로 차이 날 수 있음 (오류 메시지에 안내). 자동 실행 중 아직 다 안 끝난 주차는 실패 대신 로그만 남기고 건너뜀 — 수동 실행/로컬에서는 건너뛰지 않고 그대로 검사 |
+| 주차별 득점 합 일치 | 오류 | 그 주 경기 기록 득점 합(전체 팀) = 그 주 선수 골 합 + 그 주 자책골(`own_goals`) 합. 팀별이 아니라 주 전체로 검사함 — 한 주에 두 팀을 상대하는 라운드로빈이라 자책골을 특정 상대팀에 귀속시킬 수 없기 때문. 자동 실행 중 아직 다 안 끝난 주차는 실패 대신 로그만 남기고 건너뜀 — 수동 실행/로컬에서는 건너뛰지 않고 그대로 검사 |
 | games 값 | 경고 | 0 또는 6이 정상, 그 사이 값은 오류는 아니고 경고만 |
 | active인데 기록 누락 | 경고 | 끝난 주차에 active 선수의 player_stats 행이 없으면 경고 (players 탭 상태값은 "Player Status" 섹션 참고) |
 
@@ -177,11 +177,17 @@ Each player who has recorded stats gets, from `build_player_profiles` in
   `ALL_ROUNDER_MAX_DIFF`) are named constants right above
   `_play_style_tag` in `scripts/update_data.py` — tune them there.
 - One or more **achievement badges** (`first_goal`, `first_assist`,
-  `brace`, `hat_trick`, `perfect_attendance`, `week1_starter`, `rookie`),
-  plus a guaranteed `squad_member` fallback so **every player has at least
-  one badge**. Badge label/description/icon text lives in `BADGES` in
-  `src/lib/players.ts`, keyed by the same badge key — update both files
-  together if you add a badge.
+  `brace`, `hat_trick`, `perfect_attendance`, `week1_starter`, `rookie`,
+  `own_goal_award`), plus a guaranteed `squad_member` fallback so **every
+  player has at least one badge**. Badge label/description/icon text lives
+  in `BADGES` in `src/lib/players.ts`, keyed by the same badge key —
+  update both files together if you add a badge.
+- **Own goals** (`player_stats`'s `own_goals` column, blank = 0): counted
+  separately from `goals` everywhere — they never add to a player's
+  goals, attacking points, or leaderboard rank, only to the fun
+  `own_goal_award` badge. They still count toward the *opposing* team's
+  match score, which is why the data-validation goal-sum check (see
+  "자동 업데이트" below) adds them back in on that side of the equation.
 
 **Avatars** are initials by default (last two characters of the name, or
 the full name if it's 2 characters — no photo is collected by the

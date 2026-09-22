@@ -266,8 +266,24 @@ badge in both places if you add a new one:
 - `week1_starter` — their first recorded week was week 1.
 - `rookie` — their first recorded week is the season's latest week (and
   the season is past week 1) — i.e. they just joined.
+- `own_goal_award` — 1+ own goal this season (`OWN_GOAL_AWARD_MIN`). Not a
+  real "achievement" like the others — the club runs an own-goal award,
+  so this celebrates it rather than hiding it. Deliberately lighthearted
+  label/description/icon.
 - `squad_member` — guaranteed fallback: awarded only if none of the above
   triggered, so **every player has at least one badge** on their card.
+
+**Own goals**: `player_stats`'s `own_goals` column (blank/missing = 0,
+normalized once in `load_sheets()` so every caller can assume it exists).
+Tracked entirely separately from `goals` — never added into a player's
+`goals`, `attacking_points`, or leaderboard rank, since it's the
+*opposing* team's match score that an own goal actually contributes to,
+not the player's own attacking output. `check_team_goal_sums` in
+[scripts/validate_data.py](scripts/validate_data.py) accounts for that on
+the match-score side of its comparison — see that function's docstring
+for why it checks a whole week at once rather than one team at a time
+(a round-robin week has each team facing two different opponents, so an
+own goal's weekly total can't be attributed to a specific one).
 
 **Avatar**: no player photos are collected by the pipeline, so cards show
 initials by default (last two characters of the name, or the full name if
