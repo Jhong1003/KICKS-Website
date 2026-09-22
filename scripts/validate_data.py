@@ -204,6 +204,81 @@ def check_team_goal_sums(matches: pd.DataFrame, player_stats: pd.DataFrame, stri
     return errors, warnings
 
 
+def check_team_goal_diff_within_own_goal_budget(
+    matches: pd.DataFrame, player_stats: pd.DataFrame, strict: bool
+) -> CheckResult:
+    """Rule: for each (week, team), (match goals for that team) minus
+    (that team's own players' goal total) must be:
+
+      - >= 0 — a team's players can never be credited with more goals
+        than the match result actually shows, own goals or not. Checked
+        unconditionally (every trigger, even an incomplete week), because
+        this direction can never be explained away: more matches getting
+        scored later only *raises* a team's match-goal total, so an
+        already-negative gap only gets worse, never resolves itself.
+      - <= that week's own goals from players on the *other* two teams —
+        an own goal is the only thing that can inflate a team's match
+        score beyond what its own players are credited with, and only an
+        opponent's player can score an own goal that benefits this team.
+        A gap bigger than that budget isn't explainable by own goals at
+        all. This half follows the usual incomplete-week leniency (see
+        check_team_goal_sums) since it depends on the week being done.
+
+    This is a tighter, per-team companion to check_team_goal_sums's
+    whole-week total — that one can miss a same-week error on one team
+    that's canceled out by an opposite error on another (e.g. a goal
+    logged under the wrong week for one team, and a missing own_goal
+    entry for another, happening to sum to the right league-wide total).
+    This check catches that kind of thing per team instead.
+    """
+    errors: list[str] = []
+
+    played = matches.dropna(subset=["home_score", "away_score"])
+    home = played.rename(columns={"home_team": "team", "home_score": "goals"})[["week", "team", "goals"]]
+    away = played.rename(columns={"away_team": "team", "away_score": "goals"})[["week", "team", "goals"]]
+    match_goals = pd.concat([home, away]).groupby(["week", "team"])["goals"].sum()
+
+    stats = player_stats.fillna({"goals": 0, "own_goals": 0})
+    player_goals = stats.groupby(["week", "team"])["goals"].sum()
+    own_goals = stats.groupby(["week", "team"])["own_goals"].sum()
+    week_own_goals_total = stats.groupby("week")["own_goals"].sum()
+
+    weeks = sorted(set(matches["week"].unique()) | set(player_stats["week"].unique()))
+    for week in weeks:
+        week_matches = matches[matches["week"] == week]
+        week_total_og = int(week_own_goals_total.get(week, 0))
+
+        for team in VALID_TEAMS:
+            team_matches = week_matches[(week_matches["home_team"] == team) | (week_matches["away_team"] == team)]
+            if team_matches.empty:
+                continue
+
+            m_goals = int(match_goals.get((week, team), 0))
+            p_goals = int(player_goals.get((week, team), 0))
+            diff = m_goals - p_goals
+
+            if diff < 0:
+                errors.append(
+                    f"{week}주차 {team}: 선수 골 합({p_goals})이 경기 득점({m_goals})보다 많습니다 — "
+                    "선수 개인 골 합은 팀의 경기 득점보다 많을 수 없습니다 (자책골과 무관하게 무조건 오류)"
+                )
+                continue
+
+            is_complete = not team_matches[["home_score", "away_score"]].isna().any().any()
+            if not is_complete and not strict:
+                continue  # incomplete-week note already logged by check_team_goal_sums
+
+            own_goals_for_team = int(own_goals.get((week, team), 0))
+            opponents_own_goals = week_total_og - own_goals_for_team
+            if diff > opponents_own_goals:
+                errors.append(
+                    f"{week}주차 {team}: 경기 득점({m_goals}) - 선수 골 합({p_goals}) = {diff} — 이 주 상대 팀 "
+                    f"선수들의 자책골 합({opponents_own_goals})으로 설명되는 범위를 넘습니다. player_stats의 "
+                    "goals/own_goals 값을 확인해주세요."
+                )
+    return errors, []
+
+
 def check_active_players_have_finished_weeks(
     matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame
 ) -> CheckResult:
@@ -246,6 +321,7 @@ def main() -> None:
         check_scores_valid(matches),
         check_matches_per_week(matches),
         check_team_goal_sums(matches, player_stats, strict),
+        check_team_goal_diff_within_own_goal_budget(matches, player_stats, strict),
         check_active_players_have_finished_weeks(matches, player_stats, players),
     ]
 

@@ -284,6 +284,11 @@ the match-score side of its comparison — see that function's docstring
 for why it checks a whole week at once rather than one team at a time
 (a round-robin week has each team facing two different opponents, so an
 own goal's weekly total can't be attributed to a specific one).
+`check_team_goal_diff_within_own_goal_budget` adds a tighter per-team
+check on top: (match goals − that team's player goals) must be between 0
+and that week's own goals from the *other* two teams — catches a
+same-week error on one team that the whole-week total alone could miss
+if it happens to cancel out against an opposite error elsewhere.
 
 **Avatar**: no player photos are collected by the pipeline, so cards show
 initials by default (last two characters of the name, or the full name if
