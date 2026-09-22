@@ -11,9 +11,14 @@ interface Props {
 
 const {
 	title,
-	description = "KICKS is a student-run futsal league and community at UIUC.",
+	description = "UIUC Korean-inspired futsal community · 리그 순위, 선수 기록, 경기 일정",
 	header = "default",
 } = Astro.props;
+
+// Astro.site (set in astro.config.mjs) makes these absolute regardless of
+// how deep the current route is (e.g. /players/[id]).
+const ogImage = new URL("/og-image.png", Astro.site).toString();
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
 ---
 
 <html lang="en">
@@ -22,6 +27,16 @@ const {
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
 		<title>{title}</title>
+
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:type" content="website" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
 	</head>
 	<body>
 		{header === "default" && <Header variant="default" />}
