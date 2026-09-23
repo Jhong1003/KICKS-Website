@@ -2463,3 +2463,34 @@ a.player-card:hover {
 	}
 
 }
+
+.player-positions {
+	display: flex;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+}
+
+.position-chip {
+	padding: 0.3rem 0.85rem;
+	border-radius: 999px;
+	color: #fff;
+	font-size: 0.95rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+}
+
+.position-GK {
+	background: #f0a202;
+}
+
+.position-DF {
+	background: #2f6fed;
+}
+
+.position-MF {
+	background: #2e9e5b;
+}
+
+.position-FW {
+	background: #d7263d;
+}

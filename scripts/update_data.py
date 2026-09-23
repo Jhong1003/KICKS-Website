@@ -488,8 +488,17 @@ def _badges(
         badges.append("squad_member")
     return badges
 
+def _positions_for(name: str, positions: pd.DataFrame) -> list[str]:
+    """A player's positions, primary first, skipping any that are blank.
+    ...
+    """
+    if name not in positions.index:
+        return []
+    row = positions.loc[name]
+    return [value for value in (row["primary_position"], row["secondary_position"]) if not pd.isna(value)]
 
-def build_player_profiles(player_stats: pd.DataFrame) -> list[dict]:
+
+def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame) -> list[dict]:
     """One celebratory profile per player who has recorded stats this season.
 
     Players who haven't played a single game yet (sheet status "new", no
@@ -498,6 +507,7 @@ def build_player_profiles(player_stats: pd.DataFrame) -> list[dict]:
     """
     weeks_played = int(player_stats["week"].nunique())
     player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0, "own_goals": 0})
+    positions = players.set_index("player")[["primary_position", "secondary_position"]]
 
     profiles = []
     for name, rows in player_stats.groupby("player"):
@@ -514,6 +524,7 @@ def build_player_profiles(player_stats: pd.DataFrame) -> list[dict]:
                 "id": _player_id(name),
                 "name": name,
                 "avatar_initials": _avatar_initials(name),
+                "positions": _positions_for(name, positions),
                 "current_team": segments[-1]["team"],
                 "team_history": segments[:-1],
                 "season_totals": {
@@ -592,7 +603,7 @@ def main() -> None:
     write_json("matches.json", build_matches(matches))
     write_json("week_summaries.json", build_week_summaries(matches))
     write_json("player_leaderboard.json", build_leaderboard(player_stats))
-    write_json("player_profiles.json", build_player_profiles(player_stats))
+    write_json("player_profiles.json", build_player_profiles(player_stats, players))
 
 
 if __name__ == "__main__":
