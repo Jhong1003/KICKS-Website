@@ -36,6 +36,12 @@ export interface PersonalBestWeek {
 
 export type PlayStyleTag = "Finisher" | "Playmaker" | "All-Rounder" | "Iron Man" | "Team Player";
 
+/** Matches the `players` tab's `status` column — see AGENTS.md's "Player status" section. */
+export type PlayerStatus = "active" | "new" | "inactive";
+
+/** Matches the `players` tab's `primary_position`/`secondary_position` columns. */
+export type PlayerPosition = "GK" | "DF" | "MF" | "FW";
+
 export type BadgeKey =
 	| "first_goal"
 	| "first_assist"
@@ -51,6 +57,8 @@ export interface PlayerProfile {
 	id: string;
 	name: string;
 	avatar_initials: string;
+	positions: PlayerPosition[];
+	status: PlayerStatus;
 	current_team: string;
 	team_history: TeamSegment[];
 	season_totals: SeasonTotals;

@@ -4,9 +4,23 @@ import StandingsTable from "../components/StandingsTable.astro";
 import WeeklyResults from "../components/WeeklyResults.astro";
 import PlayerStatsTable from "../components/PlayerStatsTable.astro";
 import leagueTable from "../data/league_table.json";
-import matches from "../data/matches.json";
+import matchesData from "../data/matches.json";
 import weekSummaries from "../data/week_summaries.json";
 import leaderboard from "../data/player_leaderboard.json";
+
+interface MatchRecord {
+	match_id: string;
+	week: number;
+	round: number;
+	date: string;
+	home_team: string;
+	away_team: string;
+	home_score: number;
+	away_score: number;
+	status: "completed" | "scheduled";
+}
+
+const matches = matchesData as MatchRecord[];
 
 // Group matches by week (most recent first) so the results section can show
 // one tab per week, each broken down by round. The points/W-D-L rule lives
