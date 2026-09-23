@@ -50,7 +50,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0].week
 		<section class="content-section" aria-labelledby="player-stats-title">
 			<h2 id="player-stats-title">Player Stats</h2>
 			<p class="about-description">Click a column header to sort.</p>
-			<PlayerStatsTable players={leaderboard} />
+			<PlayerStatsTable players={leaderboard.filter((player) => player.status !== "inactive")} />
 		</section>
 	</main>
 </BaseLayout>

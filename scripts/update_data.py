@@ -321,7 +321,7 @@ def _player_id(name: str) -> str:
     return hashlib.sha1(name.encode("utf-8")).hexdigest()[:8]
 
 
-def build_leaderboard(player_stats: pd.DataFrame) -> list[dict]:
+def build_leaderboard(player_stats: pd.DataFrame, players: pd.DataFrame) -> list[dict]:
     """Season totals per player, ranked by attacking output.
 
     One row per player for the whole season, even if they changed teams
@@ -342,11 +342,13 @@ def build_leaderboard(player_stats: pd.DataFrame) -> list[dict]:
     player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0})
 
     current_team = player_stats.sort_values("week").groupby("player")["team"].last()
+    statuses = players.set_index("player")["status"]
 
     totals = player_stats.groupby("player", as_index=False).agg(
         games=("games", "sum"), goals=("goals", "sum"), assists=("assists", "sum")
     )
     totals["team"] = totals["player"].map(current_team)
+    totals["status"] = totals["player"].map(statuses).fillna("active")
 
     totals["goals"] = totals["goals"].astype(int)
     totals["assists"] = totals["assists"].astype(int)
@@ -604,7 +606,7 @@ def main() -> None:
     write_json("league_table.json", build_league_table(matches, player_stats, active_roster))
     write_json("matches.json", build_matches(matches))
     write_json("week_summaries.json", build_week_summaries(matches))
-    write_json("player_leaderboard.json", build_leaderboard(player_stats))
+    write_json("player_leaderboard.json", build_leaderboard(player_stats, players))
     write_json("player_profiles.json", build_player_profiles(player_stats, players))
 
 
