@@ -61,6 +61,12 @@ const currentPath = Astro.url.pathname;
 	</button>
 </header>
 
+<div class="easter-egg-overlay" id="logo-easter-egg" role="status" hidden>
+	<div class="easter-egg">
+		Welcome to KICKS, the best futsal club at UIUC&nbsp;<span class="easter-egg-ball" aria-hidden="true">⚽</span>
+	</div>
+</div>
+
 <script>
 	const toggle = document.querySelector<HTMLButtonElement>(".nav-toggle");
 	const nav = document.getElementById("site-nav");
@@ -74,6 +80,71 @@ const currentPath = Astro.url.pathname;
 		if ((event.target as HTMLElement).tagName === "A") {
 			nav.classList.remove("is-open");
 			toggle?.setAttribute("aria-expanded", "false");
+		}
+	});
+
+	// Logo easter egg: 5 clicks within 3 seconds. Click timestamps live in
+	// sessionStorage (not a plain in-memory counter) so the count survives
+	// the real page navigation every normal click already does — only the
+	// 5th, pattern-completing click gets intercepted (preventDefault) to
+	// show the message instead of navigating; clicks 1-4 are completely
+	// untouched, real link clicks, exactly like before.
+	const brand = document.querySelector<HTMLAnchorElement>(".brand");
+	const easterEgg = document.getElementById("logo-easter-egg");
+
+	const CLICK_WINDOW_MS = 3000;
+	const CLICKS_NEEDED = 5;
+	const AUTO_DISMISS_MS = 3000;
+	const FADE_MS = 350; // matches the CSS transition duration below
+	const CLICKS_STORAGE_KEY = "kicks-logo-click-times";
+
+	let dismissTimer: ReturnType<typeof setTimeout> | undefined;
+	let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function showEasterEgg() {
+		if (!easterEgg) return;
+		clearTimeout(hideTimer);
+		easterEgg.hidden = false;
+		easterEgg.classList.remove("easter-egg-overlay--visible");
+		// Force a style flush before adding the class so the transition
+		// (backdrop fade + card bounce-in) actually plays instead of
+		// jumping straight to visible.
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => easterEgg.classList.add("easter-egg-overlay--visible"));
+		});
+
+		clearTimeout(dismissTimer);
+		dismissTimer = setTimeout(hideEasterEgg, AUTO_DISMISS_MS);
+	}
+
+	function hideEasterEgg() {
+		if (!easterEgg || easterEgg.hidden) return;
+		clearTimeout(dismissTimer);
+		easterEgg.classList.remove("easter-egg-overlay--visible");
+		hideTimer = setTimeout(() => {
+			easterEgg.hidden = true;
+		}, FADE_MS);
+	}
+
+	easterEgg?.addEventListener("click", hideEasterEgg);
+
+	brand?.addEventListener("click", (event) => {
+		const now = Date.now();
+		let timestamps: number[] = [];
+		try {
+			timestamps = JSON.parse(sessionStorage.getItem(CLICKS_STORAGE_KEY) ?? "[]");
+		} catch {
+			timestamps = [];
+		}
+		timestamps = timestamps.filter((time) => now - time < CLICK_WINDOW_MS);
+		timestamps.push(now);
+
+		if (timestamps.length >= CLICKS_NEEDED) {
+			sessionStorage.removeItem(CLICKS_STORAGE_KEY);
+			event.preventDefault();
+			showEasterEgg();
+		} else {
+			sessionStorage.setItem(CLICKS_STORAGE_KEY, JSON.stringify(timestamps));
 		}
 	});
 </script>
