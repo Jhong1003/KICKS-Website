@@ -279,27 +279,52 @@ def check_team_goal_diff_within_own_goal_budget(
     return errors, []
 
 
-def check_active_players_have_finished_weeks(
+def check_active_players_missing_weeks(
     matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame
 ) -> CheckResult:
-    """Warning only: an active-status player with no player_stats row at
-    all for a week that's already fully played might mean the sheet
-    entry was missed, or that the player quietly stopped coming without
-    their status being updated to "inactive" (see AGENTS.md's "Player
-    status" section) - either way, worth a human glancing at it."""
-    warnings = []
+    """Rule: an active player must have a player_stats row for every fully
+    played week since they joined.
+
+    A missing row isn't caught by any of the goal-sum checks above: a
+    player who didn't score contributes 0 either way, so their whole row
+    can vanish and every total still balances. It still matters — the
+    league table's participation-rate tiebreaker counts that player in
+    the roster while counting none of their games, understating their
+    team (see the issues tab, I002).
+
+    joined_week (players tab) is what makes this an error rather than a
+    warning. Without it, every mid-season joiner looked "missing" for
+    every week before they arrived, and a real omission sat buried in
+    that noise. Weeks before a player joined are simply out of scope.
+
+    A player with no joined_week at all is skipped with a warning rather
+    than assumed to have been here since week 1 — guessing would
+    reintroduce exactly the false alarms this is meant to remove.
+    """
+    errors, warnings = [], []
     finished_weeks = [
         week
         for week, group in matches.groupby("week")
         if not group[["home_score", "away_score"]].isna().any().any()
     ]
     have_row = set(zip(player_stats["player"], player_stats["week"]))
-    active_players = players[players["status"] == "active"]["player"]
-    for player in active_players:
+    active_players = players[players["status"] == "active"]
+
+    for _, player_row in active_players.iterrows():
+        name = player_row["player"]
+        joined = player_row.get("joined_week")
+        if pd.isna(joined):
+            warnings.append(
+                f"players 탭: '{name}'의 joined_week가 비어 있어 주차별 기록 누락 검사를 건너뜁니다"
+            )
+            continue
         for week in finished_weeks:
-            if (player, week) not in have_row:
-                warnings.append(f"{player} (active 상태): {week}주차가 끝났는데 player_stats에 기록이 없습니다")
-    return [], warnings
+            if week >= int(joined) and (name, week) not in have_row:
+                errors.append(
+                    f"player_stats: {week}주차가 끝났는데 '{name}'의 기록이 없습니다 "
+                    f"({joined}주차 합류, active 상태) — 결석했다면 games 0으로 한 줄 추가해주세요"
+                )
+    return errors, warnings
 
 
 # ---------------------------------------------------------------------------
@@ -322,7 +347,7 @@ def main() -> None:
         check_matches_per_week(matches),
         check_team_goal_sums(matches, player_stats, strict),
         check_team_goal_diff_within_own_goal_budget(matches, player_stats, strict),
-        check_active_players_have_finished_weeks(matches, player_stats, players),
+        check_active_players_missing_weeks(matches, player_stats, players),
     ]
 
     all_errors = [message for errors, _ in checks for message in errors]
