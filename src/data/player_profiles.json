@@ -4,6 +4,7 @@
     "name": "김민서",
     "avatar_initials": "민서",
     "positions": [],
+    "status": "inactive",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -48,6 +49,7 @@
     "positions": [
       "DF"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -100,6 +102,7 @@
     "positions": [
       "DF"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -147,6 +150,7 @@
       "MF",
       "DF"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -202,6 +206,7 @@
       "DF",
       "MF"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -257,6 +262,7 @@
     "positions": [
       "FW"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -297,6 +303,7 @@
     "positions": [
       "DF"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -342,6 +349,7 @@
     "positions": [
       "FW"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [
       {
@@ -401,6 +409,7 @@
     "positions": [
       "FW"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -455,6 +464,7 @@
     "positions": [
       "MF"
     ],
+    "status": "active",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -509,6 +519,7 @@
       "DF",
       "FW"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -563,6 +574,7 @@
       "MF",
       "FW"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -616,6 +628,7 @@
       "DF",
       "MF"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [
       {
@@ -676,6 +689,7 @@
       "MF",
       "GK"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -728,6 +742,7 @@
     "positions": [
       "DF"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -780,6 +795,7 @@
       "DF",
       "MF"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -832,6 +848,7 @@
     "positions": [
       "DF"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -878,6 +895,7 @@
     "positions": [
       "DF"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -910,6 +928,7 @@
       "FW",
       "MF"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -948,6 +967,7 @@
     "positions": [
       "DF"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -996,6 +1016,7 @@
       "FW",
       "MF"
     ],
+    "status": "active",
     "current_team": "오늘밤 샴페인",
     "team_history": [
       {
@@ -1057,6 +1078,7 @@
     "positions": [
       "DF"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [
       {
@@ -1110,6 +1132,7 @@
       "MF",
       "DF"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1163,6 +1186,7 @@
       "DF",
       "MF"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1214,6 +1238,7 @@
     "positions": [
       "MF"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1269,6 +1294,7 @@
     "positions": [
       "FW"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1324,6 +1350,7 @@
     "positions": [
       "FW"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1376,6 +1403,7 @@
     "positions": [
       "GK"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1405,6 +1433,7 @@
     "name": "조우진",
     "avatar_initials": "우진",
     "positions": [],
+    "status": "inactive",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1444,6 +1473,7 @@
       "DF",
       "MF"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1496,6 +1526,7 @@
     "positions": [
       "FW"
     ],
+    "status": "active",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {

@@ -6,7 +6,10 @@ import teamColorsData from "../data/team-colors.json";
 import playerPhotosData from "../data/player-photos.json";
 import { getTeamColor, sortPlayers, type PlayerProfile } from "../lib/players";
 
-const players = sortPlayers(profilesData as PlayerProfile[], "name");
+const players = sortPlayers(
+	(profilesData as PlayerProfile[]).filter((player) => player.status !== "inactive"),
+	"name",
+);
 const teamColors = teamColorsData as Record<string, string>;
 const playerPhotos = playerPhotosData as Record<string, string>;
 ---

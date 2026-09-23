@@ -508,6 +508,7 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame) -> 
     weeks_played = int(player_stats["week"].nunique())
     player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0, "own_goals": 0})
     positions = players.set_index("player")[["primary_position", "secondary_position"]]
+    statuses = players.set_index("player")["status"]
 
     profiles = []
     for name, rows in player_stats.groupby("player"):
@@ -525,6 +526,7 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame) -> 
                 "name": name,
                 "avatar_initials": _avatar_initials(name),
                 "positions": _positions_for(name, positions),
+                "status": statuses.get(name, "active"),
                 "current_team": segments[-1]["team"],
                 "team_history": segments[:-1],
                 "season_totals": {
