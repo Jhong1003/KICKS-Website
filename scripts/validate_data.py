@@ -326,15 +326,140 @@ def check_active_players_missing_weeks(
                 )
     return errors, warnings
 
+def check_goal_events(
+    matches: pd.DataFrame, player_stats: pd.DataFrame, goal_events: pd.DataFrame
+) -> CheckResult:
+    """Rules for the goal_events tab, which records one row per goal.
+
+    From the week this tab starts being used it's the source of truth for
+    goals and assists (see update_data.load_sheets), so these checks are
+    the only thing standing between a mistyped row and the site: unlike
+    the weekly totals typed into player_stats, an event can name a player
+    who wasn't even in that match, and nothing downstream would notice.
+
+    Each event is tied to a specific match, which makes a much tighter
+    check possible than the weekly ones above: a match has exactly two
+    teams and one official score, so goals can be attributed exactly
+    rather than only summed league-wide. An own goal is credited to the
+    scorer's opponent in that match.
+
+    Which team a player belongs to is read from player_stats for that
+    week, not from the players tab, since players change teams mid-season
+    (see AGENTS.md's "Player status" section).
+    """
+    errors, warnings = [], []
+
+    events = goal_events.dropna(subset=["match_id", "scorer"])
+    if events.empty:
+        return errors, warnings
+
+    # match_id -> the two teams and the official score
+    match_info = {}
+    for _, row in matches.iterrows():
+        if pd.isna(row.get("match_id")):
+            continue
+        match_info[row["match_id"]] = row
+
+    # (week, player) -> team that week, and games played
+    week_team = {}
+    week_games = {}
+    for _, row in player_stats.iterrows():
+        week_team[(row["week"], row["player"])] = row["team"]
+        week_games[(row["week"], row["player"])] = row["games"]
+
+    scored = {}  # (match_id, team) -> goals counted from events
+    event_weeks = set()
+
+    for idx, row in events.iterrows():
+        where = f"goal_events {_sheet_row(idx)}행"
+        match_id = row["match_id"]
+        scorer = row["scorer"]
+        assist = row["assist"] if not pd.isna(row.get("assist")) else None
+        is_own_goal = str(row.get("own_goal", "")).strip().upper() == "Y"
+
+        match = match_info.get(match_id)
+        if match is None:
+            errors.append(f"{where}: match_id '{match_id}'가 matches 탭에 없습니다")
+            continue
+
+        week = int(match["week"])
+        event_weeks.add(week)
+        teams = (match["home_team"], match["away_team"])
+
+        scorer_team = week_team.get((week, scorer))
+        if scorer_team is None:
+            errors.append(f"{where}: '{scorer}'의 {week}주차 player_stats 기록이 없습니다")
+            continue
+        if scorer_team not in teams:
+            errors.append(
+                f"{where}: '{scorer}'는 {week}주차에 {scorer_team} 소속인데 이 경기는 "
+                f"{teams[0]} vs {teams[1]} 입니다"
+            )
+            continue
+        if week_games.get((week, scorer), 0) == 0:
+            errors.append(f"{where}: '{scorer}'는 {week}주차 결석(games 0)인데 골 기록이 있습니다")
+
+        # An own goal counts for the opponent.
+        credited = teams[1] if scorer_team == teams[0] else teams[0]
+        credited_team = credited if is_own_goal else scorer_team
+        scored[(match_id, credited_team)] = scored.get((match_id, credited_team), 0) + 1
+
+        if assist is not None:
+            if is_own_goal:
+                errors.append(f"{where}: 자책골에는 어시스트를 기록하지 않습니다")
+            elif assist == scorer:
+                errors.append(f"{where}: 득점자와 어시스트가 같은 선수입니다 ('{scorer}')")
+            else:
+                assist_team = week_team.get((week, assist))
+                if assist_team is None:
+                    errors.append(f"{where}: '{assist}'의 {week}주차 player_stats 기록이 없습니다")
+                elif assist_team != scorer_team:
+                    errors.append(
+                        f"{where}: 어시스트 '{assist}'({assist_team})가 득점자 "
+                        f"'{scorer}'({scorer_team})와 다른 팀입니다"
+                    )
+
+    # Per-match totals must match the official score.
+    for match_id, match in match_info.items():
+        if pd.isna(match["home_score"]) or pd.isna(match["away_score"]):
+            continue
+        home_counted = scored.get((match_id, match["home_team"]), 0)
+        away_counted = scored.get((match_id, match["away_team"]), 0)
+        if home_counted == 0 and away_counted == 0:
+            continue  # no events for this match yet (or a pre-goal_events week)
+        for team, official in ((match["home_team"], match["home_score"]),
+                               (match["away_team"], match["away_score"])):
+            counted = scored.get((match_id, team), 0)
+            if counted != int(official):
+                errors.append(
+                    f"{match_id} {team}: 공식 스코어 {int(official)}골인데 goal_events에는 "
+                    f"{counted}골이 기록돼 있습니다"
+                )
+
+    # In an event week, player_stats' goal columns are ignored entirely -
+    # a value typed there is silently discarded, so say so rather than
+    # letting the two records drift apart unnoticed.
+    for idx, row in player_stats.iterrows():
+        if int(row["week"]) not in event_weeks:
+            continue
+        for col in ("goals", "assists", "own_goals"):
+            value = row.get(col)
+            if not pd.isna(value) and value != 0:
+                warnings.append(
+                    f"player_stats {_sheet_row(idx)}행 ({row['week']}주차, {row['player']}): "
+                    f"{col}에 값이 있지만 이 주차는 goal_events로 계산되므로 무시됩니다"
+                )
+
+    return errors, warnings
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
-
 def main() -> None:
     sheets = load_sheets()
     matches, player_stats, players = sheets["matches"], sheets["player_stats"], sheets["players"]
+    goal_events = sheets["goal_events"]
     strict = _is_strict()
 
     print(f"검증 모드: {'엄격 (수동 실행/로컬)' if strict else '완화 (자동 스케줄 실행)'}\n")
@@ -348,6 +473,7 @@ def main() -> None:
         check_team_goal_sums(matches, player_stats, strict),
         check_team_goal_diff_within_own_goal_budget(matches, player_stats, strict),
         check_active_players_missing_weeks(matches, player_stats, players),
+        check_goal_events(matches, player_stats, goal_events),
     ]
 
     all_errors = [message for errors, _ in checks for message in errors]
