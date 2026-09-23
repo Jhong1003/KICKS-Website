@@ -82,9 +82,65 @@ def _week_date(week: int) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _event_week(match_id: str) -> int | None:
+    """Pull the league week out of a match_id like "FA26-W03-M07"."""
+    if not isinstance(match_id, str):
+        return None
+    for part in match_id.split("-"):
+        if part.startswith("W") and part[1:].isdigit():
+            return int(part[1:])
+    return None
+
+
+def _merge_goal_events(player_stats: pd.DataFrame, goal_events: pd.DataFrame) -> pd.DataFrame:
+    """Recompute goals/assists/own_goals from goal_events, week by week.
+
+    From the week goal_events starts being used, that tab is the source of
+    truth: staff enter one row per goal and leave player_stats' goals,
+    assists and own_goals blank. Earlier weeks were only ever recorded as
+    weekly totals typed straight into player_stats, so they're left
+    untouched — a week is rewritten only if it has at least one event.
+
+    Every player row in a rewritten week is reset to 0 first, so a player
+    who didn't score reads as an observed 0 rather than a blank.
+    """
+    events = goal_events.dropna(subset=["match_id", "scorer"]).copy()
+    if events.empty:
+        return player_stats
+
+    events["week"] = events["match_id"].apply(_event_week)
+    events = events.dropna(subset=["week"])
+    if events.empty:
+        return player_stats
+
+    events["week"] = events["week"].astype(int)
+    events["is_own_goal"] = events["own_goal"].astype(str).str.strip().str.upper() == "Y"
+
+    goals = events[~events["is_own_goal"]].groupby(["week", "scorer"]).size()
+    own_goals = events[events["is_own_goal"]].groupby(["week", "scorer"]).size()
+    assisted = events.dropna(subset=["assist"])
+    assists = assisted.groupby(["week", "assist"]).size()
+
+    event_weeks = set(events["week"].unique())
+    stats = player_stats.copy()
+    rewrite = stats["week"].isin(event_weeks)
+    stats.loc[rewrite, ["goals", "assists", "own_goals"]] = 0
+
+    for idx in stats.index[rewrite]:
+        key = (stats.at[idx, "week"], stats.at[idx, "player"])
+        stats.at[idx, "goals"] = int(goals.get(key, 0))
+        stats.at[idx, "assists"] = int(assists.get(key, 0))
+        stats.at[idx, "own_goals"] = int(own_goals.get(key, 0))
+
+    return stats
+
+
 def load_sheets() -> dict[str, pd.DataFrame]:
-    """Download the three published sheet tabs as DataFrames."""
+    """Download the published sheet tabs as DataFrames."""
     sheets = {name: pd.read_csv(url) for name, url in SHEET_URLS.items()}
+
+    # Drop the all-blank rows a wide dropdown range leaves in the CSV export.
+    sheets["goal_events"] = sheets["goal_events"].dropna(how="all")
 
     # own_goals is a newer player_stats column (blank/absent means 0) -
     # default it in here, once, so every caller (this script and
@@ -94,6 +150,8 @@ def load_sheets() -> dict[str, pd.DataFrame]:
         player_stats["own_goals"] = 0
     else:
         player_stats["own_goals"] = player_stats["own_goals"].fillna(0)
+
+    sheets["player_stats"] = _merge_goal_events(player_stats, sheets["goal_events"])
 
     return sheets
 
