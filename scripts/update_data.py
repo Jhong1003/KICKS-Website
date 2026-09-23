@@ -32,6 +32,7 @@ SHEET_URLS = {
     "matches": f"{_SHEET_BASE}?gid=1550061733&single=true&output=csv",
     "player_stats": f"{_SHEET_BASE}?gid=1936064582&single=true&output=csv",
     "players": f"{_SHEET_BASE}?gid=1375969708&single=true&output=csv",
+    "goal_events": f"{_SHEET_BASE}?gid=271544291&single=true&output=csv",
 }
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "src" / "data"
