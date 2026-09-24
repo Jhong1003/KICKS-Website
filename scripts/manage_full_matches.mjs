@@ -15,6 +15,10 @@
  * (src/pages/full-matches.astro), using the Web Crypto API — same
  * PBKDF2 + AES-GCM parameters on both sides.
  *
+ * Each video belongs to a league (e.g. FA26-L2) and a week within it —
+ * weeks restart at 1 in every league. Videos saved before leagues existed
+ * have no league; the script offers to label them when it finds any.
+ *
  * Password prompts show "*" for each character typed instead of the real
  * characters.
  */
@@ -169,25 +173,40 @@ async function main() {
 		}
 	}
 
+	const unlabeled = videos.filter((v) => !v.league);
+	if (unlabeled.length > 0) {
+		const league = await prompt(
+			`\n${unlabeled.length} existing video(s) have no league yet. League to label them with (e.g. FA26-L1, blank to skip): `,
+		);
+		if (league) {
+			for (const v of unlabeled) v.league = league;
+			console.log(`Labeled ${unlabeled.length} video(s) as ${league}.`);
+		}
+	}
+
 	if (videos.length > 0) {
 		console.log(`\nCurrent videos (${videos.length}):`);
-		for (const v of [...videos].sort((a, b) => b.week - a.week)) {
-			console.log(`  Week ${v.week} · ${v.date} — ${v.title}`);
+		for (const v of [...videos].sort((a, b) => b.date.localeCompare(a.date) || b.week - a.week)) {
+			console.log(`  ${v.league ? `${v.league} · ` : ""}Week ${v.week} · ${v.date} — ${v.title}`);
 		}
 	}
 
 	const addAnswer = (await prompt("\nAdd a new video? (Y/n): ")).toLowerCase();
 	if (addAnswer !== "n") {
-		const week = Number(await prompt("Week number: "));
+		// Default to the league of the newest video, since that's usually where the next one goes.
+		const latestLeague = [...videos].sort((a, b) => b.date.localeCompare(a.date)).find((v) => v.league)?.league;
+		const leagueAnswer = await prompt(`League${latestLeague ? ` [${latestLeague}]` : ""}: `);
+		const league = leagueAnswer || latestLeague;
+		const week = Number(await prompt("Week number (within that league): "));
 		const date = await prompt("Date (YYYY-MM-DD): ");
 		const title = (await prompt("Title [Full Match]: ")) || "Full Match";
 		const driveUrl = await prompt("Google Drive link: ");
 
-		if (!week || !date || !driveUrl) {
-			console.error("\nWeek, date, and Drive link are all required — nothing was added.");
+		if (!league || !week || !date || !driveUrl) {
+			console.error("\nLeague, week, date, and Drive link are all required — nothing was added.");
 		} else {
-			videos = videos.filter((v) => v.week !== week);
-			videos.push({ week, date, title, driveUrl });
+			videos = videos.filter((v) => !(v.league === league && v.week === week));
+			videos.push({ league, week, date, title, driveUrl });
 			console.log("Added.");
 		}
 	}

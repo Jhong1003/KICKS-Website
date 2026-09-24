@@ -83,6 +83,9 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 	}
 
 	interface VideoEntry {
+		// Weeks restart at 1 in every league. Videos saved before leagues
+		// existed have no league yet (see scripts/manage_full_matches.mjs).
+		league?: string;
 		week: number;
 		date: string;
 		title: string;
@@ -152,12 +155,13 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 	}
 
 	function renderVideos(videos: VideoEntry[]) {
-		const sorted = [...videos].sort((a, b) => b.week - a.week);
+		// Newest first by date — week numbers alone are ambiguous across leagues.
+		const sorted = [...videos].sort((a, b) => b.date.localeCompare(a.date) || b.week - a.week);
 		videoListEl.innerHTML = sorted
 			.map(
 				(video) => `
 					<div class="video-card">
-						<div class="video-card-meta">Week ${video.week} · ${formatDate(video.date)}</div>
+						<div class="video-card-meta">${video.league ? `${video.league} · ` : ""}Week ${video.week} · ${formatDate(video.date)}</div>
 						<h3 class="video-card-title">${video.title}</h3>
 						<a class="button-primary" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">
 							Watch on Google Drive

@@ -14,9 +14,13 @@ import { resolveTransfers, type PlayerProfile } from "../lib/players";
 import { latestLeague } from "../lib/leagues";
 
 const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
-const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData as PlayerProfile[], latestLeague.id);
+// Transfers only make sense within one league (teams are reshuffled between
+// leagues), so the banner is tied to the league named in transfer-news.json and
+// goes away by itself once a newer league becomes the latest.
+const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData as PlayerProfile[], transferNews.league);
 const standings = leagueTable.filter((row) => row.league === latestLeague.id);
-const showTransferBanner = transferNews.enabled && resolvedTransfers.length > 0;
+const showTransferBanner =
+	transferNews.enabled && transferNews.league === latestLeague.id && resolvedTransfers.length > 0;
 ---
 
 <BaseLayout
