@@ -1399,7 +1399,7 @@ h1 {
 
 /* 태블릿 이하에서는 메뉴가 햄버거로 바뀜 */
 
-@media (max-width: 860px) {
+@media (max-width: 1260px) {
 
 	.nav-list {
 
@@ -2809,6 +2809,72 @@ a.player-card:hover {
 	outline-offset: 4px;
 }
 [data-league-panel][hidden] { display: none; }
-[data-league-panel] > .content-section:first-child {
-	padding-top: 64px;
+[data-league-view] > .content-section:first-child {
+	padding-bottom: 40px;
+}
+[data-league-view] > [data-league-panel] > .content-section:first-child {
+	padding-top: 40px;
+}
+
+
+/* Desktop homepage only; preserve the stacked layout at 860px and below. */
+@media (min-width: 861px) {
+	.hero > .hero-content {
+		margin: 0 0 auto;
+		padding: 48px 0 64px;
+	}
+	.hero-content > .split-photo--hero {
+		flex: 0.85;
+		max-width: 540px;
+	}
+}
+
+@media (min-width: 1261px) {
+	.hero > .hero-content {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) min(590px, calc(100% / 2));
+		padding: 64px 8px 64px 46px;
+		gap: 0;
+	}
+	.hero-content > .hero-text {
+		margin-inline-start: 0;
+	}
+	.hero-content > .split-photo--hero {
+		flex: 1;
+		max-width: 590px;
+	}
+}
+
+/* Preserve the full wide photograph without cropping. */
+.hero-content > .split-photo--hero img {
+	object-fit: contain;
+	object-position: left top;
+}
+@media (min-width: 1261px) {
+	.hero-content > .split-photo--hero {
+		position: relative;
+	}
+	.hero-content > .split-photo--hero img {
+		position: absolute;
+		left: 0;
+		top: 20px;
+		width: auto;
+		height: 100%;
+		max-width: none;
+	}
+}
+
+/* Keep the hero composition together on wide desktop screens. */
+@media (min-width: 1600px) {
+	.hero > .hero-content {
+		grid-template-columns: minmax(620px, 1fr) 590px;
+		column-gap: 48px;
+		padding-inline-end: clamp(98px, calc(40vw - 542px), 220px);
+	}
+}
+
+@media (min-width: 1600px) {
+	.hero-content > .hero-text {
+		max-width: 620px;
+	}
 }

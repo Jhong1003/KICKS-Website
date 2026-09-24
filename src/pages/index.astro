@@ -5,7 +5,7 @@ import Header from "../components/Header.astro";
 import StandingsTable from "../components/StandingsTable.astro";
 import TransferBanner from "../components/TransferBanner.astro";
 import leagueTable from "../data/league_table.json";
-import heroImage from "../assets/hero.jpg";
+import heroImage from "../assets/hero-wide.jpg";
 import scheduleData from "../data/schedule.json";
 import transferNews from "../data/transfer-news.json";
 import profilesData from "../data/player_profiles.json";
@@ -108,9 +108,7 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 					<Image
 						src={heroImage}
 						alt="KICKS players in action"
-						width={700}
-						height={560}
-						fit="cover"
+						width={1400}
 						quality={85}
 					/>
 				</div>
