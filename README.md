@@ -397,9 +397,9 @@ League pages offer a browser-only simulator with 10,000 Monte Carlo trials.
 All teams have the same independent Poisson scoring distribution; lambda
 is the current league's completed-match goals / (2 × completed matches).
 No cross-league records or team-strength estimates are used. Completed
-count, lambda, small-sample limitations and model assumptions appear in
-the UI. High-scoring outliers still affect lambda; actual score dependence
-and tactical changes are not modeled.
+count and lambda are used internally; small-sample limitations and model
+assumptions are documented here. High-scoring outliers still affect lambda;
+actual score dependence and tactical changes are not modeled.
 
 Every week, including week 4, has three games per matchup (nine total,
 six per team). Across four weeks that is 36 games / 24 per team. Cumulative
@@ -411,11 +411,11 @@ championship credit equally. Displayed percentages are average credit,
 not sole-win probability or probability of being among tied winners.
 Player Stats retains its consecutive visible ranks.
 
-Enter both scores to fix a future match, or leave both blank for automatic
-simulation. Scenario inputs never alter the estimated lambda or saved
-data. No completed matches means no automatic estimate; lambda zero means
-all automatic scores are 0–0. Fully fixed or finished scenarios are exact.
-Missing/TBD fixtures use explicitly labeled virtual round-robin pairings;
+The site automatically simulates all remaining matches with no score inputs.
+The core API retains fixed-score support; such scores never alter the
+estimated lambda or saved data. No completed matches means no automatic
+estimate; lambda zero means all automatic scores are 0–0. Fully fixed or finished scenarios are exact.
+Missing/TBD fixtures use internally constructed virtual round-robin pairings;
 conflicting input blocks calculation. Neither Sheets nor generated match
 files are changed by the simulator.
 
@@ -447,17 +447,15 @@ Title Race automatically runs the existing 10,000-trial simulation once per
 page load. Team rows stay in generated official standings order, including
 tied teams' presentation order; only percentages and bars change. Teams
 without standings rows are appended in league team order. TITLE RACE is the
-primary heading; Championship Simulator is a small subtitle.
+primary heading, with no subtitle or interactive controls.
 
-Try scenarios and How it works are closed by default. Opening scenarios
-shows remaining weeks and score inputs immediately. Blank score pairs use
-the existing model; specified pairs are fixed. Edits label the displayed
-result as stale until Run Simulation. Reset clears inputs and restores the
-cached initial result without resampling. Tab/disclosure changes neither
-reset inputs nor trigger additional trials. Assumptions, completed count,
-lambda, frozen participation, official tiebreakers and shared championship
-credit are explained inside How it works. Exact/no-data states are labeled
-without claiming 10,000 random trials.
+The site shows a read-only result, a simulations / remaining matches line,
+and "Equal team strength · Poisson model". Scenario inputs, Run/Reset and
+How it works are removed from the UI; unused UI event handlers and styles
+are removed too. Tab changes do not rerun the simulation. Detailed model
+assumptions remain documented above. The core simulator still supports
+fixed scores for callers and tests, but the website does not expose them.
+Exact/no-data states are labeled without claiming 10,000 random trials.
 
 Browser regression: after `npm run build`, run
 `node tests/league-ui.browser.mjs` with `playwright-core` available and Chrome

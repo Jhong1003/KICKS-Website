@@ -12,8 +12,6 @@ let model: SimulationModel | undefined;
 let error = "";
 try { model = buildSimulationModel(league, matches, standings); }
 catch (reason) { error = reason instanceof Error ? reason.message : "경기 데이터를 확인해주세요."; }
-const name = (id: string) => league.teams.find((team) => team.team_id === id)?.name ?? id;
-const weeks = [...new Set(model?.remaining.map((match) => match.week) ?? [])];
 // Keep the generated official standings order, including the presentation order of tied teams.
 // Teams without a standings row are appended in league roster order. Never sort by simulated credit.
 const orderedIds = [...new Set([
@@ -24,7 +22,6 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 ---
 <section id="title-race" class="content-section championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
 	<h2 id="simulator-title">TITLE RACE</h2>
-	<p class="title-race-subtitle">Championship Simulator</p>
 	{error ? <p role="alert">계산할 수 없습니다: {error}</p> : model && <>
 		<div class="title-race-results" data-simulator-results>
 			{orderedTeams.map((team) => <div class="simulator-team" data-team-id={team.team_id}>
@@ -33,132 +30,47 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 			</div>)}
 		</div>
 		<p class="title-race-meta" data-simulator-meta>{model.remaining.length} matches remaining</p>
-		<p class="title-race-status" data-simulator-status role="status" aria-live="polite">기본 시나리오를 계산합니다…</p>
+		<p class="title-race-model">Equal team strength · Poisson model</p>
+		<p class="title-race-status" data-simulator-status role="status" aria-live="polite">결과를 계산합니다…</p>
 		<noscript><p>결과를 보려면 JavaScript를 활성화해주세요.</p></noscript>
-		<div class="title-race-disclosures">
-			<details data-scenarios>
-				<summary>Try scenarios</summary>
-				<form data-simulator-form novalidate>
-					<fieldset class="simulator-controls" disabled>
-						<legend>남은 경기 시나리오</legend>
-						{model.remaining.length > 0 ? <p>원하는 경기의 양 팀 스코어를 입력하세요. 비워둔 경기는 자동으로 생성합니다.</p> : <p>모든 경기가 완료되었습니다.</p>}
-						{model.remaining.some((match) => match.virtual) && <p class="simulator-note">가상 대진은 미정 경기를 팀 조합별 경기 수에 맞춘 것입니다. 실제 대진은 변경되지 않습니다.</p>}
-						{weeks.map((week) => <div class="simulator-week">
-							<h3>Week {week}</h3>
-							{model!.remaining.filter((match) => match.week === week).map((match, index) => <div class="simulator-match" data-match-key={match.key}>
-								<p>{index + 1}. {name(match.home)} vs {name(match.away)} {match.virtual && <small>· 가상 대진</small>}</p>
-								<div class="simulator-score-inputs">
-									<label>{name(match.home)}<input type="number" min="0" step="1" inputmode="numeric" placeholder="자동" data-home aria-label={`Week ${week} 경기 ${index + 1} ${name(match.home)} 득점`} /></label>
-									<span aria-hidden="true">:</span>
-									<label>{name(match.away)}<input type="number" min="0" step="1" inputmode="numeric" placeholder="자동" data-away aria-label={`Week ${week} 경기 ${index + 1} ${name(match.away)} 득점`} /></label>
-								</div>
-							</div>)}
-						</div>)}
-						<div class="simulator-actions"><button type="submit">Run Simulation</button><button type="reset">Reset</button></div>
-					</fieldset>
-					<p data-scenario-status role="status" aria-live="polite"></p>
-				</form>
-			</details>
-			<details data-method>
-				<summary>How it works</summary>
-				<div class="simulator-method">
-					<p>완료 <strong>{model.completed}경기</strong> · 팀당 평균 득점 <strong>λ = {model.lambda === null ? "추정 불가" : model.lambda.toFixed(3)}</strong><br />λ = 이 리그 완료 경기의 총 득점 ÷ (경기 수 × 2).</p>
-					<p>팀 전력은 동등하게 가정하고, 양 팀 득점을 같은 Poisson(λ) 분포에서 독립적으로 생성합니다. 홈·원정 차이는 반영하지 않으며, 직접 입력한 미래 스코어는 λ를 바꾸지 않습니다.</p>
-					<p>미래 참여율은 현재 값으로 고정합니다: {orderedTeams.map((team) => `${team.name} ${((model!.base.find((row) => row.team_id === team.team_id)?.participation_rate ?? 0) * 100).toFixed(1)}%`).join(" · ")}.</p>
-					<p>순위는 Points → Participation Rate → GD → GF 순입니다. 모두 같으면 공동 1위 팀들이 우승 credit을 균등하게 나눕니다. 표시값은 평균 credit이며 단독 우승 확률이나 공동 우승 포함 확률과 다릅니다.</p>
-					<p>작은 표본이나 고득점 경기는 결과에 영향을 줍니다. 실제 경기의 전술 변화·득점 간 연관성은 반영하지 않습니다. 재계산 결과는 조금 달라질 수 있고, 반올림 때문에 합계가 정확히 100%가 아닐 수 있습니다.</p>
-					{model.lambda === 0 && <p>현재 λ가 0이므로 자동 생성되는 스코어는 모두 0–0입니다.</p>}
-				</div>
-			</details>
-		</div>
+
 	</>}
 </section>
 
 <script>
-	import { simulate, type FixedScores, type SimulationModel } from "../lib/championship-simulator";
+	import { simulate, type SimulationModel } from "../lib/championship-simulator";
 	for (const root of document.querySelectorAll<HTMLElement>(".championship-simulator[data-model]")) {
 		const model = JSON.parse(root.dataset.model!) as SimulationModel;
-		const form = root.querySelector<HTMLFormElement>("[data-simulator-form]")!;
-		const controls = form.querySelector<HTMLFieldSetElement>("fieldset")!;
 		const status = root.querySelector<HTMLElement>("[data-simulator-status]")!;
-		const scenarioStatus = root.querySelector<HTMLElement>("[data-scenario-status]")!;
 		const meta = root.querySelector<HTMLElement>("[data-simulator-meta]")!;
-		type Result = Awaited<ReturnType<typeof simulate>>;
-		let baseline: Result | undefined;
-		let busy = false;
-		function showResult(result: Result, specified: number) {
-			for (const row of root.querySelectorAll<HTMLElement>("[data-team-id]")) {
-				const percentage = result.credits[row.dataset.teamId!] * 100;
-				row.querySelector<HTMLElement>("[data-credit]")!.textContent = `${percentage.toFixed(1)}%`;
-				const meter = row.querySelector<HTMLMeterElement>("meter")!;
-				meter.value = percentage; meter.hidden = false;
-			}
-			meta.textContent = `${result.exact ? "Exact scenario" : `${result.trials.toLocaleString("en-US")} simulations`} · ${model.remaining.length} matches remaining`;
-			status.textContent = specified ? `직접 지정한 ${specified}경기를 반영한 결과입니다.` : "";
-		}
-		async function run(fixed: FixedScores = {}, initial = false) {
-			if (busy) return;
-			busy = true; controls.disabled = true;
+		async function run() {
 			root.setAttribute("aria-busy", "true");
-			status.textContent = "계산 중…";
-			scenarioStatus.textContent = "";
 			try {
-				const result = await simulate(model, fixed, 10000);
-				if (initial) baseline = result;
-				showResult(result, Object.keys(fixed).length);
+				const result = await simulate(model, {}, 10000);
+				for (const row of root.querySelectorAll<HTMLElement>("[data-team-id]")) {
+					const percentage = result.credits[row.dataset.teamId!] * 100;
+					row.querySelector<HTMLElement>("[data-credit]")!.textContent = `${percentage.toFixed(1)}%`;
+					const meter = row.querySelector<HTMLMeterElement>("meter")!;
+					meter.value = percentage;
+					meter.hidden = false;
+				}
+				meta.textContent = `${result.exact ? "Exact result" : `${result.trials.toLocaleString("en-US")} simulations`} · ${model.remaining.length} matches remaining`;
+				status.textContent = "";
 			} catch (error) {
 				status.textContent = error instanceof Error ? error.message : "계산에 실패했습니다.";
 			} finally {
-				busy = false; controls.disabled = false;
 				root.removeAttribute("aria-busy");
 			}
 		}
-		form.addEventListener("input", () => {
-			status.textContent = "입력이 변경되었습니다. 표시된 값은 이전 결과입니다.";
-			scenarioStatus.textContent = "Run Simulation을 눌러 변경한 스코어를 반영해주세요.";
-		});
-		form.addEventListener("reset", () => {
-			if (busy) return;
-			scenarioStatus.textContent = "입력을 초기화했습니다.";
-			if (baseline) showResult(baseline, 0);
-			else {
-				for (const row of root.querySelectorAll<HTMLElement>("[data-team-id]")) {
-					row.querySelector<HTMLElement>("[data-credit]")!.textContent = "—";
-					row.querySelector<HTMLMeterElement>("meter")!.hidden = true;
-				}
-				meta.textContent = `${model.remaining.length} matches remaining`;
-				status.textContent = "완료 경기 데이터가 없어 자동 계산을 보류합니다.";
-			}
-		});
-		form.addEventListener("submit", (event) => {
-			event.preventDefault();
-			if (busy) return;
-			const fixed: FixedScores = {};
-			for (const row of form.querySelectorAll<HTMLElement>("[data-match-key]")) {
-				const h = row.querySelector<HTMLInputElement>("[data-home]")!;
-				const a = row.querySelector<HTMLInputElement>("[data-away]")!;
-				if (h.value === "" && a.value === "" && !h.validity.badInput && !a.validity.badInput) continue;
-				if (h.value === "" || a.value === "" || !Number.isSafeInteger(h.valueAsNumber) || !Number.isSafeInteger(a.valueAsNumber) || h.valueAsNumber < 0 || a.valueAsNumber < 0) {
-					scenarioStatus.textContent = "양 팀 스코어를 모두 0 이상의 정수로 입력해주세요.";
-					root.querySelector<HTMLDetailsElement>("[data-scenarios]")!.open = true;
-					(!h.validity.valid || h.value === "" ? h : a).focus();
-					return;
-				}
-				fixed[row.dataset.matchKey!] = [h.valueAsNumber, a.valueAsNumber];
-			}
-			void run(fixed);
-		});
-		// Exactly once per page load. Tab/disclosure changes preserve the result and inputs.
+		// Run once per page load; changing League tabs keeps the same result.
 		if (model.lambda === null && model.remaining.length > 0) {
-			status.textContent = "완료 경기 데이터가 없어 자동 계산을 보류합니다. Try scenarios에서 모든 스코어를 지정할 수 있습니다.";
-			controls.disabled = false;
-		} else void run({}, true);
+			status.textContent = "완료 경기 데이터가 없어 자동 계산을 보류합니다.";
+		} else void run();
 	}
 </script>
 
 <style>
-	.title-race-subtitle { margin: .6rem 0 1.75rem; font-size: .85rem; opacity: .65; }
-	.title-race-results { max-width: 700px; }
+	.title-race-results { max-width: 700px; margin-top: 1.75rem; }
 	.simulator-team { display: grid; grid-template-columns: minmax(0, 1.2fr) 4.5rem minmax(60px, 1fr); align-items: center; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--color-sage); }
 	.simulator-team strong { font-weight: 600; overflow-wrap: anywhere; }
 	[data-credit] { text-align: right; font-variant-numeric: tabular-nums; }
@@ -168,24 +80,8 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 	meter::-webkit-meter-optimum-value { background: var(--color-green); }
 	meter::-moz-meter-bar { background: var(--color-green); }
 	.title-race-meta { font-size: .8rem; margin: 1rem 0; opacity: .75; font-variant-numeric: tabular-nums; }
+	.title-race-model { font-size: .75rem; margin: -.4rem 0 0; opacity: .6; }
 	.title-race-status { font-size: .85rem; }
 	.title-race-status:empty { display: none; }
-	.title-race-disclosures { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; max-width: 800px; }
-	details[open] { flex-basis: 100%; }
-	summary { cursor: pointer; color: var(--color-green); font-size: .85rem; font-weight: 600; padding: .5rem 0; }
-	.simulator-method { font-size: .9rem; line-height: 1.6; }
-	legend { font-weight: 600; font-size: .9rem; }
-	.simulator-controls { margin: .75rem 0; padding: 0; border: 0; min-width: 0; }
-	.simulator-controls > p, .simulator-note { font-size: .85rem; line-height: 1.6; }
-	.simulator-week h3 { margin: 1.5rem 0 .5rem; font-size: 1rem; }
-	.simulator-match { padding: .75rem 0; border-bottom: 1px solid var(--color-sage); }
-	.simulator-match p { margin: 0 0 .5rem; font-size: .9rem; }
-	.simulator-score-inputs { display: flex; gap: .75rem; align-items: end; }
-	label { display: flex; flex-direction: column; gap: .25rem; font-size: .8rem; min-width: 0; flex: 1; max-width: 12rem; }
-	input { width: 100%; min-width: 0; padding: .6rem; border: 1px solid var(--color-sage); border-radius: 4px; background: var(--color-background); color: var(--color-dark); font: inherit; }
-	.simulator-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
-	button { padding: .7rem 1rem; background: var(--color-green); color: var(--color-background); border: 1px solid var(--color-green); border-radius: 4px; font: inherit; font-size: .85rem; cursor: pointer; }
-	button[type="reset"] { background: transparent; color: var(--color-green); }
-	button:disabled { opacity: .6; cursor: wait; }
 	@media (max-width: 480px) { .simulator-team { gap: .6rem; grid-template-columns: minmax(0, 1fr) 4rem minmax(50px, .7fr); font-size: .9rem; } }
 </style>

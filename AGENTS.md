@@ -596,9 +596,10 @@ pipeline-rounded value. All four criteria tied means each co-leader gets
 1 / number-of-co-leaders championship credit. UI percentages are mean
 credit, not probability of sole victory or inclusion in a shared title.
 
-The UI explains sample-size and model limits, shows completed count and
-lambda, and allows exact future score overrides. No observations blocks
-random simulation; a fully specified scenario can still be evaluated.
+The documentation records sample-size and model limits and the lambda
+formula; the website shows only read-only results. The core calculation
+API retains exact future score overrides for tests and other callers.
+No observations blocks random simulation; a fully specified scenario can still be evaluated.
 Lambda zero generates only 0–0. Finished leagues and fixed scenarios are
 evaluated without random trials. Other scenarios run 10,000 trials in
 small batches to keep the browser responsive.
@@ -630,17 +631,15 @@ Title Race automatically runs the existing 10,000-trial simulation once per
 page load. Team rows stay in generated official standings order, including
 tied teams' presentation order; only percentages and bars change. Teams
 without standings rows are appended in league team order. TITLE RACE is the
-primary heading; Championship Simulator is a small subtitle.
+primary heading, with no subtitle or interactive controls.
 
-Try scenarios and How it works are closed by default. Opening scenarios
-shows remaining weeks and score inputs immediately. Blank score pairs use
-the existing model; specified pairs are fixed. Edits label the displayed
-result as stale until Run Simulation. Reset clears inputs and restores the
-cached initial result without resampling. Tab/disclosure changes neither
-reset inputs nor trigger additional trials. Assumptions, completed count,
-lambda, frozen participation, official tiebreakers and shared championship
-credit are explained inside How it works. Exact/no-data states are labeled
-without claiming 10,000 random trials.
+The site shows a read-only result, a simulations / remaining matches line,
+and "Equal team strength · Poisson model". Scenario inputs, Run/Reset and
+How it works are removed from the UI; unused UI event handlers and styles
+are removed too. Tab changes do not rerun the simulation. Detailed model
+assumptions remain documented above. The core simulator still supports
+fixed scores for callers and tests, but the website does not expose them.
+Exact/no-data states are labeled without claiming 10,000 random trials.
 
 Browser regression: after `npm run build`, run
 `node tests/league-ui.browser.mjs` with `playwright-core` available and Chrome
