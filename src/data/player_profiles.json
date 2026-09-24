@@ -980,7 +980,7 @@
           "goals": 2,
           "assists": 1,
           "attacking_points": 3,
-          "weeks_attended": 3,
+          "weeks_attended": 2,
           "weeks_played": 3
         },
         "weekly_stats": [
@@ -994,7 +994,7 @@
           {
             "week": 2,
             "team": "오늘밤 샴페인",
-            "games": 6,
+            "games": 0,
             "goals": 0,
             "assists": 0
           },
@@ -1015,8 +1015,7 @@
         "play_style_tag": "All-Rounder",
         "badges": [
           "first_goal",
-          "first_assist",
-          "perfect_attendance"
+          "first_assist"
         ]
       }
     ]
