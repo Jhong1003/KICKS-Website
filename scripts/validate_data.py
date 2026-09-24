@@ -359,8 +359,8 @@ def check_team_goal_diff_within_own_goal_budget(
 def check_active_players_missing_weeks(
     matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame, league_order: list[str]
 ) -> CheckResult:
-    """Rule: an active player must have a player_stats row for every fully
-    played week of every league they're part of.
+    """Rule: an active player who takes part in a league must have a
+    player_stats row for every fully played week of it.
 
     A missing row isn't caught by any of the goal-sum checks above: a
     player who didn't score contributes 0 either way, so their whole row
@@ -369,17 +369,20 @@ def check_active_players_missing_weeks(
     the roster while counting none of their games, understating their
     team (see the issues tab, I002).
 
-    joined_week (players tab) is the league week they joined *in their
-    first league* (the earliest league they have any row in; for someone
-    with no rows yet, the latest league that has a finished week). Weeks
-    of that league before joined_week are out of scope. From the next
-    league on they're expected every week — leagues restart at week 1 with
-    new teams, and an `active` player is taken to be playing. Someone who
-    stopped playing should be flipped to `inactive` on the players tab.
+    "Takes part in a league" means having at least one player_stats row in
+    it. A player with no row at all in a league is simply sitting that
+    league out (graduated, busy, taking a break) — not an error, and not
+    a reason to flip them to `inactive`, which means having left the club.
+    Once they have any row there, every finished week is expected.
 
-    A player with no joined_week at all is skipped with a warning rather
-    than assumed to have been here since week 1 — guessing would
-    reintroduce exactly the false alarms this is meant to remove.
+    joined_week (players tab) is the league week they joined *in their
+    first league* (the earliest league they have any row in); weeks of
+    that league before it are out of scope. Later leagues they take part
+    in are checked from week 1.
+
+    An active player with rows but no joined_week is skipped with a
+    warning rather than assumed to have been here since week 1 — guessing
+    would reintroduce exactly the false alarms this is meant to remove.
     """
     errors, warnings = [], []
     rank = {league: index for index, league in enumerate(league_order)}
@@ -390,29 +393,26 @@ def check_active_players_missing_weeks(
             finished.setdefault(league, []).append(int(week))
 
     have_row = set(zip(player_stats["league"], player_stats["player"], player_stats["week"]))
-    first_league = player_stats.groupby("player")["league"].agg(lambda s: min(s, key=rank.__getitem__))
-    fallback_first = next((league for league in reversed(league_order) if league in finished), None)
+    leagues_of = player_stats.groupby("player")["league"].agg(lambda s: sorted(set(s), key=rank.__getitem__))
     active_players = players[players["status"] == "active"]
 
     for _, player_row in active_players.iterrows():
         name = player_row["player"]
+        if name not in leagues_of.index:
+            continue  # no rows anywhere yet (e.g. hasn't played) — nothing to check
         joined = player_row.get("joined_week")
         if pd.isna(joined):
             warnings.append(
                 f"players 탭: '{name}'의 joined_week가 비어 있어 주차별 기록 누락 검사를 건너뜁니다"
             )
             continue
-        first = first_league.get(name, fallback_first)
-        if first is None:
-            continue
-        for league in league_order:
-            if rank[league] < rank[first]:
-                continue
+        first = leagues_of[name][0]
+        for league in leagues_of[name]:
             for week in sorted(finished.get(league, [])):
                 if league == first and week < int(joined):
                     continue
                 if (league, name, week) not in have_row:
-                    since = f"{joined}주차 합류" if league == first else "이전 리그부터 참가"
+                    since = f"{joined}주차 합류" if league == first else "이 리그 참가자"
                     errors.append(
                         f"[{league}] player_stats: {week}주차가 끝났는데 '{name}'의 기록이 없습니다 "
                         f"({since}, active 상태) — 결석했다면 games 0으로 한 줄 추가해주세요"
