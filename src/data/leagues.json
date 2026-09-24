@@ -1,0 +1,32 @@
+[
+  {
+    "id": "FA26-L1",
+    "latest": true,
+    "started": true,
+    "rules": {
+      "weeks": 4,
+      "final_week": 4,
+      "win_points": 2,
+      "final_win_points": 3,
+      "draw_points": 1,
+      "matches_per_week": 9
+    },
+    "teams": [
+      {
+        "team_id": "T1",
+        "name": "이지선다",
+        "color": "#b8860b"
+      },
+      {
+        "team_id": "T2",
+        "name": "문전박대",
+        "color": "#1c7ed6"
+      },
+      {
+        "team_id": "T3",
+        "name": "오늘밤 샴페인",
+        "color": "#e03131"
+      }
+    ]
+  }
+]

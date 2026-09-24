@@ -1,5 +1,6 @@
 [
   {
+    "league": "FA26-L1",
     "week": 1,
     "team": "문전박대",
     "wins": 4,
@@ -8,6 +9,7 @@
     "points": 9
   },
   {
+    "league": "FA26-L1",
     "week": 1,
     "team": "이지선다",
     "wins": 2,
@@ -16,6 +18,7 @@
     "points": 6
   },
   {
+    "league": "FA26-L1",
     "week": 1,
     "team": "오늘밤 샴페인",
     "wins": 1,
@@ -24,6 +27,7 @@
     "points": 3
   },
   {
+    "league": "FA26-L1",
     "week": 2,
     "team": "문전박대",
     "wins": 5,
@@ -32,6 +36,7 @@
     "points": 10
   },
   {
+    "league": "FA26-L1",
     "week": 2,
     "team": "이지선다",
     "wins": 4,
@@ -40,6 +45,7 @@
     "points": 8
   },
   {
+    "league": "FA26-L1",
     "week": 2,
     "team": "오늘밤 샴페인",
     "wins": 0,
@@ -48,6 +54,7 @@
     "points": 0
   },
   {
+    "league": "FA26-L1",
     "week": 3,
     "team": "오늘밤 샴페인",
     "wins": 3,
@@ -56,6 +63,7 @@
     "points": 8
   },
   {
+    "league": "FA26-L1",
     "week": 3,
     "team": "문전박대",
     "wins": 2,
@@ -64,6 +72,7 @@
     "points": 7
   },
   {
+    "league": "FA26-L1",
     "week": 3,
     "team": "이지선다",
     "wins": 0,

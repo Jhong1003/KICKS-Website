@@ -5,6 +5,7 @@
     "avatar_initials": "민서",
     "positions": [],
     "status": "inactive",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -38,8 +39,47 @@
     },
     "play_style_tag": "Team Player",
     "badges": [
-      "first_goal",
-      "week1_starter"
+      "first_goal"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Team Player",
+        "badges": [
+          "first_goal"
+        ]
+      }
     ]
   },
   {
@@ -50,6 +90,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -91,8 +132,55 @@
     "play_style_tag": "Iron Man",
     "badges": [
       "first_goal",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "first_goal",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -103,6 +191,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -138,8 +227,49 @@
     "personal_best_week": null,
     "play_style_tag": "Iron Man",
     "badges": [
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -151,6 +281,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -194,8 +325,57 @@
       "first_goal",
       "first_assist",
       "brace",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 2,
+          "attacking_points": 5,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 2,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 2
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 2,
+          "assists": 0,
+          "attacking_points": 2
+        },
+        "play_style_tag": "All-Rounder",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -207,6 +387,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -251,8 +432,58 @@
       "first_assist",
       "brace",
       "hat_trick",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 4,
+          "attacking_points": 7,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 3
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 3,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 0,
+          "assists": 3,
+          "attacking_points": 3
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -263,6 +494,7 @@
       "FW"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -292,8 +524,43 @@
       "first_goal",
       "first_assist",
       "brace",
-      "hat_trick",
-      "rookie"
+      "hat_trick"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 1,
+          "attacking_points": 4,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 3,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 3,
+          "assists": 1,
+          "attacking_points": 4
+        },
+        "play_style_tag": "Finisher",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick"
+        ]
+      }
     ]
   },
   {
@@ -304,6 +571,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -339,7 +607,49 @@
     "personal_best_week": null,
     "play_style_tag": "Team Player",
     "badges": [
-      "week1_starter"
+      "squad_member"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 2,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
     ]
   },
   {
@@ -350,6 +660,7 @@
       "FW"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [
       {
@@ -398,8 +709,62 @@
     "badges": [
       "first_goal",
       "first_assist",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [
+          {
+            "team": "오늘밤 샴페인",
+            "from_week": 1,
+            "to_week": 2
+          }
+        ],
+        "season_totals": {
+          "goals": 2,
+          "assists": 1,
+          "attacking_points": 3,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 1,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 1,
+          "assists": 1,
+          "attacking_points": 2
+        },
+        "play_style_tag": "All-Rounder",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -410,6 +775,7 @@
       "FW"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -453,8 +819,57 @@
       "first_goal",
       "first_assist",
       "brace",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 2,
+          "attacking_points": 5,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 2,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 2,
+          "assists": 1,
+          "attacking_points": 3
+        },
+        "play_style_tag": "All-Rounder",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -465,6 +880,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "문전박대",
     "team_history": [],
     "season_totals": {
@@ -507,8 +923,56 @@
     "badges": [
       "first_goal",
       "first_assist",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 2,
+          "assists": 5,
+          "attacking_points": 7,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 2
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 3
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 1,
+          "assists": 3,
+          "attacking_points": 4
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -520,6 +984,7 @@
       "FW"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -562,8 +1027,56 @@
     "badges": [
       "first_goal",
       "first_assist",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 5,
+          "attacking_points": 8,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 1,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 1,
+            "assists": 4
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 1,
+          "assists": 4,
+          "attacking_points": 5
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -575,6 +1088,7 @@
       "FW"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -616,8 +1130,55 @@
     "play_style_tag": "Iron Man",
     "badges": [
       "first_goal",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "first_goal",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -629,6 +1190,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [
       {
@@ -677,8 +1239,62 @@
     "badges": [
       "first_goal",
       "first_assist",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [
+          {
+            "team": "이지선다",
+            "from_week": 1,
+            "to_week": 2
+          }
+        ],
+        "season_totals": {
+          "goals": 2,
+          "assists": 2,
+          "attacking_points": 4,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 1,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 1,
+          "assists": 1,
+          "attacking_points": 2
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -690,6 +1306,7 @@
       "GK"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -731,8 +1348,55 @@
     "play_style_tag": "Playmaker",
     "badges": [
       "first_assist",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 2,
+          "attacking_points": 2,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 2
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 0,
+          "assists": 2,
+          "attacking_points": 2
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -743,6 +1407,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -783,8 +1448,54 @@
     },
     "play_style_tag": "Playmaker",
     "badges": [
-      "first_assist",
-      "week1_starter"
+      "first_assist"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1,
+          "weeks_attended": 2,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_assist"
+        ]
+      }
     ]
   },
   {
@@ -796,6 +1507,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -837,8 +1549,55 @@
     "play_style_tag": "Playmaker",
     "badges": [
       "first_goal",
-      "first_assist",
-      "week1_starter"
+      "first_assist"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 1,
+          "attacking_points": 2,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 1,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 1,
+          "assists": 1,
+          "attacking_points": 2
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_goal",
+          "first_assist"
+        ]
+      }
     ]
   },
   {
@@ -849,6 +1608,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -884,8 +1644,49 @@
     "personal_best_week": null,
     "play_style_tag": "Iron Man",
     "badges": [
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -896,6 +1697,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -917,7 +1719,35 @@
     "personal_best_week": null,
     "play_style_tag": "Team Player",
     "badges": [
-      "rookie"
+      "squad_member"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
     ]
   },
   {
@@ -929,6 +1759,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -956,8 +1787,41 @@
     "play_style_tag": "Playmaker",
     "badges": [
       "first_goal",
-      "first_assist",
-      "rookie"
+      "first_assist"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 1,
+          "attacking_points": 2,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 1,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 1,
+          "assists": 1,
+          "attacking_points": 2
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_goal",
+          "first_assist"
+        ]
+      }
     ]
   },
   {
@@ -968,6 +1832,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [],
     "season_totals": {
@@ -1004,8 +1869,50 @@
     "play_style_tag": "Iron Man",
     "badges": [
       "perfect_attendance",
-      "week1_starter",
       "own_goal_award"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "perfect_attendance",
+          "own_goal_award"
+        ]
+      }
     ]
   },
   {
@@ -1017,6 +1924,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "오늘밤 샴페인",
     "team_history": [
       {
@@ -1067,8 +1975,64 @@
       "first_assist",
       "brace",
       "hat_trick",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "오늘밤 샴페인",
+        "team_history": [
+          {
+            "team": "문전박대",
+            "from_week": 1,
+            "to_week": 2
+          }
+        ],
+        "season_totals": {
+          "goals": 13,
+          "assists": 3,
+          "attacking_points": 16,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 4,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 2,
+            "assists": 2
+          },
+          {
+            "week": 3,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 7,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 7,
+          "assists": 0,
+          "attacking_points": 7
+        },
+        "play_style_tag": "Finisher",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -1079,6 +2043,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [
       {
@@ -1120,8 +2085,55 @@
     "personal_best_week": null,
     "play_style_tag": "Iron Man",
     "badges": [
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [
+          {
+            "team": "오늘밤 샴페인",
+            "from_week": 1,
+            "to_week": 2
+          }
+        ],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -1133,6 +2145,7 @@
       "DF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1174,8 +2187,55 @@
     "play_style_tag": "Playmaker",
     "badges": [
       "first_assist",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -1187,6 +2247,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1227,8 +2288,54 @@
     },
     "play_style_tag": "Playmaker",
     "badges": [
-      "first_assist",
-      "week1_starter"
+      "first_assist"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 2,
+          "attacking_points": 2,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 2
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 0,
+          "assists": 2,
+          "attacking_points": 2
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_assist"
+        ]
+      }
     ]
   },
   {
@@ -1239,6 +2346,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1283,8 +2391,58 @@
       "first_assist",
       "brace",
       "hat_trick",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 5,
+          "assists": 3,
+          "attacking_points": 8,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 3,
+            "assists": 2
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 2,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 3,
+          "assists": 2,
+          "attacking_points": 5
+        },
+        "play_style_tag": "Finisher",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -1295,6 +2453,7 @@
       "FW"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1339,8 +2498,58 @@
       "first_assist",
       "brace",
       "hat_trick",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 11,
+          "assists": 4,
+          "attacking_points": 15,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 2,
+            "assists": 2
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 6,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 3,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 6,
+          "assists": 1,
+          "attacking_points": 7
+        },
+        "play_style_tag": "Finisher",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -1351,6 +2560,7 @@
       "FW"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1392,8 +2602,55 @@
     "play_style_tag": "Iron Man",
     "badges": [
       "first_goal",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "first_goal",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -1404,6 +2661,7 @@
       "GK"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1425,7 +2683,35 @@
     "personal_best_week": null,
     "play_style_tag": "Team Player",
     "badges": [
-      "rookie"
+      "squad_member"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
     ]
   },
   {
@@ -1434,6 +2720,7 @@
     "avatar_initials": "우진",
     "positions": [],
     "status": "inactive",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1462,7 +2749,42 @@
     "personal_best_week": null,
     "play_style_tag": "Team Player",
     "badges": [
-      "week1_starter"
+      "squad_member"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 2,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
     ]
   },
   {
@@ -1474,6 +2796,7 @@
       "MF"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1515,8 +2838,55 @@
     "play_style_tag": "Playmaker",
     "badges": [
       "first_assist",
-      "perfect_attendance",
-      "week1_starter"
+      "perfect_attendance"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 3,
+          "attacking_points": 3,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
     ]
   },
   {
@@ -1527,6 +2897,7 @@
       "FW"
     ],
     "status": "active",
+    "current_league": "FA26-L1",
     "current_team": "이지선다",
     "team_history": [],
     "season_totals": {
@@ -1562,7 +2933,49 @@
     "personal_best_week": null,
     "play_style_tag": "Team Player",
     "badges": [
-      "week1_starter"
+      "squad_member"
+    ],
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 2,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
     ]
   }
 ]

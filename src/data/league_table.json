@@ -1,5 +1,6 @@
 [
   {
+    "league": "FA26-L1",
     "rank": 1,
     "team": "문전박대",
     "played": 18,
@@ -13,6 +14,7 @@
     "participation_rate": 0.889
   },
   {
+    "league": "FA26-L1",
     "rank": 2,
     "team": "이지선다",
     "played": 18,
@@ -26,6 +28,7 @@
     "participation_rate": 0.815
   },
   {
+    "league": "FA26-L1",
     "rank": 3,
     "team": "오늘밤 샴페인",
     "played": 18,

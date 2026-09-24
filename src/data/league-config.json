@@ -1,0 +1,13 @@
+{
+  "_comment": "Per-league rules, hand-edited (never touched by the pipeline) and read by scripts/update_data.py and scripts/validate_data.py. \"_default\" applies to every league; list a league id below only to override the values that differ for it. A league not listed at all just uses \"_default\". weeks = weeks in the league, final_week = the week wins are worth final_win_points (that week onward), matches_per_week = expected matches in a full week (3 teams round-robin, 3 rounds = 9).",
+  "_default": {
+    "weeks": 4,
+    "final_week": 4,
+    "win_points": 2,
+    "final_win_points": 3,
+    "draw_points": 1,
+    "matches_per_week": 9
+  },
+  "FA26-L1": {},
+  "FA26-L2": {}
+}
