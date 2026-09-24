@@ -5,10 +5,13 @@
 // in scripts/update_data.py (that's what computes them) — this file only
 // carries the display metadata (label/description/icon) for each badge
 // key, and small view helpers. See AGENTS.md's "Player profiles" section
-// for the full rules writeup.
+// for the full rules writeup. Teams appear here only as team_id; names come
+// from ./leagues (getTeamName) at render time.
+
+import { getLeague, getTeamIdByName, getTeamName, type League } from "./leagues";
 
 export interface TeamSegment {
-	team: string;
+	team_id: string;
 	from_week: number;
 	to_week: number;
 }
@@ -23,7 +26,7 @@ export interface SeasonTotals {
 
 export interface WeeklyStat {
 	week: number;
-	team: string;
+	team_id: string;
 	games: number;
 	goals: number;
 	assists: number;
@@ -56,7 +59,7 @@ export type BadgeKey =
 /** One player's profile within a single league (its stats, tag and badges). */
 export interface PlayerLeagueSection {
 	league: string;
-	current_team: string;
+	current_team_id: string;
 	team_history: TeamSegment[];
 	season_totals: SeasonTotals;
 	weekly_stats: WeeklyStat[];
@@ -67,7 +70,10 @@ export interface PlayerLeagueSection {
 
 /** `leagues` has one section per league the player has played in, newest first. */
 export interface PlayerProfile {
+	/** URL slug for /players/<id> (and the player-photos.json key) — not the Sheet's player_id. */
 	id: string;
+	/** The players tab's player_id (P001, ...): the player's identity in the data. */
+	player_id: string;
 	name: string;
 	avatar_initials: string;
 	positions: PlayerPosition[];
@@ -156,7 +162,7 @@ export interface TransferEntry {
 	 * Optional explicit "from" team, overriding the automatic lookup from
 	 * player_profiles.json. Use this when the Sheet hasn't recorded the
 	 * move in a new week yet — team_history is still empty in that case
-	 * and current_team can't be trusted as "the team before the move"
+	 * and current_team_id can't be trusted as "the team before the move"
 	 * (it may still show the old team, or may have been edited ahead of
 	 * time and show something else entirely). Safe to remove once a real
 	 * week under the new team has been entered and regenerated.
@@ -165,10 +171,11 @@ export interface TransferEntry {
 }
 
 export interface ResolvedTransfer {
+	/** URL slug (PlayerProfile.id), for the profile link. */
 	playerId: string;
 	playerName: string;
-	fromTeam: string;
-	toTeam: string;
+	fromTeamId: string;
+	toTeamId: string;
 }
 
 /**
@@ -176,7 +183,7 @@ export interface ResolvedTransfer {
  *
  * "From" team is `entry.from` when given; otherwise it comes from the
  * player's team_history (the most recently completed span), falling back
- * to current_team if team_history is still empty (the Sheet hasn't
+ * to current_team_id if team_history is still empty (the Sheet hasn't
  * recorded the move in a new week yet).
  *
  * An entry that resolves to the same "from" and "to" team is dropped
@@ -187,8 +194,10 @@ export interface ResolvedTransfer {
  * around that).
  *
  * Entries for a name not found in profiles (typo, or the profile hasn't
- * been generated yet) are silently skipped rather than crashing the
- * homepage build.
+ * been generated yet), or a `to`/`from` team name that isn't one of that
+ * league's teams, are silently skipped rather than crashing the homepage
+ * build. transfer-news.json stays name-based (it's typed by hand); names are
+ * turned into ids here and compared as ids.
  */
 export function resolveTransfers(
 	entries: TransferEntry[],
@@ -196,6 +205,7 @@ export function resolveTransfers(
 	leagueId: string,
 ): ResolvedTransfer[] {
 	const byName = new Map(profiles.map((profile) => [profile.name, profile]));
+	const league = getLeague(leagueId);
 
 	return entries.flatMap((entry) => {
 		const profile = byName.get(entry.player);
@@ -203,11 +213,14 @@ export function resolveTransfers(
 		if (!profile || !section) return [];
 
 		const lastSegment = section.team_history[section.team_history.length - 1];
-		const fromTeam = entry.from ?? (lastSegment ? lastSegment.team : section.current_team);
+		const fromTeamId = entry.from
+			? getTeamIdByName(entry.from, league)
+			: (lastSegment?.team_id ?? section.current_team_id);
+		const toTeamId = getTeamIdByName(entry.to, league);
 
-		if (fromTeam === entry.to) return [];
+		if (!fromTeamId || !toTeamId || fromTeamId === toTeamId) return [];
 
-		return [{ playerId: profile.id, playerName: profile.name, fromTeam, toTeam: entry.to }];
+		return [{ playerId: profile.id, playerName: profile.name, fromTeamId, toTeamId }];
 	});
 }
 
@@ -218,12 +231,17 @@ export type PlayerSortKey = "name" | "team";
  * celebration page, not a leaderboard (that already exists on /league);
  * keep it that way if you touch this function.
  */
-export function sortPlayers(players: PlayerInLeague[], sortBy: PlayerSortKey): PlayerInLeague[] {
+export function sortPlayers(
+	players: PlayerInLeague[],
+	sortBy: PlayerSortKey,
+	league: League | undefined,
+): PlayerInLeague[] {
 	const collator = new Intl.Collator("ko");
+	const team = (entry: PlayerInLeague) => getTeamName(entry.section.current_team_id, league);
 	return [...players].sort((a, b) => {
 		if (sortBy === "team") {
 			return (
-				collator.compare(a.section.current_team, b.section.current_team) ||
+				collator.compare(team(a), team(b)) ||
 				collator.compare(a.player.name, b.player.name)
 			);
 		}

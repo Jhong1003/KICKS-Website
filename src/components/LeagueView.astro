@@ -6,7 +6,8 @@ import leagueTableData from "../data/league_table.json";
 import matchesData from "../data/matches.json";
 import weekSummariesData from "../data/week_summaries.json";
 import leaderboardData from "../data/player_leaderboard.json";
-import { leagues, type League } from "../lib/leagues";
+import profilesData from "../data/player_profiles.json";
+import { leagues, getTeamName, type League } from "../lib/leagues";
 
 interface Props {
 	league: League;
@@ -18,8 +19,8 @@ interface MatchRecord {
 	week: number;
 	round: number;
 	date: string;
-	home_team: string;
-	away_team: string;
+	home_team_id: string | null;
+	away_team_id: string | null;
 	home_score: number;
 	away_score: number;
 	status: "completed" | "scheduled";
@@ -34,10 +35,25 @@ function inLeague<T extends { league: string }>(rows: T[]): T[] {
 	return rows.filter((row) => row.league === league.id);
 }
 
-const standings = inLeague(leagueTableData);
-const matches = inLeague(matchesData as MatchRecord[]);
-const weekSummaries = inLeague(weekSummariesData);
-const leaderboard = inLeague(leaderboardData).filter((player) => player.status !== "inactive");
+// The generated JSON only carries ids (team_id, player_id); names are joined
+// back in here, once, so the table/result components just render them.
+const teamName = (teamId: string | null) => getTeamName(teamId, league);
+const playerNames = new Map(profilesData.map((profile) => [profile.player_id, profile.name]));
+
+const standings = inLeague(leagueTableData).map((row) => ({ ...row, team: teamName(row.team_id) }));
+const matches = inLeague(matchesData as MatchRecord[]).map((match) => ({
+	...match,
+	home_team: teamName(match.home_team_id),
+	away_team: teamName(match.away_team_id),
+}));
+const weekSummaries = inLeague(weekSummariesData).map((row) => ({ ...row, team: teamName(row.team_id) }));
+const leaderboard = inLeague(leaderboardData)
+	.filter((player) => player.status !== "inactive")
+	.map((row) => ({
+		...row,
+		player: playerNames.get(row.player_id) ?? row.player_id,
+		team: teamName(row.team_id),
+	}));
 
 // Most recent week first, so the results section can show one tab per week,
 // each broken down by round.

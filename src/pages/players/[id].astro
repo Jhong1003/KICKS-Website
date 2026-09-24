@@ -5,7 +5,7 @@ import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
 import playerPhotosData from "../../data/player-photos.json";
 import { BADGES, type PlayerProfile } from "../../lib/players";
-import { getLeague, getTeamColor } from "../../lib/leagues";
+import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 
 export function getStaticPaths() {
 	const profiles = profilesData as PlayerProfile[];
@@ -32,7 +32,9 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 	<main>
 		{
 			player.leagues.map((section, index) => {
-				const teamColor = getTeamColor(section.current_team, getLeague(section.league));
+				const league = getLeague(section.league);
+				const teamName = getTeamName(section.current_team_id, league);
+				const teamColor = getTeamColor(section.current_team_id, league);
 				const isLatest = index === 0;
 
 				return (
@@ -43,7 +45,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 						>
 							{isLatest && <a class="back-link" href="/players">← All players</a>}
 							<p class="section-label">
-								{isLatest ? section.league : `PREVIOUS LEAGUE`} · {section.current_team}
+								{isLatest ? section.league : `PREVIOUS LEAGUE`} · {teamName}
 							</p>
 							{isLatest ? (
 								<h1 id="player-detail-title">{player.name}</h1>
@@ -63,6 +65,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 									<PlayerCard
 										player={player}
 										section={section}
+										teamName={teamName}
 										teamColor={teamColor}
 										size="large"
 										avatarPhoto={playerPhotos[player.id]}
@@ -73,7 +76,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 										<div class="player-detail-meta">
 											<p class="section-label">TEAM HISTORY</p>
 											<p class="about-description">
-												Previously played for {section.team_history.map((segment) => segment.team).join(", ")}{" "}
+												Previously played for {section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")}{" "}
 												earlier in this league.
 											</p>
 										</div>

@@ -2,7 +2,7 @@
   {
     "league": "FA26-L1",
     "week": 1,
-    "team": "문전박대",
+    "team_id": "T2",
     "wins": 4,
     "draws": 1,
     "losses": 1,
@@ -11,7 +11,7 @@
   {
     "league": "FA26-L1",
     "week": 1,
-    "team": "이지선다",
+    "team_id": "T1",
     "wins": 2,
     "draws": 2,
     "losses": 2,
@@ -20,7 +20,7 @@
   {
     "league": "FA26-L1",
     "week": 1,
-    "team": "오늘밤 샴페인",
+    "team_id": "T3",
     "wins": 1,
     "draws": 1,
     "losses": 4,
@@ -29,7 +29,7 @@
   {
     "league": "FA26-L1",
     "week": 2,
-    "team": "문전박대",
+    "team_id": "T2",
     "wins": 5,
     "draws": 0,
     "losses": 1,
@@ -38,7 +38,7 @@
   {
     "league": "FA26-L1",
     "week": 2,
-    "team": "이지선다",
+    "team_id": "T1",
     "wins": 4,
     "draws": 0,
     "losses": 2,
@@ -47,7 +47,7 @@
   {
     "league": "FA26-L1",
     "week": 2,
-    "team": "오늘밤 샴페인",
+    "team_id": "T3",
     "wins": 0,
     "draws": 0,
     "losses": 6,
@@ -56,7 +56,7 @@
   {
     "league": "FA26-L1",
     "week": 3,
-    "team": "오늘밤 샴페인",
+    "team_id": "T3",
     "wins": 3,
     "draws": 2,
     "losses": 1,
@@ -65,7 +65,7 @@
   {
     "league": "FA26-L1",
     "week": 3,
-    "team": "문전박대",
+    "team_id": "T2",
     "wins": 2,
     "draws": 3,
     "losses": 1,
@@ -74,7 +74,7 @@
   {
     "league": "FA26-L1",
     "week": 3,
-    "team": "이지선다",
+    "team_id": "T1",
     "wins": 0,
     "draws": 3,
     "losses": 3,

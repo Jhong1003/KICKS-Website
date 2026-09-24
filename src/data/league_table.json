@@ -2,7 +2,7 @@
   {
     "league": "FA26-L1",
     "rank": 1,
-    "team": "문전박대",
+    "team_id": "T2",
     "played": 18,
     "wins": 11,
     "draws": 4,
@@ -16,7 +16,7 @@
   {
     "league": "FA26-L1",
     "rank": 2,
-    "team": "이지선다",
+    "team_id": "T1",
     "played": 18,
     "wins": 6,
     "draws": 5,
@@ -30,7 +30,7 @@
   {
     "league": "FA26-L1",
     "rank": 3,
-    "team": "오늘밤 샴페인",
+    "team_id": "T3",
     "played": 18,
     "wins": 4,
     "draws": 3,

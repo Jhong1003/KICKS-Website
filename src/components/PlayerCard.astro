@@ -11,13 +11,15 @@ interface Props {
 	player: PlayerProfile;
 	/** The league section this card shows (stats, tag, badges, team). */
 	section: PlayerLeagueSection;
+	/** Display name of section.current_team_id (joined from leagues.json by the page). */
+	teamName: string;
 	teamColor: string;
 	size?: "default" | "large";
 	href?: string;
 	avatarPhoto?: string;
 }
 
-const { player, section, teamColor, size = "default", href, avatarPhoto } = Astro.props;
+const { player, section, teamName, teamColor, size = "default", href, avatarPhoto } = Astro.props;
 const Tag = href ? "a" : "div";
 const avatarTextColor = getContrastingTextColor(teamColor);
 const labelColor = getReadableAccentColor(teamColor);
@@ -29,11 +31,11 @@ const cardStyle = `--team-color: ${teamColor}; --team-avatar-text: ${avatarTextC
 	href={href}
 	style={cardStyle}
 	data-name={player.name}
-	data-team={section.current_team}
+	data-team={teamName}
 >
 	<div class="player-card-header">
 		<span class="player-card-tag">{section.play_style_tag}</span>
-		<span class="player-card-team">{section.current_team}</span>
+		<span class="player-card-team">{teamName}</span>
 	</div>
 
 	<div class="player-card-avatar">

@@ -127,6 +127,61 @@ Then restart/refresh the dev server (or rebuild) to see the changes. This
 also happens automatically — see "Automated updates" next — but running it
 locally is still useful to preview a change or debug something.
 
+### Names vs ids
+
+People type **names** into the Sheet (players, teams), and that stays that
+way. The pipeline swaps them for **ids** right after loading
+(`resolve_ids` in `update_data.py`, runs after `load_sheets()`), and from
+there on — every calculation and every generated JSON file — works on ids
+only. The site joins names back in at render time.
+
+- **Where the ids come from**: `player_id` is the `players` tab's
+  `player_id` column; `team_id` is the `teams` tab's `team_id` column.
+  `build_id_maps` is the *only* place a name becomes an id.
+- **Team ids are per league** (every league has its own `T1`, `T2`, ...),
+  so a team is always `(league, team_id)` — any lookup goes through the
+  league.
+- **Unresolvable name** (not on the players/teams tab): `resolve_ids`
+  collects every one and raises, so the run fails instead of silently
+  dropping rows. `validate_data.py` reports the same thing first, with
+  sheet row numbers (`check_team_names`, `check_player_names_known`,
+  `check_player_ids`). A **blank** team on a match is allowed and becomes
+  `null` (a fixture whose teams aren't decided yet, e.g. finals week) —
+  the site shows it as "TBD".
+- **Same-name players aren't supported yet**: a duplicate name on the
+  players tab is a validation error. If two members ever share a name,
+  change `build_id_maps` (e.g. have staff type a disambiguated name) —
+  nothing downstream looks at names.
+- `validate_data.py` itself still works on names (it runs on
+  `load_sheets()` output, before `resolve_ids`), so its messages quote
+  what people actually typed.
+- **Generated fields**: `matches.json` has `home_team_id`/`away_team_id`;
+  `league_table.json` and `week_summaries.json` have `team_id`;
+  `player_leaderboard.json` has `player_id` + `team_id` (no name);
+  `player_profiles.json` sections have `current_team_id`, and
+  `team_history[]`/`weekly_stats[]` entries have `team_id`. Names live only
+  in `leagues.json` (`teams[].name`) and `player_profiles.json` (`name`).
+- **Frontend join**: `getTeamName`/`getTeamColor`/`getTeamIdByName` in
+  [src/lib/leagues.ts](src/lib/leagues.ts) take a `team_id` and a league.
+  [LeagueView.astro](src/components/LeagueView.astro) and `index.astro`
+  join names once and hand plain names to `StandingsTable`,
+  `WeeklyResults` and `PlayerStatsTable`; player pages pass `teamName` to
+  `PlayerCard`.
+
+**Two different player ids — don't mix them up:**
+
+| | Sheet `player_id` | URL slug (`id`) |
+|---|---|---|
+| Looks like | `P001`, `P024` | `88c25e9d` (8-char sha1 of the name) |
+| Comes from | `players` tab, typed by staff | `_player_slug(name)` in `update_data.py` |
+| JSON field | `player_id` (profiles, leaderboard) | `id` (profiles, leaderboard) |
+| Used for | the player's identity in the data: every join, groupby and roster in the pipeline, and name lookup on the site (`player_id` → `name`) | the public URL only: `/players/<id>` routes/links, the `player-photos.json` key, and `ResolvedTransfer.playerId` |
+
+They're never derived from each other. The slug is kept as a name hash so
+existing URLs and photo keys didn't change when ids were introduced — which
+also means the slug changes if a player's name is ever corrected on the
+Sheet, while `player_id` doesn't.
+
 ### Automated updates
 
 [.github/workflows/update-data.yml](.github/workflows/update-data.yml) runs
@@ -178,9 +233,10 @@ and why it must stay the only one.
   `goal_events` rows point at matches by it (`_event_key` in
   `update_data.py` pulls out `(league, week)`).
 - **Teams and colors** come from the `teams` tab (`league`, `team_id`,
-  `team_name`, `color` as `#rrggbb`). Team names are only unique *within* a
-  league, so anything that looks a team up (colors, `resolveTransfers`)
-  goes through its league. A blank color falls back to a neutral gray
+  `team_name`, `color` as `#rrggbb`). Team names and ids are only unique
+  *within* a league, so anything that looks a team up (names, colors,
+  `resolveTransfers`) goes through its league — see
+  [Names vs ids](#names-vs-ids). A blank color falls back to a neutral gray
   (`getTeamColor` in [src/lib/leagues.ts](src/lib/leagues.ts)).
 - **Rules** (weeks per league, finals week, points, matches per week) live
   in [src/data/league-config.json](src/data/league-config.json), not in
@@ -361,15 +417,18 @@ initials by default (last two characters of the name, or the full name if
 it's only two characters — `_avatar_initials`). To show a real photo for a
 specific player instead, add it to
 [src/data/player-photos.json](src/data/player-photos.json) (hand-edited,
-never touched by `update_data.py`) keyed by that player's `id` — e.g.
+never touched by `update_data.py`) keyed by that player's `id` (the URL
+slug, not the Sheet's `P001`-style `player_id`) — e.g.
 `{"6c36530d": "/players/jongho.jpg"}` — with the image placed under
 `public/players/`.
 
-**Player id**: `player_profiles.json` and `player_leaderboard.json` both
-use `_player_id(name)` (a short sha1 hash of the name) as a stable,
-URL-safe id for `/players/<id>` links — deterministic across regens, so
-links from the League leaderboard to a player's profile don't break when
-the Sheet is updated.
+**Player id vs URL slug**: `player_profiles.json` and
+`player_leaderboard.json` both carry `player_id` (the Sheet's `P001`, the
+data identity) and `id` (`_player_slug(name)`, a short sha1 hash of the
+name, used only for `/players/<id>` links) — deterministic across regens,
+so links from the League leaderboard to a player's profile don't break
+when the Sheet is updated. See [Names vs ids](#names-vs-ids) for the full
+comparison.
 
 **Team colors**: each card's accent color is the `color` of that team on
 the Sheet's `teams` tab (see [Leagues](#leagues)), looked up in the
@@ -397,10 +456,10 @@ never touched by the pipeline):
 `player` up in `player_profiles.json` to get their id (for the profile
 link. The team shown as *before* the move is `from` when given;
 otherwise it comes from the last entry in that league section's
-`team_history`, falling back to its `current_team` if that's still empty (a transfer is often announced here
+`team_history`, falling back to its `current_team_id` if that's still empty (a transfer is often announced here
 before the Sheet has a new week recorded under the new team). **Set
 `from` explicitly whenever the Sheet hasn't caught up yet** —
-`current_team`/`team_history` can't be trusted as "the pre-move team" in
+`current_team_id`/`team_history` can't be trusted as "the pre-move team" in
 that window (it may show the old team, or something edited ahead of
 time), and this is what actually happened the first time this shipped:
 three of four announced transfers ended up reading the wrong team because
@@ -411,8 +470,11 @@ had no way to tell. `from` is safe to remove once the move shows up in
 Whatever the source, if `from` and `to` end up equal the entry is dropped
 rather than rendered as a nonsensical "Team X -> Team X" line — this is
 the safety net for exactly that kind of Sheet inconsistency. An entry
-whose `player` doesn't match anyone in `player_profiles.json` is also
-silently skipped rather than breaking the homepage build.
+whose `player` doesn't match anyone in `player_profiles.json`, or whose
+`to`/`from` isn't one of that league's team names, is also silently
+skipped rather than breaking the homepage build. The file itself stays
+name-based (it's typed by hand); `resolveTransfers` turns the names into
+`team_id`s and compares ids.
 
 Dismissing the banner (the ✕) only hides it for that browsing session —
 it's stored in `sessionStorage`, not `localStorage`, on purpose, so it

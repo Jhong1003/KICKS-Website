@@ -190,6 +190,7 @@ the numbers live in `src/data/league-config.json`, not in code):
 | 리그 구조 | 오류/경고 | `matches`/`player_stats`의 모든 행에 `league`가 있고 `teams` 탭에 있는 리그여야 함. `teams` 탭에는 빈 값·중복된 팀 이름/id가 없어야 하고 `color`는 `#rrggbb` 형식이어야 함(빈 color는 경고). `matches`의 모든 (리그, 주차)에 `schedule.json` 날짜가 있어야 함. 이 검사에서 오류가 나면 다른 검사는 돌리지 않고 이것만 먼저 보고함 |
 | 팀 이름이 teams 탭과 일치 | 오류 | `matches`/`player_stats`는 **그 행의 리그**의 `teams` 탭 팀 이름과, `players`는 어느 리그든 `teams` 탭에 있는 이름과 띄어쓰기까지 정확히 일치해야 함 |
 | 선수 이름 일치 | 오류 | `player_stats`의 모든 이름이 `players` 탭에 있어야 함 (역방향은 검사 안 함 — 아직 기록 없는 신규 멤버는 정상) |
+| players 탭 id | 오류 | `players` 탭의 모든 행에 `player`와 `player_id`가 있어야 하고, 둘 다 중복되면 안 됨. 파이프라인이 다른 탭의 이름을 이 `player_id`로 바꾸기 때문 (동명이인은 아직 지원하지 않음) |
 | 점수는 0 이상 정수 | 오류 | 빈 점수(아직 안 한 경기)는 검사 대상에서 제외 |
 | 주차별 경기 수 | 오류 | 리그마다 `league-config.json`의 `matches_per_week`(기본 9 = 3팀 라운드로빈 × 3라운드)개여야 하고, 주차가 그 리그의 `weeks`(기본 4)를 넘으면 안 됨 |
 | 주차별 득점 합 일치 | 오류 | (리그·주차별로) 그 주 경기 기록 득점 합(전체 팀) = 그 주 선수 골 합 + 그 주 자책골(`own_goals`) 합. 팀별이 아니라 주 전체로 검사함 — 한 주에 두 팀을 상대하는 라운드로빈이라 자책골을 특정 상대팀에 귀속시킬 수 없기 때문. 자동 실행 중 아직 다 안 끝난 주차는 실패 대신 로그만 남기고 건너뜀 — 수동 실행/로컬에서는 건너뛰지 않고 그대로 검사 |
@@ -306,7 +307,7 @@ itself when the next league starts (set it to the new league id to announce
 moves inside it). Each
 `player` must match a name in `player_profiles.json` exactly. `from` is
 optional — without it, the previous team is looked up automatically from
-`team_history` (falling back to `current_team`), which only works once
+`team_history` (falling back to `current_team_id`), which only works once
 the Sheet has a week recorded under the new team. **Until then, set
 `from` explicitly** — this bit us once already: the Sheet's week 1/2 rows
 got edited inconsistently for a real transfer, and without an explicit

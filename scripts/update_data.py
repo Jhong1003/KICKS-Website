@@ -5,6 +5,12 @@ goal_events, teams), computes the league table, player leaderboard and
 player profiles with pandas, and writes the results to src/data/ for the
 Astro site to read directly.
 
+Names only exist at the edges: people type player and team *names* into the
+sheet, resolve_ids() swaps them for ids (players tab player_id, teams tab
+team_id) right after loading, and everything after that - and every
+generated JSON file - works on ids. The site joins names back in only when
+rendering.
+
 Everything is computed per league (e.g. FA26-L1, FA26-L2): each league has
 its own teams and restarts at week 1, and nothing is summed across leagues.
 Per-league rules (points, finals week, ...) live in src/data/league-config.json.
@@ -178,6 +184,93 @@ def load_sheets() -> dict[str, pd.DataFrame]:
 
 
 # ---------------------------------------------------------------------------
+# Names -> ids
+# ---------------------------------------------------------------------------
+
+
+def build_id_maps(players: pd.DataFrame, teams: pd.DataFrame) -> tuple[dict[str, str], dict[tuple[str, str], str]]:
+    """The only place a typed name is turned into an id.
+
+    - player name -> player_id (players tab). Names are assumed unique for
+      now; a duplicate is an error rather than a silent guess. If two
+      members ever share a name, this is the function to change (e.g. have
+      staff type a disambiguated name, or the player_id itself, in the
+      other tabs) - nothing downstream looks at names.
+    - (league, team_name) -> team_id (teams tab). Team names and ids are
+      only unique within a league (every league has its own T1, T2, ...).
+    """
+    problems = []
+    names = players["player"]
+    ids = players["player_id"]
+    for label, column in (("player", names), ("player_id", ids)):
+        if column.isna().any():
+            problems.append(f"players tab has rows with a blank `{label}`")
+        duplicated = sorted(set(column[column.duplicated() & column.notna()]))
+        if duplicated:
+            problems.append(f"players tab has duplicate {label}(s): {duplicated}")
+    if problems:
+        raise ValueError("; ".join(problems))
+
+    player_ids = dict(zip(names, ids))
+    team_ids = {
+        (league, name): team_id
+        for league, name, team_id in zip(teams["league"], teams["team_name"], teams["team_id"])
+    }
+    return player_ids, team_ids
+
+
+def resolve_ids(sheets: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    """Swap every player/team name in matches and player_stats for its id.
+
+    matches: home_team/away_team -> home_team_id/away_team_id.
+    player_stats: player/team -> player_id/team_id.
+    players keeps both `player` (the display name) and `player_id` - it's
+    the table names are joined back from. goal_events has already been
+    folded into player_stats by load_sheets() and isn't used after that.
+
+    A name that doesn't resolve fails the whole run, listing every one at
+    once. validate_data.py (check_team_names / check_player_names_known /
+    check_player_ids) reports the same problems first, with sheet row
+    numbers - this is the backstop for running update_data.py on its own.
+    """
+    players, teams = sheets["players"].copy(), sheets["teams"].copy()
+    # A stray space around an id would otherwise split one player/team in two.
+    players["player_id"] = players["player_id"].str.strip()
+    teams["team_id"] = teams["team_id"].str.strip()
+    player_ids, team_ids = build_id_maps(players, teams)
+    unknown: set[str] = set()
+
+    def team_id(league: str, name: str) -> str | None:
+        if pd.isna(name):
+            return None
+        if (league, name) not in team_ids:
+            unknown.add(f"team '{name}' ({league})")
+        return team_ids.get((league, name))
+
+    def player_id(name: str) -> str | None:
+        if name not in player_ids:
+            unknown.add(f"player '{name}'")
+        return player_ids.get(name)
+
+    matches = sheets["matches"].copy()
+    for side in ("home", "away"):
+        matches[f"{side}_team"] = [team_id(l, n) for l, n in zip(matches["league"], matches[f"{side}_team"])]
+    matches = matches.rename(columns={"home_team": "home_team_id", "away_team": "away_team_id"})
+
+    stats = sheets["player_stats"].copy()
+    stats["player"] = stats["player"].map(player_id)
+    stats["team"] = [team_id(l, n) for l, n in zip(stats["league"], stats["team"])]
+    stats = stats.rename(columns={"player": "player_id", "team": "team_id"})
+
+    if unknown:
+        raise ValueError(
+            "Names not found on the players/teams tabs (run validate_data.py for row numbers): "
+            + ", ".join(sorted(unknown))
+        )
+    return {**sheets, "matches": matches, "player_stats": stats, "players": players, "teams": teams}
+
+
+# ---------------------------------------------------------------------------
 # League table
 # ---------------------------------------------------------------------------
 
@@ -201,15 +294,15 @@ def _team_match_rows(matches: pd.DataFrame) -> pd.DataFrame:
     """
     played = matches.dropna(subset=["home_score", "away_score"]).copy()
 
-    home_rows = played.rename(columns={"home_team": "team", "away_team": "opponent"})
+    home_rows = played.rename(columns={"home_team_id": "team_id", "away_team_id": "opponent_id"})
     home_rows["goals_for"] = played["home_score"]
     home_rows["goals_against"] = played["away_score"]
 
-    away_rows = played.rename(columns={"away_team": "team", "home_team": "opponent"})
+    away_rows = played.rename(columns={"away_team_id": "team_id", "home_team_id": "opponent_id"})
     away_rows["goals_for"] = played["away_score"]
     away_rows["goals_against"] = played["home_score"]
 
-    columns = ["league", "week", "team", "opponent", "goals_for", "goals_against"]
+    columns = ["league", "week", "team_id", "opponent_id", "goals_for", "goals_against"]
     team_rows = pd.concat([home_rows[columns], away_rows[columns]], ignore_index=True)
 
     team_rows["points"] = team_rows.apply(
@@ -245,15 +338,15 @@ def _participation_rates(team_rows: pd.DataFrame, player_stats: pd.DataFrame, ro
     up for. "Games played by the roster" (the numerator, just below) is
     the one figure that's intentionally scoped to today's active roster.
     """
-    roster_size = roster.groupby("team")["player"].nunique()
+    roster_size = roster.groupby("team_id")["player_id"].nunique()
 
-    team_games_per_week = player_stats.groupby(["team", "week"])["games"].max()
-    team_total_games = team_games_per_week.groupby("team").sum()
+    team_games_per_week = player_stats.groupby(["team_id", "week"])["games"].max()
+    team_total_games = team_games_per_week.groupby("team_id").sum()
 
-    stats = player_stats.merge(roster[["player", "team"]], on="player", suffixes=("", "_roster"))
-    games_played = stats.groupby("team")["games"].sum(min_count=1).fillna(0)
+    stats = player_stats.merge(roster[["player_id", "team_id"]], on="player_id", suffixes=("", "_roster"))
+    games_played = stats.groupby("team_id")["games"].sum(min_count=1).fillna(0)
 
-    teams = team_rows["team"].unique()
+    teams = team_rows["team_id"].unique()
     rates = {}
     for team in teams:
         members = roster_size.get(team, 0)
@@ -276,8 +369,8 @@ def build_league_table(matches: pd.DataFrame, player_stats: pd.DataFrame, roster
         if team_rows.empty:
             continue
 
-        table = team_rows.groupby("team").agg(
-            played=("team", "size"),
+        table = team_rows.groupby("team_id").agg(
+            played=("team_id", "size"),
             wins=("result", lambda s: (s == "win").sum()),
             draws=("result", lambda s: (s == "draw").sum()),
             losses=("result", lambda s: (s == "loss").sum()),
@@ -295,7 +388,7 @@ def build_league_table(matches: pd.DataFrame, player_stats: pd.DataFrame, roster
         )
 
         table = table.sort_values(
-            by=["points", "participation_rate", "team"], ascending=[False, False, True]
+            by=["points", "participation_rate", "team_id"], ascending=[False, False, True]
         ).reset_index()
         table.insert(0, "rank", range(1, len(table) + 1))
         table.insert(0, "league", league)
@@ -329,7 +422,7 @@ def build_week_summaries(matches: pd.DataFrame) -> list[dict]:
     completed matches simply produce no rows here.
     """
     team_rows = _team_match_rows(matches)
-    summary = team_rows.groupby(["league", "week", "team"], as_index=False).agg(
+    summary = team_rows.groupby(["league", "week", "team_id"], as_index=False).agg(
         wins=("result", lambda s: int((s == "win").sum())),
         draws=("result", lambda s: int((s == "draw").sum())),
         losses=("result", lambda s: int((s == "loss").sum())),
@@ -352,13 +445,16 @@ def build_week_summaries(matches: pd.DataFrame) -> list[dict]:
 GAMES_PER_WEEK = 6  # a player who attends every game in a week racks up 6 games
 
 
-def _player_id(name: str) -> str:
-    """URL-safe id for a player, used in /players/<id> links.
+def _player_slug(name: str) -> str:
+    """URL slug for a player, used in /players/<slug> links (the `id` field
+    in player_leaderboard.json / player_profiles.json).
 
-    Player names are Korean and shouldn't end up raw in a URL, so this
-    hashes the name into a short stable slug instead. It's deterministic
-    (same name -> same id every regen) and shared between the leaderboard
-    and the player profiles below, so links between the two always match.
+    Not the same thing as player_id (the players tab's P001, ...), which is
+    the player's identity in the data: this is only the public URL. Player
+    names are Korean and shouldn't end up raw in a URL, so this hashes the
+    name into a short stable slug instead. It's deterministic (same name ->
+    same slug every regen), which keeps existing links and
+    player-photos.json keys working.
     """
     return hashlib.sha1(name.encode("utf-8")).hexdigest()[:8]
 
@@ -382,32 +478,40 @@ def build_leaderboard(player_stats: pd.DataFrame, players: pd.DataFrame) -> list
     totals. Attendance itself is reported alongside as a secondary, human
     -readable stat ("weeks attended / weeks played so far").
     """
-    statuses = players.set_index("player")["status"]
+    statuses = players.set_index("player_id")["status"]
+    names = players.set_index("player_id")["player"]
 
     records: list[dict] = []
     for league, league_stats in player_stats.groupby("league", sort=False):
         weeks_played = int(league_stats["week"].nunique())
         league_stats = league_stats.fillna({"games": 0, "goals": 0, "assists": 0})
 
-        current_team = league_stats.sort_values("week").groupby("player")["team"].last()
+        current_team = league_stats.sort_values("week").groupby("player_id")["team_id"].last()
 
-        totals = league_stats.groupby("player", as_index=False).agg(
+        totals = league_stats.groupby("player_id", as_index=False).agg(
             games=("games", "sum"), goals=("goals", "sum"), assists=("assists", "sum")
         )
-        totals["team"] = totals["player"].map(current_team)
-        totals["status"] = totals["player"].map(statuses).fillna("active")
+        totals["team_id"] = totals["player_id"].map(current_team)
+        totals["status"] = totals["player_id"].map(statuses).fillna("active")
 
         totals["goals"] = totals["goals"].astype(int)
         totals["assists"] = totals["assists"].astype(int)
         totals["attacking_points"] = totals["goals"] + totals["assists"]
         totals["weeks_attended"] = (totals["games"] / GAMES_PER_WEEK).astype(int)
         totals["weeks_played"] = weeks_played
-        totals["id"] = totals["player"].apply(_player_id)
+        totals["id"] = totals["player_id"].map(names).apply(_player_slug)
         totals = totals.drop(columns=["games"])
 
-        totals = totals.sort_values(
-            by=["attacking_points", "goals", "assists", "weeks_attended"], ascending=False
-        ).reset_index(drop=True)
+        # Full ties fall back to name order (display only, not a real tiebreaker).
+        totals["_name"] = totals["player_id"].map(names)
+        totals = (
+            totals.sort_values(
+                by=["attacking_points", "goals", "assists", "weeks_attended", "_name"],
+                ascending=[False, False, False, False, True],
+            )
+            .drop(columns=["_name"])
+            .reset_index(drop=True)
+        )
         totals.insert(0, "rank", range(1, len(totals) + 1))
         totals.insert(0, "league", league)
         records.extend(totals.to_dict(orient="records"))
@@ -464,11 +568,11 @@ def _team_segments(rows: pd.DataFrame) -> list[dict]:
     rows = rows.sort_values("week")
     segments: list[dict] = []
     for _, row in rows.iterrows():
-        week, team = int(row["week"]), row["team"]
-        if segments and segments[-1]["team"] == team:
+        week, team_id = int(row["week"]), row["team_id"]
+        if segments and segments[-1]["team_id"] == team_id:
             segments[-1]["to_week"] = week
         else:
-            segments.append({"team": team, "from_week": week, "to_week": week})
+            segments.append({"team_id": team_id, "from_week": week, "to_week": week})
     return segments
 
 
@@ -533,13 +637,13 @@ def _badges(
         badges.append("squad_member")
     return badges
 
-def _positions_for(name: str, positions: pd.DataFrame) -> list[str]:
+def _positions_for(player_id: str, positions: pd.DataFrame) -> list[str]:
     """A player's positions, primary first, skipping any that are blank.
     ...
     """
-    if name not in positions.index:
+    if player_id not in positions.index:
         return []
-    row = positions.loc[name]
+    row = positions.loc[player_id]
     return [value for value in (row["primary_position"], row["secondary_position"]) if not pd.isna(value)]
 
 
@@ -555,7 +659,7 @@ def _league_section(league: str, rows: pd.DataFrame, weeks_played: int) -> dict:
 
     return {
         "league": league,
-        "current_team": segments[-1]["team"],
+        "current_team_id": segments[-1]["team_id"],
         "team_history": segments[:-1],
         "season_totals": {
             "goals": goals,
@@ -567,7 +671,7 @@ def _league_section(league: str, rows: pd.DataFrame, weeks_played: int) -> dict:
         "weekly_stats": [
             {
                 "week": int(row["week"]),
-                "team": row["team"],
+                "team_id": row["team_id"],
                 "games": int(row["games"]),
                 "goals": int(row["goals"]),
                 "assists": int(row["assists"]),
@@ -596,12 +700,14 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, lea
     """
     weeks_played = player_stats.groupby("league")["week"].nunique().to_dict()
     player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0, "own_goals": 0})
-    positions = players.set_index("player")[["primary_position", "secondary_position"]]
-    statuses = players.set_index("player")["status"]
+    by_id = players.set_index("player_id")
+    positions = by_id[["primary_position", "secondary_position"]]
+    statuses = by_id["status"].dropna()
     league_rank = {league: index for index, league in enumerate(league_order)}
 
     profiles = []
-    for name, player_rows in player_stats.groupby("player"):
+    for player_id, player_rows in player_stats.groupby("player_id"):
+        name = by_id.at[player_id, "player"]
         sections = [
             _league_section(league, rows, int(weeks_played[league]))
             for league, rows in player_rows.groupby("league", sort=False)
@@ -610,11 +716,12 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, lea
 
         profiles.append(
             {
-                "id": _player_id(name),
+                "id": _player_slug(name),
+                "player_id": player_id,
                 "name": name,
                 "avatar_initials": _avatar_initials(name),
-                "positions": _positions_for(name, positions),
-                "status": statuses.get(name, "active"),
+                "positions": _positions_for(player_id, positions),
+                "status": statuses.get(player_id, "active"),
                 "leagues": sections,
             }
         )
@@ -663,7 +770,7 @@ def build_leagues(teams: pd.DataFrame, matches: pd.DataFrame) -> list[dict]:
 
 
 def build_rosters(player_stats: pd.DataFrame, players: pd.DataFrame) -> pd.DataFrame:
-    """Each league's active roster: (league, player, team).
+    """Each league's active roster: (league, player_id, team_id).
 
     Derived from that league's player_stats rows (a player belongs to a
     league's roster if they have at least one row there) rather than from
@@ -672,14 +779,14 @@ def build_rosters(player_stats: pd.DataFrame, players: pd.DataFrame) -> pd.DataF
     league. Only `active` players count — same rule as before, applied to
     the global `status` column.
     """
-    statuses = players.set_index("player")["status"]
+    statuses = players.set_index("player_id")["status"]
     roster = (
         player_stats.sort_values("week")
-        .groupby(["league", "player"], as_index=False)["team"]
+        .groupby(["league", "player_id"], as_index=False)["team_id"]
         .last()
     )
-    roster["status"] = roster["player"].map(statuses).fillna("active")
-    return roster[roster["status"] == "active"][["league", "player", "team"]]
+    roster["status"] = roster["player_id"].map(statuses).fillna("active")
+    return roster[roster["status"] == "active"][["league", "player_id", "team_id"]]
 
 
 # ---------------------------------------------------------------------------
@@ -735,13 +842,14 @@ def _check_leagues(teams: pd.DataFrame, matches: pd.DataFrame, player_stats: pd.
 
 def main() -> None:
     sheets = load_sheets()
+    _check_leagues(sheets["teams"], sheets["matches"], sheets["player_stats"])
+    sheets = resolve_ids(sheets)
     matches, player_stats, players, teams = (
         sheets["matches"],
         sheets["player_stats"],
         sheets["players"],
         sheets["teams"],
     )
-    _check_leagues(teams, matches, player_stats)
 
     leagues = build_leagues(teams, matches)
     league_order = [league["id"] for league in leagues]

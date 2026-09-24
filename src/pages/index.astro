@@ -12,7 +12,7 @@ import profilesData from "../data/player_profiles.json";
 import matchesData from "../data/matches.json";
 import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
-import { latestLeague } from "../lib/leagues";
+import { latestLeague, getTeamName } from "../lib/leagues";
 import { buildGoalCountdown, isCelebratingMilestone, type MatchScore } from "../lib/goals";
 
 const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
@@ -20,7 +20,9 @@ const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
 // leagues), so the banner is tied to the league named in transfer-news.json and
 // goes away by itself once a newer league becomes the latest.
 const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData as PlayerProfile[], transferNews.league);
-const standings = leagueTable.filter((row) => row.league === latestLeague.id);
+const standings = leagueTable
+	.filter((row) => row.league === latestLeague.id)
+	.map((row) => ({ ...row, team: getTeamName(row.team_id, latestLeague) }));
 const showTransferBanner =
 	transferNews.enabled && transferNews.league === latestLeague.id && resolvedTransfers.length > 0;
 // Club-wide all-time goals (every league summed). Celebration state is as of

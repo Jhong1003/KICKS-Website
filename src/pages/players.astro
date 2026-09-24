@@ -4,7 +4,7 @@ import PlayerCard from "../components/PlayerCard.astro";
 import profilesData from "../data/player_profiles.json";
 import playerPhotosData from "../data/player-photos.json";
 import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from "../lib/players";
-import { latestLeague, getTeamColor } from "../lib/leagues";
+import { latestLeague, getTeamColor, getTeamName } from "../lib/leagues";
 
 // The grid shows the latest league's roster: players with a section in that
 // league. Earlier leagues live on each player's own profile page.
@@ -13,7 +13,7 @@ const roster = (profilesData as PlayerProfile[]).flatMap((player): PlayerInLeagu
 	const section = getSection(player, league.id);
 	return section && player.status !== "inactive" ? [{ player, section }] : [];
 });
-const players = sortPlayers(roster, "name");
+const players = sortPlayers(roster, "name", league);
 const playerPhotos = playerPhotosData as Record<string, string>;
 ---
 
@@ -45,7 +45,8 @@ const playerPhotos = playerPhotosData as Record<string, string>;
 						<PlayerCard
 							player={player}
 							section={section}
-							teamColor={getTeamColor(section.current_team, league)}
+							teamName={getTeamName(section.current_team_id, league)}
+							teamColor={getTeamColor(section.current_team_id, league)}
 							href={`/players/${player.id}`}
 							avatarPhoto={playerPhotos[player.id]}
 						/>

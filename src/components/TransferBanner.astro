@@ -1,6 +1,6 @@
 ---
 import { getReadableAccentColor, type ResolvedTransfer } from "../lib/players";
-import { getTeamColor, type League } from "../lib/leagues";
+import { getTeamColor, getTeamName, type League } from "../lib/leagues";
 
 interface Props {
 	heading: string;
@@ -10,7 +10,7 @@ interface Props {
 
 const { heading, transfers, league } = Astro.props;
 
-const teamTextColor = (team: string) => getReadableAccentColor(getTeamColor(team, league));
+const teamTextColor = (teamId: string) => getReadableAccentColor(getTeamColor(teamId, league));
 ---
 
 <div class="transfer-banner" id="transfer-banner">
@@ -23,14 +23,14 @@ const teamTextColor = (team: string) => getReadableAccentColor(getTeamColor(team
 						<a class="transfer-chip-name" href={`/players/${transfer.playerId}`}>
 							{transfer.playerName}
 						</a>
-						<span class="transfer-chip-team" style={`color: ${teamTextColor(transfer.fromTeam)}`}>
-							{transfer.fromTeam}
+						<span class="transfer-chip-team" style={`color: ${teamTextColor(transfer.fromTeamId)}`}>
+							{getTeamName(transfer.fromTeamId, league)}
 						</span>
 						<span class="transfer-chip-arrow" aria-hidden="true">
 							→
 						</span>
-						<span class="transfer-chip-team" style={`color: ${teamTextColor(transfer.toTeam)}`}>
-							{transfer.toTeam}
+						<span class="transfer-chip-team" style={`color: ${teamTextColor(transfer.toTeamId)}`}>
+							{getTeamName(transfer.toTeamId, league)}
 						</span>
 					</div>
 				))

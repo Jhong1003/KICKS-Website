@@ -41,10 +41,33 @@ export function getLeague(id: string): League | undefined {
 
 export const DEFAULT_TEAM_COLOR = "#7f8c8d";
 
+// The generated JSON refers to teams only by team_id (T1, T2, ...), which is
+// unique only within a league — so every lookup goes through the league.
+// Names are joined back in here, at render time.
+
+function findTeam(teamId: string | null, league: League | undefined): LeagueTeam | undefined {
+	return teamId ? league?.teams.find((entry) => entry.team_id === teamId) : undefined;
+}
+
+/**
+ * A team's display name. A null id (a fixture whose teams aren't decided
+ * yet, e.g. the finals week) reads as "TBD"; an id missing from the league
+ * falls back to the raw id rather than breaking the page.
+ */
+export function getTeamName(teamId: string | null, league: League | undefined): string {
+	if (!teamId) return "TBD";
+	return findTeam(teamId, league)?.name ?? teamId;
+}
+
+/** team_id for a team name as typed by hand (e.g. transfer-news.json), within one league. */
+export function getTeamIdByName(name: string, league: League | undefined): string | undefined {
+	return league?.teams.find((entry) => entry.name === name)?.team_id;
+}
+
 /**
  * A team's color, from its league's entry on the teams tab. Falls back to a
  * neutral gray when the league or team is unknown or has no color yet.
  */
-export function getTeamColor(team: string, league: League | undefined): string {
-	return league?.teams.find((entry) => entry.name === team)?.color || DEFAULT_TEAM_COLOR;
+export function getTeamColor(teamId: string | null, league: League | undefined): string {
+	return findTeam(teamId, league)?.color || DEFAULT_TEAM_COLOR;
 }

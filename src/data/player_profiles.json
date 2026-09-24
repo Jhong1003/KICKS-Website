@@ -1,6 +1,7 @@
 [
   {
     "id": "8cefcaea",
+    "player_id": "P004",
     "name": "강경웅",
     "avatar_initials": "경웅",
     "positions": [
@@ -11,7 +12,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 3,
@@ -23,21 +24,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 1,
             "assists": 1
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 1,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 1,
             "assists": 4
@@ -60,6 +61,7 @@
   },
   {
     "id": "d5cbda93",
+    "player_id": "P009",
     "name": "김민규",
     "avatar_initials": "민규",
     "positions": [
@@ -70,7 +72,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 1,
@@ -82,21 +84,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 1,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -118,6 +120,7 @@
   },
   {
     "id": "02c74af3",
+    "player_id": "P027",
     "name": "김민서",
     "avatar_initials": "민서",
     "positions": [],
@@ -125,7 +128,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 1,
@@ -137,14 +140,14 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 0,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 1,
             "assists": 0
@@ -165,6 +168,7 @@
   },
   {
     "id": "85804296",
+    "player_id": "P014",
     "name": "김하주",
     "avatar_initials": "하주",
     "positions": [
@@ -175,10 +179,10 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [
           {
-            "team": "이지선다",
+            "team_id": "T1",
             "from_week": 1,
             "to_week": 2
           }
@@ -193,21 +197,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 1,
             "assists": 1
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 1,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 1
@@ -230,6 +234,7 @@
   },
   {
     "id": "6b275000",
+    "player_id": "P008",
     "name": "남우현",
     "avatar_initials": "우현",
     "positions": [
@@ -240,7 +245,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -252,21 +257,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 2
@@ -288,6 +293,7 @@
   },
   {
     "id": "b6c4cad3",
+    "player_id": "P022",
     "name": "노윤오",
     "avatar_initials": "윤오",
     "positions": [
@@ -297,7 +303,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 1,
@@ -309,21 +315,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 1,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -345,6 +351,7 @@
   },
   {
     "id": "e1f2e6b2",
+    "player_id": "P020",
     "name": "문재홍",
     "avatar_initials": "재홍",
     "positions": [
@@ -354,7 +361,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -366,21 +373,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -396,6 +403,7 @@
   },
   {
     "id": "dfe0850f",
+    "player_id": "P003",
     "name": "박경태",
     "avatar_initials": "경태",
     "positions": [
@@ -405,10 +413,10 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [
           {
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "from_week": 1,
             "to_week": 2
           }
@@ -423,21 +431,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -453,6 +461,7 @@
   },
   {
     "id": "7af93f87",
+    "player_id": "P026",
     "name": "박현제",
     "avatar_initials": "현제",
     "positions": [
@@ -463,7 +472,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 3,
@@ -475,21 +484,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 2,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 1,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 2
@@ -513,6 +522,7 @@
   },
   {
     "id": "2619e3b6",
+    "player_id": "P011",
     "name": "배성민",
     "avatar_initials": "성민",
     "positions": [
@@ -523,7 +533,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -535,21 +545,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 1
@@ -571,6 +581,7 @@
   },
   {
     "id": "66ec6daf",
+    "player_id": "P006",
     "name": "서지현",
     "avatar_initials": "지현",
     "positions": [
@@ -580,7 +591,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -592,21 +603,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 0,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 1
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -627,6 +638,7 @@
   },
   {
     "id": "c3d373b3",
+    "player_id": "P021",
     "name": "손영보",
     "avatar_initials": "영보",
     "positions": [
@@ -637,7 +649,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 3,
@@ -649,21 +661,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 3
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 1
           },
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 3,
             "assists": 0
@@ -688,6 +700,7 @@
   },
   {
     "id": "041dc3f4",
+    "player_id": "P029",
     "name": "이관현",
     "avatar_initials": "관현",
     "positions": [
@@ -697,7 +710,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 3,
@@ -709,7 +722,7 @@
         "weekly_stats": [
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 3,
             "assists": 1
@@ -733,6 +746,7 @@
   },
   {
     "id": "61b88435",
+    "player_id": "P001",
     "name": "이동규",
     "avatar_initials": "동규",
     "positions": [
@@ -743,7 +757,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 1,
@@ -755,21 +769,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 0,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 1,
             "assists": 1
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 0,
             "goals": 0,
             "assists": 0
@@ -791,6 +805,7 @@
   },
   {
     "id": "1cb91f73",
+    "player_id": "P015",
     "name": "이승균",
     "avatar_initials": "승균",
     "positions": [
@@ -801,7 +816,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -813,21 +828,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 0,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 2
           },
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 0,
             "goals": 0,
             "assists": 0
@@ -848,6 +863,7 @@
   },
   {
     "id": "e8eba53c",
+    "player_id": "P018",
     "name": "이시온",
     "avatar_initials": "시온",
     "positions": [
@@ -857,7 +873,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 5,
@@ -869,21 +885,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 3,
             "assists": 2
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 1
           },
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 2,
             "assists": 0
@@ -908,6 +924,7 @@
   },
   {
     "id": "ba1c4f55",
+    "player_id": "P023",
     "name": "이은성",
     "avatar_initials": "은성",
     "positions": [
@@ -917,7 +934,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -929,21 +946,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 0,
             "goals": 0,
             "assists": 0
@@ -959,6 +976,7 @@
   },
   {
     "id": "db1a5f56",
+    "player_id": "P002",
     "name": "이재민",
     "avatar_initials": "재민",
     "positions": [
@@ -968,10 +986,10 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [
           {
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "from_week": 1,
             "to_week": 2
           }
@@ -986,21 +1004,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 1,
             "assists": 1
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 0,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 1,
             "assists": 0
@@ -1022,6 +1040,7 @@
   },
   {
     "id": "6c36530d",
+    "player_id": "P010",
     "name": "이종호",
     "avatar_initials": "종호",
     "positions": [
@@ -1031,7 +1050,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 11,
@@ -1043,21 +1062,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 2,
             "assists": 2
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 6,
             "assists": 1
           },
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 3,
             "assists": 1
@@ -1082,6 +1101,7 @@
   },
   {
     "id": "f591da0a",
+    "player_id": "P005",
     "name": "이지수",
     "avatar_initials": "지수",
     "positions": [
@@ -1091,7 +1111,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -1103,21 +1123,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -1133,6 +1153,7 @@
   },
   {
     "id": "3c6929d0",
+    "player_id": "P025",
     "name": "이현동",
     "avatar_initials": "현동",
     "positions": [
@@ -1142,7 +1163,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 3,
@@ -1154,21 +1175,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 1
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 2,
             "assists": 1
           },
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 1,
             "assists": 0
@@ -1192,6 +1213,7 @@
   },
   {
     "id": "169ca10b",
+    "player_id": "P012",
     "name": "이희준",
     "avatar_initials": "희준",
     "positions": [
@@ -1201,7 +1223,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 1,
@@ -1213,21 +1235,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 1,
             "assists": 0
@@ -1249,6 +1271,7 @@
   },
   {
     "id": "86b16786",
+    "player_id": "P031",
     "name": "정경섭",
     "avatar_initials": "경섭",
     "positions": [
@@ -1258,7 +1281,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -1270,7 +1293,7 @@
         "weekly_stats": [
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -1286,6 +1309,7 @@
   },
   {
     "id": "f0c6f90d",
+    "player_id": "P017",
     "name": "조우진",
     "avatar_initials": "우진",
     "positions": [],
@@ -1293,7 +1317,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -1305,14 +1329,14 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -1328,6 +1352,7 @@
   },
   {
     "id": "e816824a",
+    "player_id": "P016",
     "name": "주민건",
     "avatar_initials": "민건",
     "positions": [
@@ -1338,7 +1363,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -1350,21 +1375,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 1
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 1
           },
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 1
@@ -1386,6 +1411,7 @@
   },
   {
     "id": "37bdae54",
+    "player_id": "P028",
     "name": "진홍주",
     "avatar_initials": "홍주",
     "positions": [
@@ -1395,7 +1421,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -1407,7 +1433,7 @@
         "weekly_stats": [
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -1423,6 +1449,7 @@
   },
   {
     "id": "bb68b4a4",
+    "player_id": "P013",
     "name": "차희락",
     "avatar_initials": "희락",
     "positions": [
@@ -1432,7 +1459,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -1444,21 +1471,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 0,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "이지선다",
+            "team_id": "T1",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -1474,6 +1501,7 @@
   },
   {
     "id": "43adbf2e",
+    "player_id": "P030",
     "name": "최건",
     "avatar_initials": "최건",
     "positions": [
@@ -1484,7 +1512,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 1,
@@ -1496,7 +1524,7 @@
         "weekly_stats": [
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 1,
             "assists": 1
@@ -1518,6 +1546,7 @@
   },
   {
     "id": "e3e80231",
+    "player_id": "P007",
     "name": "최민석",
     "avatar_initials": "민석",
     "positions": [
@@ -1527,7 +1556,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
           "goals": 0,
@@ -1539,21 +1568,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 0,
             "assists": 0
@@ -1570,6 +1599,7 @@
   },
   {
     "id": "88c25e9d",
+    "player_id": "P024",
     "name": "홍지환",
     "avatar_initials": "지환",
     "positions": [
@@ -1580,10 +1610,10 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "오늘밤 샴페인",
+        "current_team_id": "T3",
         "team_history": [
           {
-            "team": "문전박대",
+            "team_id": "T2",
             "from_week": 1,
             "to_week": 2
           }
@@ -1598,21 +1628,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 4,
             "assists": 1
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 2,
             "assists": 2
           },
           {
             "week": 3,
-            "team": "오늘밤 샴페인",
+            "team_id": "T3",
             "games": 6,
             "goals": 7,
             "assists": 0
@@ -1637,6 +1667,7 @@
   },
   {
     "id": "ef395141",
+    "player_id": "P019",
     "name": "황보준",
     "avatar_initials": "보준",
     "positions": [
@@ -1646,7 +1677,7 @@
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "문전박대",
+        "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
           "goals": 2,
@@ -1658,21 +1689,21 @@
         "weekly_stats": [
           {
             "week": 1,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 1,
             "assists": 0
           },
           {
             "week": 2,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 0,
             "assists": 2
           },
           {
             "week": 3,
-            "team": "문전박대",
+            "team_id": "T2",
             "games": 6,
             "goals": 1,
             "assists": 3

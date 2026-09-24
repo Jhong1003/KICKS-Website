@@ -190,6 +190,27 @@ def check_player_names_known(player_stats: pd.DataFrame, players: pd.DataFrame) 
     return errors, []
 
 
+def check_player_ids(players: pd.DataFrame) -> CheckResult:
+    """Rule: every players-tab row needs a name and a player_id, and both
+    must be unique. update_data.py turns every name typed in the other tabs
+    into this player_id (resolve_ids), so a blank or duplicated one would
+    leave a name with no id, or two people sharing one. A duplicate *name*
+    is an error too for now: with two same-named members there's no way to
+    tell from the other tabs which one a row means (see
+    update_data.build_id_maps)."""
+    errors = []
+    for col in ("player", "player_id"):
+        for idx, value in players[col].items():
+            if pd.isna(value) or not str(value).strip():
+                errors.append(f"players {_sheet_row(idx)}행: {col}가 비어 있습니다")
+        values = players[col].dropna().astype(str).str.strip()
+        for value, count in values.value_counts().items():
+            if count > 1:
+                rows = ", ".join(str(_sheet_row(idx)) for idx in values[values == value].index)
+                errors.append(f"players 탭: {col} '{value}'가 {count}번 나옵니다 ({rows}행)")
+    return errors, []
+
+
 def check_scores_valid(matches: pd.DataFrame) -> CheckResult:
     """Rule: a filled-in score must be a non-negative integer. A blank
     score means the match hasn't been played yet and is out of scope for
@@ -604,6 +625,7 @@ def main() -> None:
         (structure_errors, structure_warnings),
         check_team_names(matches, player_stats, players, teams),
         check_player_names_known(player_stats, players),
+        check_player_ids(players),
         check_matches_per_week(matches),
         _per_league(leagues, lambda l: check_games_values(scoped(player_stats, l))),
         _per_league(leagues, lambda l: check_scores_valid(scoped(matches, l))),
