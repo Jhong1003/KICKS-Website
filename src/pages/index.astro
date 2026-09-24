@@ -9,9 +9,11 @@ import heroImage from "../assets/hero.jpg";
 import scheduleData from "../data/schedule.json";
 import transferNews from "../data/transfer-news.json";
 import profilesData from "../data/player_profiles.json";
+import matchesData from "../data/matches.json";
 import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
 import { latestLeague } from "../lib/leagues";
+import { buildGoalCountdown, isCelebratingMilestone, type MatchScore } from "../lib/goals";
 
 const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
 // Transfers only make sense within one league (teams are reshuffled between
@@ -21,6 +23,10 @@ const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData 
 const standings = leagueTable.filter((row) => row.league === latestLeague.id);
 const showTransferBanner =
 	transferNews.enabled && transferNews.league === latestLeague.id && resolvedTransfers.length > 0;
+// Club-wide all-time goals (every league summed). Celebration state is as of
+// build time here; the script below re-checks it against the visitor's date.
+const goalCountdown = buildGoalCountdown(matchesData as MatchScore[]);
+const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 ---
 
 <BaseLayout
@@ -74,6 +80,27 @@ const showTransferBanner =
 						</span>
 						<span aria-hidden="true">→</span>
 					</a>
+					{
+						goalCountdown.total > 0 && (
+							<p
+								class:list={["hero-goal-counter", { "hero-goal-counter--celebrate": celebratingMilestone }]}
+								id="hero-goal-counter"
+								data-countdown={JSON.stringify(goalCountdown)}
+							>
+								<span class="hero-goal-counter-icon" aria-hidden="true">
+									⚽
+								</span>
+								<span id="hero-goal-counter-default" hidden={celebratingMilestone}>
+									KICKS 통산 <strong>{goalCountdown.total}골</strong> · {goalCountdown.nextMilestone}호 골까지{" "}
+									{goalCountdown.remaining}골
+								</span>
+								<span id="hero-goal-counter-celebrate" hidden={!celebratingMilestone}>
+									<strong>KICKS 통산 {goalCountdown.lastMilestone}골 달성!</strong> 🎉 · 지금까지{" "}
+									{goalCountdown.total}골
+								</span>
+							</p>
+						)
+					}
 				</div>
 				<div class="split-photo split-photo--hero">
 					<Image
@@ -103,6 +130,7 @@ const showTransferBanner =
 
 <script>
 	import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
+	import { isCelebratingMilestone, type GoalCountdown } from "../lib/goals";
 
 	// The link above reflects "today" as of the last build, which goes stale
 	// between deploys. Recompute against the visitor's actual current date
@@ -118,5 +146,18 @@ const showTransferBanner =
 			const restEl = document.getElementById("hero-next-up-rest");
 			if (restEl) restEl.textContent = `${next.isToday ? "Today" : next.formattedDate} · ${next.title}`;
 		}
+	}
+
+	// Same staleness problem for the milestone celebration: whether it was
+	// reached "recently" depends on today's date, not the build date.
+	const counter = document.getElementById("hero-goal-counter");
+	const rawCountdown = counter?.dataset.countdown;
+	if (counter && rawCountdown) {
+		const celebrate = isCelebratingMilestone(JSON.parse(rawCountdown) as GoalCountdown);
+		counter.classList.toggle("hero-goal-counter--celebrate", celebrate);
+		const defaultEl = document.getElementById("hero-goal-counter-default");
+		const celebrateEl = document.getElementById("hero-goal-counter-celebrate");
+		if (defaultEl) defaultEl.hidden = celebrate;
+		if (celebrateEl) celebrateEl.hidden = !celebrate;
 	}
 </script>

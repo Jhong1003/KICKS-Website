@@ -1745,6 +1745,69 @@ h1 {
 
 }
 
+/* 홈: KICKS 통산 골 카운트다운 (Next up 바로 아래) */
+
+.hero-goal-counter {
+
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 9px;
+	width: fit-content;
+	margin: 28px 0 0;
+	color: var(--color-sage);
+	font-size: 0.9rem;
+
+}
+
+.hero-next-up:not([hidden]) + .hero-goal-counter {
+
+	margin-top: 12px;
+
+}
+
+.hero-goal-counter-icon {
+
+	font-size: 0.8rem;
+	line-height: 1;
+
+}
+
+.hero-goal-counter strong {
+
+	color: var(--color-background);
+	font-weight: 700;
+
+}
+
+.hero-goal-counter [hidden] {
+
+	display: none;
+
+}
+
+.hero-goal-counter--celebrate {
+
+	padding: 6px 12px;
+	border: 1px solid rgba(247, 246, 242, 0.45);
+	border-radius: 999px;
+	background-color: rgba(247, 246, 242, 0.12);
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.hero-goal-counter--celebrate .hero-goal-counter-icon {
+		animation: hero-goal-bounce 1.6s ease-in-out infinite;
+	}
+}
+
+@keyframes hero-goal-bounce {
+
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-3px); }
+
+}
+
 /* 일정 페이지: 세로 타임라인 (월별 그룹) */
 
 .schedule-timeline {
