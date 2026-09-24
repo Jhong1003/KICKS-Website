@@ -585,10 +585,10 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, lea
 
     A profile has one section per league the player has played in
     (`leagues`, newest first) — stats, play-style tag and badges are all
-    per league, never combined. The section fields of the player's most
-    recent league are also mirrored at the top level (`current_league`,
-    `current_team`, `season_totals`, ...) so a page that just wants "the
-    player as they are now" doesn't have to dig into `leagues`.
+    per league, never combined. There is deliberately no top-level copy of
+    "the current league's" fields: which league a page shows is the page's
+    decision (the site's latest league, or a specific one), not whichever
+    one this player happened to play last.
 
     Players who haven't played a single game yet (sheet status "new", no
     rows in player_stats) don't have anything to show on a card - they'll
@@ -607,7 +607,6 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, lea
             for league, rows in player_rows.groupby("league", sort=False)
         ]
         sections.sort(key=lambda section: league_rank[section["league"]], reverse=True)
-        latest = sections[0]
 
         profiles.append(
             {
@@ -616,13 +615,11 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, lea
                 "avatar_initials": _avatar_initials(name),
                 "positions": _positions_for(name, positions),
                 "status": statuses.get(name, "active"),
-                "current_league": latest["league"],
-                **{key: value for key, value in latest.items() if key != "league"},
                 "leagues": sections,
             }
         )
 
-    profiles.sort(key=lambda p: (p["current_team"], p["name"]))
+    profiles.sort(key=lambda p: p["name"])
     return profiles
 
 

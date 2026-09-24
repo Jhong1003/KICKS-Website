@@ -21,85 +21,102 @@ interface Props {
 
 const { player } = Astro.props;
 const playerPhotos = playerPhotosData as Record<string, string>;
-const teamColor = getTeamColor(player.current_team, getLeague(player.current_league));
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 ---
 
 <BaseLayout
 	title={`${player.name} | KICKS Players`}
-	description={`${player.name}'s KICKS player profile — season stats, play style, and badges.`}
+	description={`${player.name}'s KICKS player profile — league stats, play style, and badges.`}
 >
 	<main>
-		<section class="content-section" aria-labelledby="player-detail-title">
-			<a class="back-link" href="/players">← All players</a>
-			<p class="section-label">{player.current_team}</p>
-			<h1 id="player-detail-title">{player.name}</h1>
-			{
-				player.positions.length > 0 && (
-					<p class="player-positions">
-						{player.positions.map((position) => (
-							<span class={`position-chip position-${position}`}>{position}</span>
-						))}
-					</p>
-				)
-			}
+		{
+			player.leagues.map((section, index) => {
+				const teamColor = getTeamColor(section.current_team, getLeague(section.league));
+				const isLatest = index === 0;
 
-			<div class="about-intro player-detail">
-				<div class="split-photo player-detail-card-col">
-					<PlayerCard player={player} teamColor={teamColor} size="large" avatarPhoto={playerPhotos[player.id]} />
-				</div>
-				<div class="about-intro-text">
-					{
-						player.team_history.length > 0 && (
-							<div class="player-detail-meta">
-								<p class="section-label">TEAM HISTORY</p>
-								<p class="about-description">
-									Previously played for {player.team_history.map((segment) => segment.team).join(", ")} earlier
-									this season.
+				return (
+					<>
+						<section
+							class="content-section"
+							aria-labelledby={isLatest ? "player-detail-title" : `player-league-${section.league}`}
+						>
+							{isLatest && <a class="back-link" href="/players">← All players</a>}
+							<p class="section-label">
+								{isLatest ? section.league : `PREVIOUS LEAGUE`} · {section.current_team}
+							</p>
+							{isLatest ? (
+								<h1 id="player-detail-title">{player.name}</h1>
+							) : (
+								<h2 id={`player-league-${section.league}`}>{section.league}</h2>
+							)}
+							{isLatest && player.positions.length > 0 && (
+								<p class="player-positions">
+									{player.positions.map((position) => (
+										<span class={`position-chip position-${position}`}>{position}</span>
+									))}
 								</p>
-							</div>
-						)
-					}
+							)}
 
-					{
-						player.personal_best_week && (
-							<div class="player-detail-meta">
-								<p class="section-label">PERSONAL BEST WEEK</p>
-								<p class="about-description">
-									Week {player.personal_best_week.week}: {plural(player.personal_best_week.goals, "goal")} and{" "}
-									{plural(player.personal_best_week.assists, "assist")} (
-									{plural(player.personal_best_week.attacking_points, "attacking point")}).
-								</p>
-							</div>
-						)
-					}
+							<div class="about-intro player-detail">
+								<div class="split-photo player-detail-card-col">
+									<PlayerCard
+										player={player}
+										section={section}
+										teamColor={teamColor}
+										size="large"
+										avatarPhoto={playerPhotos[player.id]}
+									/>
+								</div>
+								<div class="about-intro-text">
+									{section.team_history.length > 0 && (
+										<div class="player-detail-meta">
+											<p class="section-label">TEAM HISTORY</p>
+											<p class="about-description">
+												Previously played for {section.team_history.map((segment) => segment.team).join(", ")}{" "}
+												earlier in this league.
+											</p>
+										</div>
+									)}
 
-					<div class="player-detail-meta">
-						<p class="section-label">BADGES</p>
-						<div class="player-badge-list">
-							{
-								player.badges.map((key) => (
-									<div class="player-badge-item">
-										<span class="player-badge-icon" aria-hidden="true">
-											{BADGES[key].icon}
-										</span>
-										<div>
-											<p class="player-badge-label">{BADGES[key].label}</p>
-											<p class="player-badge-description">{BADGES[key].description}</p>
+									{section.personal_best_week && (
+										<div class="player-detail-meta">
+											<p class="section-label">PERSONAL BEST WEEK</p>
+											<p class="about-description">
+												Week {section.personal_best_week.week}: {plural(section.personal_best_week.goals, "goal")}{" "}
+												and {plural(section.personal_best_week.assists, "assist")} (
+												{plural(section.personal_best_week.attacking_points, "attacking point")}).
+											</p>
+										</div>
+									)}
+
+									<div class="player-detail-meta">
+										<p class="section-label">BADGES</p>
+										<div class="player-badge-list">
+											{section.badges.map((key) => (
+												<div class="player-badge-item">
+													<span class="player-badge-icon" aria-hidden="true">
+														{BADGES[key].icon}
+													</span>
+													<div>
+														<p class="player-badge-label">{BADGES[key].label}</p>
+														<p class="player-badge-description">{BADGES[key].description}</p>
+													</div>
+												</div>
+											))}
 										</div>
 									</div>
-								))
-							}
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
+								</div>
+							</div>
+						</section>
 
-		<section class="content-section" aria-labelledby="player-chart-title">
-			<h2 id="player-chart-title">Week by Week</h2>
-			<WeeklyStatsChart weeklyStats={player.weekly_stats} />
-		</section>
+						<section class="content-section" aria-labelledby={`player-chart-title-${section.league}`}>
+							<h2 id={`player-chart-title-${section.league}`}>Week by Week</h2>
+							<WeeklyStatsChart weeklyStats={section.weekly_stats} />
+						</section>
+					</>
+				);
+			})
+		}
 	</main>
 </BaseLayout>

@@ -65,33 +65,38 @@ export interface PlayerLeagueSection {
 	badges: BadgeKey[];
 }
 
-/**
- * `leagues` has one section per league the player has played in, newest
- * first. The section fields of their most recent league are mirrored at the
- * top level (`current_league`, `current_team`, `season_totals`, ...) for
- * pages that just want the player as they are now.
- */
-export interface PlayerProfile extends Omit<PlayerLeagueSection, "league"> {
+/** `leagues` has one section per league the player has played in, newest first. */
+export interface PlayerProfile {
 	id: string;
 	name: string;
 	avatar_initials: string;
 	positions: PlayerPosition[];
 	status: PlayerStatus;
-	current_league: string;
 	leagues: PlayerLeagueSection[];
+}
+
+/** The player's section for one league, or undefined if they never played in it. */
+export function getSection(player: PlayerProfile, leagueId: string): PlayerLeagueSection | undefined {
+	return player.leagues.find((section) => section.league === leagueId);
+}
+
+/** A player paired with their section for the league a page is showing. */
+export interface PlayerInLeague {
+	player: PlayerProfile;
+	section: PlayerLeagueSection;
 }
 
 // Deliberately no rating/score field anywhere on this type — this is a
 // friendly club site, not a scouting report. See AGENTS.md.
 
 export const BADGES: Record<BadgeKey, { label: string; description: string; icon: string }> = {
-	first_goal: { label: "First Goal", description: "Scored a goal this season.", icon: "⚽" },
-	first_assist: { label: "First Assist", description: "Set up a teammate's goal this season.", icon: "🎯" },
+	first_goal: { label: "First Goal", description: "Scored a goal in this league.", icon: "⚽" },
+	first_assist: { label: "First Assist", description: "Set up a teammate's goal in this league.", icon: "🎯" },
 	brace: { label: "Brace", description: "Scored 2+ goals in a single week.", icon: "✌️" },
 	hat_trick: { label: "Hat-trick", description: "Scored 3+ goals in a single week.", icon: "🎩" },
 	perfect_attendance: {
 		label: "Perfect Attendance",
-		description: "Hasn't missed a week so far this season.",
+		description: "Hasn't missed a week so far in this league.",
 		icon: "📅",
 	},
 	own_goal_award: {
@@ -141,7 +146,8 @@ export function getReadableAccentColor(hex: string): string {
 // Config lives in src/data/transfer-news.json (hand-edited: on/off, heading
 // text, and the list of moves) — this only resolves each entry against
 // player_profiles.json to find the player's id (for the profile link) and
-// their team just before the move.
+// their team just before the move, within one league (teams are reshuffled
+// between leagues, so a move only means something inside a single league).
 
 export interface TransferEntry {
 	player: string;
@@ -184,15 +190,20 @@ export interface ResolvedTransfer {
  * been generated yet) are silently skipped rather than crashing the
  * homepage build.
  */
-export function resolveTransfers(entries: TransferEntry[], profiles: PlayerProfile[]): ResolvedTransfer[] {
+export function resolveTransfers(
+	entries: TransferEntry[],
+	profiles: PlayerProfile[],
+	leagueId: string,
+): ResolvedTransfer[] {
 	const byName = new Map(profiles.map((profile) => [profile.name, profile]));
 
 	return entries.flatMap((entry) => {
 		const profile = byName.get(entry.player);
-		if (!profile) return [];
+		const section = profile && getSection(profile, leagueId);
+		if (!profile || !section) return [];
 
-		const lastSegment = profile.team_history[profile.team_history.length - 1];
-		const fromTeam = entry.from ?? (lastSegment ? lastSegment.team : profile.current_team);
+		const lastSegment = section.team_history[section.team_history.length - 1];
+		const fromTeam = entry.from ?? (lastSegment ? lastSegment.team : section.current_team);
 
 		if (fromTeam === entry.to) return [];
 
@@ -207,12 +218,15 @@ export type PlayerSortKey = "name" | "team";
  * celebration page, not a leaderboard (that already exists on /league);
  * keep it that way if you touch this function.
  */
-export function sortPlayers(players: PlayerProfile[], sortBy: PlayerSortKey): PlayerProfile[] {
+export function sortPlayers(players: PlayerInLeague[], sortBy: PlayerSortKey): PlayerInLeague[] {
 	const collator = new Intl.Collator("ko");
 	return [...players].sort((a, b) => {
 		if (sortBy === "team") {
-			return collator.compare(a.current_team, b.current_team) || collator.compare(a.name, b.name);
+			return (
+				collator.compare(a.section.current_team, b.section.current_team) ||
+				collator.compare(a.player.name, b.player.name)
+			);
 		}
-		return collator.compare(a.name, b.name);
+		return collator.compare(a.player.name, b.player.name);
 	});
 }

@@ -1,981 +1,5 @@
 [
   {
-    "id": "02c74af3",
-    "name": "김민서",
-    "avatar_initials": "민서",
-    "positions": [],
-    "status": "inactive",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1,
-      "weeks_attended": 1,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 0,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 2,
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1
-    },
-    "play_style_tag": "Team Player",
-    "badges": [
-      "first_goal"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 1,
-          "assists": 0,
-          "attacking_points": 1,
-          "weeks_attended": 1,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "문전박대",
-            "games": 0,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 1,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": {
-          "week": 2,
-          "goals": 1,
-          "assists": 0,
-          "attacking_points": 1
-        },
-        "play_style_tag": "Team Player",
-        "badges": [
-          "first_goal"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "b6c4cad3",
-    "name": "노윤오",
-    "avatar_initials": "윤오",
-    "positions": [
-      "DF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1
-    },
-    "play_style_tag": "Iron Man",
-    "badges": [
-      "first_goal",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 1,
-          "assists": 0,
-          "attacking_points": 1,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 1,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": {
-          "week": 1,
-          "goals": 1,
-          "assists": 0,
-          "attacking_points": 1
-        },
-        "play_style_tag": "Iron Man",
-        "badges": [
-          "first_goal",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "e1f2e6b2",
-    "name": "문재홍",
-    "avatar_initials": "재홍",
-    "positions": [
-      "DF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Iron Man",
-    "badges": [
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": null,
-        "play_style_tag": "Iron Man",
-        "badges": [
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "7af93f87",
-    "name": "박현제",
-    "avatar_initials": "현제",
-    "positions": [
-      "MF",
-      "DF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 3,
-      "assists": 2,
-      "attacking_points": 5,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 2,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 2
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 2,
-      "assists": 0,
-      "attacking_points": 2
-    },
-    "play_style_tag": "All-Rounder",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 3,
-          "assists": 2,
-          "attacking_points": 5,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 2,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 1,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 2
-          }
-        ],
-        "personal_best_week": {
-          "week": 1,
-          "goals": 2,
-          "assists": 0,
-          "attacking_points": 2
-        },
-        "play_style_tag": "All-Rounder",
-        "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "c3d373b3",
-    "name": "손영보",
-    "avatar_initials": "영보",
-    "positions": [
-      "DF",
-      "MF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 3,
-      "assists": 4,
-      "attacking_points": 7,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 3
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      },
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 3,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 0,
-      "assists": 3,
-      "attacking_points": 3
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "hat_trick",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 3,
-          "assists": 4,
-          "attacking_points": 7,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 3
-          },
-          {
-            "week": 2,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 1
-          },
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 3,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": {
-          "week": 1,
-          "goals": 0,
-          "assists": 3,
-          "attacking_points": 3
-        },
-        "play_style_tag": "Playmaker",
-        "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "041dc3f4",
-    "name": "이관현",
-    "avatar_initials": "관현",
-    "positions": [
-      "FW"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 3,
-      "assists": 1,
-      "attacking_points": 4,
-      "weeks_attended": 1,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 3,
-        "assists": 1
-      }
-    ],
-    "personal_best_week": {
-      "week": 3,
-      "goals": 3,
-      "assists": 1,
-      "attacking_points": 4
-    },
-    "play_style_tag": "Finisher",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "hat_trick"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 3,
-          "assists": 1,
-          "attacking_points": 4,
-          "weeks_attended": 1,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 3,
-            "assists": 1
-          }
-        ],
-        "personal_best_week": {
-          "week": 3,
-          "goals": 3,
-          "assists": 1,
-          "attacking_points": 4
-        },
-        "play_style_tag": "Finisher",
-        "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "ba1c4f55",
-    "name": "이은성",
-    "avatar_initials": "은성",
-    "positions": [
-      "DF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 0,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Team Player",
-    "badges": [
-      "squad_member"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 0,
-            "goals": 0,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": null,
-        "play_style_tag": "Team Player",
-        "badges": [
-          "squad_member"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "db1a5f56",
-    "name": "이재민",
-    "avatar_initials": "재민",
-    "positions": [
-      "FW"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [
-      {
-        "team": "오늘밤 샴페인",
-        "from_week": 1,
-        "to_week": 2
-      }
-    ],
-    "season_totals": {
-      "goals": 2,
-      "assists": 1,
-      "attacking_points": 3,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2
-    },
-    "play_style_tag": "All-Rounder",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [
-          {
-            "team": "오늘밤 샴페인",
-            "from_week": 1,
-            "to_week": 2
-          }
-        ],
-        "season_totals": {
-          "goals": 2,
-          "assists": 1,
-          "attacking_points": 3,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "오늘밤 샴페인",
-            "games": 6,
-            "goals": 1,
-            "assists": 1
-          },
-          {
-            "week": 2,
-            "team": "오늘밤 샴페인",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 1,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": {
-          "week": 1,
-          "goals": 1,
-          "assists": 1,
-          "attacking_points": 2
-        },
-        "play_style_tag": "All-Rounder",
-        "badges": [
-          "first_goal",
-          "first_assist",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "3c6929d0",
-    "name": "이현동",
-    "avatar_initials": "현동",
-    "positions": [
-      "FW"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 3,
-      "assists": 2,
-      "attacking_points": 5,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 2,
-        "assists": 1
-      },
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 2,
-      "goals": 2,
-      "assists": 1,
-      "attacking_points": 3
-    },
-    "play_style_tag": "All-Rounder",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 3,
-          "assists": 2,
-          "attacking_points": 5,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 1
-          },
-          {
-            "week": 2,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 2,
-            "assists": 1
-          },
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 1,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": {
-          "week": 2,
-          "goals": 2,
-          "assists": 1,
-          "attacking_points": 3
-        },
-        "play_style_tag": "All-Rounder",
-        "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "ef395141",
-    "name": "황보준",
-    "avatar_initials": "보준",
-    "positions": [
-      "MF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "문전박대",
-    "team_history": [],
-    "season_totals": {
-      "goals": 2,
-      "assists": 5,
-      "attacking_points": 7,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 0,
-        "assists": 2
-      },
-      {
-        "week": 3,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 1,
-        "assists": 3
-      }
-    ],
-    "personal_best_week": {
-      "week": 3,
-      "goals": 1,
-      "assists": 3,
-      "attacking_points": 4
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "문전박대",
-        "team_history": [],
-        "season_totals": {
-          "goals": 2,
-          "assists": 5,
-          "attacking_points": 7,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 1,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 0,
-            "assists": 2
-          },
-          {
-            "week": 3,
-            "team": "문전박대",
-            "games": 6,
-            "goals": 1,
-            "assists": 3
-          }
-        ],
-        "personal_best_week": {
-          "week": 3,
-          "goals": 1,
-          "assists": 3,
-          "attacking_points": 4
-        },
-        "play_style_tag": "Playmaker",
-        "badges": [
-          "first_goal",
-          "first_assist",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
     "id": "8cefcaea",
     "name": "강경웅",
     "avatar_initials": "경웅",
@@ -984,51 +8,6 @@
       "FW"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 3,
-      "assists": 5,
-      "attacking_points": 8,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 4
-      }
-    ],
-    "personal_best_week": {
-      "week": 3,
-      "goals": 1,
-      "assists": 4,
-      "attacking_points": 5
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "perfect_attendance"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1088,50 +67,6 @@
       "FW"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1
-    },
-    "play_style_tag": "Iron Man",
-    "badges": [
-      "first_goal",
-      "perfect_attendance"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1182,6 +117,53 @@
     ]
   },
   {
+    "id": "02c74af3",
+    "name": "김민서",
+    "avatar_initials": "민서",
+    "positions": [],
+    "status": "inactive",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Team Player",
+        "badges": [
+          "first_goal"
+        ]
+      }
+    ]
+  },
+  {
     "id": "85804296",
     "name": "김하주",
     "avatar_initials": "하주",
@@ -1190,57 +172,6 @@
       "MF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [
-      {
-        "team": "이지선다",
-        "from_week": 1,
-        "to_week": 2
-      }
-    ],
-    "season_totals": {
-      "goals": 2,
-      "assists": 2,
-      "attacking_points": 4,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 1,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "perfect_attendance"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1306,50 +237,6 @@
       "GK"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 2,
-      "attacking_points": 2,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 2
-      }
-    ],
-    "personal_best_week": {
-      "week": 3,
-      "goals": 0,
-      "assists": 2,
-      "attacking_points": 2
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_assist",
-      "perfect_attendance"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1400,6 +287,289 @@
     ]
   },
   {
+    "id": "b6c4cad3",
+    "name": "노윤오",
+    "avatar_initials": "윤오",
+    "positions": [
+      "DF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "first_goal",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "e1f2e6b2",
+    "name": "문재홍",
+    "avatar_initials": "재홍",
+    "positions": [
+      "DF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dfe0850f",
+    "name": "박경태",
+    "avatar_initials": "경태",
+    "positions": [
+      "DF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [
+          {
+            "team": "오늘밤 샴페인",
+            "from_week": 1,
+            "to_week": 2
+          }
+        ],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "7af93f87",
+    "name": "박현제",
+    "avatar_initials": "현제",
+    "positions": [
+      "MF",
+      "DF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 2,
+          "attacking_points": 5,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 2,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 2
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 2,
+          "assists": 0,
+          "attacking_points": 2
+        },
+        "play_style_tag": "All-Rounder",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2619e3b6",
+    "name": "배성민",
+    "avatar_initials": "성민",
+    "positions": [
+      "MF",
+      "DF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
     "id": "66ec6daf",
     "name": "서지현",
     "avatar_initials": "지현",
@@ -1407,49 +577,6 @@
       "DF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 1,
-      "attacking_points": 1,
-      "weeks_attended": 2,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 0,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 2,
-      "goals": 0,
-      "assists": 1,
-      "attacking_points": 1
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_assist"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1499,6 +626,112 @@
     ]
   },
   {
+    "id": "c3d373b3",
+    "name": "손영보",
+    "avatar_initials": "영보",
+    "positions": [
+      "DF",
+      "MF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 4,
+          "attacking_points": 7,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 3
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 3,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 0,
+          "assists": 3,
+          "attacking_points": 3
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "041dc3f4",
+    "name": "이관현",
+    "avatar_initials": "관현",
+    "positions": [
+      "FW"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 1,
+          "attacking_points": 4,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 3,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 3,
+          "assists": 1,
+          "attacking_points": 4
+        },
+        "play_style_tag": "Finisher",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick"
+        ]
+      }
+    ]
+  },
+  {
     "id": "61b88435",
     "name": "이동규",
     "avatar_initials": "동규",
@@ -1507,50 +740,6 @@
       "MF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2,
-      "weeks_attended": 1,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 0,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 1
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 0,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 2,
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1601,6 +790,298 @@
     ]
   },
   {
+    "id": "1cb91f73",
+    "name": "이승균",
+    "avatar_initials": "승균",
+    "positions": [
+      "DF",
+      "MF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 2,
+          "attacking_points": 2,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 2
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 0,
+          "assists": 2,
+          "attacking_points": 2
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_assist"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "e8eba53c",
+    "name": "이시온",
+    "avatar_initials": "시온",
+    "positions": [
+      "MF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 5,
+          "assists": 3,
+          "attacking_points": 8,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 3,
+            "assists": 2
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 2,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 3,
+          "assists": 2,
+          "attacking_points": 5
+        },
+        "play_style_tag": "Finisher",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ba1c4f55",
+    "name": "이은성",
+    "avatar_initials": "은성",
+    "positions": [
+      "DF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 2,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "db1a5f56",
+    "name": "이재민",
+    "avatar_initials": "재민",
+    "positions": [
+      "FW"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [
+          {
+            "team": "오늘밤 샴페인",
+            "from_week": 1,
+            "to_week": 2
+          }
+        ],
+        "season_totals": {
+          "goals": 2,
+          "assists": 1,
+          "attacking_points": 3,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 1,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "오늘밤 샴페인",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 1,
+          "assists": 1,
+          "attacking_points": 2
+        },
+        "play_style_tag": "All-Rounder",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "6c36530d",
+    "name": "이종호",
+    "avatar_initials": "종호",
+    "positions": [
+      "FW"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 11,
+          "assists": 4,
+          "attacking_points": 15,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 2,
+            "assists": 2
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 6,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 3,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 6,
+          "assists": 1,
+          "attacking_points": 7
+        },
+        "play_style_tag": "Finisher",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "hat_trick",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
     "id": "f591da0a",
     "name": "이지수",
     "avatar_initials": "지수",
@@ -1608,44 +1089,6 @@
       "DF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Iron Man",
-    "badges": [
-      "perfect_attendance"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1690,6 +1133,259 @@
     ]
   },
   {
+    "id": "3c6929d0",
+    "name": "이현동",
+    "avatar_initials": "현동",
+    "positions": [
+      "FW"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "문전박대",
+        "team_history": [],
+        "season_totals": {
+          "goals": 3,
+          "assists": 2,
+          "attacking_points": 5,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 2,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 2,
+          "goals": 2,
+          "assists": 1,
+          "attacking_points": 3
+        },
+        "play_style_tag": "All-Rounder",
+        "badges": [
+          "first_goal",
+          "first_assist",
+          "brace",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "169ca10b",
+    "name": "이희준",
+    "avatar_initials": "희준",
+    "positions": [
+      "FW"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": {
+          "week": 3,
+          "goals": 1,
+          "assists": 0,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Iron Man",
+        "badges": [
+          "first_goal",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "86b16786",
+    "name": "정경섭",
+    "avatar_initials": "경섭",
+    "positions": [
+      "GK"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 1,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "f0c6f90d",
+    "name": "조우진",
+    "avatar_initials": "우진",
+    "positions": [],
+    "status": "inactive",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 2,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "e816824a",
+    "name": "주민건",
+    "avatar_initials": "민건",
+    "positions": [
+      "DF",
+      "MF"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 3,
+          "attacking_points": 3,
+          "weeks_attended": 3,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
+          }
+        ],
+        "personal_best_week": {
+          "week": 1,
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1
+        },
+        "play_style_tag": "Playmaker",
+        "badges": [
+          "first_assist",
+          "perfect_attendance"
+        ]
+      }
+    ]
+  },
+  {
     "id": "37bdae54",
     "name": "진홍주",
     "avatar_initials": "홍주",
@@ -1697,30 +1393,6 @@
       "DF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 1,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Team Player",
-    "badges": [
-      "squad_member"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1751,6 +1423,57 @@
     ]
   },
   {
+    "id": "bb68b4a4",
+    "name": "차희락",
+    "avatar_initials": "희락",
+    "positions": [
+      "FW"
+    ],
+    "status": "active",
+    "leagues": [
+      {
+        "league": "FA26-L1",
+        "current_team": "이지선다",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 2,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team": "이지선다",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team": "이지선다",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Team Player",
+        "badges": [
+          "squad_member"
+        ]
+      }
+    ]
+  },
+  {
     "id": "43adbf2e",
     "name": "최건",
     "avatar_initials": "최건",
@@ -1759,36 +1482,6 @@
       "MF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2,
-      "weeks_attended": 1,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 1,
-        "assists": 1
-      }
-    ],
-    "personal_best_week": {
-      "week": 3,
-      "goals": 1,
-      "assists": 1,
-      "attacking_points": 2
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_goal",
-      "first_assist"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1832,45 +1525,6 @@
       "DF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Iron Man",
-    "badges": [
-      "perfect_attendance",
-      "own_goal_award"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1924,59 +1578,6 @@
       "MF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "오늘밤 샴페인",
-    "team_history": [
-      {
-        "team": "문전박대",
-        "from_week": 1,
-        "to_week": 2
-      }
-    ],
-    "season_totals": {
-      "goals": 13,
-      "assists": 3,
-      "attacking_points": 16,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 4,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "문전박대",
-        "games": 6,
-        "goals": 2,
-        "assists": 2
-      },
-      {
-        "week": 3,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 7,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 3,
-      "goals": 7,
-      "assists": 0,
-      "attacking_points": 7
-    },
-    "play_style_tag": "Finisher",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "hat_trick",
-      "perfect_attendance"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
@@ -2036,944 +1637,59 @@
     ]
   },
   {
-    "id": "dfe0850f",
-    "name": "박경태",
-    "avatar_initials": "경태",
-    "positions": [
-      "DF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [
-      {
-        "team": "오늘밤 샴페인",
-        "from_week": 1,
-        "to_week": 2
-      }
-    ],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "오늘밤 샴페인",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Iron Man",
-    "badges": [
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [
-          {
-            "team": "오늘밤 샴페인",
-            "from_week": 1,
-            "to_week": 2
-          }
-        ],
-        "season_totals": {
-          "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "오늘밤 샴페인",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "오늘밤 샴페인",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": null,
-        "play_style_tag": "Iron Man",
-        "badges": [
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "2619e3b6",
-    "name": "배성민",
-    "avatar_initials": "성민",
-    "positions": [
-      "MF",
-      "DF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 1,
-      "attacking_points": 1,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      }
-    ],
-    "personal_best_week": {
-      "week": 3,
-      "goals": 0,
-      "assists": 1,
-      "attacking_points": 1
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_assist",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [],
-        "season_totals": {
-          "goals": 0,
-          "assists": 1,
-          "attacking_points": 1,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 1
-          }
-        ],
-        "personal_best_week": {
-          "week": 3,
-          "goals": 0,
-          "assists": 1,
-          "attacking_points": 1
-        },
-        "play_style_tag": "Playmaker",
-        "badges": [
-          "first_assist",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "1cb91f73",
-    "name": "이승균",
-    "avatar_initials": "승균",
-    "positions": [
-      "DF",
-      "MF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 2,
-      "attacking_points": 2,
-      "weeks_attended": 1,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 0,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 2
-      },
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 0,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 2,
-      "goals": 0,
-      "assists": 2,
-      "attacking_points": 2
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_assist"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [],
-        "season_totals": {
-          "goals": 0,
-          "assists": 2,
-          "attacking_points": 2,
-          "weeks_attended": 1,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "이지선다",
-            "games": 0,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 2
-          },
-          {
-            "week": 3,
-            "team": "이지선다",
-            "games": 0,
-            "goals": 0,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": {
-          "week": 2,
-          "goals": 0,
-          "assists": 2,
-          "attacking_points": 2
-        },
-        "play_style_tag": "Playmaker",
-        "badges": [
-          "first_assist"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "e8eba53c",
-    "name": "이시온",
-    "avatar_initials": "시온",
+    "id": "ef395141",
+    "name": "황보준",
+    "avatar_initials": "보준",
     "positions": [
       "MF"
     ],
     "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 5,
-      "assists": 3,
-      "attacking_points": 8,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 3,
-        "assists": 2
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      },
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 2,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 3,
-      "assists": 2,
-      "attacking_points": 5
-    },
-    "play_style_tag": "Finisher",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "hat_trick",
-      "perfect_attendance"
-    ],
     "leagues": [
       {
         "league": "FA26-L1",
-        "current_team": "이지선다",
+        "current_team": "문전박대",
         "team_history": [],
         "season_totals": {
-          "goals": 5,
-          "assists": 3,
-          "attacking_points": 8,
+          "goals": 2,
+          "assists": 5,
+          "attacking_points": 7,
           "weeks_attended": 3,
           "weeks_played": 3
         },
         "weekly_stats": [
           {
             "week": 1,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 3,
-            "assists": 2
-          },
-          {
-            "week": 2,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 1
-          },
-          {
-            "week": 3,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 2,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": {
-          "week": 1,
-          "goals": 3,
-          "assists": 2,
-          "attacking_points": 5
-        },
-        "play_style_tag": "Finisher",
-        "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "6c36530d",
-    "name": "이종호",
-    "avatar_initials": "종호",
-    "positions": [
-      "FW"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 11,
-      "assists": 4,
-      "attacking_points": 15,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 2,
-        "assists": 2
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 6,
-        "assists": 1
-      },
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 3,
-        "assists": 1
-      }
-    ],
-    "personal_best_week": {
-      "week": 2,
-      "goals": 6,
-      "assists": 1,
-      "attacking_points": 7
-    },
-    "play_style_tag": "Finisher",
-    "badges": [
-      "first_goal",
-      "first_assist",
-      "brace",
-      "hat_trick",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [],
-        "season_totals": {
-          "goals": 11,
-          "assists": 4,
-          "attacking_points": 15,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 2,
-            "assists": 2
-          },
-          {
-            "week": 2,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 6,
-            "assists": 1
-          },
-          {
-            "week": 3,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 3,
-            "assists": 1
-          }
-        ],
-        "personal_best_week": {
-          "week": 2,
-          "goals": 6,
-          "assists": 1,
-          "attacking_points": 7
-        },
-        "play_style_tag": "Finisher",
-        "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "169ca10b",
-    "name": "이희준",
-    "avatar_initials": "희준",
-    "positions": [
-      "FW"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 1,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": {
-      "week": 3,
-      "goals": 1,
-      "assists": 0,
-      "attacking_points": 1
-    },
-    "play_style_tag": "Iron Man",
-    "badges": [
-      "first_goal",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [],
-        "season_totals": {
-          "goals": 1,
-          "assists": 0,
-          "attacking_points": 1,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "이지선다",
+            "team": "문전박대",
             "games": 6,
             "goals": 1,
             "assists": 0
+          },
+          {
+            "week": 2,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 0,
+            "assists": 2
+          },
+          {
+            "week": 3,
+            "team": "문전박대",
+            "games": 6,
+            "goals": 1,
+            "assists": 3
           }
         ],
         "personal_best_week": {
           "week": 3,
           "goals": 1,
-          "assists": 0,
-          "attacking_points": 1
-        },
-        "play_style_tag": "Iron Man",
-        "badges": [
-          "first_goal",
-          "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "86b16786",
-    "name": "정경섭",
-    "avatar_initials": "경섭",
-    "positions": [
-      "GK"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 1,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Team Player",
-    "badges": [
-      "squad_member"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [],
-        "season_totals": {
-          "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 1,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 3,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": null,
-        "play_style_tag": "Team Player",
-        "badges": [
-          "squad_member"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "f0c6f90d",
-    "name": "조우진",
-    "avatar_initials": "우진",
-    "positions": [],
-    "status": "inactive",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Team Player",
-    "badges": [
-      "squad_member"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [],
-        "season_totals": {
-          "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": null,
-        "play_style_tag": "Team Player",
-        "badges": [
-          "squad_member"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "e816824a",
-    "name": "주민건",
-    "avatar_initials": "민건",
-    "positions": [
-      "DF",
-      "MF"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 3,
-      "attacking_points": 3,
-      "weeks_attended": 3,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      },
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 1
-      }
-    ],
-    "personal_best_week": {
-      "week": 1,
-      "goals": 0,
-      "assists": 1,
-      "attacking_points": 1
-    },
-    "play_style_tag": "Playmaker",
-    "badges": [
-      "first_assist",
-      "perfect_attendance"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [],
-        "season_totals": {
-          "goals": 0,
           "assists": 3,
-          "attacking_points": 3,
-          "weeks_attended": 3,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 1
-          },
-          {
-            "week": 2,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 1
-          },
-          {
-            "week": 3,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 1
-          }
-        ],
-        "personal_best_week": {
-          "week": 1,
-          "goals": 0,
-          "assists": 1,
-          "attacking_points": 1
+          "attacking_points": 4
         },
         "play_style_tag": "Playmaker",
         "badges": [
+          "first_goal",
           "first_assist",
           "perfect_attendance"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "bb68b4a4",
-    "name": "차희락",
-    "avatar_initials": "희락",
-    "positions": [
-      "FW"
-    ],
-    "status": "active",
-    "current_league": "FA26-L1",
-    "current_team": "이지선다",
-    "team_history": [],
-    "season_totals": {
-      "goals": 0,
-      "assists": 0,
-      "attacking_points": 0,
-      "weeks_attended": 2,
-      "weeks_played": 3
-    },
-    "weekly_stats": [
-      {
-        "week": 1,
-        "team": "이지선다",
-        "games": 0,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 2,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      },
-      {
-        "week": 3,
-        "team": "이지선다",
-        "games": 6,
-        "goals": 0,
-        "assists": 0
-      }
-    ],
-    "personal_best_week": null,
-    "play_style_tag": "Team Player",
-    "badges": [
-      "squad_member"
-    ],
-    "leagues": [
-      {
-        "league": "FA26-L1",
-        "current_team": "이지선다",
-        "team_history": [],
-        "season_totals": {
-          "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 3
-        },
-        "weekly_stats": [
-          {
-            "week": 1,
-            "team": "이지선다",
-            "games": 0,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 2,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          },
-          {
-            "week": 3,
-            "team": "이지선다",
-            "games": 6,
-            "goals": 0,
-            "assists": 0
-          }
-        ],
-        "personal_best_week": null,
-        "play_style_tag": "Team Player",
-        "badges": [
-          "squad_member"
         ]
       }
     ]

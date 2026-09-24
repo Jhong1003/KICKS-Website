@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import LeagueView from "../../components/LeagueView.astro";
+import { leagues, type League } from "../../lib/leagues";
+
+export function getStaticPaths() {
+	return leagues.map((league) => ({ params: { league: league.id }, props: { league } }));
+}
+
+interface Props {
+	league: League;
+}
+
+const { league } = Astro.props;
+---
+
+<BaseLayout
+	title={`${league.id} | KICKS League`}
+	description={`KICKS ${league.id} standings, match results, and player stats.`}
+>
+	<LeagueView league={league} />
+</BaseLayout>

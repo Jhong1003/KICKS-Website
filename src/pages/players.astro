@@ -3,13 +3,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PlayerCard from "../components/PlayerCard.astro";
 import profilesData from "../data/player_profiles.json";
 import playerPhotosData from "../data/player-photos.json";
-import { sortPlayers, type PlayerProfile } from "../lib/players";
-import { getLeague, getTeamColor } from "../lib/leagues";
+import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from "../lib/players";
+import { latestLeague, getTeamColor } from "../lib/leagues";
 
-const players = sortPlayers(
-	(profilesData as PlayerProfile[]).filter((player) => player.status !== "inactive"),
-	"name",
-);
+// The grid shows the latest league's roster: players with a section in that
+// league. Earlier leagues live on each player's own profile page.
+const league = latestLeague;
+const roster = (profilesData as PlayerProfile[]).flatMap((player): PlayerInLeague[] => {
+	const section = getSection(player, league.id);
+	return section && player.status !== "inactive" ? [{ player, section }] : [];
+});
+const players = sortPlayers(roster, "name");
 const playerPhotos = playerPhotosData as Record<string, string>;
 ---
 
@@ -19,10 +23,10 @@ const playerPhotos = playerPhotosData as Record<string, string>;
 >
 	<main>
 		<section class="content-section" aria-labelledby="players-title">
-			<p class="section-label">FA26 ROSTER</p>
+			<p class="section-label">{league.id} ROSTER</p>
 			<h1 id="players-title">Players</h1>
 			<p class="about-description">
-				Every KICKS player this season — stats, play style, and badges earned along the way.
+				Every KICKS player in {league.id} — stats, play style, and badges earned along the way.
 			</p>
 
 			<div class="player-sort" role="group" aria-label="Sort players">
@@ -37,10 +41,11 @@ const playerPhotos = playerPhotosData as Record<string, string>;
 
 			<div class="player-grid" id="player-grid">
 				{
-					players.map((player) => (
+					players.map(({ player, section }) => (
 						<PlayerCard
 							player={player}
-							teamColor={getTeamColor(player.current_team, getLeague(player.current_league))}
+							section={section}
+							teamColor={getTeamColor(section.current_team, league)}
 							href={`/players/${player.id}`}
 							avatarPhoto={playerPhotos[player.id]}
 						/>

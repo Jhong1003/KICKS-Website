@@ -30,7 +30,7 @@ const currentPath = Astro.url.pathname;
 				<a
 						href={link.href}
 						class={link.cta ? "nav-cta" : undefined}
-						aria-current={currentPath === link.href ? "page" : undefined}
+						aria-current={currentPath === link.href || currentPath.startsWith(`${link.href}/`) ? "page" : undefined}
 					>
 					{link.label}
 					{link.locked && (

@@ -14,7 +14,8 @@ import { resolveTransfers, type PlayerProfile } from "../lib/players";
 import { latestLeague } from "../lib/leagues";
 
 const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
-const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData as PlayerProfile[]);
+const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData as PlayerProfile[], latestLeague.id);
+const standings = leagueTable.filter((row) => row.league === latestLeague.id);
 const showTransferBanner = transferNews.enabled && resolvedTransfers.length > 0;
 ---
 
@@ -88,9 +89,9 @@ const showTransferBanner = transferNews.enabled && resolvedTransfers.length > 0;
 		</div>
 
 		<section class="content-section" aria-labelledby="standings-preview-title">
-			<p class="section-label">LEAGUE STANDINGS</p>
-			<h2 id="standings-preview-title">Current Season</h2>
-			<StandingsTable rows={leagueTable} />
+			<p class="section-label">LEAGUE STANDINGS · {latestLeague.id}</p>
+			<h2 id="standings-preview-title">Current League</h2>
+			<StandingsTable rows={standings} />
 			<a class="section-link" href="/league">View full league page →</a>
 		</section>
 	</main>

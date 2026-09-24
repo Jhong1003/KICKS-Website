@@ -8,6 +8,8 @@ export interface ScheduleEvent {
 	date: string | null;
 	title: string;
 	type: ScheduleEventType;
+	/** For `league` entries: which league (e.g. "FA26-L1") and the week within it. */
+	league?: string;
 	week?: number;
 	/** Has a tentative date that still needs to be confirmed. */
 	tbd?: boolean;
@@ -74,7 +76,10 @@ export function formatEventDate(isoDate: string): string {
 export function eventHref(event: ScheduleEvent): string | null {
 	// The #results hash scrolls straight to the Match Results section on
 	// load; ?week picks the tab (see WeeklyResults.astro's deep-link script).
-	if (event.type === "league" && event.week) return `/league?week=${event.week}#results`;
+	// Weeks restart at 1 in every league, so the link names the league too.
+	if (event.type === "league" && event.league && event.week) {
+		return `/league/${event.league}?week=${event.week}#results`;
+	}
 	return null;
 }
 

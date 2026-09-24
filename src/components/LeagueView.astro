@@ -1,0 +1,120 @@
+---
+import StandingsTable from "./StandingsTable.astro";
+import WeeklyResults from "./WeeklyResults.astro";
+import PlayerStatsTable from "./PlayerStatsTable.astro";
+import leagueTableData from "../data/league_table.json";
+import matchesData from "../data/matches.json";
+import weekSummariesData from "../data/week_summaries.json";
+import leaderboardData from "../data/player_leaderboard.json";
+import { leagues, type League } from "../lib/leagues";
+
+interface Props {
+	league: League;
+}
+
+interface MatchRecord {
+	league: string;
+	match_id: string;
+	week: number;
+	round: number;
+	date: string;
+	home_team: string;
+	away_team: string;
+	home_score: number;
+	away_score: number;
+	status: "completed" | "scheduled";
+}
+
+const { league } = Astro.props;
+
+// Everything on this page is one league's data — weeks restart at 1 in each
+// league and nothing is combined across leagues. The points/W-D-L rule lives
+// only in scripts/update_data.py; this is just grouping already-computed data.
+function inLeague<T extends { league: string }>(rows: T[]): T[] {
+	return rows.filter((row) => row.league === league.id);
+}
+
+const standings = inLeague(leagueTableData);
+const matches = inLeague(matchesData as MatchRecord[]);
+const weekSummaries = inLeague(weekSummariesData);
+const leaderboard = inLeague(leaderboardData).filter((player) => player.status !== "inactive");
+
+// Most recent week first, so the results section can show one tab per week,
+// each broken down by round.
+const weekNumbers = [...new Set(matches.map((match) => match.week))].sort((a, b) => b - a);
+
+const weeks = weekNumbers.map((week) => {
+	const weekMatches = matches.filter((match) => match.week === week);
+	return {
+		week,
+		date: weekMatches[0].date,
+		hasResults: weekMatches.some((match) => match.status === "completed"),
+		rounds: [...new Set(weekMatches.map((match) => match.round))].sort((a, b) => a - b),
+		matches: weekMatches,
+		summary: weekSummaries.filter((row) => row.week === week).sort((a, b) => b.points - a.points),
+	};
+});
+
+// Only used when weeks is non-empty (the results section is skipped otherwise).
+const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.week ?? 0;
+---
+
+<main>
+	<section class="content-section" aria-labelledby="league-title">
+		<p class="section-label">{league.id}</p>
+		<h1 id="league-title">Standings & Results</h1>
+
+		{
+			leagues.length > 1 && (
+				<nav class="league-switcher" aria-label="Leagues">
+					{leagues.map((entry) => (
+						<a
+							class="league-switcher-link"
+							href={`/league/${entry.id}`}
+							aria-current={entry.id === league.id ? "page" : undefined}
+						>
+							{entry.id}
+							{!entry.started && <span class="league-switcher-note">upcoming</span>}
+						</a>
+					))}
+				</nav>
+			)
+		}
+	</section>
+
+	<section class="content-section" aria-labelledby="standings-title">
+		<h2 id="standings-title">League Table</h2>
+		{
+			standings.length > 0 ? (
+				<StandingsTable rows={standings} />
+			) : (
+				<p class="about-description">The table appears once the first match has been played.</p>
+			)
+		}
+	</section>
+
+	<section class="content-section" id="results" aria-labelledby="results-title">
+		<h2 id="results-title">Match Results</h2>
+		{
+			weeks.length > 0 ? (
+				<WeeklyResults weeks={weeks} defaultWeek={defaultWeek} />
+			) : (
+				<p class="about-description">Fixtures will appear here once this league's matches are added.</p>
+			)
+		}
+	</section>
+
+	<section class="content-section" aria-labelledby="player-stats-title">
+		<h2 id="player-stats-title">Player Stats</h2>
+		{
+			leaderboard.length > 0 ? (
+				<>
+					<p class="about-description">Click a column header to sort.</p>
+					<PlayerStatsTable players={leaderboard} />
+				</>
+			) : (
+				<p class="about-description">Player stats appear once the first week has been recorded.</p>
+			)
+		}
+	</section>
+</main>
