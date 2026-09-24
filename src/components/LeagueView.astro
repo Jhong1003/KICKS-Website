@@ -78,7 +78,7 @@ const weeks = weekNumbers.map((week) => {
 const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.week ?? 0;
 ---
 
-<main>
+<main data-league-view>
 	<section class="content-section" aria-labelledby="league-title">
 		<p class="section-label">{league.id}</p>
 		<h1 id="league-title">Standings & Results</h1>
@@ -99,8 +99,13 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 				</nav>
 			)
 		}
+		<nav class="league-subnav" aria-label="League sections">
+			<a id="overview-tab" href="#overview" data-league-tab="overview">OVERVIEW</a>
+			<a id="player-stats-tab" href="#player-stats" data-league-tab="player-stats">PLAYER STATS</a>
+		</nav>
 	</section>
 
+	<div id="overview" data-league-panel>
 	<section class="content-section" aria-labelledby="standings-title">
 		<h2 id="standings-title">League Table</h2>
 		{
@@ -111,8 +116,6 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			)
 		}
 	</section>
-
-	<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
 
 	<section class="content-section" id="results" aria-labelledby="results-title">
 		<h2 id="results-title">Match Results</h2>
@@ -125,6 +128,10 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		}
 	</section>
 
+	<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
+
+	</div>
+	<div id="player-stats" data-league-panel>
 	<section class="content-section" aria-labelledby="player-stats-title">
 		<h2 id="player-stats-title">Player Stats</h2>
 		{
@@ -138,4 +145,60 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			)
 		}
 	</section>
+	</div>
 </main>
+
+<script>
+	const root = document.querySelector<HTMLElement>("[data-league-view]");
+	if (root) {
+		const nav = root.querySelector<HTMLElement>(".league-subnav")!;
+		const tabs = Array.from(nav.querySelectorAll<HTMLAnchorElement>("[data-league-tab]"));
+		const panels = Array.from(root.querySelectorAll<HTMLElement>("[data-league-panel]"));
+		nav.setAttribute("role", "tablist");
+		for (const tab of tabs) {
+			tab.setAttribute("role", "tab");
+			tab.setAttribute("aria-controls", tab.dataset.leagueTab!);
+		}
+		for (const panel of panels) {
+			panel.setAttribute("role", "tabpanel");
+			panel.setAttribute("aria-labelledby", `${panel.id}-tab`);
+			panel.tabIndex = 0;
+		}
+		function syncFromUrl(scrollToAnchor = false) {
+			const hash = location.hash.slice(1);
+			const selected = hash === "player-stats" || hash === "player-stats-title" ? "player-stats" : "overview";
+			for (const panel of panels) panel.hidden = panel.id !== selected;
+			for (const tab of tabs) {
+				const active = tab.dataset.leagueTab === selected;
+				tab.setAttribute("aria-selected", String(active));
+				tab.tabIndex = active ? 0 : -1;
+			}
+			if (scrollToAnchor && hash && hash !== "overview" && hash !== "player-stats") {
+				requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
+			}
+		}
+		for (const [index, tab] of tabs.entries()) {
+			tab.addEventListener("click", (event) => {
+				if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+				event.preventDefault();
+				const url = new URL(location.href);
+				url.hash = tab.dataset.leagueTab!;
+				if (url.href !== location.href) history.pushState(null, "", url);
+				syncFromUrl();
+			});
+			tab.addEventListener("keydown", (event) => {
+				let target: number;
+				if (event.key === "ArrowRight") target = (index + 1) % tabs.length;
+				else if (event.key === "ArrowLeft") target = (index + tabs.length - 1) % tabs.length;
+				else if (event.key === "Home") target = 0;
+				else if (event.key === "End") target = tabs.length - 1;
+				else if (event.key === " ") { event.preventDefault(); tab.click(); return; }
+				else return;
+				event.preventDefault(); tabs[target].focus(); tabs[target].click();
+			});
+		}
+		window.addEventListener("hashchange", () => syncFromUrl(true));
+		window.addEventListener("popstate", () => syncFromUrl(true));
+		syncFromUrl(true);
+	}
+</script>

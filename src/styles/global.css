@@ -2784,3 +2784,31 @@ a.player-card:hover {
 	}
 
 }
+
+/* League section navigation: same olive palette and borders as week tabs. */
+.league-subnav {
+	display: flex;
+	gap: 24px;
+	margin-top: 32px;
+	border-bottom: 1px solid var(--color-sage);
+}
+.league-subnav a {
+	padding: 12px 0;
+	border-bottom: 2px solid transparent;
+	font-size: .85rem;
+	font-weight: 600;
+	letter-spacing: .06em;
+}
+.league-subnav a:hover,
+.league-subnav a[aria-selected="true"] {
+	color: var(--color-green);
+	border-bottom-color: var(--color-green);
+}
+.league-subnav a:focus-visible {
+	outline: 2px solid var(--color-green);
+	outline-offset: 4px;
+}
+[data-league-panel][hidden] { display: none; }
+[data-league-panel] > .content-section:first-child {
+	padding-top: 64px;
+}

@@ -430,3 +430,37 @@ npm run build
 The Node tests use native TypeScript stripping (Node 22.18+, or add
 `--experimental-strip-types` on Node 22.12+). Python and TypeScript share
 ranking fixtures to keep official ties and championship credit consistent.
+
+
+### League sections and Title Race UI
+
+League pages keep their existing paths and offer OVERVIEW / PLAYER STATS
+sub-navigation. Overview contains League Table → Match Results → Title Race;
+Player Stats contains the unchanged full leaderboard with consecutive ranks.
+`#player-stats` selects that panel; `#overview` or no hash selects Overview.
+The existing `#player-stats-title` anchor also selects Player Stats.
+`?week=N#results` opens Overview and preserves the existing week selection.
+Tabs retain query parameters and support reload, history navigation and
+keyboard controls. Without JavaScript, both sections remain available.
+
+Title Race automatically runs the existing 10,000-trial simulation once per
+page load. Team rows stay in generated official standings order, including
+tied teams' presentation order; only percentages and bars change. Teams
+without standings rows are appended in league team order. TITLE RACE is the
+primary heading; Championship Simulator is a small subtitle.
+
+Try scenarios and How it works are closed by default. Opening scenarios
+shows remaining weeks and score inputs immediately. Blank score pairs use
+the existing model; specified pairs are fixed. Edits label the displayed
+result as stale until Run Simulation. Reset clears inputs and restores the
+cached initial result without resampling. Tab/disclosure changes neither
+reset inputs nor trigger additional trials. Assumptions, completed count,
+lambda, frozen participation, official tiebreakers and shared championship
+credit are explained inside How it works. Exact/no-data states are labeled
+without claiming 10,000 random trials.
+
+Browser regression: after `npm run build`, run
+`node tests/league-ui.browser.mjs` with `playwright-core` available and Chrome
+installed. `PLAYWRIGHT_MODULE` can point to an external installation's
+`index.mjs`, avoiding changes to project dependencies. The check uses a
+local temporary HTTP server, closed automatically after completion.
