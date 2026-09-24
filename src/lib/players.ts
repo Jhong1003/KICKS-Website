@@ -1,5 +1,7 @@
 // Shared types/helpers for src/data/player_profiles.json, used by the
-// /players grid and /players/[id] detail pages. The badge/tag *rules* live
+// /players grid and /players/[id] detail pages. Stats, tag and badges are
+// per league (see PlayerLeagueSection) and never combined across leagues;
+// team colors and league metadata live in ./leagues. The badge/tag *rules* live
 // in scripts/update_data.py (that's what computes them) — this file only
 // carries the display metadata (label/description/icon) for each badge
 // key, and small view helpers. See AGENTS.md's "Player profiles" section
@@ -48,17 +50,12 @@ export type BadgeKey =
 	| "brace"
 	| "hat_trick"
 	| "perfect_attendance"
-	| "week1_starter"
-	| "rookie"
 	| "own_goal_award"
 	| "squad_member";
 
-export interface PlayerProfile {
-	id: string;
-	name: string;
-	avatar_initials: string;
-	positions: PlayerPosition[];
-	status: PlayerStatus;
+/** One player's profile within a single league (its stats, tag and badges). */
+export interface PlayerLeagueSection {
+	league: string;
 	current_team: string;
 	team_history: TeamSegment[];
 	season_totals: SeasonTotals;
@@ -66,6 +63,22 @@ export interface PlayerProfile {
 	personal_best_week: PersonalBestWeek | null;
 	play_style_tag: PlayStyleTag;
 	badges: BadgeKey[];
+}
+
+/**
+ * `leagues` has one section per league the player has played in, newest
+ * first. The section fields of their most recent league are mirrored at the
+ * top level (`current_league`, `current_team`, `season_totals`, ...) for
+ * pages that just want the player as they are now.
+ */
+export interface PlayerProfile extends Omit<PlayerLeagueSection, "league"> {
+	id: string;
+	name: string;
+	avatar_initials: string;
+	positions: PlayerPosition[];
+	status: PlayerStatus;
+	current_league: string;
+	leagues: PlayerLeagueSection[];
 }
 
 // Deliberately no rating/score field anywhere on this type — this is a
@@ -81,12 +94,6 @@ export const BADGES: Record<BadgeKey, { label: string; description: string; icon
 		description: "Hasn't missed a week so far this season.",
 		icon: "📅",
 	},
-	week1_starter: {
-		label: "Week 1 Starter",
-		description: "Part of the squad since the very first week of the season.",
-		icon: "🚩",
-	},
-	rookie: { label: "Rookie", description: "Just joined the squad this season.", icon: "🌱" },
 	own_goal_award: {
 		label: "Own Goal Award",
 		description: "Generously contributed a goal to the other team's tally. It happens to the best of us!",
@@ -94,10 +101,6 @@ export const BADGES: Record<BadgeKey, { label: string; description: string; icon
 	},
 	squad_member: { label: "Squad Member", description: "A valued part of the KICKS roster.", icon: "🤝" },
 };
-
-export function getTeamColor(team: string, colors: Record<string, string>): string {
-	return colors[team] ?? colors["_default"] ?? "#7f8c8d";
-}
 
 /** WCAG relative luminance of a hex color, or null if it doesn't parse. */
 function relativeLuminance(hex: string): number | null {
@@ -115,7 +118,7 @@ function relativeLuminance(hex: string): number | null {
  * Dark or light text color, whichever reads better on top of `hex` — used
  * for the player card avatar, which fills its circle with the team color.
  * Computed (WCAG relative luminance) rather than hardcoded per team, so a
- * future team-colors.json edit (e.g. real bib colors) can't accidentally
+ * future teams-tab color change (e.g. real bib colors) can't accidentally
  * ship unreadable white-on-yellow text again.
  */
 export function getContrastingTextColor(hex: string): string {

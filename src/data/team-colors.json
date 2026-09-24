@@ -1,7 +1,0 @@
-{
-  "_comment": "Placeholder accent colors for player cards, one per team, keyed by the exact team name used in the Google Sheet. Replace with the real bib colors whenever they're decided — hex only, no rebuild logic depends on which colors are here. \"_default\" is used for any team not listed (e.g. a new team added before this file is updated).",
-  "_default": "#7f8c8d",
-  "이지선다": "#b8860b",
-  "문전박대": "#1c7ed6",
-  "오늘밤 샴페인": "#e03131"
-}

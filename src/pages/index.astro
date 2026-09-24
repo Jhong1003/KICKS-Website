@@ -9,9 +9,9 @@ import heroImage from "../assets/hero.jpg";
 import scheduleData from "../data/schedule.json";
 import transferNews from "../data/transfer-news.json";
 import profilesData from "../data/player_profiles.json";
-import teamColorsData from "../data/team-colors.json";
 import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
+import { latestLeague } from "../lib/leagues";
 
 const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
 const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData as PlayerProfile[]);
@@ -26,7 +26,7 @@ const showTransferBanner = transferNews.enabled && resolvedTransfers.length > 0;
 	<main>
 		{
 			showTransferBanner && (
-				<TransferBanner heading={transferNews.heading} transfers={resolvedTransfers} teamColors={teamColorsData} />
+				<TransferBanner heading={transferNews.heading} transfers={resolvedTransfers} league={latestLeague} />
 			)
 		}
 

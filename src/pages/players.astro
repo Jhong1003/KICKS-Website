@@ -2,15 +2,14 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PlayerCard from "../components/PlayerCard.astro";
 import profilesData from "../data/player_profiles.json";
-import teamColorsData from "../data/team-colors.json";
 import playerPhotosData from "../data/player-photos.json";
-import { getTeamColor, sortPlayers, type PlayerProfile } from "../lib/players";
+import { sortPlayers, type PlayerProfile } from "../lib/players";
+import { getLeague, getTeamColor } from "../lib/leagues";
 
 const players = sortPlayers(
 	(profilesData as PlayerProfile[]).filter((player) => player.status !== "inactive"),
 	"name",
 );
-const teamColors = teamColorsData as Record<string, string>;
 const playerPhotos = playerPhotosData as Record<string, string>;
 ---
 
@@ -41,7 +40,7 @@ const playerPhotos = playerPhotosData as Record<string, string>;
 					players.map((player) => (
 						<PlayerCard
 							player={player}
-							teamColor={getTeamColor(player.current_team, teamColors)}
+							teamColor={getTeamColor(player.current_team, getLeague(player.current_league))}
 							href={`/players/${player.id}`}
 							avatarPhoto={playerPhotos[player.id]}
 						/>

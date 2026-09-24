@@ -3,9 +3,9 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import PlayerCard from "../../components/PlayerCard.astro";
 import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
-import teamColorsData from "../../data/team-colors.json";
 import playerPhotosData from "../../data/player-photos.json";
-import { BADGES, getTeamColor, type PlayerProfile } from "../../lib/players";
+import { BADGES, type PlayerProfile } from "../../lib/players";
+import { getLeague, getTeamColor } from "../../lib/leagues";
 
 export function getStaticPaths() {
 	const profiles = profilesData as PlayerProfile[];
@@ -20,9 +20,8 @@ interface Props {
 }
 
 const { player } = Astro.props;
-const teamColors = teamColorsData as Record<string, string>;
 const playerPhotos = playerPhotosData as Record<string, string>;
-const teamColor = getTeamColor(player.current_team, teamColors);
+const teamColor = getTeamColor(player.current_team, getLeague(player.current_league));
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 ---

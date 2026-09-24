@@ -1,15 +1,16 @@
 ---
-import { getReadableAccentColor, getTeamColor, type ResolvedTransfer } from "../lib/players";
+import { getReadableAccentColor, type ResolvedTransfer } from "../lib/players";
+import { getTeamColor, type League } from "../lib/leagues";
 
 interface Props {
 	heading: string;
 	transfers: ResolvedTransfer[];
-	teamColors: Record<string, string>;
+	league: League;
 }
 
-const { heading, transfers, teamColors } = Astro.props;
+const { heading, transfers, league } = Astro.props;
 
-const teamTextColor = (team: string) => getReadableAccentColor(getTeamColor(team, teamColors));
+const teamTextColor = (team: string) => getReadableAccentColor(getTeamColor(team, league));
 ---
 
 <div class="transfer-banner" id="transfer-banner">
