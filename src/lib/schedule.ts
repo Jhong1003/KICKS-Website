@@ -132,10 +132,9 @@ export function getNextUpEvent(events: ScheduleEvent[], today: Date = new Date()
 }
 
 /**
- * Group events by month for the timeline. Within a month, events flagged
- * `tbd` (a tentative date still to be confirmed) sort to the end of that
- * month's group. Fully undated events land in their own "Date TBD" group
- * at the end.
+ * Group the date-sorted buildScheduleView output by month for the timeline,
+ * preserving chronological order even for tentative dates. Fully undated
+ * events land in their own "Date TBD" group at the end.
  */
 export function groupByMonth(views: ScheduleEventView[]): ScheduleMonthGroup[] {
 	const groups = new Map<string, ScheduleEventView[]>();
@@ -152,9 +151,6 @@ export function groupByMonth(views: ScheduleEventView[]): ScheduleMonthGroup[] {
 
 	return order.map((key) => {
 		const monthEvents = groups.get(key)!;
-		if (key !== TBD_GROUP_LABEL) {
-			monthEvents.sort((a, b) => Number(Boolean(a.tbd)) - Number(Boolean(b.tbd)));
-		}
 		const [year, monthIndex] = key === TBD_GROUP_LABEL ? [null, null] : key.split("-").map(Number);
 		return {
 			label: key === TBD_GROUP_LABEL ? TBD_GROUP_LABEL : `${MONTH_NAMES[monthIndex!]} ${year}`,

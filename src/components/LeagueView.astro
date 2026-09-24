@@ -49,8 +49,10 @@ const matches = inLeague(matchesData as MatchRecord[]).map((match) => ({
 const weekSummaries = inLeague(weekSummariesData).map((row) => ({ ...row, team: teamName(row.team_id) }));
 const leaderboard = inLeague(leaderboardData)
 	.filter((player) => player.status !== "inactive")
-	.map((row) => ({
+	.map((row, index) => ({
 		...row,
+		// Rank only visible players, preserving the pipeline's ranking order.
+		rank: index + 1,
 		player: playerNames.get(row.player_id) ?? row.player_id,
 		team: teamName(row.team_id),
 	}));
