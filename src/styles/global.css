@@ -2830,6 +2830,9 @@ a.player-card:hover {
 }
 
 @media (min-width: 1261px) {
+	.hero {
+		min-height: calc(100vh - 64px);
+	}
 	.hero > .hero-content {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) min(590px, calc(100% / 2));
