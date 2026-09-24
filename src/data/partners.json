@@ -1,4 +1,29 @@
 [
-  { "partner_id": "partner-01", "name": "Placeholder Partner", "logo": null, "url": null },
-  { "partner_id": "partner-02", "name": "Placeholder Partner", "logo": null, "url": null }
+  {
+    "partner_id": "star-karaoke",
+    "name": "Star Karaoke",
+    "logo": "/partners/star-karaoke.png",
+    "logo_scale": 0.6,
+    "address": "1503 Lyndhurst Alley, Savoy, IL 61874",
+    "url": "https://www.starkaraokeuc.com/",
+    "link_label": "Visit website"
+  },
+  {
+    "partner_id": "star-bbq",
+    "name": "Star BBQ",
+    "logo": "/partners/star-bbq.png",
+    "logo_scale": 0.85,
+    "address": "1209 Savoy Plaza Ln, Savoy, IL 61874",
+    "url": "https://starbbq.net/",
+    "link_label": "Visit website"
+  },
+  {
+    "partner_id": "masijta-grill",
+    "name": "Masijta Grill Korean BBQ",
+    "logo": "/partners/masijta-grill.png",
+    "logo_scale": 0.85,
+    "address": "202 N Race St, Urbana, IL 61801",
+    "url": "https://www.google.com/maps/place/Masijta+Grill+korean+BBQ/@40.1135718,-88.2113418,17z",
+    "link_label": "View on Google Maps"
+  }
 ]

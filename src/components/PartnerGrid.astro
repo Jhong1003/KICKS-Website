@@ -3,7 +3,10 @@ interface Partner {
 	partner_id: string;
 	name: string;
 	logo: string | null;
+	logo_scale?: number;
+	address?: string;
 	url: string | null;
+	link_label?: string;
 }
 
 interface Props {
@@ -15,20 +18,29 @@ const { partners } = Astro.props;
 
 <div class="partner-grid">
 	{
-		partners.map((partner) => {
-			const card = partner.logo ? (
-				<img src={partner.logo} alt={partner.name} />
-			) : (
-				<span class="partner-logo-placeholder">{partner.name}</span>
-			);
-
-			return partner.url ? (
-				<a class="partner-card" href={partner.url} target="_blank" rel="noopener noreferrer">
-					{card}
-				</a>
-			) : (
-				<div class="partner-card">{card}</div>
-			);
-		})
+		partners.map((partner) => (
+			<article class="partner-card">
+				<div class="partner-logo-area" style={`--logo-scale: ${partner.logo_scale ?? 0.8}`}>
+					{
+						partner.logo ? (
+							<img src={partner.logo} alt={`${partner.name} logo`} loading="lazy" />
+						) : (
+							<span class="partner-logo-placeholder">{partner.name}</span>
+						)
+					}
+				</div>
+				<div class="partner-info">
+					<h3 class="partner-name">{partner.name}</h3>
+					{partner.address && <p class="partner-address">{partner.address}</p>}
+					{
+						partner.url && (
+							<a class="partner-link" href={partner.url} target="_blank" rel="noopener noreferrer">
+								{partner.link_label ?? "Visit website"} →
+							</a>
+						)
+					}
+				</div>
+			</article>
+		))
 	}
 </div>

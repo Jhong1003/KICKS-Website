@@ -1169,7 +1169,7 @@ h1 {
 .partner-grid {
 
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 16px;
 	margin-top: 24px;
 
@@ -1178,18 +1178,82 @@ h1 {
 .partner-card {
 
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 24px;
+	flex-direction: column;
+	overflow: hidden;
 	border: 1px solid var(--color-sage);
 	border-radius: 8px;
 
 }
 
-.partner-card img {
+/* 모든 카드가 같은 높이의 흰 영역을 쓰고, 로고 크기는 partners.json의
+   logo_scale(영역 너비 대비 비율)로 로고마다 따로 조절한다. */
+.partner-logo-area {
 
-	max-width: 100%;
-	max-height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 5 / 2;
+	background: #fff;
+	border-bottom: 1px solid var(--color-sage);
+
+}
+
+.partner-logo-area img {
+
+	width: calc(var(--logo-scale, 0.8) * 100%);
+	height: auto;
+
+}
+
+.partner-info {
+
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 6px;
+	padding: 16px 18px 18px;
+
+}
+
+.partner-name {
+
+	margin: 0;
+	font-size: 1.05rem;
+
+}
+
+.partner-address {
+
+	margin: 0;
+	font-size: 0.9rem;
+	line-height: 1.5;
+	opacity: 0.75;
+
+}
+
+.partner-link {
+
+	margin-top: auto;
+	padding-top: 6px;
+	color: var(--color-green);
+	font-size: 0.9rem;
+	font-weight: 600;
+
+}
+
+.partner-link:hover {
+
+	text-decoration: underline;
+
+}
+
+@media (max-width: 700px) {
+
+	.partner-grid {
+
+		grid-template-columns: 1fr;
+
+	}
 
 }
 
