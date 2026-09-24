@@ -49,6 +49,8 @@ site reads.
   player profiles: per-league profile sections (`getSection`), badge
   label/description/icon lookup, transfer resolution, and the name/team
   sort (see "Player profiles" below).
+- [src/lib/goals.ts](src/lib/goals.ts) — the homepage's all-time goal
+  countdown (see "All-time goal countdown" below).
 - [scripts/update_data.py](scripts/update_data.py) — Google Sheets → JSON
   pipeline.
 - [scripts/validate_data.py](scripts/validate_data.py) — sanity-checks the
@@ -163,7 +165,10 @@ edit alone is enough to update the live site.
 A season can hold several leagues (FA26 has **FA26-L1** and **FA26-L2**).
 Each league has its own teams and team names, restarts at week 1, and is
 computed completely separately — **nothing is ever summed across leagues**
-(standings, leaderboard, profile stats, badges are all per league).
+(standings, leaderboard, profile stats, badges are all per league). The
+one deliberate exception is the homepage's club-wide goal total — see
+[All-time goal countdown](#all-time-goal-countdown) for why it's allowed
+and why it must stay the only one.
 
 - **Ids and order**: a league id like `FA26-L2` is whatever the Sheet's
   `league` columns and `teams` tab say. The **order of leagues is the order
@@ -415,6 +420,35 @@ reappears on a later visit rather than being gone for good. On narrow
 screens the transfer list scrolls horizontally instead of wrapping to
 multiple lines, so the banner stays a single compact row regardless of
 how many transfers are listed.
+
+### All-time goal countdown
+
+The homepage hero shows a line right under "Next up", e.g. "KICKS 통산
+93골 · 100호 골까지 7골": every completed match's score (`home_score` +
+`away_score`, so own goals count, as they do in the match score) summed
+across **all leagues**, and how many goals are left until the next
+milestone. For `MILESTONE_CELEBRATION_DAYS` (7) after the match that
+crossed a milestone, it switches to a celebration message instead ("KICKS
+통산 100골 달성! 🎉"). Both constants, plus `GOAL_MILESTONE_STEP` (100),
+are in [src/lib/goals.ts](src/lib/goals.ts).
+
+**This is the only place on the site that sums across leagues, on
+purpose.** The no-cross-league rule exists because teams are re-drawn and
+rosters change every league, so adding up standings, player stats or
+badges across leagues would compare things that aren't comparable, and
+would rank someone on numbers from a different setup. The goal total
+doesn't rank or compare anyone: no team, no player, just one number for
+the whole club celebrating how much it has played together. That's the
+test for any future exception: a club-wide number that nobody is ranked
+or compared on. Anything per team or per player stays per league.
+
+It's computed on the frontend from `matches.json` rather than in
+`update_data.py`. It's a plain sum of data that's already generated, and
+whether a milestone is still "recent" depends on the visitor's date, so it
+has to be re-checked client-side anyway. Same pattern as the "Next up"
+card: the build-time render is the fallback, and `index.astro`'s script
+re-runs `isCelebratingMilestone` against today's date. The line is hidden
+while the total is 0.
 
 ### Full Matches encryption
 
