@@ -12,6 +12,10 @@ fail the run). Exit code 1 means at least one error was found — in the
 GitHub Actions workflow this stops the run before update_data.py touches
 anything, so nothing bad ever gets committed.
 
+Everything is checked per league (FA26-L1, FA26-L2, ...): each league has its
+own teams (teams tab) and rules (src/data/league-config.json) and restarts at
+week 1, so a message is prefixed with the league it's about.
+
 Strictness: a week's matches are often entered before that week is fully
 played, so a mismatch caused purely by an incomplete week isn't a real
 error. When this runs from a GitHub Actions `schedule` trigger, that kind
@@ -24,21 +28,22 @@ VALIDATE_STRICT=1 or VALIDATE_STRICT=0.
 from __future__ import annotations
 
 import os
+import re
 import sys
 from pathlib import Path
 
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from update_data import GAMES_PER_WEEK, load_sheets  # noqa: E402 (needs sys.path set first)
+from update_data import GAMES_PER_WEEK, LEAGUE_WEEK_DATES, league_rules, load_sheets  # noqa: E402 (needs sys.path set first)
 
 # ---------------------------------------------------------------------------
-# Config — the rules themselves live in the check_* functions below; these
-# are just the constants they check against.
+# Config — the rules themselves live in the check_* functions below. What
+# they check against comes from the sheet's teams tab (valid team names) and
+# src/data/league-config.json (per-league weeks / matches per week).
 # ---------------------------------------------------------------------------
 
-VALID_TEAMS = {"이지선다", "문전박대", "오늘밤 샴페인"}
-MATCHES_PER_WEEK = 9  # 3 teams round-robin, 3 rounds/week -> 9 matches
+HEX_COLOR = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 CheckResult = tuple[list[str], list[str]]  # (errors, warnings)
 
@@ -66,25 +71,89 @@ def _sheet_row(index: int) -> int:
 # ---------------------------------------------------------------------------
 
 
-def check_team_names(matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame) -> CheckResult:
-    """Rule: every team name must be exactly one of the 3 canonical names
-    (spacing included) — catches typos that would silently create a 4th
-    team bucket somewhere in the pipeline."""
+def check_leagues(teams: pd.DataFrame, matches: pd.DataFrame, player_stats: pd.DataFrame) -> CheckResult:
+    """Rule: the league structure itself must be sound, since every other
+    check (and the whole pipeline) groups by it.
+
+      - every matches/player_stats row has a `league`, and it's one that's
+        on the teams tab (a blank or typo'd league would silently drop the
+        row out of every per-league calculation);
+      - the teams tab has no blank or duplicate team names / ids within a
+        league, and any color is a #rrggbb hex (a blank color is only a
+        warning — the site falls back to a neutral gray);
+      - every (league, week) in matches has a date in schedule.json, which
+        update_data.py needs (it raises otherwise)."""
+    errors, warnings = [], []
+
+    if teams.empty:
+        return ["teams 탭이 비어 있습니다 — 리그별 팀 목록이 필요합니다"], []
+
+    for idx, row in teams.iterrows():
+        where = f"teams {_sheet_row(idx)}행"
+        for col in ("league", "team_id", "team_name"):
+            if pd.isna(row[col]):
+                errors.append(f"{where}: {col}가 비어 있습니다")
+        if pd.isna(row["color"]):
+            warnings.append(f"{where} ({row['league']} {row['team_name']}): color가 비어 있어 기본 회색이 쓰입니다")
+        elif not HEX_COLOR.match(str(row["color"]).strip()):
+            errors.append(f"{where}: color 값 '{row['color']}' — #rrggbb 형식이어야 합니다")
+    for col in ("team_id", "team_name"):
+        for (league, value), count in teams.dropna(subset=["league", col]).groupby(["league", col]).size().items():
+            if count > 1:
+                errors.append(f"teams: {league}에 {col} '{value}'가 {count}번 나옵니다")
+
+    known = set(teams["league"].dropna())
+    for label, df in [("matches", matches), ("player_stats", player_stats)]:
+        for idx, value in df["league"].items():
+            if pd.isna(value):
+                errors.append(f"{label} {_sheet_row(idx)}행: league가 비어 있습니다")
+            elif value not in known:
+                errors.append(
+                    f"{label} {_sheet_row(idx)}행: league '{value}'가 teams 탭에 없습니다 "
+                    f"(있는 리그: {', '.join(sorted(known))})"
+                )
+
+    for (league, week), _ in matches.dropna(subset=["league"]).groupby(["league", "week"]):
+        if (league, int(week)) not in LEAGUE_WEEK_DATES:
+            errors.append(
+                f"matches: {league} {week}주차의 날짜가 src/data/schedule.json에 없습니다 — "
+                f'{{"type": "league", "league": "{league}", "week": {week}, ...}} 항목을 추가해주세요'
+            )
+    return errors, warnings
+
+
+def check_team_names(
+    matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame, teams: pd.DataFrame
+) -> CheckResult:
+    """Rule: every team name must exactly match a team on the teams tab
+    (spacing included) — catches typos that would silently create an extra
+    team bucket somewhere in the pipeline.
+
+    matches and player_stats rows are checked against *their own league's*
+    teams. The players tab has a single `team` column that can't say which
+    league it means, so it only has to be a team from some league."""
     errors = []
+    teams_of = teams.groupby("league")["team_name"].apply(set).to_dict()
+    all_teams = set(teams["team_name"].dropna())
+
+    def check_column(label: str, df: pd.DataFrame, col: str, valid_for) -> None:
+        for idx, value in df[col].items():
+            if pd.isna(value):
+                continue  # e.g. a "new" status player with no team yet
+            valid = valid_for(idx)
+            if value not in valid:
+                errors.append(
+                    f"{label} {_sheet_row(idx)}행: {col} 값 '{value}' — 허용된 팀명이 아닙니다 "
+                    f"(허용: {', '.join(sorted(valid))})"
+                )
+
     for label, df, cols in [
         ("matches", matches, ["home_team", "away_team"]),
         ("player_stats", player_stats, ["team"]),
-        ("players", players, ["team"]),
     ]:
         for col in cols:
-            for idx, value in df[col].items():
-                if pd.isna(value):
-                    continue  # e.g. a "new" status player with no team yet
-                if value not in VALID_TEAMS:
-                    errors.append(
-                        f"{label} {_sheet_row(idx)}행: {col} 값 '{value}' — 허용된 팀명이 아닙니다 "
-                        f"(허용: {', '.join(sorted(VALID_TEAMS))})"
-                    )
+            check_column(label, df, col, lambda idx, df=df: teams_of.get(df.at[idx, "league"], set()))
+    check_column("players", players, "team", lambda idx: all_teams)
     return errors, []
 
 
@@ -140,13 +209,21 @@ def check_scores_valid(matches: pd.DataFrame) -> CheckResult:
 
 
 def check_matches_per_week(matches: pd.DataFrame) -> CheckResult:
-    """Rule: every week must have exactly MATCHES_PER_WEEK rows, regardless
-    of whether scores are filled in yet — this is a row-count/structure
-    check, not a "did they play" check."""
+    """Rule: every league week must have exactly that league's
+    matches_per_week rows (league-config.json), regardless of whether
+    scores are filled in yet — this is a row-count/structure check, not a
+    "did they play" check. A week number past the league's `weeks` is also
+    an error."""
     errors = []
-    for week, count in matches.groupby("week").size().items():
-        if count != MATCHES_PER_WEEK:
-            errors.append(f"matches: {week}주차 행이 {count}개 — {MATCHES_PER_WEEK}개여야 합니다")
+    for (league, week), count in matches.groupby(["league", "week"]).size().items():
+        rules = league_rules(league)
+        if count != rules["matches_per_week"]:
+            errors.append(f"[{league}] matches: {week}주차 행이 {count}개 — {rules['matches_per_week']}개여야 합니다")
+        if week > rules["weeks"]:
+            errors.append(
+                f"[{league}] matches: {week}주차는 이 리그의 주차 수({rules['weeks']}주)를 넘습니다 "
+                "(src/data/league-config.json의 weeks 확인)"
+            )
     return errors, []
 
 
@@ -205,7 +282,7 @@ def check_team_goal_sums(matches: pd.DataFrame, player_stats: pd.DataFrame, stri
 
 
 def check_team_goal_diff_within_own_goal_budget(
-    matches: pd.DataFrame, player_stats: pd.DataFrame, strict: bool
+    matches: pd.DataFrame, player_stats: pd.DataFrame, strict: bool, league_teams: set[str]
 ) -> CheckResult:
     """Rule: for each (week, team), (match goals for that team) minus
     (that team's own players' goal total) must be:
@@ -248,7 +325,7 @@ def check_team_goal_diff_within_own_goal_budget(
         week_matches = matches[matches["week"] == week]
         week_total_og = int(week_own_goals_total.get(week, 0))
 
-        for team in VALID_TEAMS:
+        for team in sorted(league_teams):
             team_matches = week_matches[(week_matches["home_team"] == team) | (week_matches["away_team"] == team)]
             if team_matches.empty:
                 continue
@@ -280,10 +357,10 @@ def check_team_goal_diff_within_own_goal_budget(
 
 
 def check_active_players_missing_weeks(
-    matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame
+    matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame, league_order: list[str]
 ) -> CheckResult:
     """Rule: an active player must have a player_stats row for every fully
-    played week since they joined.
+    played week of every league they're part of.
 
     A missing row isn't caught by any of the goal-sum checks above: a
     player who didn't score contributes 0 either way, so their whole row
@@ -292,22 +369,29 @@ def check_active_players_missing_weeks(
     the roster while counting none of their games, understating their
     team (see the issues tab, I002).
 
-    joined_week (players tab) is what makes this an error rather than a
-    warning. Without it, every mid-season joiner looked "missing" for
-    every week before they arrived, and a real omission sat buried in
-    that noise. Weeks before a player joined are simply out of scope.
+    joined_week (players tab) is the league week they joined *in their
+    first league* (the earliest league they have any row in; for someone
+    with no rows yet, the latest league that has a finished week). Weeks
+    of that league before joined_week are out of scope. From the next
+    league on they're expected every week — leagues restart at week 1 with
+    new teams, and an `active` player is taken to be playing. Someone who
+    stopped playing should be flipped to `inactive` on the players tab.
 
     A player with no joined_week at all is skipped with a warning rather
     than assumed to have been here since week 1 — guessing would
     reintroduce exactly the false alarms this is meant to remove.
     """
     errors, warnings = [], []
-    finished_weeks = [
-        week
-        for week, group in matches.groupby("week")
-        if not group[["home_score", "away_score"]].isna().any().any()
-    ]
-    have_row = set(zip(player_stats["player"], player_stats["week"]))
+    rank = {league: index for index, league in enumerate(league_order)}
+
+    finished: dict[str, list[int]] = {}
+    for (league, week), group in matches.groupby(["league", "week"]):
+        if not group[["home_score", "away_score"]].isna().any().any():
+            finished.setdefault(league, []).append(int(week))
+
+    have_row = set(zip(player_stats["league"], player_stats["player"], player_stats["week"]))
+    first_league = player_stats.groupby("player")["league"].agg(lambda s: min(s, key=rank.__getitem__))
+    fallback_first = next((league for league in reversed(league_order) if league in finished), None)
     active_players = players[players["status"] == "active"]
 
     for _, player_row in active_players.iterrows():
@@ -318,13 +402,23 @@ def check_active_players_missing_weeks(
                 f"players 탭: '{name}'의 joined_week가 비어 있어 주차별 기록 누락 검사를 건너뜁니다"
             )
             continue
-        for week in finished_weeks:
-            if week >= int(joined) and (name, week) not in have_row:
-                errors.append(
-                    f"player_stats: {week}주차가 끝났는데 '{name}'의 기록이 없습니다 "
-                    f"({joined}주차 합류, active 상태) — 결석했다면 games 0으로 한 줄 추가해주세요"
-                )
+        first = first_league.get(name, fallback_first)
+        if first is None:
+            continue
+        for league in league_order:
+            if rank[league] < rank[first]:
+                continue
+            for week in sorted(finished.get(league, [])):
+                if league == first and week < int(joined):
+                    continue
+                if (league, name, week) not in have_row:
+                    since = f"{joined}주차 합류" if league == first else "이전 리그부터 참가"
+                    errors.append(
+                        f"[{league}] player_stats: {week}주차가 끝났는데 '{name}'의 기록이 없습니다 "
+                        f"({since}, active 상태) — 결석했다면 games 0으로 한 줄 추가해주세요"
+                    )
     return errors, warnings
+
 
 def check_goal_events(
     matches: pd.DataFrame, player_stats: pd.DataFrame, goal_events: pd.DataFrame
@@ -360,15 +454,15 @@ def check_goal_events(
             continue
         match_info[row["match_id"]] = row
 
-    # (week, player) -> team that week, and games played
+    # (league, week, player) -> team that week, and games played
     week_team = {}
     week_games = {}
     for _, row in player_stats.iterrows():
-        week_team[(row["week"], row["player"])] = row["team"]
-        week_games[(row["week"], row["player"])] = row["games"]
+        week_team[(row["league"], row["week"], row["player"])] = row["team"]
+        week_games[(row["league"], row["week"], row["player"])] = row["games"]
 
     scored = {}  # (match_id, team) -> goals counted from events
-    event_weeks = set()
+    event_weeks = set()  # (league, week)
 
     for idx, row in events.iterrows():
         where = f"goal_events {_sheet_row(idx)}행"
@@ -382,11 +476,12 @@ def check_goal_events(
             errors.append(f"{where}: match_id '{match_id}'가 matches 탭에 없습니다")
             continue
 
+        league = match["league"]
         week = int(match["week"])
-        event_weeks.add(week)
+        event_weeks.add((league, week))
         teams = (match["home_team"], match["away_team"])
 
-        scorer_team = week_team.get((week, scorer))
+        scorer_team = week_team.get((league, week, scorer))
         if scorer_team is None:
             errors.append(f"{where}: '{scorer}'의 {week}주차 player_stats 기록이 없습니다")
             continue
@@ -396,7 +491,7 @@ def check_goal_events(
                 f"{teams[0]} vs {teams[1]} 입니다"
             )
             continue
-        if week_games.get((week, scorer), 0) == 0:
+        if week_games.get((league, week, scorer), 0) == 0:
             errors.append(f"{where}: '{scorer}'는 {week}주차 결석(games 0)인데 골 기록이 있습니다")
 
         # An own goal counts for the opponent.
@@ -410,7 +505,7 @@ def check_goal_events(
             elif assist == scorer:
                 errors.append(f"{where}: 득점자와 어시스트가 같은 선수입니다 ('{scorer}')")
             else:
-                assist_team = week_team.get((week, assist))
+                assist_team = week_team.get((league, week, assist))
                 if assist_team is None:
                     errors.append(f"{where}: '{assist}'의 {week}주차 player_stats 기록이 없습니다")
                 elif assist_team != scorer_team:
@@ -440,13 +535,13 @@ def check_goal_events(
     # a value typed there is silently discarded, so say so rather than
     # letting the two records drift apart unnoticed.
     for idx, row in player_stats.iterrows():
-        if int(row["week"]) not in event_weeks:
+        if (row["league"], int(row["week"])) not in event_weeks:
             continue
         for col in ("goals", "assists", "own_goals"):
             value = row.get(col)
             if not pd.isna(value) and value != 0:
                 warnings.append(
-                    f"player_stats {_sheet_row(idx)}행 ({row['week']}주차, {row['player']}): "
+                    f"player_stats {_sheet_row(idx)}행 ({row['league']} {row['week']}주차, {row['player']}): "
                     f"{col}에 값이 있지만 이 주차는 goal_events로 계산되므로 무시됩니다"
                 )
 
@@ -456,42 +551,79 @@ def check_goal_events(
 # Main
 # ---------------------------------------------------------------------------
 
-def main() -> None:
-    sheets = load_sheets()
-    matches, player_stats, players = sheets["matches"], sheets["player_stats"], sheets["players"]
-    goal_events = sheets["goal_events"]
-    strict = _is_strict()
+def _per_league(leagues: list[str], run) -> CheckResult:
+    """Run a league-scoped check once per league, tagging each message with
+    the league it came from."""
+    errors, warnings = [], []
+    for league in leagues:
+        league_errors, league_warnings = run(league)
+        errors += [f"[{league}] {message}" for message in league_errors]
+        warnings += [f"[{league}] {message}" for message in league_warnings]
+    return errors, warnings
 
-    print(f"검증 모드: {'엄격 (수동 실행/로컬)' if strict else '완화 (자동 스케줄 실행)'}\n")
 
-    checks: list[CheckResult] = [
-        check_team_names(matches, player_stats, players),
-        check_games_values(player_stats),
-        check_player_names_known(player_stats, players),
-        check_scores_valid(matches),
-        check_matches_per_week(matches),
-        check_team_goal_sums(matches, player_stats, strict),
-        check_team_goal_diff_within_own_goal_budget(matches, player_stats, strict),
-        check_active_players_missing_weeks(matches, player_stats, players),
-        check_goal_events(matches, player_stats, goal_events),
-    ]
-
-    all_errors = [message for errors, _ in checks for message in errors]
-    all_warnings = [message for _, warnings in checks for message in warnings]
-
-    if all_warnings:
-        print(f"⚠️  경고 {len(all_warnings)}건 (실패 처리는 안 됨):")
-        for message in all_warnings:
+def _report(errors: list[str], warnings: list[str]) -> None:
+    if warnings:
+        print(f"⚠️  경고 {len(warnings)}건 (실패 처리는 안 됨):")
+        for message in warnings:
             print(f"  - {message}")
         print()
 
-    if all_errors:
-        print(f"❌ 오류 {len(all_errors)}건 — 시트를 수정한 뒤 다시 실행해주세요:")
-        for message in all_errors:
+    if errors:
+        print(f"❌ 오류 {len(errors)}건 — 시트를 수정한 뒤 다시 실행해주세요:")
+        for message in errors:
             print(f"  - {message}")
         sys.exit(1)
 
     print("✅ 검증 통과 — 오류 없음.")
+
+
+def main() -> None:
+    sheets = load_sheets()
+    matches, player_stats, players = sheets["matches"], sheets["player_stats"], sheets["players"]
+    goal_events, teams = sheets["goal_events"], sheets["teams"]
+    strict = _is_strict()
+
+    print(f"검증 모드: {'엄격 (수동 실행/로컬)' if strict else '완화 (자동 스케줄 실행)'}\n")
+
+    # Everything below groups by league, so a broken league structure has to
+    # be reported on its own first rather than crashing the other checks.
+    structure_errors, structure_warnings = check_leagues(teams, matches, player_stats)
+    if structure_errors:
+        _report(structure_errors, structure_warnings)
+
+    league_order = list(dict.fromkeys(teams["league"]))
+    used = set(matches["league"]) | set(player_stats["league"])
+    leagues = [league for league in league_order if league in used]
+    teams_of = teams.groupby("league")["team_name"].apply(set).to_dict()
+
+    def scoped(df: pd.DataFrame, league: str) -> pd.DataFrame:
+        return df[df["league"] == league]
+
+    checks: list[CheckResult] = [
+        (structure_errors, structure_warnings),
+        check_team_names(matches, player_stats, players, teams),
+        check_player_names_known(player_stats, players),
+        check_matches_per_week(matches),
+        _per_league(leagues, lambda l: check_games_values(scoped(player_stats, l))),
+        _per_league(leagues, lambda l: check_scores_valid(scoped(matches, l))),
+        _per_league(
+            leagues, lambda l: check_team_goal_sums(scoped(matches, l), scoped(player_stats, l), strict)
+        ),
+        _per_league(
+            leagues,
+            lambda l: check_team_goal_diff_within_own_goal_budget(
+                scoped(matches, l), scoped(player_stats, l), strict, teams_of.get(l, set())
+            ),
+        ),
+        check_active_players_missing_weeks(matches, player_stats, players, league_order),
+        check_goal_events(matches, player_stats, goal_events),
+    ]
+
+    _report(
+        [message for errors, _ in checks for message in errors],
+        [message for _, warnings in checks for message in warnings],
+    )
 
 
 if __name__ == "__main__":
