@@ -80,8 +80,10 @@ the numbers live in `src/data/league-config.json`, not in code):
 - League points: `win_points` (2) for a win, `final_win_points` (3) for a win in
   the `final_week` (week 4) or later, `draw_points` (1) for a draw, 0 for a loss.
   A league can override any of these — see `league-config.json`.
-- League table ties are broken by participation rate (see the
-  `_participation_rates` docstring). A league's roster is the `active` players
+- League table ranking is points → participation rate → goal difference →
+  goals for, all descending (`ranking_criteria` in league-config). Full ties
+  share competition ranks (1, 1, 3); team ids do not break sporting ties.
+  Participation follows the `_participation_rates` docstring. A league's roster is the `active` players
   who have at least one `player_stats` row in that league.
 - Player leaderboard ranking is attacking points → goals → assists →
   attendance (more weeks attended wins), all on that league's totals — not a
@@ -387,3 +389,44 @@ If a newly added video doesn't show up on `/full-matches` after a refresh:
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+
+## Championship simulator
+
+League pages offer a browser-only simulator with 10,000 Monte Carlo trials.
+All teams have the same independent Poisson scoring distribution; lambda
+is the current league's completed-match goals / (2 × completed matches).
+No cross-league records or team-strength estimates are used. Completed
+count, lambda, small-sample limitations and model assumptions appear in
+the UI. High-scoring outliers still affect lambda; actual score dependence
+and tactical changes are not modeled.
+
+Every week, including week 4, has three games per matchup (nine total,
+six per team). Across four weeks that is 36 games / 24 per team. Cumulative
+standings determine the champion, with week-4 win points from the config.
+Python standings and the simulator use the same configured order:
+**Points → Participation Rate → GD → GF**. Participation is frozen at its
+current value in future scenarios. Fully tied leaders split one trial's
+championship credit equally. Displayed percentages are average credit,
+not sole-win probability or probability of being among tied winners.
+Player Stats retains its consecutive visible ranks.
+
+Enter both scores to fix a future match, or leave both blank for automatic
+simulation. Scenario inputs never alter the estimated lambda or saved
+data. No completed matches means no automatic estimate; lambda zero means
+all automatic scores are 0–0. Fully fixed or finished scenarios are exact.
+Missing/TBD fixtures use explicitly labeled virtual round-robin pairings;
+conflicting input blocks calculation. Neither Sheets nor generated match
+files are changed by the simulator.
+
+Run offline regression checks:
+
+```sh
+python3 -m unittest discover -s tests -p 'test_*.py'
+node --test tests/championship-simulator.test.mjs
+npm run build
+```
+
+The Node tests use native TypeScript stripping (Node 22.18+, or add
+`--experimental-strip-types` on Node 22.12+). Python and TypeScript share
+ranking fixtures to keep official ties and championship credit consistent.

@@ -9,7 +9,14 @@
       "win_points": 2,
       "final_win_points": 3,
       "draw_points": 1,
-      "matches_per_week": 9
+      "matches_per_week": 9,
+      "matches_per_pair_per_week": 3,
+      "ranking_criteria": [
+        "points",
+        "participation_rate",
+        "goal_difference",
+        "goals_for"
+      ]
     },
     "teams": [
       {

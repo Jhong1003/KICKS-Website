@@ -1,0 +1,144 @@
+---
+import type { League } from "../lib/leagues";
+import { buildSimulationModel, type MatchRecord, type SimulationModel } from "../lib/championship-simulator";
+import type { TeamStanding } from "../lib/standings";
+interface Props {
+	league: League;
+	matches: MatchRecord[];
+	standings: (TeamStanding & { league: string })[];
+}
+const { league, matches, standings } = Astro.props;
+let model: SimulationModel | undefined;
+let error = "";
+try { model = buildSimulationModel(league, matches, standings); }
+catch (reason) { error = reason instanceof Error ? reason.message : "경기 데이터를 확인해주세요."; }
+const name = (id: string) => league.teams.find((team) => team.team_id === id)?.name ?? id;
+const weeks = [...new Set(model?.remaining.map((match) => match.week) ?? [])];
+---
+<section class="content-section championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
+	<h2 id="simulator-title">Championship Simulator</h2>
+	<p class="about-description">{league.id} · 동등한 팀 전력을 가정한 우승 시뮬레이터</p>
+	{error ? <p role="alert">계산할 수 없습니다: {error}</p> : model && <>
+		<p>완료 경기 <strong>{model.completed}경기</strong> · 남은 경기 <strong>{model.remaining.length}경기</strong> · 팀당 평균 득점 λ = <strong>{model.lambda === null ? "추정 불가" : model.lambda.toFixed(3)}</strong></p>
+		<div class="simulator-assumptions">
+			<p>모든 팀의 득점은 동일한 Poisson(λ) 분포에서 서로 독립적으로 생성합니다. λ는 이 리그의 완료 경기 총 득점 ÷ (완료 경기 수 × 2)이며, 홈·원정이나 팀별 전력 차이는 반영하지 않습니다.</p>
+			<p><strong>미래 Participation Rate는 현재 값으로 고정합니다.</strong> 순위 기준은 Points → Participation Rate → GD → GF입니다. 네 기준이 같으면 공동 1위 팀들에게 championship credit을 균등 배분합니다.</p>
+			<p>표본이 적으면 λ와 결과가 크게 달라질 수 있고, 특이한 고득점도 평균에 영향을 줍니다. 실제 경기의 전술 변화·득점 간 연관성은 반영하지 않으며, 정확한 예측이나 보장이 아닙니다.</p>
+			<p>표시 비율은 평균 championship credit입니다. 단독 우승 확률이나 공동 우승에 포함될 확률과 다르며, 반올림으로 합계가 100%와 조금 다를 수 있습니다.</p>
+		</div>
+		{model.lambda === null && <p>완료 경기 데이터가 없어 자동 계산을 보류합니다. 모든 남은 경기의 스코어를 입력하면 해당 시나리오는 계산할 수 있습니다.</p>}
+		{model.lambda === 0 && <p>완료 경기가 모두 0–0이므로 λ = 0입니다. 자동 생성되는 모든 미래 경기 스코어도 0–0입니다.</p>}
+		{model.remaining.length === 0 && <p>리그가 종료되었습니다. 반복 추첨 없이 최종 순위의 championship credit을 표시합니다.</p>}
+		<form data-simulator-form novalidate>
+			<fieldset class="simulator-controls" disabled>
+				<legend>남은 경기 시나리오</legend>
+				{model.remaining.length > 0 && <p>양쪽 스코어를 비우면 자동 생성합니다. 직접 지정하려면 양쪽 모두 0 이상의 정수를 입력해주세요. 완료 경기는 변경할 수 없습니다.</p>}
+				{model.remaining.some((match) => match.virtual) && <p>‘가상 대진’은 미정·미입력 경기를 주차별 팀 조합 수에 맞춰 구성한 것입니다. 실제 대진이나 시트는 변경하지 않습니다.</p>}
+				{weeks.map((week) => <details>
+					<summary>Week {week} · {model!.remaining.filter((match) => match.week === week).length}경기</summary>
+					{model!.remaining.filter((match) => match.week === week).map((match, index) => <div class="simulator-match" data-match-key={match.key}>
+						<p>{index + 1}. {name(match.home)} vs {name(match.away)} {match.virtual && <small>· 가상 대진</small>}</p>
+						<div class="simulator-score-inputs">
+							<label>{name(match.home)}<input type="number" min="0" step="1" inputmode="numeric" placeholder="자동" data-home aria-label={`Week ${week} 경기 ${index + 1} ${name(match.home)} 득점`} /></label>
+							<span aria-hidden="true">:</span>
+							<label>{name(match.away)}<input type="number" min="0" step="1" inputmode="numeric" placeholder="자동" data-away aria-label={`Week ${week} 경기 ${index + 1} ${name(match.away)} 득점`} /></label>
+						</div>
+					</div>)}
+				</details>)}
+				<div class="simulator-actions"><button type="submit">계산하기</button><button type="reset">입력 초기화</button></div>
+			</fieldset>
+		</form>
+		<noscript><p>시뮬레이터를 사용하려면 JavaScript를 활성화해주세요.</p></noscript>
+		<p data-simulator-status role="status" aria-live="polite">계산하기를 누르면 최대 10,000회 시뮬레이션합니다.</p>
+		<div data-simulator-results hidden>
+			{league.teams.map((team) => <div class="simulator-team" data-team-id={team.team_id}>
+				<div><strong>{team.name}</strong><span data-credit></span></div>
+				<meter min="0" max="100" value="0" aria-label={`${team.name} championship credit`} style={`--team-color: ${team.color ?? "#7f8c8d"}`} />
+				<small>고정 Participation Rate: {((model!.base.find((row) => row.team_id === team.team_id)?.participation_rate ?? 0) * 100).toFixed(1)}%</small>
+			</div>)}
+		</div>
+	</>}
+</section>
+
+<script>
+	import { simulate, type FixedScores, type SimulationModel } from "../lib/championship-simulator";
+	for (const root of document.querySelectorAll<HTMLElement>(".championship-simulator[data-model]")) {
+		const model = JSON.parse(root.dataset.model!) as SimulationModel;
+		const form = root.querySelector<HTMLFormElement>("[data-simulator-form]")!;
+		const controls = form.querySelector<HTMLFieldSetElement>("fieldset")!;
+		const status = root.querySelector<HTMLElement>("[data-simulator-status]")!;
+		const results = root.querySelector<HTMLElement>("[data-simulator-results]")!;
+		controls.disabled = false;
+		form.addEventListener("input", () => {
+			results.hidden = true;
+			status.textContent = "입력이 변경되었습니다. 계산하기를 눌러 다시 계산해주세요.";
+		});
+		form.addEventListener("reset", () => {
+			results.hidden = true;
+			status.textContent = "입력을 초기화했습니다. 계산하기를 누르면 기본 가정으로 계산합니다.";
+		});
+		form.addEventListener("submit", async (event) => {
+			event.preventDefault();
+			results.hidden = true;
+			const fixed: FixedScores = {};
+			for (const row of form.querySelectorAll<HTMLElement>("[data-match-key]")) {
+				const h = row.querySelector<HTMLInputElement>("[data-home]")!;
+				const a = row.querySelector<HTMLInputElement>("[data-away]")!;
+				if (h.value === "" && a.value === "" && !h.validity.badInput && !a.validity.badInput) continue;
+				if (h.value === "" || a.value === "" || !Number.isSafeInteger(h.valueAsNumber) || !Number.isSafeInteger(a.valueAsNumber) || h.valueAsNumber < 0 || a.valueAsNumber < 0) {
+					status.textContent = "직접 지정하는 경기는 양 팀 스코어를 모두 0 이상의 정수로 입력해주세요.";
+					row.closest("details")!.open = true;
+					(!h.validity.valid || h.value === "" ? h : a).focus();
+					return;
+				}
+				fixed[row.dataset.matchKey!] = [h.valueAsNumber, a.valueAsNumber];
+			}
+			controls.disabled = true;
+			root.setAttribute("aria-busy", "true");
+			status.textContent = "계산 중…";
+			try {
+				const result = await simulate(model, fixed, 10000, Math.random, (fraction) => {
+					status.textContent = `계산 중… ${Math.round(fraction * 100)}%`;
+				});
+				for (const row of results.querySelectorAll<HTMLElement>("[data-team-id]")) {
+					const percentage = result.credits[row.dataset.teamId!] * 100;
+					row.querySelector<HTMLElement>("[data-credit]")!.textContent = `${percentage.toFixed(1)}%`;
+					row.querySelector<HTMLMeterElement>("meter")!.value = percentage;
+				}
+				results.hidden = false;
+				status.textContent = result.exact ? "확정 시나리오 계산 완료 · 공동 1위 credit은 균등 배분합니다."
+					: `${result.trials.toLocaleString()}회 계산 완료 · 스코어 지정 ${Object.keys(fixed).length}경기 · 반복 계산 시 무작위 표본에 따라 값이 조금 달라집니다.`;
+			} catch (error) {
+				status.textContent = error instanceof Error ? error.message : "계산에 실패했습니다.";
+			} finally {
+				controls.disabled = false;
+				root.removeAttribute("aria-busy");
+			}
+		});
+	}
+</script>
+
+<style>
+	.simulator-assumptions { padding: 1rem 1.25rem; background: var(--color-sage); border-radius: 8px; font-size: .9rem; line-height: 1.6; }
+	.simulator-assumptions p:first-child { margin-top: 0; }
+	.simulator-assumptions p:last-child { margin-bottom: 0; }
+	.simulator-controls { margin: 1.5rem 0; padding: 0; border: 0; min-width: 0; }
+	legend { font-weight: 700; }
+	details { margin: .75rem 0; border-bottom: 1px solid var(--color-sage); padding: .75rem 0; }
+	summary { cursor: pointer; font-weight: 600; }
+	.simulator-match { padding: .5rem 0; }
+	.simulator-match p { margin: .5rem 0; }
+	.simulator-score-inputs { display: flex; gap: .75rem; align-items: end; }
+	label { display: flex; flex-direction: column; gap: .25rem; font-size: .85rem; min-width: 0; flex: 1; max-width: 12rem; }
+	input { width: 100%; min-width: 0; padding: .6rem; border: 1px solid var(--color-green); border-radius: 4px; background: var(--color-background); color: var(--color-dark); font: inherit; }
+	.simulator-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1rem; }
+	button { padding: .7rem 1rem; background: var(--color-green); color: var(--color-background); border: 1px solid var(--color-green); border-radius: 4px; font: inherit; cursor: pointer; }
+	button[type="reset"] { background: transparent; color: var(--color-green); }
+	button:disabled { opacity: .6; cursor: wait; }
+	.simulator-team { margin: 1rem 0; }
+	.simulator-team > div { display: flex; justify-content: space-between; gap: 1rem; }
+	meter { display: block; width: 100%; height: 1.4rem; accent-color: var(--team-color); }
+	meter::-webkit-meter-bar { background: var(--color-sage); border: 0; }
+	meter::-webkit-meter-optimum-value { background: var(--team-color); }
+	meter::-moz-meter-bar { background: var(--team-color); }
+</style>

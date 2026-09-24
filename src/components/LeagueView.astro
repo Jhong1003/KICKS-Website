@@ -1,4 +1,5 @@
 ---
+import ChampionshipSimulator from "./ChampionshipSimulator.astro";
 import StandingsTable from "./StandingsTable.astro";
 import WeeklyResults from "./WeeklyResults.astro";
 import PlayerStatsTable from "./PlayerStatsTable.astro";
@@ -21,8 +22,8 @@ interface MatchRecord {
 	date: string;
 	home_team_id: string | null;
 	away_team_id: string | null;
-	home_score: number;
-	away_score: number;
+	home_score: number | null;
+	away_score: number | null;
 	status: "completed" | "scheduled";
 }
 
@@ -110,6 +111,8 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			)
 		}
 	</section>
+
+	<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
 
 	<section class="content-section" id="results" aria-labelledby="results-title">
 		<h2 id="results-title">Match Results</h2>

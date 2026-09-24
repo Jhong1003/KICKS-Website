@@ -356,6 +356,25 @@ def _participation_rates(team_rows: pd.DataFrame, player_stats: pd.DataFrame, ro
     return pd.Series(rates, name="participation_rate")
 
 
+def rank_team_rows(rows: list[dict], rules: dict) -> list[dict]:
+    """Official descending criteria; equal tuples share competition rank (1, 1, 3).
+
+    Stable ordering is presentation only. Team ids never decide a winner.
+    """
+    criteria = rules["ranking_criteria"]
+    ordered = sorted(rows, key=lambda row: tuple(-row[key] for key in criteria))
+    previous = None
+    rank = 0
+    result = []
+    for position, row in enumerate(ordered, 1):
+        key = tuple(row[field] for field in criteria)
+        if key != previous:
+            rank = position
+        result.append({**row, "rank": rank})
+        previous = key
+    return result
+
+
 def build_league_table(matches: pd.DataFrame, player_stats: pd.DataFrame, roster: pd.DataFrame) -> list[dict]:
     """Compute each league's ranked table from raw match results.
 
@@ -387,12 +406,10 @@ def build_league_table(matches: pd.DataFrame, player_stats: pd.DataFrame, roster
             roster[roster["league"] == league],
         )
 
-        table = table.sort_values(
-            by=["points", "participation_rate", "team_id"], ascending=[False, False, True]
-        ).reset_index()
-        table.insert(0, "rank", range(1, len(table) + 1))
+        table = table.reset_index()
+        table.insert(0, "rank", 0)
         table.insert(0, "league", league)
-        records.extend(table.to_dict(orient="records"))
+        records.extend(rank_team_rows(table.to_dict(orient="records"), league_rules(league)))
 
     return records
 

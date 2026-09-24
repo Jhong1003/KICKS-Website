@@ -265,7 +265,10 @@ Implemented in `scripts/update_data.py`, per league; the numbers come from
 - **Points**: `win_points` (default 2) for a win, `final_win_points`
   (default 3) for a win in `final_week` (default 4) or later, a draw is
   `draw_points` (1), a loss is 0 (`_match_points`).
-- **League table tiebreaker**: participation rate — the share of a team's
+- **League table ranking**: points → participation rate → goal difference →
+  goals for (all descending), configured in `ranking_criteria`. All four
+  equal means shared competition ranks (1, 1, 3); team ids are never a
+  sporting tiebreaker. Participation rate is the share of a team's
   active roster that actually shows up, computed per team as
   `games played by roster / (roster size × games the team played)`
   (`_participation_rates`). The roster is per league: see
@@ -568,3 +571,45 @@ Consult these guides before working on related tasks:
 - [Adding or managing content](https://docs.astro.build/en/guides/content-collections/)
 - [Adding styles or using Tailwind](https://docs.astro.build/en/guides/styling/)
 - [Supporting multiple languages](https://docs.astro.build/en/guides/internationalization/)
+
+
+### Championship simulator
+
+`ChampionshipSimulator.astro` runs only in the browser, using
+`src/lib/championship-simulator.ts` and `src/lib/standings.ts`. Python's
+`rank_team_rows` and the browser read the same `ranking_criteria` through
+league-config → generated leagues.json. Shared cases in
+`tests/standings-cases.json` verify both ranking implementations.
+Player Stats keeps its existing consecutive visible ranks.
+
+Every week (including week 4) has three matches per pair of teams, nine
+matches overall and six per team. Four weeks total 36 matches / 24 per
+team. `matches_per_pair_per_week` records this in league-config. There is
+no knockout or separate final: cumulative week 1–4 standings decide the
+championship. The final-week win points still apply.
+
+Future goals are independent Poisson draws with the SAME lambda for both
+teams: the current league's completed-match total goals / (2 × completed
+matches). No other league, team strength or home advantage is used. User
+scenario scores never change lambda. Participation stays at its current,
+pipeline-rounded value. All four criteria tied means each co-leader gets
+1 / number-of-co-leaders championship credit. UI percentages are mean
+credit, not probability of sole victory or inclusion in a shared title.
+
+The UI explains sample-size and model limits, shows completed count and
+lambda, and allows exact future score overrides. No observations blocks
+random simulation; a fully specified scenario can still be evaluated.
+Lambda zero generates only 0–0. Finished leagues and fixed scenarios are
+evaluated without random trials. Other scenarios run 10,000 trials in
+small batches to keep the browser responsive.
+
+Missing/TBD fixtures are filled as virtual pair slots within each league
+and week, without modifying Sheet data, JSON, or assigning real match ids
+to guesses. Duplicate/conflicting fixtures block simulation. Completed
+match totals are accumulated exactly once; standings supplies participation.
+
+Verification (offline):
+- `python3 -m unittest discover -s tests -p 'test_*.py'`
+- `node --test tests/championship-simulator.test.mjs` (Node 22.18+ for native
+  TypeScript stripping, or Node 22.12+ with `--experimental-strip-types`)
+- `npm run build`

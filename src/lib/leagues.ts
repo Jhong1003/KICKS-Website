@@ -11,6 +11,8 @@ export interface LeagueTeam {
 	color: string | null;
 }
 
+export type RankingCriterion = "points" | "participation_rate" | "goal_difference" | "goals_for";
+
 export interface LeagueRules {
 	weeks: number;
 	final_week: number;
@@ -18,6 +20,8 @@ export interface LeagueRules {
 	final_win_points: number;
 	draw_points: number;
 	matches_per_week: number;
+	matches_per_pair_per_week: number;
+	ranking_criteria: RankingCriterion[];
 }
 
 export interface League {
