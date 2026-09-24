@@ -1722,11 +1722,15 @@ h1 {
 
 }
 
+/* Next up의 점과 통산 골의 ⚽은 같은 14px 폭 칸의 가운데에 놓여서, 두 줄의
+   아이콘 중심과 뒤따르는 글자의 시작 위치가 세로로 맞는다. */
+
 .hero-next-up-dot {
 
 	width: 7px;
 	height: 7px;
 	flex-shrink: 0;
+	margin-inline: 3.5px;
 	border-radius: 50%;
 	background-color: var(--color-sage);
 
@@ -1751,7 +1755,9 @@ h1 {
 
 	display: flex;
 	flex-wrap: wrap;
-	align-items: center;
+	/* 이모지는 글자 상자 안에서 위쪽에 치우쳐 그려져서, center로 맞추면
+	   옆 글자보다 떠 보인다. 기준선(baseline)에 맞춰 글자와 같은 선에 앉힌다. */
+	align-items: baseline;
 	gap: 9px;
 	width: fit-content;
 	margin: 28px 0 0;
@@ -1768,8 +1774,11 @@ h1 {
 
 .hero-goal-counter-icon {
 
+	width: 14px;
+	flex-shrink: 0;
 	font-size: 0.8rem;
 	line-height: 1;
+	text-align: center;
 
 }
 
