@@ -30,7 +30,10 @@ interface PlayerGroup {
 	players: PlayerInLeague[];
 }
 
-// Front to back, like a team sheet.
+// Front to back, like a team sheet. The team view lists each team in this
+// order too; the script below shuffles within a position (and within each
+// position group) on every visit, so nobody is always last just because of
+// their name. Only the "Name" view is alphabetical.
 const POSITION_GROUPS = [
 	{ key: "FW", en: "Forwards", ko: "공격수" },
 	{ key: "MF", en: "Midfielders", ko: "미드필더" },
@@ -39,6 +42,10 @@ const POSITION_GROUPS = [
 ];
 
 const primaryPosition = (entry: PlayerInLeague) => entry.player.positions[0] ?? null;
+const positionOrder = (entry: PlayerInLeague) => {
+	const index = POSITION_GROUPS.findIndex((group) => group.key === primaryPosition(entry));
+	return index === -1 ? POSITION_GROUPS.length : index;
+};
 
 // Teams in current standings order (league leader first). The generated
 // table is already in official order, ties included; a league with no
@@ -59,7 +66,9 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 				en: team.name,
 				ko: team.name,
 				color: getTeamColor(team.team_id, league),
-				players: players.filter(({ section }) => section.current_team_id === team.team_id),
+				players: players
+					.filter(({ section }) => section.current_team_id === team.team_id)
+					.sort((a, b) => positionOrder(a) - positionOrder(b)),
 			}))
 			.filter((group) => group.players.length > 0),
 	},
@@ -172,6 +181,24 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 			});
 		});
 	});
+
+	// Team and position views: shuffle on every visit so no one is always at
+	// the end. The team view keeps its forwards-to-goalkeeper order and only
+	// shuffles players who share a position.
+	const POSITION_ORDER = ["FW", "MF", "DF", "GK"];
+	const positionRank = (card: HTMLElement) => {
+		const index = POSITION_ORDER.indexOf(card.dataset.position ?? "");
+		return index === -1 ? POSITION_ORDER.length : index;
+	};
+	for (const view of ["team", "position"]) {
+		document.querySelectorAll<HTMLElement>(`[data-view="${view}"] .player-grid`).forEach((grid) => {
+			const shuffled = (Array.from(grid.children) as HTMLElement[])
+				.map((card) => ({ card, key: Math.random() }))
+				.sort((a, b) => (view === "team" ? positionRank(a.card) - positionRank(b.card) : 0) || a.key - b.key)
+				.map(({ card }) => card);
+			shuffled.forEach((card) => grid.appendChild(card));
+		});
+	}
 
 	// Team view: one team at a time, starting with the league leader.
 	const teamButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-team-filter]"));

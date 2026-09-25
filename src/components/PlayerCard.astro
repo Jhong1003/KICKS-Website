@@ -34,6 +34,7 @@ const cardStyle = `--team-color: ${teamColor}; --team-avatar-text: ${avatarTextC
 	style={cardStyle}
 	data-name={player.name}
 	data-team={teamName}
+	data-position={player.positions[0] ?? ""}
 >
 	<div class="player-card-header">
 		<span class="player-card-tag">{section.play_style_tag}</span>

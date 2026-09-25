@@ -351,7 +351,9 @@ top-level copy of "the current league's" values: a page picks its league
 explicitly (`getSection(player, leagueId)` in
 [src/lib/players.ts](src/lib/players.ts)). `/players` shows the latest
 league's roster (players with a section in it), viewable by name, or
-grouped under a heading per team or per primary position (never by a stat);
+grouped per team (buttons, league leader first; players forwards to
+goalkeeper) or per primary position (never by a stat). Only the name view is
+alphabetical: team/position views shuffle within a position on every visit;
 `/players/[id]` shows every
 section, newest first. Each section has:
 
