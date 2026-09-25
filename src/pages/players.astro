@@ -16,6 +16,58 @@ const roster = (profilesData as PlayerProfile[]).flatMap((player): PlayerInLeagu
 });
 const players = sortPlayers(roster, "name", league);
 const playerPhotos = playerPhotosData as Record<string, string>;
+
+// Three ways to view the same roster: one alphabetical grid, or grouped
+// under a heading per team / per primary position. Each group keeps name
+// order. Deliberately never grouped or ordered by any stat (see AGENTS.md's
+// "Player profiles" section) - this page celebrates everyone equally.
+interface PlayerGroup {
+	key: string;
+	en?: string;
+	ko?: string;
+	color?: string;
+	players: PlayerInLeague[];
+}
+
+const POSITION_GROUPS = [
+	{ key: "GK", en: "Goalkeepers", ko: "골키퍼" },
+	{ key: "DF", en: "Defenders", ko: "수비수" },
+	{ key: "MF", en: "Midfielders", ko: "미드필더" },
+	{ key: "FW", en: "Forwards", ko: "공격수" },
+];
+
+const primaryPosition = (entry: PlayerInLeague) => entry.player.positions[0] ?? null;
+
+const views: { key: string; groups: PlayerGroup[] }[] = [
+	{ key: "name", groups: [{ key: "all", players }] },
+	{
+		key: "team",
+		groups: league.teams
+			.map((team) => ({
+				key: team.team_id,
+				en: team.name,
+				ko: team.name,
+				color: getTeamColor(team.team_id, league),
+				players: players.filter(({ section }) => section.current_team_id === team.team_id),
+			}))
+			.filter((group) => group.players.length > 0),
+	},
+	{
+		key: "position",
+		groups: [
+			...POSITION_GROUPS.map((group) => ({
+				...group,
+				players: players.filter((entry) => primaryPosition(entry) === group.key),
+			})),
+			{
+				key: "none",
+				en: "Position TBD",
+				ko: "포지션 미정",
+				players: players.filter((entry) => !POSITION_GROUPS.some((group) => group.key === primaryPosition(entry))),
+			},
+		].filter((group) => group.players.length > 0),
+	},
+];
 ---
 
 <BaseLayout
@@ -33,61 +85,65 @@ const playerPhotos = playerPhotosData as Record<string, string>;
 				ko={`${league.id} 선수들을 만나보세요. 선수를 누르면 기록, 플레이 스타일, 배지를 볼 수 있어요.`}
 			/>
 
-			<div class="player-sort" role="group" aria-label="Sort players">
-				<span class="player-sort-label"><T en="Sort by" ko="정렬" /></span>
-				<button class="player-sort-button" type="button" data-sort="name" aria-pressed="true">
+			<div class="player-sort" role="group" aria-label="View players by">
+				<span class="player-sort-label"><T en="View by" ko="보기" /></span>
+				<button class="player-sort-button" type="button" data-view-button="name" aria-pressed="true">
 					<T en="Name" ko="이름" />
 				</button>
-				<button class="player-sort-button" type="button" data-sort="team" aria-pressed="false">
+				<button class="player-sort-button" type="button" data-view-button="team" aria-pressed="false">
 					<T en="Team" ko="팀" />
+				</button>
+				<button class="player-sort-button" type="button" data-view-button="position" aria-pressed="false">
+					<T en="Position" ko="포지션" />
 				</button>
 			</div>
 
-			<div class="player-grid" id="player-grid">
-				{
-					players.map(({ player, section }) => (
-						<PlayerCard
-							player={player}
-							section={section}
-							teamName={getTeamName(section.current_team_id, league)}
-							teamColor={getTeamColor(section.current_team_id, league)}
-							href={`/players/${player.id}`}
-							avatarPhoto={playerPhotos[player.id]}
-						/>
-					))
-				}
-			</div>
+			{
+				views.map((view) => (
+					<div class="player-view" data-view={view.key} hidden={view.key !== "name"}>
+						{view.groups.map((group) => (
+							<div class="player-group">
+								{group.en && (
+									<h3 class="player-group-title">
+										{group.color && <span class="player-group-dot" style={`background-color: ${group.color}`} />}
+										<T en={group.en} ko={group.ko ?? group.en} />
+										<span class="player-group-count">{group.players.length}</span>
+									</h3>
+								)}
+								<div class="player-grid">
+									{group.players.map(({ player, section }) => (
+										<PlayerCard
+											player={player}
+											section={section}
+											teamName={getTeamName(section.current_team_id, league)}
+											teamColor={getTeamColor(section.current_team_id, league)}
+											href={`/players/${player.id}`}
+											avatarPhoto={playerPhotos[player.id]}
+										/>
+									))}
+								</div>
+							</div>
+						))}
+					</div>
+				))
+			}
 		</section>
 	</main>
 </BaseLayout>
 
 <script>
-	// Sort by re-ordering the already-rendered cards in the DOM (using the
-	// data-name/data-team attributes PlayerCard.astro sets on each card) —
-	// simplest and consistent with the sort-only-by-name-or-team rule: no
-	// performance stat is ever used to reorder these.
-	const grid = document.getElementById("player-grid");
-	const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>(".player-sort-button"));
-	const collator = new Intl.Collator("ko");
+	// Switch between the pre-rendered views (by name / team / position).
+	// Every view is built at build time, so switching is just show/hide.
+	const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-view-button]"));
+	const views = Array.from(document.querySelectorAll<HTMLElement>("[data-view]"));
 
 	buttons.forEach((button) => {
 		button.addEventListener("click", () => {
-			if (button.getAttribute("aria-pressed") === "true" || !grid) return;
-
-			buttons.forEach((otherButton) => otherButton.setAttribute("aria-pressed", String(otherButton === button)));
-
-			const sortBy = button.dataset.sort;
-			const cards = Array.from(grid.children) as HTMLElement[];
-
-			cards.sort((a, b) => {
-				const nameCompare = collator.compare(a.dataset.name ?? "", b.dataset.name ?? "");
-				if (sortBy === "team") {
-					return collator.compare(a.dataset.team ?? "", b.dataset.team ?? "") || nameCompare;
-				}
-				return nameCompare;
+			const selected = button.dataset.viewButton;
+			buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+			views.forEach((view) => {
+				view.hidden = view.dataset.view !== selected;
 			});
-
-			cards.forEach((card) => grid.appendChild(card));
 		});
 	});
 </script>

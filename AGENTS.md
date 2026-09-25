@@ -350,7 +350,9 @@ tag and badges are all computed per league and never combined. There is no
 top-level copy of "the current league's" values: a page picks its league
 explicitly (`getSection(player, leagueId)` in
 [src/lib/players.ts](src/lib/players.ts)). `/players` shows the latest
-league's roster (players with a section in it); `/players/[id]` shows every
+league's roster (players with a section in it), viewable by name, or
+grouped under a heading per team or per primary position (never by a stat);
+`/players/[id]` shows every
 section, newest first. Each section has:
 
 - League totals, that league's team, and team history (previous teams in
