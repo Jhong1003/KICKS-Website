@@ -8,6 +8,11 @@
 		-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 	color: var(--color-dark);
 	background-color: var(--color-background);
+	/* 한글은 기본적으로 글자 단위로 줄바꿈돼서 팀 이름이 "문전박/대"처럼 잘림.
+	   keep-all이면 띄어쓰기에서만 줄바꿈 (영어에는 영향 없음). 칸이 너무 좁을 때만
+	   overflow-wrap이 단어 중간에서 끊어 넘침을 막음. */
+	word-break: keep-all;
+	overflow-wrap: break-word;
 
 }
 
