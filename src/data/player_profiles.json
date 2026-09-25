@@ -52,9 +52,13 @@
         },
         "play_style_tag": "Playmaker",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "on_fire",
+          "libero",
+          "maestro",
+          "delivery_service"
         ]
       }
     ]
@@ -110,10 +114,10 @@
           "assists": 0,
           "attacking_points": 1
         },
-        "play_style_tag": "Iron Man",
+        "play_style_tag": "Engine",
         "badges": [
-          "first_goal",
-          "perfect_attendance"
+          "off_the_mark",
+          "iron_man"
         ]
       }
     ]
@@ -161,7 +165,7 @@
         },
         "play_style_tag": "Team Player",
         "badges": [
-          "first_goal"
+          "off_the_mark"
         ]
       }
     ]
@@ -223,11 +227,13 @@
           "assists": 1,
           "attacking_points": 2
         },
-        "play_style_tag": "Playmaker",
+        "play_style_tag": "All-Rounder",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "libero",
+          "journeyman"
         ]
       }
     ]
@@ -285,8 +291,8 @@
         },
         "play_style_tag": "Playmaker",
         "badges": [
-          "first_assist",
-          "perfect_attendance"
+          "provider",
+          "iron_man"
         ]
       }
     ]
@@ -341,10 +347,12 @@
           "assists": 0,
           "attacking_points": 1
         },
-        "play_style_tag": "Iron Man",
+        "play_style_tag": "Rock",
         "badges": [
-          "first_goal",
-          "perfect_attendance"
+          "off_the_mark",
+          "iron_man",
+          "libero",
+          "the_wall"
         ]
       }
     ]
@@ -394,9 +402,10 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Iron Man",
+        "play_style_tag": "Rock",
         "badges": [
-          "perfect_attendance"
+          "iron_man",
+          "the_wall"
         ]
       }
     ]
@@ -452,9 +461,10 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Iron Man",
+        "play_style_tag": "Rock",
         "badges": [
-          "perfect_attendance"
+          "iron_man",
+          "journeyman"
         ]
       }
     ]
@@ -512,10 +522,9 @@
         },
         "play_style_tag": "All-Rounder",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man"
         ]
       }
     ]
@@ -571,10 +580,10 @@
           "assists": 1,
           "attacking_points": 1
         },
-        "play_style_tag": "Playmaker",
+        "play_style_tag": "Engine",
         "badges": [
-          "first_assist",
-          "perfect_attendance"
+          "provider",
+          "iron_man"
         ]
       }
     ]
@@ -629,9 +638,10 @@
           "assists": 1,
           "attacking_points": 1
         },
-        "play_style_tag": "Playmaker",
+        "play_style_tag": "Rock",
         "badges": [
-          "first_assist"
+          "provider",
+          "libero"
         ]
       }
     ]
@@ -687,13 +697,15 @@
           "assists": 3,
           "attacking_points": 3
         },
-        "play_style_tag": "Playmaker",
+        "play_style_tag": "All-Rounder",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "on_fire",
+          "libero",
+          "the_wall",
+          "maestro"
         ]
       }
     ]
@@ -736,10 +748,10 @@
         },
         "play_style_tag": "Finisher",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "on_fire"
         ]
       }
     ]
@@ -795,10 +807,11 @@
           "assists": 1,
           "attacking_points": 2
         },
-        "play_style_tag": "Playmaker",
+        "play_style_tag": "All-Rounder",
         "badges": [
-          "first_goal",
-          "first_assist"
+          "off_the_mark",
+          "provider",
+          "libero"
         ]
       }
     ]
@@ -856,7 +869,8 @@
         },
         "play_style_tag": "Playmaker",
         "badges": [
-          "first_assist"
+          "provider",
+          "libero"
         ]
       }
     ]
@@ -913,11 +927,12 @@
         },
         "play_style_tag": "Finisher",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "on_fire",
+          "game_changer",
+          "fox_in_the_box"
         ]
       }
     ]
@@ -967,9 +982,9 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Team Player",
+        "play_style_tag": "Rock",
         "badges": [
-          "squad_member"
+          "the_wall"
         ]
       }
     ]
@@ -1032,8 +1047,9 @@
         },
         "play_style_tag": "All-Rounder",
         "badges": [
-          "first_goal",
-          "first_assist"
+          "off_the_mark",
+          "provider",
+          "journeyman"
         ]
       }
     ]
@@ -1090,11 +1106,13 @@
         },
         "play_style_tag": "Finisher",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "on_fire",
+          "game_changer",
+          "crack",
+          "fox_in_the_box"
         ]
       }
     ]
@@ -1144,9 +1162,9 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Iron Man",
+        "play_style_tag": "Rock",
         "badges": [
-          "perfect_attendance"
+          "iron_man"
         ]
       }
     ]
@@ -1203,10 +1221,10 @@
         },
         "play_style_tag": "All-Rounder",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "on_fire"
         ]
       }
     ]
@@ -1261,10 +1279,10 @@
           "assists": 0,
           "attacking_points": 1
         },
-        "play_style_tag": "Iron Man",
+        "play_style_tag": "Target Man",
         "badges": [
-          "first_goal",
-          "perfect_attendance"
+          "off_the_mark",
+          "iron_man"
         ]
       }
     ]
@@ -1300,9 +1318,9 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Team Player",
+        "play_style_tag": "Black Spider",
         "badges": [
-          "squad_member"
+          "iron_man"
         ]
       }
     ]
@@ -1345,7 +1363,7 @@
         "personal_best_week": null,
         "play_style_tag": "Team Player",
         "badges": [
-          "squad_member"
+          "iron_man"
         ]
       }
     ]
@@ -1403,8 +1421,9 @@
         },
         "play_style_tag": "Playmaker",
         "badges": [
-          "first_assist",
-          "perfect_attendance"
+          "provider",
+          "iron_man",
+          "libero"
         ]
       }
     ]
@@ -1440,9 +1459,9 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Team Player",
+        "play_style_tag": "Rock",
         "badges": [
-          "squad_member"
+          "iron_man"
         ]
       }
     ]
@@ -1492,7 +1511,7 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Team Player",
+        "play_style_tag": "Target Man",
         "badges": [
           "squad_member"
         ]
@@ -1536,10 +1555,11 @@
           "assists": 1,
           "attacking_points": 2
         },
-        "play_style_tag": "Playmaker",
+        "play_style_tag": "All-Rounder",
         "badges": [
-          "first_goal",
-          "first_assist"
+          "off_the_mark",
+          "provider",
+          "iron_man"
         ]
       }
     ]
@@ -1589,9 +1609,9 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Iron Man",
+        "play_style_tag": "Rock",
         "badges": [
-          "perfect_attendance",
+          "iron_man",
           "own_goal_award"
         ]
       }
@@ -1656,11 +1676,14 @@
         },
         "play_style_tag": "Finisher",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "brace",
-          "hat_trick",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "on_fire",
+          "game_changer",
+          "crack",
+          "fox_in_the_box",
+          "journeyman"
         ]
       }
     ]
@@ -1717,9 +1740,13 @@
         },
         "play_style_tag": "Playmaker",
         "badges": [
-          "first_goal",
-          "first_assist",
-          "perfect_attendance"
+          "off_the_mark",
+          "provider",
+          "iron_man",
+          "on_fire",
+          "crack",
+          "maestro",
+          "delivery_service"
         ]
       }
     ]
