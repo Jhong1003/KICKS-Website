@@ -1,4 +1,5 @@
 ---
+import T from "./T.astro";
 import type { League } from "../lib/leagues";
 import { buildSimulationModel, type MatchRecord, type SimulationModel } from "../lib/championship-simulator";
 import type { TeamStanding } from "../lib/standings";
@@ -22,23 +23,26 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 ---
 <section id="title-race" class="content-section championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
 	<h2 id="simulator-title">TITLE RACE</h2>
-	{error ? <p role="alert">계산할 수 없습니다: {error}</p> : model && <>
+	{error ? <p role="alert"><T en="Couldn't calculate: " ko="계산할 수 없습니다: " />{error}</p> : model && <>
 		<div class="title-race-results" data-simulator-results>
 			{orderedTeams.map((team) => <div class="simulator-team" data-team-id={team.team_id}>
 				<strong>{team.name}</strong><span data-credit>—</span>
 				<meter hidden min="0" max="100" value="0" aria-label={`${team.name} championship credit`} />
 			</div>)}
 		</div>
-		<p class="title-race-meta" data-simulator-meta>{model.remaining.length} matches remaining</p>
-		<p class="title-race-model">Equal team strength · Poisson model</p>
-		<p class="title-race-status" data-simulator-status role="status" aria-live="polite">결과를 계산합니다…</p>
-		<noscript><p>결과를 보려면 JavaScript를 활성화해주세요.</p></noscript>
+		<p class="title-race-meta" data-simulator-meta>
+			<T en={`${model.remaining.length} matches remaining`} ko={`남은 경기 ${model.remaining.length}개`} />
+		</p>
+		<p class="title-race-model"><T en="Equal team strength · Poisson model" ko="세 팀 전력 동일 가정 · 포아송 모델" /></p>
+		<p class="title-race-status" data-simulator-status role="status" aria-live="polite"><T en="Calculating…" ko="결과를 계산합니다…" /></p>
+		<noscript><p><T en="Turn on JavaScript to see the results." ko="결과를 보려면 JavaScript를 활성화해주세요." /></p></noscript>
 
 	</>}
 </section>
 
 <script>
 	import { simulate, type SimulationModel } from "../lib/championship-simulator";
+	import { bilingualHtml } from "../lib/i18n";
 	for (const root of document.querySelectorAll<HTMLElement>(".championship-simulator[data-model]")) {
 		const model = JSON.parse(root.dataset.model!) as SimulationModel;
 		const status = root.querySelector<HTMLElement>("[data-simulator-status]")!;
@@ -54,17 +58,26 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 					meter.value = percentage;
 					meter.hidden = false;
 				}
-				meta.textContent = `${result.exact ? "Exact result" : `${result.trials.toLocaleString("en-US")} simulations`} · ${model.remaining.length} matches remaining`;
+				const trials = result.trials.toLocaleString("en-US");
+				const remaining = model.remaining.length;
+				meta.innerHTML = bilingualHtml(
+					`${result.exact ? "Exact result" : `${trials} simulations`} · ${remaining} matches remaining`,
+					`${result.exact ? "정확한 계산" : `시뮬레이션 ${trials}회`} · 남은 경기 ${remaining}개`,
+				);
 				status.textContent = "";
 			} catch (error) {
-				status.textContent = error instanceof Error ? error.message : "계산에 실패했습니다.";
+				if (error instanceof Error) status.textContent = error.message;
+				else status.innerHTML = bilingualHtml("Calculation failed.", "계산에 실패했습니다.");
 			} finally {
 				root.removeAttribute("aria-busy");
 			}
 		}
 		// Run once per page load; changing League tabs keeps the same result.
 		if (model.lambda === null && model.remaining.length > 0) {
-			status.textContent = "완료 경기 데이터가 없어 자동 계산을 보류합니다.";
+			status.innerHTML = bilingualHtml(
+				"No completed matches yet, so the calculation is on hold.",
+				"완료 경기 데이터가 없어 자동 계산을 보류합니다.",
+			);
 		} else void run();
 	}
 </script>

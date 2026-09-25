@@ -1,15 +1,20 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import T from "../components/T.astro";
 
 const applications = [
 	{
 		title: "Player Application",
+		titleKo: "선수 지원",
 		description: "Join a team and compete in our weekly Sunday league. Some prior game experience is recommended.",
+		descriptionKo: "팀에 소속되어 매주 일요일 리그에서 함께 뛰어요. 어느 정도 경기 경험이 있으면 좋아요.",
 		href: "https://docs.google.com/forms/d/e/1FAIpQLSeAsTpI1HfyPwalSO6fJGyN9qXU2k6ALMtHRKj8RfnM89bzqQ/viewform",
 	},
 	{
 		title: "Manager Application",
+		titleKo: "운영진 지원",
 		description: "Help run the club behind the scenes — match operations, stats, media, and events.",
+		descriptionKo: "경기 운영, 기록, 미디어, 이벤트 등 동아리를 뒤에서 함께 운영해요.",
 		href: "https://docs.google.com/forms/d/e/1FAIpQLSe41sRKsCnZyOgq9njgD-TwpBY8TLlDSh8JDZ4_Hz_VF-yqaA/viewform",
 	},
 ];
@@ -20,18 +25,21 @@ const applications = [
 		<section class="content-section" aria-labelledby="join-title">
 			<p class="section-label">JOIN KICKS</p>
 			<h1 id="join-title">Ready to play?</h1>
-			<p class="about-description">
-				Choose the application that fits you below. Both link out to a short Google Form.
-			</p>
+			<T
+				as="p"
+				class="about-description"
+				en="Choose the application that fits you below. Both link out to a short Google Form."
+				ko="아래에서 나에게 맞는 지원서를 골라주세요. 둘 다 간단한 구글 폼으로 연결돼요."
+			/>
 
 			<div class="cta-card-grid">
 				{
 					applications.map((application) => (
 						<div class="cta-card">
-							<span class="cta-card-title">{application.title}</span>
-							<p class="cta-card-description">{application.description}</p>
+							<T class="cta-card-title" en={application.title} ko={application.titleKo} />
+							<T as="p" class="cta-card-description" en={application.description} ko={application.descriptionKo} />
 							<a class="button-primary" href={application.href} target="_blank" rel="noopener noreferrer">
-								Apply
+								<T en="Apply" ko="지원하기" />
 							</a>
 						</div>
 					))

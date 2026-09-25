@@ -7,6 +7,7 @@
 // Descriptive filenames (e.g. team-huddle-matchday3.jpg) become the alt text;
 // filenames that are just a number (e.g. 7.jpg) become "KICKS futsal photo 7".
 import { Image } from "astro:assets";
+import T from "./T.astro";
 import heroImage from "../assets/hero.jpg";
 import aboutImage from "../assets/about.jpg";
 
@@ -36,7 +37,12 @@ const images = [
 
 {
 	images.length === 0 ? (
-		<p class="gallery-empty">No photos yet — add files to src/assets/gallery/ to fill this gallery.</p>
+		<T
+			as="p"
+			class="gallery-empty"
+			en="No photos yet — add files to src/assets/gallery/ to fill this gallery."
+			ko="아직 사진이 없어요 — src/assets/gallery/ 폴더에 사진을 넣으면 여기에 나타나요."
+		/>
 	) : (
 		<div class="gallery-grid">
 			{images.map((image, index) => (

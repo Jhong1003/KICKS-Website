@@ -46,6 +46,12 @@ const currentPath = Astro.url.pathname;
 		}
 	</nav>
 
+	<button class="lang-toggle" type="button" data-lang-toggle aria-label="Switch language / 언어 변경">
+		<span class="lang-toggle-option" data-lang-option="en">EN</span>
+		<span class="lang-toggle-divider" aria-hidden="true">|</span>
+		<span class="lang-toggle-option" data-lang-option="ko">한</span>
+	</button>
+
 	<span class="season-label">FA26 SEASON</span>
 
 	<button
@@ -63,11 +69,18 @@ const currentPath = Astro.url.pathname;
 
 <div class="easter-egg-overlay" id="logo-easter-egg" role="status" hidden>
 	<div class="easter-egg">
-		Welcome to KICKS, the best futsal club at UIUC&nbsp;<span class="easter-egg-ball" aria-hidden="true">⚽</span>
+		<span data-lang="en">Welcome to KICKS, the best futsal club at UIUC&nbsp;</span><span data-lang="ko" lang="ko">UIUC 최고의 풋살 동아리, KICKS에 오신 걸 환영합니다&nbsp;</span><span class="easter-egg-ball" aria-hidden="true">⚽</span>
 	</div>
 </div>
 
 <script>
+	// EN | 한 switch. The actual switching lives in BaseLayout.astro's inline
+	// script (window.kicksSetLang), which also picked the starting language.
+	document.querySelector<HTMLButtonElement>("[data-lang-toggle]")?.addEventListener("click", () => {
+		const next = document.documentElement.lang === "ko" ? "en" : "ko";
+		(window as unknown as { kicksSetLang: (lang: string, remember: boolean) => void }).kicksSetLang(next, true);
+	});
+
 	const toggle = document.querySelector<HTMLButtonElement>(".nav-toggle");
 	const nav = document.getElementById("site-nav");
 

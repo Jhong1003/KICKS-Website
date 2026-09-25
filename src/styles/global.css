@@ -77,6 +77,48 @@ a {
 
 }
 
+/* 한/영 전환: 모든 번역 문구는 두 언어로 렌더링되고, <html lang>에 맞지 않는 쪽을 숨김 (src/lib/i18n.ts 참고) */
+
+html:not([lang="ko"]) [data-lang="ko"],
+html[lang="ko"] [data-lang="en"] {
+
+	display: none !important;
+
+}
+
+.lang-toggle {
+
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 12px;
+	border: 1px solid rgba(247, 246, 242, 0.4);
+	border-radius: 999px;
+	background: none;
+	color: inherit;
+	font: inherit;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	white-space: nowrap;
+	cursor: pointer;
+
+}
+
+.lang-toggle-option,
+.lang-toggle-divider {
+
+	opacity: 0.45;
+
+}
+
+html:not([lang="ko"]) [data-lang-option="en"],
+html[lang="ko"] [data-lang-option="ko"] {
+
+	opacity: 1;
+
+}
+
 /* 첫 화면 제목과 설명 */
 
 .hero-content {
@@ -1440,6 +1482,13 @@ h1 {
 	.season-label {
 
 		display: none;
+
+	}
+
+	/* 메뉴가 햄버거로 접히면 언어 버튼을 햄버거 바로 왼쪽으로 */
+	.lang-toggle {
+
+		margin-left: auto;
 
 	}
 

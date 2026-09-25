@@ -1,4 +1,13 @@
 ---
+import T from "./T.astro";
+
+// partners.json's link_label is hand-typed English; the common ones get a
+// Korean version here, anything else is shown as written in both languages.
+const LINK_LABELS_KO: Record<string, string> = {
+	"Visit website": "웹사이트 방문",
+	"View on Google Maps": "구글 지도에서 보기",
+};
+
 interface Partner {
 	partner_id: string;
 	name: string;
@@ -35,7 +44,11 @@ const { partners } = Astro.props;
 					{
 						partner.url && (
 							<a class="partner-link" href={partner.url} target="_blank" rel="noopener noreferrer">
-								{partner.link_label ?? "Visit website"} →
+								<T
+									en={partner.link_label ?? "Visit website"}
+									ko={LINK_LABELS_KO[partner.link_label ?? "Visit website"] ?? partner.link_label ?? ""}
+								/>{" "}
+								→
 							</a>
 						)
 					}

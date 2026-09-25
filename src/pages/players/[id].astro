@@ -1,10 +1,11 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PlayerCard from "../../components/PlayerCard.astro";
+import T from "../../components/T.astro";
 import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
 import playerPhotosData from "../../data/player-photos.json";
-import { BADGES, BADGE_TIER_LABELS, sortBadges, type PlayerProfile } from "../../lib/players";
+import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, sortBadges, type PlayerProfile } from "../../lib/players";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 
 export function getStaticPaths() {
@@ -43,7 +44,11 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 							class="content-section"
 							aria-labelledby={isLatest ? "player-detail-title" : `player-league-${section.league}`}
 						>
-							{isLatest && <a class="back-link" href="/players">← All players</a>}
+							{isLatest && (
+								<a class="back-link" href="/players">
+									<T en="← All players" ko="← 전체 선수" />
+								</a>
+							)}
 							<p class="section-label">
 								{isLatest ? section.league : `PREVIOUS LEAGUE`} · {teamName}
 							</p>
@@ -75,21 +80,24 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 									{section.team_history.length > 0 && (
 										<div class="player-detail-meta">
 											<p class="section-label">TEAM HISTORY</p>
-											<p class="about-description">
-												Previously played for {section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")}{" "}
-												earlier in this league.
-											</p>
+											<T
+												as="p"
+												class="about-description"
+												en={`Previously played for ${section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")} earlier in this league.`}
+												ko={`이번 리그 초반에는 ${section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")} 소속이었어요.`}
+											/>
 										</div>
 									)}
 
 									{section.personal_best_week && (
 										<div class="player-detail-meta">
 											<p class="section-label">PERSONAL BEST WEEK</p>
-											<p class="about-description">
-												Week {section.personal_best_week.week}: {plural(section.personal_best_week.goals, "goal")}{" "}
-												and {plural(section.personal_best_week.assists, "assist")} (
-												{plural(section.personal_best_week.attacking_points, "attacking point")}).
-											</p>
+											<T
+												as="p"
+												class="about-description"
+												en={`Week ${section.personal_best_week.week}: ${plural(section.personal_best_week.goals, "goal")} and ${plural(section.personal_best_week.assists, "assist")} (${plural(section.personal_best_week.attacking_points, "attacking point")}).`}
+												ko={`${section.personal_best_week.week}주차: ${section.personal_best_week.goals}골 ${section.personal_best_week.assists}어시스트 (공격포인트 ${section.personal_best_week.attacking_points}개)`}
+											/>
 										</div>
 									)}
 
@@ -103,10 +111,20 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 													</span>
 													<div>
 														<p class="player-badge-label">
-															{BADGES[key].label}
-															<span class="player-badge-tier">{BADGE_TIER_LABELS[BADGES[key].tier]}</span>
+															<T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} />
+															<span class="player-badge-tier">
+																<T
+																	en={BADGE_TIER_LABELS[BADGES[key].tier]}
+																	ko={BADGE_TIER_LABELS_KO[BADGES[key].tier]}
+																/>
+															</span>
 														</p>
-														<p class="player-badge-description">{BADGES[key].description}</p>
+														<T
+															as="p"
+															class="player-badge-description"
+															en={BADGES[key].description}
+															ko={BADGES[key].descriptionKo}
+														/>
 													</div>
 												</div>
 											))}

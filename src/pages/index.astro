@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Header from "../components/Header.astro";
 import StandingsTable from "../components/StandingsTable.astro";
+import T from "../components/T.astro";
 import TransferBanner from "../components/TransferBanner.astro";
 import leagueTable from "../data/league_table.json";
 import heroImage from "../assets/hero-wide.jpg";
@@ -10,7 +11,8 @@ import scheduleData from "../data/schedule.json";
 import transferNews from "../data/transfer-news.json";
 import profilesData from "../data/player_profiles.json";
 import matchesData from "../data/matches.json";
-import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
+import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";
+import { formatShortDate } from "../lib/i18n";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
 import { latestLeague, getTeamName } from "../lib/leagues";
 import { buildGoalCountdown, isCelebratingMilestone, type MatchScore } from "../lib/goals";
@@ -52,17 +54,19 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 						Compete together.<br />
 						Grow together.
 					</h1>
-					<p class="hero-description">
-						A competitive season league where fixed teams battle it out every week,
-						and friendships are built on and off the court.
-					</p>
+					<T
+						as="p"
+						class="hero-description"
+						en="A competitive season league where fixed teams battle it out every week, and friendships are built on and off the court."
+						ko="고정된 팀으로 매주 치열하게 겨루는 시즌 리그, 그리고 코트 안팎에서 쌓여가는 우정."
+					/>
 					<div class="hero-buttons">
 						<a class="hero-button" href="/join">
-							Join KICKS
+							<T en="Join KICKS" ko="KICKS 가입하기" />
 							<span aria-hidden="true">→</span>
 						</a>
 						<a class="hero-button hero-button--secondary" href="/league">
-							View Standings
+							<T en="View Standings" ko="순위 보기" />
 							<span aria-hidden="true">→</span>
 						</a>
 					</div>
@@ -75,9 +79,14 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 					>
 						<span class="hero-next-up-dot" aria-hidden="true"></span>
 						<span class="hero-next-up-text">
-							<strong>Next up</strong> ·{" "}
+							<strong><T en="Next up" ko="다음 일정" /></strong> ·{" "}
 							<span id="hero-next-up-rest">
-								{nextUpEvent && `${nextUpEvent.isToday ? "Today" : nextUpEvent.formattedDate} · ${nextUpEvent.title}`}
+								{nextUpEvent && (
+									<T
+										en={`${nextUpEvent.isToday ? "Today" : formatShortDate(nextUpEvent.date!, "en")} · ${eventTitle(nextUpEvent, "en")}`}
+										ko={`${nextUpEvent.isToday ? "오늘" : formatShortDate(nextUpEvent.date!, "ko")} · ${eventTitle(nextUpEvent, "ko")}`}
+									/>
+								)}
 							</span>
 						</span>
 						<span aria-hidden="true">→</span>
@@ -93,12 +102,24 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 									⚽
 								</span>
 								<span id="hero-goal-counter-default" hidden={celebratingMilestone}>
-									KICKS 통산 <strong>{goalCountdown.total}골</strong> · {goalCountdown.nextMilestone}호 골까지{" "}
-									{goalCountdown.remaining}골
+									<span data-lang="en">
+										<strong>{goalCountdown.total} KICKS goals</strong> all-time · {goalCountdown.remaining} to go
+										until goal #{goalCountdown.nextMilestone}
+									</span>
+									<span data-lang="ko" lang="ko">
+										KICKS 통산 <strong>{goalCountdown.total}골</strong> · {goalCountdown.nextMilestone}호 골까지{" "}
+										{goalCountdown.remaining}골
+									</span>
 								</span>
 								<span id="hero-goal-counter-celebrate" hidden={!celebratingMilestone}>
-									<strong>KICKS 통산 {goalCountdown.lastMilestone}골 달성!</strong> 🎉 · 지금까지{" "}
-									{goalCountdown.total}골
+									<span data-lang="en">
+										<strong>KICKS hit {goalCountdown.lastMilestone} all-time goals!</strong> 🎉 ·{" "}
+										{goalCountdown.total} so far
+									</span>
+									<span data-lang="ko" lang="ko">
+										<strong>KICKS 통산 {goalCountdown.lastMilestone}골 달성!</strong> 🎉 · 지금까지{" "}
+										{goalCountdown.total}골
+									</span>
 								</span>
 							</p>
 						)
@@ -123,14 +144,15 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 			<p class="section-label">LEAGUE STANDINGS · {latestLeague.id}</p>
 			<h2 id="standings-preview-title">Current League</h2>
 			<StandingsTable rows={standings} />
-			<a class="section-link" href="/league">View full league page →</a>
+			<a class="section-link" href="/league"><T en="View full league page →" ko="리그 페이지 전체 보기 →" /></a>
 		</section>
 	</main>
 </BaseLayout>
 
 <script>
-	import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
+	import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";
 	import { isCelebratingMilestone, type GoalCountdown } from "../lib/goals";
+	import { bilingualHtml, formatShortDate } from "../lib/i18n";
 
 	// The link above reflects "today" as of the last build, which goes stale
 	// between deploys. Recompute against the visitor's actual current date
@@ -144,7 +166,12 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 		link.hidden = !next;
 		if (next) {
 			const restEl = document.getElementById("hero-next-up-rest");
-			if (restEl) restEl.textContent = `${next.isToday ? "Today" : next.formattedDate} · ${next.title}`;
+			if (restEl) {
+				restEl.innerHTML = bilingualHtml(
+					`${next.isToday ? "Today" : formatShortDate(next.date!, "en")} · ${eventTitle(next, "en")}`,
+					`${next.isToday ? "오늘" : formatShortDate(next.date!, "ko")} · ${eventTitle(next, "ko")}`,
+				);
+			}
 		}
 	}
 

@@ -554,6 +554,33 @@ in that script must stay in sync with `src/pages/full-matches.astro`.
 Commit and push the updated `.enc.json` file afterward like any other
 change.
 
+### Languages (EN / 한)
+
+The site is bilingual. Every translatable string is rendered in **both**
+languages and CSS shows only the one matching `<html lang>` — switching never
+re-renders anything. Pieces:
+
+- [src/components/T.astro](src/components/T.astro): `<T en="..." ko="..." />`
+  (or `slot="en"` / `slot="ko"` fragments for text with links); `as="p"` etc.
+  picks the wrapping element.
+- [src/lib/i18n.ts](src/lib/i18n.ts): `formatShortDate` ("Sun, Sep 27" /
+  "9월 27일 (일)"), `weekLabel`, and `bilingualHtml` for text written by
+  client-side scripts.
+- The inline script at the top of
+  [BaseLayout.astro](src/layouts/BaseLayout.astro) picks the language before
+  first paint: a saved choice (localStorage `kicks-lang`) wins, otherwise
+  Korean browsers get Korean and everyone else English. It also defines
+  `window.kicksSetLang` (used by the header's EN | 한 button) and fills
+  translated attributes from `data-i18n-attrs`. No JavaScript = English.
+
+**Stays English in both languages, on purpose**: the nav menu, hero slogan
+and brand labels, h1/h2 headings and ALL-CAPS section labels, badge and
+play-style tag names (except Brace → 멀티골), and hand-edited JSON content
+(schedule titles other than league weeks, partner names, video titles,
+transfer banner heading). Sentences, buttons, table labels, empty-state
+messages and badge descriptions are translated. When adding new visible
+text, add both versions.
+
 ### Design
 
 **Keep the current design and styling by default.** Don't introduce a new

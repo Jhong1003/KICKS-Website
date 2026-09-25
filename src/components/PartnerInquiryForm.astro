@@ -1,25 +1,29 @@
+---
+import T from "./T.astro";
+---
+
 <!-- TODO: connect real submit handling here (e.g. a form service or serverless endpoint). -->
 <!-- The form has no `action`/`method` yet, so submitting it currently does nothing. -->
 <form class="inquiry-form">
 	<div class="form-field">
-		<label for="brand-name">Brand Name</label>
+		<label for="brand-name"><T en="Brand Name" ko="브랜드명" /></label>
 		<input type="text" id="brand-name" name="brand-name" required />
 	</div>
 
 	<div class="form-field">
-		<label for="contact-name">Contact Name</label>
+		<label for="contact-name"><T en="Contact Name" ko="담당자 이름" /></label>
 		<input type="text" id="contact-name" name="contact-name" required />
 	</div>
 
 	<div class="form-field">
-		<label for="email">Email</label>
+		<label for="email"><T en="Email" ko="이메일" /></label>
 		<input type="email" id="email" name="email" required />
 	</div>
 
 	<div class="form-field">
-		<label for="proposal">Proposal Details</label>
+		<label for="proposal"><T en="Proposal Details" ko="제안 내용" /></label>
 		<textarea id="proposal" name="proposal" rows="5" required></textarea>
 	</div>
 
-	<button class="form-submit" type="submit">Send Inquiry</button>
+	<button class="form-submit" type="submit"><T en="Send Inquiry" ko="문의 보내기" /></button>
 </form>

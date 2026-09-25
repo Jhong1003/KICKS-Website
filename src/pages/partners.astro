@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PartnerGrid from "../components/PartnerGrid.astro";
 import PartnerInquiryForm from "../components/PartnerInquiryForm.astro";
+import T from "../components/T.astro";
 import partners from "../data/partners.json";
 ---
 
@@ -10,13 +11,23 @@ import partners from "../data/partners.json";
 		<section class="content-section" aria-labelledby="partners-title">
 			<p class="section-label">PARTNERS</p>
 			<h1 id="partners-title">Our Partners</h1>
-			<p class="about-description">KICKS를 응원해주시는 파트너들입니다.</p>
+			<T
+				as="p"
+				class="about-description"
+				en="The partners who support KICKS."
+				ko="KICKS를 응원해주시는 파트너들입니다."
+			/>
 			<PartnerGrid partners={partners} />
 		</section>
 
 		<section class="content-section" aria-labelledby="inquiry-title">
 			<h2 id="inquiry-title">Partnership Inquiry</h2>
-			<p class="about-description">Interested in partnering with KICKS? Fill out the form below.</p>
+			<T
+				as="p"
+				class="about-description"
+				en="Interested in partnering with KICKS? Fill out the form below."
+				ko="KICKS와의 파트너십에 관심이 있으신가요? 아래 양식을 작성해주세요."
+			/>
 			<PartnerInquiryForm />
 		</section>
 	</main>

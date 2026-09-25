@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import T from "../components/T.astro";
 
 // The encrypted data file only exists once someone has run
 // scripts/manage_full_matches.mjs at least once. Before that (or right
@@ -28,7 +29,12 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 					/>
 				</svg>
 				<h2 class="lock-screen-title">KICKS Members Only</h2>
-				<p class="lock-screen-text">Enter the club password to watch full match videos.</p>
+				<T
+					as="p"
+					class="lock-screen-text"
+					en="Enter the club password to watch full match videos."
+					ko="풀경기 영상을 보려면 동아리 비밀번호를 입력하세요."
+				/>
 
 				<form id="unlock-form" class="unlock-form">
 					<div class="password-field">
@@ -37,6 +43,7 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 							id="password-input"
 							class="unlock-input"
 							placeholder="Club password"
+							data-i18n-attrs={JSON.stringify({ placeholder: { en: "Club password", ko: "동아리 비밀번호" } })}
 							autocomplete="current-password"
 							required
 						/>
@@ -61,13 +68,17 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 							</svg>
 						</button>
 					</div>
-					<button class="button-primary unlock-button" type="submit">Unlock</button>
+					<button class="button-primary unlock-button" type="submit"><T en="Unlock" ko="잠금 해제" /></button>
 				</form>
-				<p id="unlock-error" class="unlock-error" hidden>That password didn't work. Please try again.</p>
+				<p id="unlock-error" class="unlock-error" hidden>
+					<T en="That password didn't work. Please try again." ko="비밀번호가 맞지 않아요. 다시 시도해주세요." />
+				</p>
 			</div>
 
 			<div id="video-list" class="video-list" hidden></div>
-			<p id="no-videos-message" class="no-videos-message" hidden>No videos yet — check back soon!</p>
+			<p id="no-videos-message" class="no-videos-message" hidden>
+				<T en="No videos yet — check back soon!" ko="아직 영상이 없어요. 곧 올라올 예정이에요!" />
+			</p>
 		</section>
 	</main>
 </BaseLayout>
@@ -75,6 +86,8 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 <script type="application/json" id="full-matches-payload" set:html={JSON.stringify(encryptedPayload)} />
 
 <script>
+	import { bilingualHtml, formatShortDate, weekLabel } from "../lib/i18n";
+
 	interface FullMatchesPayload {
 		kdf: { iterations: number };
 		salt: string;
@@ -146,14 +159,6 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		return JSON.parse(new TextDecoder().decode(plaintext));
 	}
 
-	function formatDate(isoDate: string): string {
-		return new Date(`${isoDate}T00:00:00`).toLocaleDateString("en-US", {
-			weekday: "short",
-			month: "short",
-			day: "numeric",
-		});
-	}
-
 	function renderVideos(videos: VideoEntry[]) {
 		// Newest first by date — week numbers alone are ambiguous across leagues.
 		const sorted = [...videos].sort((a, b) => b.date.localeCompare(a.date) || b.week - a.week);
@@ -161,10 +166,13 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 			.map(
 				(video) => `
 					<div class="video-card">
-						<div class="video-card-meta">${video.league ? `${video.league} · ` : ""}Week ${video.week} · ${formatDate(video.date)}</div>
+						<div class="video-card-meta">${bilingualHtml(
+							`${video.league ? `${video.league} · ` : ""}${weekLabel(video.week, "en")} · ${formatShortDate(video.date, "en")}`,
+							`${video.league ? `${video.league} · ` : ""}${weekLabel(video.week, "ko")} · ${formatShortDate(video.date, "ko")}`,
+						)}</div>
 						<h3 class="video-card-title">${video.title}</h3>
 						<a class="button-primary" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">
-							Watch on Google Drive
+							${bilingualHtml("Watch on Google Drive", "구글 드라이브에서 보기")}
 						</a>
 					</div>
 				`

@@ -1,6 +1,9 @@
 // Shared helpers for turning src/data/schedule.json into the view the
 // Schedule page's timeline and the homepage's "Next up" card both need:
 // formatted dates, past/upcoming/next-up flags, and league week links.
+// Labels come in both languages (see src/lib/i18n.ts).
+
+import { weekLabel, type Lang } from "./i18n";
 
 export type ScheduleEventType = "league" | "event" | "friendly" | "ceremony";
 
@@ -33,6 +36,7 @@ export interface ScheduleEventView extends ScheduleEvent {
 
 export interface ScheduleMonthGroup {
 	label: string;
+	labelKo: string;
 	events: ScheduleEventView[];
 }
 
@@ -42,6 +46,25 @@ export const TYPE_LABELS: Record<ScheduleEventType, string> = {
 	friendly: "Friendly",
 	ceremony: "Ceremony",
 };
+
+export const TYPE_LABELS_KO: Record<ScheduleEventType, string> = {
+	league: "리그",
+	event: "이벤트",
+	friendly: "친선경기",
+	ceremony: "시상식",
+};
+
+/**
+ * An event's display title. League weeks are built from their league and
+ * week ("FA26-L1 · Week 4" / "FA26-L1 · 4주차") so they read naturally in
+ * both languages; every other event shows its schedule.json title as written.
+ */
+export function eventTitle(event: ScheduleEvent, lang: Lang): string {
+	if (event.type === "league" && event.league && event.week) {
+		return `${event.league} · ${weekLabel(event.week, lang)}`;
+	}
+	return event.title;
+}
 
 const MONTH_NAMES = [
 	"January",
@@ -59,6 +82,7 @@ const MONTH_NAMES = [
 ];
 
 const TBD_GROUP_LABEL = "Date TBD";
+const TBD_GROUP_LABEL_KO = "날짜 미정";
 
 // Appending a time forces the date to be parsed in the local timezone
 // instead of UTC, which would otherwise risk showing the previous day in
@@ -154,6 +178,7 @@ export function groupByMonth(views: ScheduleEventView[]): ScheduleMonthGroup[] {
 		const [year, monthIndex] = key === TBD_GROUP_LABEL ? [null, null] : key.split("-").map(Number);
 		return {
 			label: key === TBD_GROUP_LABEL ? TBD_GROUP_LABEL : `${MONTH_NAMES[monthIndex!]} ${year}`,
+			labelKo: key === TBD_GROUP_LABEL ? TBD_GROUP_LABEL_KO : `${year}년 ${monthIndex! + 1}월`,
 			events: monthEvents,
 		};
 	});

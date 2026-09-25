@@ -1,0 +1,27 @@
+---
+// One piece of text in both languages. global.css shows only the version
+// that matches <html lang> (see src/lib/i18n.ts for how that's chosen).
+//
+//   <T en="Join KICKS" ko="KICKS 가입하기" />
+//   <T as="p" class="about-description">
+//     <Fragment slot="en">Longer text with <a href="...">a link</a></Fragment>
+//     <Fragment slot="ko">링크가 들어간 <a href="...">긴 문장</a></Fragment>
+//   </T>
+//
+// `as` picks the wrapping element (span by default); use a block element
+// like "p" or "li" when the text is a whole paragraph, so each language
+// version is a real paragraph instead of a span inside one.
+interface Props {
+	en?: string;
+	ko?: string;
+	as?: string;
+	class?: string;
+}
+
+const { en, ko, as = "span", class: className } = Astro.props;
+const Tag = as;
+const hasEn = Astro.slots.has("en");
+const hasKo = Astro.slots.has("ko");
+---
+
+<Tag data-lang="en" class={className}>{hasEn ? <slot name="en" /> : en}</Tag><Tag data-lang="ko" lang="ko" class={className}>{hasKo ? <slot name="ko" /> : ko}</Tag>

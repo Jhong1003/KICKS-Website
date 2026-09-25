@@ -1,4 +1,5 @@
 ---
+import T from "./T.astro";
 import type { WeeklyStat } from "../lib/players";
 
 interface Props {
@@ -16,11 +17,11 @@ const maxValue = Math.max(1, ...weeklyStats.flatMap((week) => [week.goals, week.
 	<div class="weekly-chart-legend">
 		<span class="weekly-chart-legend-item">
 			<span class="weekly-chart-swatch weekly-chart-swatch--goals" />
-			Goals
+			<T en="Goals" ko="골" />
 		</span>
 		<span class="weekly-chart-legend-item">
 			<span class="weekly-chart-swatch weekly-chart-swatch--assists" />
-			Assists
+			<T en="Assists" ko="어시스트" />
 		</span>
 	</div>
 	<div class="weekly-chart-bars">

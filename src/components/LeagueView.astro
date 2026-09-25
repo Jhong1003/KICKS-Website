@@ -3,6 +3,7 @@ import ChampionshipSimulator from "./ChampionshipSimulator.astro";
 import StandingsTable from "./StandingsTable.astro";
 import WeeklyResults from "./WeeklyResults.astro";
 import PlayerStatsTable from "./PlayerStatsTable.astro";
+import T from "./T.astro";
 import leagueTableData from "../data/league_table.json";
 import matchesData from "../data/matches.json";
 import weekSummariesData from "../data/week_summaries.json";
@@ -93,7 +94,11 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 							aria-current={entry.id === league.id ? "page" : undefined}
 						>
 							{entry.id}
-							{!entry.started && <span class="league-switcher-note">upcoming</span>}
+							{!entry.started && (
+								<span class="league-switcher-note">
+									<T en="upcoming" ko="예정" />
+								</span>
+							)}
 						</a>
 					))}
 				</nav>
@@ -112,7 +117,12 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			standings.length > 0 ? (
 				<StandingsTable rows={standings} />
 			) : (
-				<p class="about-description">The table appears once the first match has been played.</p>
+				<T
+					as="p"
+					class="about-description"
+					en="The table appears once the first match has been played."
+					ko="첫 경기가 끝나면 순위표가 나타나요."
+				/>
 			)
 		}
 	</section>
@@ -123,7 +133,12 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			weeks.length > 0 ? (
 				<WeeklyResults weeks={weeks} defaultWeek={defaultWeek} />
 			) : (
-				<p class="about-description">Fixtures will appear here once this league's matches are added.</p>
+				<T
+					as="p"
+					class="about-description"
+					en="Fixtures will appear here once this league's matches are added."
+					ko="이 리그의 경기가 등록되면 여기에 일정이 나타나요."
+				/>
 			)
 		}
 	</section>
@@ -137,11 +152,16 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		{
 			leaderboard.length > 0 ? (
 				<>
-					<p class="about-description">Click a column header to sort.</p>
+					<T as="p" class="about-description" en="Click a column header to sort." ko="열 제목을 누르면 정렬돼요." />
 					<PlayerStatsTable players={leaderboard} />
 				</>
 			) : (
-				<p class="about-description">Player stats appear once the first week has been recorded.</p>
+				<T
+					as="p"
+					class="about-description"
+					en="Player stats appear once the first week has been recorded."
+					ko="첫 주 기록이 입력되면 선수 기록이 나타나요."
+				/>
 			)
 		}
 	</section>

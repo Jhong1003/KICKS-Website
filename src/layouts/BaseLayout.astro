@@ -23,6 +23,51 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
 
 <html lang="en">
 	<head>
+		<!--
+			Language (see src/lib/i18n.ts). Runs before anything renders, so the
+			page never flashes the wrong language: a saved choice wins, otherwise
+			Korean browsers get Korean and everyone else English. Without
+			JavaScript the page simply stays English (<html lang="en"> above).
+		-->
+		<script is:inline>
+			(function () {
+				var KEY = "kicks-lang";
+				function pick() {
+					var saved;
+					try {
+						saved = localStorage.getItem(KEY);
+					} catch (e) {}
+					if (saved === "en" || saved === "ko") return saved;
+					var preferred = (navigator.languages && navigator.languages[0]) || navigator.language || "";
+					return preferred.toLowerCase().indexOf("ko") === 0 ? "ko" : "en";
+				}
+				// Attributes can't hold two languages at once, so elements that need a
+				// translated placeholder/aria-label carry both in data-i18n-attrs, e.g.
+				// data-i18n-attrs='{"placeholder":{"en":"Password","ko":"비밀번호"}}'.
+				function applyAttributes(lang) {
+					document.querySelectorAll("[data-i18n-attrs]").forEach(function (el) {
+						var map = JSON.parse(el.getAttribute("data-i18n-attrs"));
+						Object.keys(map).forEach(function (attr) {
+							el.setAttribute(attr, map[attr][lang]);
+						});
+					});
+				}
+				window.kicksSetLang = function (lang, remember) {
+					document.documentElement.lang = lang;
+					if (remember) {
+						try {
+							localStorage.setItem(KEY, lang);
+						} catch (e) {}
+					}
+					applyAttributes(lang);
+					document.dispatchEvent(new CustomEvent("kicks:langchange", { detail: lang }));
+				};
+				document.documentElement.lang = pick();
+				document.addEventListener("DOMContentLoaded", function () {
+					applyAttributes(document.documentElement.lang);
+				});
+			})();
+		</script>
 		<!-- Google tag (gtag.js) -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZKK1G0QSJ8"></script>
 		<script is:inline>

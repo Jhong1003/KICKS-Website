@@ -1,4 +1,6 @@
 ---
+import T from "./T.astro";
+
 interface Player {
 	rank: number;
 	player: string;
@@ -18,13 +20,13 @@ interface Props {
 const { players } = Astro.props;
 
 const columns = [
-	{ key: "rank", label: "Rank", type: "number" },
-	{ key: "player", label: "Player", type: "string" },
-	{ key: "team", label: "Team", type: "string" },
-	{ key: "attendance", label: "Attendance", type: "number" },
-	{ key: "goals", label: "Goals", type: "number" },
-	{ key: "assists", label: "Assists", type: "number" },
-	{ key: "attacking_points", label: "Attacking Pts", type: "number" },
+	{ key: "rank", label: "Rank", labelKo: "순위", type: "number" },
+	{ key: "player", label: "Player", labelKo: "선수", type: "string" },
+	{ key: "team", label: "Team", labelKo: "팀", type: "string" },
+	{ key: "attendance", label: "Attendance", labelKo: "출석", type: "number" },
+	{ key: "goals", label: "Goals", labelKo: "골", type: "number" },
+	{ key: "assists", label: "Assists", labelKo: "어시스트", type: "number" },
+	{ key: "attacking_points", label: "Attacking Pts", labelKo: "공격포인트", type: "number" },
 ] as const;
 ---
 
@@ -35,7 +37,7 @@ const columns = [
 				{
 					columns.map((column) => (
 						<th data-sortable data-type={column.type}>
-							{column.label}
+							<T en={column.label} ko={column.labelKo} />
 						</th>
 					))
 				}

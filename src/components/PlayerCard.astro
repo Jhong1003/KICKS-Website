@@ -1,4 +1,5 @@
 ---
+import T from "./T.astro";
 import {
 	BADGES,
 	sortBadges,
@@ -48,15 +49,15 @@ const cardStyle = `--team-color: ${teamColor}; --team-avatar-text: ${avatarTextC
 	<div class="player-card-stats">
 		<div class="player-card-stat">
 			<span class="player-card-stat-value">{section.season_totals.goals}</span>
-			<span class="player-card-stat-label">Goals</span>
+			<span class="player-card-stat-label"><T en="Goals" ko="골" /></span>
 		</div>
 		<div class="player-card-stat">
 			<span class="player-card-stat-value">{section.season_totals.assists}</span>
-			<span class="player-card-stat-label">Assists</span>
+			<span class="player-card-stat-label"><T en="Assists" ko="어시스트" /></span>
 		</div>
 		<div class="player-card-stat">
 			<span class="player-card-stat-value">{section.season_totals.weeks_attended}</span>
-			<span class="player-card-stat-label">Weeks</span>
+			<span class="player-card-stat-label"><T en="Weeks" ko="출석" /></span>
 		</div>
 	</div>
 

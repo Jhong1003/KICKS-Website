@@ -1,4 +1,6 @@
 ---
+import T from "./T.astro";
+
 interface StandingsRow {
 	rank: number;
 	team: string;
@@ -18,30 +20,46 @@ interface Props {
 }
 
 const { rows } = Astro.props;
+
+const columns = [
+	["Rank", "순위"],
+	["Team", "팀"],
+	["P", "경기"],
+	["W", "승"],
+	["D", "무"],
+	["L", "패"],
+	["GF", "득점"],
+	["GA", "실점"],
+	["GD", "득실"],
+	["Pts", "승점"],
+	["Participation", "참여율"],
+] as const;
 ---
 
 <div class="table-scroll">
 	<table class="standings-table">
 		<thead>
 			<tr>
-				<th>Rank</th>
-				<th>Team</th>
-				<th>P</th>
-				<th>W</th>
-				<th>D</th>
-				<th>L</th>
-				<th>GF</th>
-				<th>GA</th>
-				<th>GD</th>
-				<th>Pts</th>
-				<th>Participation</th>
+				{
+					columns.map(([en, ko]) => (
+						<th>
+							<T en={en} ko={ko} />
+						</th>
+					))
+				}
 			</tr>
 		</thead>
 		<tbody>
 			{
 				rows.map((row) => (
 					<tr>
-						<td>{rows.filter((other) => other.rank === row.rank).length > 1 ? `공동 ${row.rank}` : row.rank}</td>
+						<td>
+							{rows.filter((other) => other.rank === row.rank).length > 1 ? (
+								<T en={`T-${row.rank}`} ko={`공동 ${row.rank}`} />
+							) : (
+								row.rank
+							)}
+						</td>
 						<td class="team-name">{row.team}</td>
 						<td>{row.played}</td>
 						<td>{row.wins}</td>

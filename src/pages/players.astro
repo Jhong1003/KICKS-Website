@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PlayerCard from "../components/PlayerCard.astro";
+import T from "../components/T.astro";
 import profilesData from "../data/player_profiles.json";
 import playerPhotosData from "../data/player-photos.json";
 import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from "../lib/players";
@@ -25,17 +26,20 @@ const playerPhotos = playerPhotosData as Record<string, string>;
 		<section class="content-section" aria-labelledby="players-title">
 			<p class="section-label">{league.id} ROSTER</p>
 			<h1 id="players-title">Players</h1>
-			<p class="about-description">
-				Every KICKS player in {league.id} — stats, play style, and badges earned along the way.
-			</p>
+			<T
+				as="p"
+				class="about-description"
+				en={`Every KICKS player in ${league.id} — stats, play style, and badges earned along the way.`}
+				ko={`${league.id}의 모든 KICKS 선수 — 기록, 플레이 스타일, 그리고 지금까지 모은 배지.`}
+			/>
 
 			<div class="player-sort" role="group" aria-label="Sort players">
-				<span class="player-sort-label">Sort by</span>
+				<span class="player-sort-label"><T en="Sort by" ko="정렬" /></span>
 				<button class="player-sort-button" type="button" data-sort="name" aria-pressed="true">
-					Name
+					<T en="Name" ko="이름" />
 				</button>
 				<button class="player-sort-button" type="button" data-sort="team" aria-pressed="false">
-					Team
+					<T en="Team" ko="팀" />
 				</button>
 			</div>
 

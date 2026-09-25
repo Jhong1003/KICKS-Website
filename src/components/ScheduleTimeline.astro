@@ -1,5 +1,7 @@
 ---
-import { TYPE_LABELS, buildScheduleView, groupByMonth, type ScheduleEvent } from "../lib/schedule";
+import T from "./T.astro";
+import { TYPE_LABELS, TYPE_LABELS_KO, buildScheduleView, eventTitle, groupByMonth, type ScheduleEvent } from "../lib/schedule";
+import { formatShortDate } from "../lib/i18n";
 
 interface Props {
 	events: ScheduleEvent[];
@@ -13,7 +15,7 @@ const groups = groupByMonth(buildScheduleView(events));
 	{
 		groups.map((group) => (
 			<div class="schedule-month">
-				<h3 class="schedule-month-label">{group.label}</h3>
+				<h3 class="schedule-month-label"><T en={group.label} ko={group.labelKo} /></h3>
 				<ol class="schedule-list">
 					{group.events.map((event) => {
 						const itemClass = [
@@ -26,15 +28,29 @@ const groups = groupByMonth(buildScheduleView(events));
 						const inner = (
 							<>
 								<div class="schedule-item-date">
-									{event.formattedDate ?? "TBD"}
-									{event.tbd && event.formattedDate && <span class="schedule-tbd-badge">TBD</span>}
+									{event.date ? (
+										<T en={formatShortDate(event.date, "en")} ko={formatShortDate(event.date, "ko")} />
+									) : (
+										<T en="TBD" ko="미정" />
+									)}
+									{event.tbd && event.date && (
+										<span class="schedule-tbd-badge">
+											<T en="TBD" ko="미정" />
+										</span>
+									)}
 								</div>
 								<div class="schedule-item-body">
-									{event.isNextUp && <span class="schedule-next-label">Next up</span>}
+									{event.isNextUp && (
+										<span class="schedule-next-label">
+											<T en="Next up" ko="다음 일정" />
+										</span>
+									)}
 									<span class={`schedule-type-badge schedule-type-badge--${event.type}`}>
-										{TYPE_LABELS[event.type]}
+										<T en={TYPE_LABELS[event.type]} ko={TYPE_LABELS_KO[event.type]} />
 									</span>
-									<p class="schedule-item-title">{event.title}</p>
+									<p class="schedule-item-title">
+										<T en={eventTitle(event, "en")} ko={eventTitle(event, "ko")} />
+									</p>
 								</div>
 							</>
 						);
@@ -58,6 +74,7 @@ const groups = groupByMonth(buildScheduleView(events));
 
 <script>
 	import { buildScheduleView, type ScheduleEvent } from "../lib/schedule";
+	import { bilingualHtml } from "../lib/i18n";
 
 	// The timeline above is rendered with "today" as of the last build, which
 	// goes stale between deploys. Recompute past/next-up against the
@@ -83,7 +100,7 @@ const groups = groupByMonth(buildScheduleView(events));
 			if (info.isNextUp && !existingLabel) {
 				const label = document.createElement("span");
 				label.className = "schedule-next-label";
-				label.textContent = "Next up";
+				label.innerHTML = bilingualHtml("Next up", "다음 일정");
 				body?.prepend(label);
 			} else if (!info.isNextUp && existingLabel) {
 				existingLabel.remove();

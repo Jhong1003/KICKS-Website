@@ -126,60 +126,150 @@ export const BADGE_TIER_LABELS: Record<BadgeTier, string> = {
 	special: "Special",
 };
 
+export const BADGE_TIER_LABELS_KO: Record<BadgeTier, string> = {
+	legendary: "전설",
+	rare: "레어",
+	common: "일반",
+	special: "스페셜",
+};
+
 const TIER_ORDER: BadgeTier[] = ["legendary", "rare", "common", "special"];
 
-export const BADGES: Record<BadgeKey, { label: string; description: string; icon: string; tier: BadgeTier }> = {
+/** `labelKo` only where the Korean name differs (badge names otherwise stay English in both languages). */
+export interface BadgeInfo {
+	label: string;
+	labelKo?: string;
+	description: string;
+	descriptionKo: string;
+	icon: string;
+	tier: BadgeTier;
+}
+
+export const BADGES: Record<BadgeKey, BadgeInfo> = {
 	// Common
-	off_the_mark: { label: "Goal!", description: "Scored in this league.", icon: "⚽", tier: "common" },
-	provider: { label: "Assist!", description: "Set up a teammate's goal in this league.", icon: "🎯", tier: "common" },
+	off_the_mark: {
+		label: "Goal!",
+		description: "Scored in this league.",
+		descriptionKo: "이번 리그에서 골을 기록했어요.",
+		icon: "⚽",
+		tier: "common",
+	},
+	provider: {
+		label: "Assist!",
+		description: "Set up a teammate's goal in this league.",
+		descriptionKo: "이번 리그에서 동료의 골을 도왔어요.",
+		icon: "🎯",
+		tier: "common",
+	},
 	iron_man: {
 		label: "Iron Man",
 		description: "Hasn't missed a week since joining this league.",
+		descriptionKo: "합류한 뒤로 한 주도 빠지지 않고 출석했어요.",
 		icon: "🦾",
 		tier: "common",
 	},
-	squad_member: { label: "Squad Member", description: "A valued part of the KICKS roster.", icon: "🤝", tier: "common" },
+	squad_member: {
+		label: "Squad Member",
+		description: "A valued part of the KICKS roster.",
+		descriptionKo: "KICKS의 소중한 멤버예요.",
+		icon: "🤝",
+		tier: "common",
+	},
 	// Rare
-	on_fire: { label: "On Fire", description: "3+ goals and assists combined in a single week.", icon: "🔥", tier: "rare" },
-	libero: { label: "Libero", description: "A defender who scored or assisted in this league.", icon: "🛡️", tier: "rare" },
+	on_fire: {
+		label: "On Fire",
+		description: "3+ goals and assists combined in a single week.",
+		descriptionKo: "한 주에 공격포인트 3개 이상을 기록했어요.",
+		icon: "🔥",
+		tier: "rare",
+	},
+	libero: {
+		label: "Libero",
+		description: "A defender who scored or assisted in this league.",
+		descriptionKo: "수비수로서 이번 리그에서 골이나 어시스트를 기록했어요.",
+		icon: "🛡️",
+		tier: "rare",
+	},
 	the_wall: {
 		label: "The Wall",
 		description: "Defended in a week the team kept 3+ clean sheets.",
+		descriptionKo: "팀이 한 주에 무실점 경기를 3번 이상 기록한 주에 함께 수비했어요.",
 		icon: "🧱",
 		tier: "rare",
 	},
-	champion: { label: "Champion", description: "Won the league.", icon: "🏆", tier: "rare" },
-	brace: { label: "Brace", description: "Scored 2 goals in a single match.", icon: "✌️", tier: "rare" },
+	champion: {
+		label: "Champion",
+		description: "Won the league.",
+		descriptionKo: "리그 우승!",
+		icon: "🏆",
+		tier: "rare",
+	},
+	brace: {
+		label: "Brace",
+		labelKo: "멀티골",
+		description: "Scored 2 goals in a single match.",
+		descriptionKo: "한 경기에서 2골을 넣었어요.",
+		icon: "✌️",
+		tier: "rare",
+	},
 	// Legendary
 	game_changer: {
 		label: "Game Changer",
 		description: "2+ goals and 2+ assists in the same week.",
+		descriptionKo: "한 주에 2골 이상, 어시스트 2개 이상을 함께 기록했어요.",
 		icon: "⚡",
 		tier: "legendary",
 	},
 	crack: {
 		label: "Crack",
 		description: "2+ goals and assists combined in each of two weeks in a row.",
+		descriptionKo: "2주 연속으로 매주 공격포인트 2개 이상을 기록했어요.",
 		icon: "💎",
 		tier: "legendary",
 	},
-	fox_in_the_box: { label: "Fox in the Box", description: "5+ goals in this league.", icon: "🦊", tier: "legendary" },
-	maestro: { label: "Maestro", description: "3+ assists in a single week.", icon: "🎼", tier: "legendary" },
+	fox_in_the_box: {
+		label: "Fox in the Box",
+		description: "5+ goals in this league.",
+		descriptionKo: "이번 리그에서 5골 이상을 넣었어요.",
+		icon: "🦊",
+		tier: "legendary",
+	},
+	maestro: {
+		label: "Maestro",
+		description: "3+ assists in a single week.",
+		descriptionKo: "한 주에 어시스트 3개 이상을 기록했어요.",
+		icon: "🎼",
+		tier: "legendary",
+	},
 	delivery_service: {
 		label: "Delivery Service",
 		description: "5+ assists in this league.",
+		descriptionKo: "이번 리그에서 어시스트 5개 이상을 기록했어요.",
 		icon: "📦",
 		tier: "legendary",
 	},
-	hat_trick: { label: "Hat-trick", description: "Scored 3 goals in a single match.", icon: "🎩", tier: "legendary" },
+	hat_trick: {
+		label: "Hat-trick",
+		description: "Scored 3 goals in a single match.",
+		descriptionKo: "한 경기에서 3골을 넣었어요.",
+		icon: "🎩",
+		tier: "legendary",
+	},
 	// Special — just for fun
 	own_goal_award: {
 		label: "Own Goal Award",
 		description: "Generously contributed a goal to the other team's tally. It happens to the best of us!",
+		descriptionKo: "상대 팀 득점에 너그럽게 기여했어요. 누구에게나 있을 수 있는 일!",
 		icon: "🪃",
 		tier: "special",
 	},
-	journeyman: { label: "Journeyman", description: "Played for more than one team in this league.", icon: "🧳", tier: "special" },
+	journeyman: {
+		label: "Journeyman",
+		description: "Played for more than one team in this league.",
+		descriptionKo: "이번 리그에서 두 팀 이상에서 뛰었어요.",
+		icon: "🧳",
+		tier: "special",
+	},
 };
 
 /** Badges rarest-first (legendary, rare, common, then the fun ones), keeping the pipeline's order within a tier. */

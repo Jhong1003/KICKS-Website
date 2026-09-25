@@ -1,4 +1,7 @@
 ---
+import T from "./T.astro";
+import { formatShortDate, weekLabel } from "../lib/i18n";
+
 interface Match {
 	week: number;
 	round: number;
@@ -35,16 +38,6 @@ interface Props {
 
 const { weeks, defaultWeek } = Astro.props;
 
-// "2026-09-13" -> "Sun, Sep 13". Appending a time forces the date to be
-// parsed in the local timezone instead of UTC, which would otherwise risk
-// showing the previous day in timezones behind UTC.
-const formatDate = (isoDate: string) =>
-	new Date(`${isoDate}T00:00:00`).toLocaleDateString("en-US", {
-		weekday: "short",
-		month: "short",
-		day: "numeric",
-	});
-
 const matchesForRound = (week: Week, round: number) => week.matches.filter((match) => match.round === round);
 ---
 
@@ -59,7 +52,11 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 					data-week={week.week}
 					aria-selected={week.week === defaultWeek ? "true" : "false"}
 				>
-					{week.hasResults ? `Week ${week.week}` : "Upcoming"}
+					{week.hasResults ? (
+						<T en={weekLabel(week.week, "en")} ko={weekLabel(week.week, "ko")} />
+					) : (
+						<T en="Upcoming" ko="예정" />
+					)}
 				</button>
 			))
 		}
@@ -72,17 +69,19 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 				data-week-panel={week.week}
 				hidden={week.week !== defaultWeek}
 			>
-				<p class="week-date">{formatDate(week.date)}</p>
+				<p class="week-date">
+					<T en={formatShortDate(week.date, "en")} ko={formatShortDate(week.date, "ko")} />
+				</p>
 
 				{week.summary.length > 0 && (
 					<table class="week-summary-table">
 						<thead>
 							<tr>
-								<th>Team</th>
-								<th>W</th>
-								<th>D</th>
-								<th>L</th>
-								<th>Pts</th>
+								<th><T en="Team" ko="팀" /></th>
+								<th><T en="W" ko="승" /></th>
+								<th><T en="D" ko="무" /></th>
+								<th><T en="L" ko="패" /></th>
+								<th><T en="Pts" ko="승점" /></th>
 							</tr>
 						</thead>
 						<tbody>
@@ -102,7 +101,9 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 				<div class="week-rounds">
 					{week.rounds.map((round) => (
 						<div class="round-group">
-							<h3 class="round-label">Round {round}</h3>
+							<h3 class="round-label">
+								<T en={`Round ${round}`} ko={`${round}라운드`} />
+							</h3>
 							<div class="match-cards">
 								{matchesForRound(week, round).map((match) => {
 									const homeWins = match.status === "completed" && match.home_score! > match.away_score!;
