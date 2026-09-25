@@ -2984,3 +2984,21 @@ a.player-card:hover {
 		max-width: 620px;
 	}
 }
+
+/* 모바일: 홈 첫 화면 문구를 로고 쪽으로 올리고, 페이지 제목 위 여백을 줄임 */
+@media (max-width: 860px) {
+	.hero > .hero-content {
+		margin: 0;
+		padding: 40px 0 32px;
+	}
+}
+
+@media (max-width: 600px) {
+	.content-section {
+		padding-top: 40px;
+		padding-bottom: 64px;
+	}
+	.content-section + .content-section {
+		padding-top: 48px;
+	}
+}
