@@ -3,7 +3,7 @@
 // per league (see PlayerLeagueSection) and never combined across leagues;
 // team colors and league metadata live in ./leagues. The badge/tag *rules* live
 // in scripts/update_data.py (that's what computes them) — this file only
-// carries the display metadata (label/description/icon) for each badge
+// carries the display metadata (label/description/icon/tier) for each badge
 // key, and small view helpers. See AGENTS.md's "Player profiles" section
 // for the full rules writeup. Teams appear here only as team_id; names come
 // from ./leagues (getTeamName) at render time.
@@ -39,7 +39,15 @@ export interface PersonalBestWeek {
 	attacking_points: number;
 }
 
-export type PlayStyleTag = "Finisher" | "Playmaker" | "All-Rounder" | "Iron Man" | "Team Player";
+export type PlayStyleTag =
+	| "Finisher"
+	| "Playmaker"
+	| "All-Rounder"
+	| "Rock"
+	| "Engine"
+	| "Target Man"
+	| "Black Spider"
+	| "Team Player";
 
 /** Matches the `players` tab's `status` column — see AGENTS.md's "Player status" section. */
 export type PlayerStatus = "active" | "new" | "inactive";
@@ -48,13 +56,23 @@ export type PlayerStatus = "active" | "new" | "inactive";
 export type PlayerPosition = "GK" | "DF" | "MF" | "FW";
 
 export type BadgeKey =
-	| "first_goal"
-	| "first_assist"
+	| "off_the_mark"
+	| "provider"
+	| "iron_man"
+	| "squad_member"
+	| "on_fire"
+	| "libero"
+	| "the_wall"
+	| "champion"
 	| "brace"
+	| "game_changer"
+	| "crack"
+	| "fox_in_the_box"
+	| "maestro"
+	| "delivery_service"
 	| "hat_trick"
-	| "perfect_attendance"
 	| "own_goal_award"
-	| "squad_member";
+	| "journeyman";
 
 /** One player's profile within a single league (its stats, tag and badges). */
 export interface PlayerLeagueSection {
@@ -95,23 +113,79 @@ export interface PlayerInLeague {
 // Deliberately no rating/score field anywhere on this type — this is a
 // friendly club site, not a scouting report. See AGENTS.md.
 
-export const BADGES: Record<BadgeKey, { label: string; description: string; icon: string }> = {
-	first_goal: { label: "First Goal", description: "Scored a goal in this league.", icon: "⚽" },
-	first_assist: { label: "First Assist", description: "Set up a teammate's goal in this league.", icon: "🎯" },
-	brace: { label: "Brace", description: "Scored 2+ goals in a single week.", icon: "✌️" },
-	hat_trick: { label: "Hat-trick", description: "Scored 3+ goals in a single week.", icon: "🎩" },
-	perfect_attendance: {
-		label: "Perfect Attendance",
-		description: "Hasn't missed a week so far in this league.",
-		icon: "📅",
+/**
+ * How hard a badge is to earn. Fixed per badge (never recalculated from how
+ * many people hold it); "special" is for the just-for-fun story badges.
+ */
+export type BadgeTier = "legendary" | "rare" | "common" | "special";
+
+export const BADGE_TIER_LABELS: Record<BadgeTier, string> = {
+	legendary: "Legendary",
+	rare: "Rare",
+	common: "Common",
+	special: "Special",
+};
+
+const TIER_ORDER: BadgeTier[] = ["legendary", "rare", "common", "special"];
+
+export const BADGES: Record<BadgeKey, { label: string; description: string; icon: string; tier: BadgeTier }> = {
+	// Common
+	off_the_mark: { label: "Off the Mark", description: "Scored in this league.", icon: "⚽", tier: "common" },
+	provider: { label: "Provider", description: "Set up a teammate's goal in this league.", icon: "🎯", tier: "common" },
+	iron_man: {
+		label: "Iron Man",
+		description: "Hasn't missed a week since joining this league.",
+		icon: "🦾",
+		tier: "common",
 	},
+	squad_member: { label: "Squad Member", description: "A valued part of the KICKS roster.", icon: "🤝", tier: "common" },
+	// Rare
+	on_fire: { label: "On Fire", description: "3+ goals and assists combined in a single week.", icon: "🔥", tier: "rare" },
+	libero: { label: "Libero", description: "A defender who scored or assisted in this league.", icon: "🛡️", tier: "rare" },
+	the_wall: {
+		label: "The Wall",
+		description: "Defended in a week the team kept 3+ clean sheets.",
+		icon: "🧱",
+		tier: "rare",
+	},
+	champion: { label: "Champion", description: "Won the league.", icon: "🏆", tier: "rare" },
+	brace: { label: "Brace", description: "Scored 2 goals in a single match.", icon: "✌️", tier: "rare" },
+	// Legendary
+	game_changer: {
+		label: "Game Changer",
+		description: "2+ goals and 2+ assists in the same week.",
+		icon: "⚡",
+		tier: "legendary",
+	},
+	crack: {
+		label: "Crack",
+		description: "2+ goals and assists combined in each of two weeks in a row.",
+		icon: "💎",
+		tier: "legendary",
+	},
+	fox_in_the_box: { label: "Fox in the Box", description: "5+ goals in this league.", icon: "🦊", tier: "legendary" },
+	maestro: { label: "Maestro", description: "3+ assists in a single week.", icon: "🎼", tier: "legendary" },
+	delivery_service: {
+		label: "Delivery Service",
+		description: "5+ assists in this league.",
+		icon: "📦",
+		tier: "legendary",
+	},
+	hat_trick: { label: "Hat-trick", description: "Scored 3 goals in a single match.", icon: "🎩", tier: "legendary" },
+	// Special — just for fun
 	own_goal_award: {
 		label: "Own Goal Award",
 		description: "Generously contributed a goal to the other team's tally. It happens to the best of us!",
 		icon: "🪃",
+		tier: "special",
 	},
-	squad_member: { label: "Squad Member", description: "A valued part of the KICKS roster.", icon: "🤝" },
+	journeyman: { label: "Journeyman", description: "Played for more than one team in this league.", icon: "🧳", tier: "special" },
 };
+
+/** Badges rarest-first (legendary, rare, common, then the fun ones), keeping the pipeline's order within a tier. */
+export function sortBadges(keys: BadgeKey[]): BadgeKey[] {
+	return [...keys].sort((a, b) => TIER_ORDER.indexOf(BADGES[a].tier) - TIER_ORDER.indexOf(BADGES[b].tier));
+}
 
 /** WCAG relative luminance of a hex color, or null if it doesn't parse. */
 function relativeLuminance(hex: string): number | null {

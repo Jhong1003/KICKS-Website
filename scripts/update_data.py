@@ -226,7 +226,9 @@ def resolve_ids(sheets: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     player_stats: player/team -> player_id/team_id.
     players keeps both `player` (the display name) and `player_id` - it's
     the table names are joined back from. goal_events has already been
-    folded into player_stats by load_sheets() and isn't used after that.
+    folded into player_stats by load_sheets(); after that it's only read
+    for per-match badges (_max_match_goals), which maps its scorer names
+    to ids itself.
 
     A name that doesn't resolve fails the whole run, listing every one at
     once. validate_data.py (check_team_names / check_player_names_known /
@@ -544,23 +546,39 @@ def build_leaderboard(player_stats: pd.DataFrame, players: pd.DataFrame) -> list
 # every player, so there are deliberately no overall ratings, scores, or
 # rankings here (that's what player_leaderboard.json is for). Everything
 # below is either a league stat, a single positive play-style tag, or a
-# badge — and every player ends up with at least one badge per league (see
-# _badges' "squad_member" fallback). All of it is computed per league;
-# nothing carries over between leagues.
+# badge — every player ends up with exactly one tag and at least one badge
+# per league (see the "Team Player" / "squad_member" fallbacks). All of it
+# is computed per league; nothing carries over between leagues.
 
 # --- Play-style tag thresholds -------------------------------------------
-# Exactly one tag per player. Checked in this order, first match wins, so
-# the order below doubles as the priority when a player's stats could fit
-# more than one description. Tune these constants as the season's scoring
-# patterns become clearer.
+# Exactly one tag per player. Players with enough attacking points get an
+# attacking style; everyone else gets the role of their primary position,
+# so nobody is left with a generic label. Goalkeepers are always "Black
+# Spider", whatever their numbers.
+TAG_MIN_ATTACKING_POINTS = 2  # goals + assists needed for an attacking-style tag
 FINISHER_GOAL_MARGIN = 2  # goals must lead assists by at least this much
-ALL_ROUNDER_MAX_DIFF = 1  # goals/assists within this of each other counts as "balanced"
-IRON_MAN_MIN_WEEKS_PLAYED = 2  # need a couple of weeks on record before attendance is a "style"
+PLAYMAKER_ASSIST_MARGIN = 2  # assists must lead goals by at least this much
+
+POSITION_TAGS = {"DF": "Rock", "MF": "Engine", "FW": "Target Man"}
+GOALKEEPER_TAG = "Black Spider"
+FALLBACK_TAG = "Team Player"  # only if a player has no primary position on the sheet yet
 
 # --- Badge thresholds ------------------------------------------------------
-BRACE_GOALS = 2  # 2+ goals in a single week
-HAT_TRICK_GOALS = 3  # 3+ goals in a single week (also counts as a Brace)
+# Tiers (common / rare / legendary) are display metadata and live with the
+# labels in src/lib/players.ts (BADGES).
+ON_FIRE_POINTS = 3  # attacking points in a single week
+GAME_CHANGER_GOALS = 2  # ...and GAME_CHANGER_ASSISTS, both in the same week
+GAME_CHANGER_ASSISTS = 2
+CRACK_POINTS = 2  # attacking points in each of two consecutive attended weeks
+FOX_IN_THE_BOX_GOALS = 5  # goals in the league
+DELIVERY_SERVICE_ASSISTS = 5  # assists in the league
+MAESTRO_ASSISTS = 3  # assists in a single week
+THE_WALL_CLEAN_SHEETS = 3  # team clean sheets in a single week
+BRACE_GOALS = 2  # goals in a single *match* (needs goal_events, so FA26-L2 onward)
+HAT_TRICK_GOALS = 3  # goals in a single match (also counts as a Brace)
 OWN_GOAL_AWARD_MIN = 1  # 1+ own goal in the league
+
+DEFENSIVE_POSITIONS = {"DF", "GK"}
 
 
 def _avatar_initials(name: str) -> str:
@@ -609,54 +627,102 @@ def _personal_best_week(rows: pd.DataFrame) -> dict | None:
     }
 
 
-def _play_style_tag(goals: int, assists: int, weeks_attended: int, weeks_played: int) -> str:
+def _play_style_tag(goals: int, assists: int, primary_position: str | None) -> str:
     """One positive play-style tag — see the thresholds above for the rules."""
-    if goals > 0 and goals >= assists + FINISHER_GOAL_MARGIN:
-        return "Finisher"
-    if assists >= 1 and assists >= goals:
-        return "Playmaker"
-    if goals >= 1 and assists >= 1 and abs(goals - assists) <= ALL_ROUNDER_MAX_DIFF:
+    if primary_position == "GK":
+        return GOALKEEPER_TAG
+    if goals + assists >= TAG_MIN_ATTACKING_POINTS:
+        if goals >= assists + FINISHER_GOAL_MARGIN:
+            return "Finisher"
+        if assists >= goals + PLAYMAKER_ASSIST_MARGIN:
+            return "Playmaker"
         return "All-Rounder"
-    if weeks_played >= IRON_MAN_MIN_WEEKS_PLAYED and weeks_attended == weeks_played:
-        return "Iron Man"
-    return "Team Player"
+    return POSITION_TAGS.get(primary_position, FALLBACK_TAG)
+
+
+def _has_crack_streak(rows: pd.DataFrame) -> bool:
+    """Two consecutive league weeks, both attended, with CRACK_POINTS+ attacking
+    points in each. A missed week in between breaks the streak."""
+    attended = rows[rows["games"] > 0]
+    points = dict(zip(attended["week"].astype(int), attended["goals"] + attended["assists"]))
+    return any(points[week] >= CRACK_POINTS and points.get(week + 1, 0) >= CRACK_POINTS for week in points)
 
 
 def _badges(
-    rows: pd.DataFrame, goals: int, assists: int, own_goals: int, weeks_attended: int, weeks_played: int
+    rows: pd.DataFrame,
+    *,
+    primary_position: str | None,
+    max_match_goals: int,
+    wall_weeks: set[tuple[int, str]],
+    champion: bool,
+    moved_teams: bool,
 ) -> list[str]:
-    """Every achievement badge a player has earned in one league (a player can have many).
+    """Every badge a player has earned in one league (a player can have many).
 
-    Badge keys are looked up for their label/description/icon in
+    Badge keys are looked up for their label/description/icon/tier in
     src/lib/players.ts (BADGES) — add a badge in both places if you add a
     new one here. "squad_member" is a guaranteed fallback, not one of the
-    "achievements": if nothing else triggered, everyone still gets a
+    achievements: if nothing else triggered, everyone still gets a
     positive badge on their card.
+
+    `rows` is the player's player_stats rows for this league — one per week
+    from the week they joined (absent weeks are rows with games = 0).
     """
-    max_week_goals = int(rows["goals"].max())
+    attended = rows[rows["games"] > 0]
+    weekly_points = attended["goals"] + attended["assists"]
+    goals, assists = int(rows["goals"].sum()), int(rows["assists"].sum())
+    own_goals = int(rows["own_goals"].sum())
 
     badges = []
+    # Common
     if goals >= 1:
-        badges.append("first_goal")
+        badges.append("off_the_mark")
     if assists >= 1:
-        badges.append("first_assist")
-    if max_week_goals >= BRACE_GOALS:
+        badges.append("provider")
+    if not attended.empty and len(attended) == len(rows):
+        badges.append("iron_man")
+    # Rare
+    if (weekly_points >= ON_FIRE_POINTS).any():
+        badges.append("on_fire")
+    if primary_position == "DF" and goals + assists >= 1:
+        badges.append("libero")
+    if primary_position in DEFENSIVE_POSITIONS and any(
+        (int(week), team_id) in wall_weeks for week, team_id in zip(attended["week"], attended["team_id"])
+    ):
+        badges.append("the_wall")
+    if champion:
+        badges.append("champion")
+    if max_match_goals >= BRACE_GOALS:
         badges.append("brace")
-    if max_week_goals >= HAT_TRICK_GOALS:
+    # Legendary
+    if ((attended["goals"] >= GAME_CHANGER_GOALS) & (attended["assists"] >= GAME_CHANGER_ASSISTS)).any():
+        badges.append("game_changer")
+    if _has_crack_streak(rows):
+        badges.append("crack")
+    if goals >= FOX_IN_THE_BOX_GOALS:
+        badges.append("fox_in_the_box")
+    if (attended["assists"] >= MAESTRO_ASSISTS).any():
+        badges.append("maestro")
+    if assists >= DELIVERY_SERVICE_ASSISTS:
+        badges.append("delivery_service")
+    if max_match_goals >= HAT_TRICK_GOALS:
         badges.append("hat_trick")
-    if weeks_played >= 1 and weeks_attended == weeks_played:
-        badges.append("perfect_attendance")
-    # A fun one, not a real "achievement" — the club tracks an own-goal
-    # award, so this celebrates it rather than hiding it.
+    # Just for fun — the club tracks an own-goal award, and a mid-league move
+    # is part of a player's story. Neither is a real "achievement".
     if own_goals >= OWN_GOAL_AWARD_MIN:
         badges.append("own_goal_award")
+    if moved_teams:
+        badges.append("journeyman")
     if not badges:
         badges.append("squad_member")
     return badges
 
+
 def _positions_for(player_id: str, positions: pd.DataFrame) -> list[str]:
     """A player's positions, primary first, skipping any that are blank.
-    ...
+
+    Positions are a property of the player (not of a league), so they come
+    straight from the players tab rather than from player_stats.
     """
     if player_id not in positions.index:
         return []
@@ -664,19 +730,82 @@ def _positions_for(player_id: str, positions: pd.DataFrame) -> list[str]:
     return [value for value in (row["primary_position"], row["secondary_position"]) if not pd.isna(value)]
 
 
-def _league_section(league: str, rows: pd.DataFrame, weeks_played: int) -> dict:
+def _wall_weeks(matches: pd.DataFrame) -> dict[str, set[tuple[int, str]]]:
+    """(week, team_id) pairs per league where the team kept THE_WALL_CLEAN_SHEETS+
+    clean sheets that week."""
+    team_rows = _team_match_rows(matches)
+    if team_rows.empty:
+        return {}
+    clean = team_rows[team_rows["goals_against"] == 0]
+    counts = clean.groupby(["league", "week", "team_id"]).size()
+    walls: dict[str, set[tuple[int, str]]] = {}
+    for (league, week, team_id), count in counts.items():
+        if count >= THE_WALL_CLEAN_SHEETS:
+            walls.setdefault(league, set()).add((int(week), team_id))
+    return walls
+
+
+def _champions(matches: pd.DataFrame, league_table: list[dict]) -> dict[str, set[str]]:
+    """Champion team_id(s) per *finished* league — every fixture has a score.
+
+    Co-champions are possible in principle (a full tie on every ranking
+    criterion shares rank 1). A league still in progress has no champion.
+    """
+    finished = {
+        league
+        for league, league_matches in matches.groupby("league")
+        if league_matches[["home_score", "away_score"]].notna().all().all()
+    }
+    champions: dict[str, set[str]] = {}
+    for row in league_table:
+        if row["league"] in finished and row["rank"] == 1:
+            champions.setdefault(row["league"], set()).add(row["team_id"])
+    return champions
+
+
+def _max_match_goals(goal_events: pd.DataFrame, player_ids: dict[str, str]) -> dict[tuple[str, str], int]:
+    """(league, player_id) -> most goals that player scored in one match.
+
+    Only goal_events has per-match detail, so this is empty for weeks that
+    were recorded as weekly totals (all of FA26-L1): Brace and Hat-trick
+    can't be awarded there. Own goals don't count.
+    """
+    events = goal_events.dropna(subset=["match_id", "scorer"]).copy()
+    if events.empty:
+        return {}
+    events = events[events["own_goal"].astype(str).str.strip().str.upper() != "Y"]
+    keys = events["match_id"].apply(_event_key)
+    events = events[keys.notna()].copy()
+    if events.empty:
+        return {}
+    events["league"] = keys[keys.notna()].apply(lambda key: key[0])
+    events["player_id"] = events["scorer"].map(player_ids)
+    per_match = events.dropna(subset=["player_id"]).groupby(["league", "player_id", "match_id"]).size()
+    return {key: int(value) for key, value in per_match.groupby(level=[0, 1]).max().items()}
+
+
+def _league_section(
+    league: str,
+    rows: pd.DataFrame,
+    weeks_played: int,
+    *,
+    primary_position: str | None,
+    max_match_goals: int,
+    wall_weeks: set[tuple[int, str]],
+    champion_teams: set[str],
+) -> dict:
     """One player's profile for a single league (stats, tag, badges)."""
     rows = rows.sort_values("week")
     goals = int(rows["goals"].sum())
     assists = int(rows["assists"].sum())
-    own_goals = int(rows["own_goals"].sum())
     weeks_attended = int((rows["games"].sum()) / GAMES_PER_WEEK)
 
     segments = _team_segments(rows)
+    current_team_id = segments[-1]["team_id"]
 
     return {
         "league": league,
-        "current_team_id": segments[-1]["team_id"],
+        "current_team_id": current_team_id,
         "team_history": segments[:-1],
         "season_totals": {
             "goals": goals,
@@ -696,12 +825,26 @@ def _league_section(league: str, rows: pd.DataFrame, weeks_played: int) -> dict:
             for _, row in rows.iterrows()
         ],
         "personal_best_week": _personal_best_week(rows),
-        "play_style_tag": _play_style_tag(goals, assists, weeks_attended, weeks_played),
-        "badges": _badges(rows, goals, assists, own_goals, weeks_attended, weeks_played),
+        "play_style_tag": _play_style_tag(goals, assists, primary_position),
+        "badges": _badges(
+            rows,
+            primary_position=primary_position,
+            max_match_goals=max_match_goals,
+            wall_weeks=wall_weeks,
+            champion=current_team_id in champion_teams,
+            moved_teams=len(segments) > 1,
+        ),
     }
 
 
-def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, league_order: list[str]) -> list[dict]:
+def build_player_profiles(
+    player_stats: pd.DataFrame,
+    players: pd.DataFrame,
+    league_order: list[str],
+    matches: pd.DataFrame,
+    league_table: list[dict],
+    goal_events: pd.DataFrame,
+) -> list[dict]:
     """One celebratory profile per player who has recorded stats in any league.
 
     A profile has one section per league the player has played in
@@ -714,6 +857,10 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, lea
     Players who haven't played a single game yet (sheet status "new", no
     rows in player_stats) don't have anything to show on a card - they'll
     get one automatically once their first week of stats is entered.
+
+    `matches` and `league_table` feed the team-based badges (The Wall,
+    Champion); `goal_events` (still name-based) feeds the per-match ones
+    (Brace, Hat-trick).
     """
     weeks_played = player_stats.groupby("league")["week"].nunique().to_dict()
     player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0, "own_goals": 0})
@@ -722,11 +869,25 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, lea
     statuses = by_id["status"].dropna()
     league_rank = {league: index for index, league in enumerate(league_order)}
 
+    wall_weeks = _wall_weeks(matches)
+    champions = _champions(matches, league_table)
+    max_match_goals = _max_match_goals(goal_events, dict(zip(players["player"], players["player_id"])))
+
     profiles = []
     for player_id, player_rows in player_stats.groupby("player_id"):
         name = by_id.at[player_id, "player"]
+        player_positions = _positions_for(player_id, positions)
+        primary_position = player_positions[0] if player_positions else None
         sections = [
-            _league_section(league, rows, int(weeks_played[league]))
+            _league_section(
+                league,
+                rows,
+                int(weeks_played[league]),
+                primary_position=primary_position,
+                max_match_goals=max_match_goals.get((league, player_id), 0),
+                wall_weeks=wall_weeks.get(league, set()),
+                champion_teams=champions.get(league, set()),
+            )
             for league, rows in player_rows.groupby("league", sort=False)
         ]
         sections.sort(key=lambda section: league_rank[section["league"]], reverse=True)
@@ -737,7 +898,7 @@ def build_player_profiles(player_stats: pd.DataFrame, players: pd.DataFrame, lea
                 "player_id": player_id,
                 "name": name,
                 "avatar_initials": _avatar_initials(name),
-                "positions": _positions_for(player_id, positions),
+                "positions": player_positions,
                 "status": statuses.get(player_id, "active"),
                 "leagues": sections,
             }
@@ -872,12 +1033,17 @@ def main() -> None:
     league_order = [league["id"] for league in leagues]
     rosters = build_rosters(player_stats, players)
 
+    league_table = build_league_table(matches, player_stats, rosters)
+
     write_json("leagues.json", leagues)
-    write_json("league_table.json", build_league_table(matches, player_stats, rosters))
+    write_json("league_table.json", league_table)
     write_json("matches.json", build_matches(matches))
     write_json("week_summaries.json", build_week_summaries(matches))
     write_json("player_leaderboard.json", build_leaderboard(player_stats, players))
-    write_json("player_profiles.json", build_player_profiles(player_stats, players, league_order))
+    write_json(
+        "player_profiles.json",
+        build_player_profiles(player_stats, players, league_order, matches, league_table, sheets["goal_events"]),
+    )
 
 
 if __name__ == "__main__":

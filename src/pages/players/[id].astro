@@ -4,7 +4,7 @@ import PlayerCard from "../../components/PlayerCard.astro";
 import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
 import playerPhotosData from "../../data/player-photos.json";
-import { BADGES, type PlayerProfile } from "../../lib/players";
+import { BADGES, BADGE_TIER_LABELS, sortBadges, type PlayerProfile } from "../../lib/players";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 
 export function getStaticPaths() {
@@ -96,13 +96,16 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 									<div class="player-detail-meta">
 										<p class="section-label">BADGES</p>
 										<div class="player-badge-list">
-											{section.badges.map((key) => (
-												<div class="player-badge-item">
+											{sortBadges(section.badges).map((key) => (
+												<div class={`player-badge-item player-badge-item--${BADGES[key].tier}`}>
 													<span class="player-badge-icon" aria-hidden="true">
 														{BADGES[key].icon}
 													</span>
 													<div>
-														<p class="player-badge-label">{BADGES[key].label}</p>
+														<p class="player-badge-label">
+															{BADGES[key].label}
+															<span class="player-badge-tier">{BADGE_TIER_LABELS[BADGES[key].tier]}</span>
+														</p>
 														<p class="player-badge-description">{BADGES[key].description}</p>
 													</div>
 												</div>

@@ -262,16 +262,17 @@ has:
   and week-by-week goals/assists.
 - A **personal best week** (most attacking points), skipped (`null`) if
   they've never had one.
-- Exactly one **play-style tag** — `Finisher` / `Playmaker` / `All-Rounder`
-  / `Iron Man` / `Team Player` — picked by threshold checks in that order
-  (first match wins). The thresholds (e.g. `FINISHER_GOAL_MARGIN`,
-  `ALL_ROUNDER_MAX_DIFF`) are named constants right above
-  `_play_style_tag` in `scripts/update_data.py` — tune them there.
-- One or more **achievement badges** (`first_goal`, `first_assist`,
-  `brace`, `hat_trick`, `perfect_attendance`, `own_goal_award`), plus a guaranteed `squad_member` fallback so **every
-  player has at least one badge**. Badge label/description/icon text lives
-  in `BADGES` in `src/lib/players.ts`, keyed by the same badge key —
-  update both files together if you add a badge.
+- Exactly one **play-style tag**: `Black Spider` for goalkeepers; with 2+
+  attacking points `Finisher` / `Playmaker` / `All-Rounder`; otherwise the
+  primary position's role — `Rock` (DF), `Engine` (MF), `Target Man` (FW).
+  Thresholds are named constants above `_play_style_tag` in
+  `scripts/update_data.py` — tune them there.
+- One or more **badges**, each with a fixed tier (common / rare / legendary
+  / special) — the full list and rules are in AGENTS.md's "Player profiles"
+  section. A guaranteed `squad_member` fallback means **every player has at
+  least one badge**. Badge label/description/icon/tier lives in `BADGES` in
+  `src/lib/players.ts`, keyed by the same badge key — update both files
+  together if you add a badge.
 - **Own goals** (`player_stats`'s `own_goals` column, blank = 0): counted
   separately from `goals` everywhere — they never add to a player's
   goals, attacking points, or leaderboard rank, only to the fun

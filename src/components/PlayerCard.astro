@@ -1,6 +1,7 @@
 ---
 import {
 	BADGES,
+	sortBadges,
 	getContrastingTextColor,
 	getReadableAccentColor,
 	type PlayerLeagueSection,
@@ -61,8 +62,12 @@ const cardStyle = `--team-color: ${teamColor}; --team-avatar-text: ${avatarTextC
 
 	<div class="player-card-badges">
 		{
-			section.badges.map((key) => (
-				<span class="player-card-badge" title={BADGES[key].label} aria-label={BADGES[key].label}>
+			sortBadges(section.badges).map((key) => (
+				<span
+					class={`player-card-badge player-card-badge--${BADGES[key].tier}`}
+					title={BADGES[key].label}
+					aria-label={BADGES[key].label}
+				>
 					{BADGES[key].icon}
 				</span>
 			))

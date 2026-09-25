@@ -360,43 +360,54 @@ section, newest first. Each section has:
   (goals + assists), or `null` if the player has never had one — there's
   nothing to spotlight in a scoreless week, so it's skipped rather than
   shown as 0-0.
-- Exactly one **play-style tag**, and one or more **achievement badges**.
+- Exactly one **play-style tag**, and one or more **badges**.
 
-**Play-style tag** — exactly one per player, checked in this order (first
-match wins), thresholds all named constants right above
-`_play_style_tag` in `scripts/update_data.py`:
+**Play-style tag** — exactly one per player, from `_play_style_tag` in
+`scripts/update_data.py` (thresholds are named constants above it):
 
-1. **Finisher** — goals lead assists by `FINISHER_GOAL_MARGIN` (2) or more.
-2. **Playmaker** — at least 1 assist, and assists ≥ goals.
-3. **All-Rounder** — has both goals and assists, within
-   `ALL_ROUNDER_MAX_DIFF` (1) of each other.
-4. **Iron Man** — attended every week so far, once at least
-   `IRON_MAN_MIN_WEEKS_PLAYED` (2) weeks have been played (so it doesn't
-   trivially apply to everyone in week 1).
-5. **Team Player** — the default for everyone else.
+1. **Black Spider** — primary position GK, always, whatever the numbers.
+2. With at least `TAG_MIN_ATTACKING_POINTS` (2) goals + assists, an
+   attacking style: **Finisher** (goals lead assists by
+   `FINISHER_GOAL_MARGIN`, 2+), **Playmaker** (assists lead goals by
+   `PLAYMAKER_ASSIST_MARGIN`, 2+), otherwise **All-Rounder**.
+3. Otherwise the role of their primary position (`POSITION_TAGS`):
+   **Rock** (DF), **Engine** (MF), **Target Man** (FW).
+4. **Team Player** — only if the players tab has no primary position yet.
 
-**Achievement badges** — a player can have any number of these; the keys
-below are what's stored in `player_profiles.json`, and their
-label/description/icon (shown on the detail page and as icons on the
-card) live in `BADGES` in [src/lib/players.ts](src/lib/players.ts) — add a
-badge in both places if you add a new one:
+**Badges** — a player can have any number; keys are what's stored in
+`player_profiles.json`, and label/description/icon/**tier** live in
+`BADGES` in [src/lib/players.ts](src/lib/players.ts) (add a badge in both
+places). Tiers are fixed per badge — never recalculated from how many
+people hold one — and pages show badges rarest-first (`sortBadges`).
+"Attended" means a week with `games > 0`; a player's rows start the week
+they joined, so late joiners aren't penalised.
 
-- `first_goal` — scored at least once in the league.
-- `first_assist` — assisted at least once in the league.
-- `brace` — 2+ goals in a single week (`BRACE_GOALS`).
-- `hat_trick` — 3+ goals in a single week (`HAT_TRICK_GOALS`, also
-  satisfies `brace`).
-- `perfect_attendance` — attended every week played so far in the league.
-- `own_goal_award` — 1+ own goal in the league (`OWN_GOAL_AWARD_MIN`). Not a
-  real "achievement" like the others — the club runs an own-goal award,
-  so this celebrates it rather than hiding it. Deliberately lighthearted
-  label/description/icon.
-- `squad_member` — guaranteed fallback: awarded only if none of the above
-  triggered, so **every player has at least one badge** per league.
+- Common: `off_the_mark` (scored in the league), `provider` (assisted),
+  `iron_man` (attended every week since joining), `squad_member`
+  (fallback when nothing else triggered, so **everyone has at least one
+  badge** per league).
+- Rare: `on_fire` (3+ goals + assists in one week), `libero` (primary DF
+  with a goal or assist), `the_wall` (primary DF/GK who attended a week
+  their team kept 3+ clean sheets), `champion` (on the rank-1 team of a
+  *finished* league — every fixture scored), `brace` (2 goals in one match).
+- Legendary: `game_changer` (2+ goals and 2+ assists in one week), `crack`
+  (2+ goals + assists in each of two consecutive attended weeks — once
+  earned it stays), `fox_in_the_box` (5+ league goals), `maestro` (3+
+  assists in one week), `delivery_service` (5+ league assists), `hat_trick`
+  (3 goals in one match).
+- Special (just for fun): `own_goal_award` (1+ own goal — the club runs an
+  own-goal award), `journeyman` (played for more than one team in the
+  league).
+
+`brace`/`hat_trick` need per-match goals, which only `goal_events` has
+(`_max_match_goals`), so they start in FA26-L2; FA26-L1 was recorded as
+weekly totals. Team-based badges (`the_wall`, `champion`) are deliberately
+few, since they mostly reflect team strength rather than the player.
 
 (There used to be `week1_starter` and `rookie` badges; they were dropped
 because teams are re-drawn every league, which made "first week"/"just
-joined" meaningless.)
+joined" meaningless. The old week-based `brace`/`hat_trick` became
+`on_fire`, and the Iron Man tag became the `iron_man` badge.)
 
 **Own goals**: `player_stats`'s `own_goals` column (blank/missing = 0,
 normalized once in `load_sheets()` so every caller can assume it exists).

@@ -2270,6 +2270,23 @@ a.player-card:hover {
 
 }
 
+/* 배지 등급: 레어는 파란 테두리, 전설은 금색 테두리 */
+
+.player-card-badge--rare,
+.player-badge-item--rare .player-badge-icon {
+
+	box-shadow: 0 0 0 2px #4a7fc1;
+
+}
+
+.player-card-badge--legendary,
+.player-badge-item--legendary .player-badge-icon {
+
+	background-color: #f6e7b8;
+	box-shadow: 0 0 0 2px #c9a227;
+
+}
+
 /* 큰 카드 (선수 상세 페이지) */
 
 .player-card--large {
@@ -2373,6 +2390,35 @@ a.player-card:hover {
 	margin: 0;
 	color: var(--color-dark);
 	font-weight: 700;
+
+}
+
+.player-badge-tier {
+
+	margin-left: 8px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background-color: var(--color-sage);
+	color: var(--color-green);
+	font-size: 0.6rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	vertical-align: middle;
+
+}
+
+.player-badge-item--rare .player-badge-tier {
+
+	background-color: #dbe7f5;
+	color: #2f5f99;
+
+}
+
+.player-badge-item--legendary .player-badge-tier {
+
+	background-color: #f6e7b8;
+	color: #7a5f0e;
 
 }
 
