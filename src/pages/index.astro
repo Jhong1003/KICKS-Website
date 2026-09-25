@@ -5,6 +5,7 @@ import Header from "../components/Header.astro";
 import StandingsTable from "../components/StandingsTable.astro";
 import T from "../components/T.astro";
 import TransferBanner from "../components/TransferBanner.astro";
+import WelcomePopup from "../components/WelcomePopup.astro";
 import leagueTable from "../data/league_table.json";
 import heroImage from "../assets/hero-wide.jpg";
 import scheduleData from "../data/schedule.json";
@@ -38,6 +39,7 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 	description="UIUC Korean-inspired futsal community · 리그 순위, 선수 기록, 경기 일정"
 	header="custom"
 >
+	<WelcomePopup />
 	<main>
 		{
 			showTransferBanner && (
