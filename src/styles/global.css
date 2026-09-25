@@ -2987,9 +2987,13 @@ a.player-card:hover {
 
 /* 모바일: 홈 첫 화면 문구를 로고 쪽으로 올리고, 페이지 제목 위 여백을 줄임 */
 @media (max-width: 860px) {
+	/* 화면 높이를 억지로 채우지 않아서, 사진 아래 밑줄·지역 문구가 사진 바로 밑에 붙음 */
+	.hero {
+		min-height: auto;
+	}
 	.hero > .hero-content {
 		margin: 0;
-		padding: 40px 0 32px;
+		padding: 40px 0 24px;
 	}
 }
 
