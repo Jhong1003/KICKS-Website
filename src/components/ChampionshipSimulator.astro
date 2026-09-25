@@ -22,7 +22,7 @@ const orderedIds = [...new Set([
 const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => team.team_id === id));
 ---
 <section id="title-race" class="content-section championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
-	<h2 id="simulator-title">TITLE RACE</h2>
+	<h2 id="simulator-title"><T en="TITLE RACE" ko="우승 경쟁" /></h2>
 	{error ? <p role="alert"><T en="Couldn't calculate: " ko="계산할 수 없습니다: " />{error}</p> : model && <>
 		<div class="title-race-results" data-simulator-results>
 			{orderedTeams.map((team) => <div class="simulator-team" data-team-id={team.team_id}>

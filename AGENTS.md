@@ -573,14 +573,14 @@ re-renders anything. Pieces:
   `window.kicksSetLang` (used by the header's EN | 한 button) and fills
   translated attributes from `data-i18n-attrs`. No JavaScript = English.
 
-**Stays English in both languages, on purpose**: the nav menu, hero slogan
-and brand labels, h1/h2 headings and ALL-CAPS section labels, badge and
+**Stays English in both languages, on purpose**: the hero slogan and brand
+labels (logo, "KOREAN FUTSAL CLUB · UIUC", hero footer), badge and
 play-style tag names (except Brace → 멀티골), and hand-edited JSON content
 (partner names, video titles). The transfer banner has `heading` (Korean)
 and `heading_en` in transfer-news.json. Schedule titles
 are translated through an optional `title_ko` on each schedule.json entry
-(league weeks build their own title). Sentences, buttons, table labels, empty-state
-messages and badge descriptions are translated. When adding new visible
+(league weeks build their own title). The nav menu, headings, section labels, sentences, buttons,
+table labels, empty-state messages and badge descriptions are translated. When adding new visible
 text, add both versions.
 
 ### Design

@@ -24,8 +24,8 @@ const playerPhotos = playerPhotosData as Record<string, string>;
 >
 	<main>
 		<section class="content-section" aria-labelledby="players-title">
-			<p class="section-label">{league.id} ROSTER</p>
-			<h1 id="players-title">Players</h1>
+			<p class="section-label"><T en={`${league.id} ROSTER`} ko={`${league.id} 선수단`} /></p>
+			<h1 id="players-title"><T en="Players" ko="선수" /></h1>
 			<T
 				as="p"
 				class="about-description"

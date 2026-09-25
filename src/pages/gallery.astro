@@ -1,13 +1,14 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PhotoGallery from "../components/PhotoGallery.astro";
+import T from "../components/T.astro";
 ---
 
 <BaseLayout title="Gallery | KICKS" description="Photos from KICKS matches and events.">
 	<main>
 		<section class="content-section" aria-labelledby="gallery-title">
-			<p class="section-label">GALLERY</p>
-			<h1 id="gallery-title">Moments from the pitch.</h1>
+			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>
+			<h1 id="gallery-title"><T en="Moments from the pitch." ko="필드 위의 순간들" /></h1>
 			<PhotoGallery />
 		</section>
 	</main>

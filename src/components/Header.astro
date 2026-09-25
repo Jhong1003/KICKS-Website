@@ -1,4 +1,6 @@
 ---
+import T from "./T.astro";
+
 interface Props {
 	variant?: "hero" | "default";
 }
@@ -6,14 +8,14 @@ interface Props {
 const { variant = "default" } = Astro.props;
 
 const navLinks = [
-	{ href: "/about", label: "About" },
-	{ href: "/league", label: "League" },
-	{ href: "/players", label: "Players" },
-	{ href: "/schedule", label: "Schedule" },
-	{ href: "/gallery", label: "Gallery" },
-	{ href: "/full-matches", label: "Full Matches", locked: true },
-	{ href: "/partners", label: "Partners" },
-	{ href: "/join", label: "Join", cta: true },
+	{ href: "/about", label: "About", labelKo: "소개" },
+	{ href: "/league", label: "League", labelKo: "리그" },
+	{ href: "/players", label: "Players", labelKo: "선수" },
+	{ href: "/schedule", label: "Schedule", labelKo: "일정" },
+	{ href: "/gallery", label: "Gallery", labelKo: "갤러리" },
+	{ href: "/full-matches", label: "Full Matches", labelKo: "풀영상", locked: true },
+	{ href: "/partners", label: "Partners", labelKo: "파트너" },
+	{ href: "/join", label: "Join", labelKo: "가입하기", cta: true },
 ];
 
 const currentPath = Astro.url.pathname;
@@ -32,7 +34,7 @@ const currentPath = Astro.url.pathname;
 						class={link.cta ? "nav-cta" : undefined}
 						aria-current={currentPath === link.href || currentPath.startsWith(`${link.href}/`) ? "page" : undefined}
 					>
-					{link.label}
+					<T en={link.label} ko={link.labelKo} />
 					{link.locked && (
 						<svg class="nav-lock-icon" viewBox="0 0 16 16" aria-hidden="true">
 							<path
@@ -52,7 +54,7 @@ const currentPath = Astro.url.pathname;
 		<span class="lang-toggle-option" data-lang-option="ko">한</span>
 	</button>
 
-	<span class="season-label">FA26 SEASON</span>
+	<span class="season-label"><T en="FA26 SEASON" ko="FA26 시즌" /></span>
 
 	<button
 		class="nav-toggle"

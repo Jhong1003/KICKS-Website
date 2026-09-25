@@ -50,7 +50,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 								</a>
 							)}
 							<p class="section-label">
-								{isLatest ? section.league : `PREVIOUS LEAGUE`} · {teamName}
+								{isLatest ? section.league : <T en="PREVIOUS LEAGUE" ko="이전 리그" />} · {teamName}
 							</p>
 							{isLatest ? (
 								<h1 id="player-detail-title">{player.name}</h1>
@@ -79,7 +79,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 								<div class="about-intro-text">
 									{section.team_history.length > 0 && (
 										<div class="player-detail-meta">
-											<p class="section-label">TEAM HISTORY</p>
+											<p class="section-label"><T en="TEAM HISTORY" ko="이전 소속 팀" /></p>
 											<T
 												as="p"
 												class="about-description"
@@ -91,7 +91,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 
 									{section.personal_best_week && (
 										<div class="player-detail-meta">
-											<p class="section-label">PERSONAL BEST WEEK</p>
+											<p class="section-label"><T en="PERSONAL BEST WEEK" ko="개인 최고 기록 주간" /></p>
 											<T
 												as="p"
 												class="about-description"
@@ -102,7 +102,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 									)}
 
 									<div class="player-detail-meta">
-										<p class="section-label">BADGES</p>
+										<p class="section-label"><T en="BADGES" ko="배지" /></p>
 										<div class="player-badge-list">
 											{sortBadges(section.badges).map((key) => (
 												<div class={`player-badge-item player-badge-item--${BADGES[key].tier}`}>
@@ -135,7 +135,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 						</section>
 
 						<section class="content-section" aria-labelledby={`player-chart-title-${section.league}`}>
-							<h2 id={`player-chart-title-${section.league}`}>Week by Week</h2>
+							<h2 id={`player-chart-title-${section.league}`}><T en="Week by Week" ko="주차별 기록" /></h2>
 							<WeeklyStatsChart weeklyStats={section.weekly_stats} />
 						</section>
 					</>

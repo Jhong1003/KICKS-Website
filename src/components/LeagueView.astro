@@ -82,7 +82,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 <main data-league-view>
 	<section class="content-section" aria-labelledby="league-title">
 		<p class="section-label">{league.id}</p>
-		<h1 id="league-title">Standings & Results</h1>
+		<h1 id="league-title"><T en="Standings & Results" ko="순위 & 경기 결과" /></h1>
 
 		{
 			leagues.length > 1 && (
@@ -105,14 +105,14 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			)
 		}
 		<nav class="league-subnav" aria-label="League sections">
-			<a id="overview-tab" href="#overview" data-league-tab="overview">OVERVIEW</a>
-			<a id="player-stats-tab" href="#player-stats" data-league-tab="player-stats">PLAYER STATS</a>
+			<a id="overview-tab" href="#overview" data-league-tab="overview"><T en="OVERVIEW" ko="개요" /></a>
+			<a id="player-stats-tab" href="#player-stats" data-league-tab="player-stats"><T en="PLAYER STATS" ko="선수 기록" /></a>
 		</nav>
 	</section>
 
 	<div id="overview" data-league-panel>
 	<section class="content-section" aria-labelledby="standings-title">
-		<h2 id="standings-title">League Table</h2>
+		<h2 id="standings-title"><T en="League Table" ko="순위표" /></h2>
 		{
 			standings.length > 0 ? (
 				<StandingsTable rows={standings} />
@@ -128,7 +128,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 	</section>
 
 	<section class="content-section" id="results" aria-labelledby="results-title">
-		<h2 id="results-title">Match Results</h2>
+		<h2 id="results-title"><T en="Match Results" ko="경기 결과" /></h2>
 		{
 			weeks.length > 0 ? (
 				<WeeklyResults weeks={weeks} defaultWeek={defaultWeek} />
@@ -148,7 +148,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 	</div>
 	<div id="player-stats" data-league-panel>
 	<section class="content-section" aria-labelledby="player-stats-title">
-		<h2 id="player-stats-title">Player Stats</h2>
+		<h2 id="player-stats-title"><T en="Player Stats" ko="선수 기록" /></h2>
 		{
 			leaderboard.length > 0 ? (
 				<>
