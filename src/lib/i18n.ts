@@ -9,8 +9,8 @@
 // What stays English in both modes, on purpose: the nav menu, the hero
 // slogan and brand labels, h1/h2 headings and ALL-CAPS section labels,
 // badge and play-style tag names (except Brace, shown as 멀티골 in Korean).
-// Content that comes from hand-edited JSON (schedule event titles other than
-// league weeks, partner names, video titles) is shown as written.
+// Content that comes from hand-edited JSON (partner names, video titles) is
+// shown as written; schedule events can carry an optional Korean `title_ko`.
 
 export type Lang = "en" | "ko";
 

@@ -3,14 +3,14 @@
   { "date": "2026-09-13", "title": "FA26-L1 · Week 2", "type": "league", "league": "FA26-L1", "week": 2 },
   { "date": "2026-09-20", "title": "FA26-L1 · Week 3", "type": "league", "league": "FA26-L1", "week": 3 },
   { "date": "2026-09-27", "title": "FA26-L1 · Week 4", "type": "league", "league": "FA26-L1", "week": 4 },
-  { "date": "2026-10-04", "title": "11 vs 11 Event", "type": "event" },
+  { "date": "2026-10-04", "title": "11 vs 11 Event", "title_ko": "11 대 11 이벤트", "type": "event" },
   { "date": "2026-10-11", "title": "FA26-L2 · Week 1", "type": "league", "league": "FA26-L2", "week": 1 },
   { "date": "2026-10-18", "title": "FA26-L2 · Week 2", "type": "league", "league": "FA26-L2", "week": 2 },
   { "date": "2026-10-25", "title": "FA26-L2 · Week 3", "type": "league", "league": "FA26-L2", "week": 3 },
   { "date": "2026-11-01", "title": "FA26-L2 · Week 4", "type": "league", "league": "FA26-L2", "week": 4 },
-  { "date": "2026-11-08", "title": "KICKS Sports Day", "type": "event", "tbd": true },
-  { "date": "2026-11-15", "title": "Final Futsal of the Season", "type": "event" },
-  { "date": null, "title": "Friendly Match vs International Team", "type": "friendly" },
-  { "date": null, "title": "Friendly Match vs International Team", "type": "friendly" },
-  { "date": "2026-12-06", "title": "Awards Ceremony & End-of-Semester Dinner", "type": "ceremony" }
+  { "date": "2026-11-08", "title": "KICKS Sports Day", "title_ko": "KICKS 체육대회", "type": "event", "tbd": true },
+  { "date": "2026-11-15", "title": "Final Futsal of the Season", "title_ko": "시즌 마지막 풋살", "type": "event" },
+  { "date": null, "title": "Friendly Match vs International Team", "title_ko": "유학생 팀과의 친선경기", "type": "friendly" },
+  { "date": null, "title": "Friendly Match vs International Team", "title_ko": "유학생 팀과의 친선경기", "type": "friendly" },
+  { "date": "2026-12-06", "title": "Awards Ceremony & End-of-Semester Dinner", "title_ko": "시상식 & 종강 회식", "type": "ceremony" }
 ]

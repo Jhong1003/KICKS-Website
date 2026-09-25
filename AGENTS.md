@@ -576,8 +576,9 @@ re-renders anything. Pieces:
 **Stays English in both languages, on purpose**: the nav menu, hero slogan
 and brand labels, h1/h2 headings and ALL-CAPS section labels, badge and
 play-style tag names (except Brace → 멀티골), and hand-edited JSON content
-(schedule titles other than league weeks, partner names, video titles,
-transfer banner heading). Sentences, buttons, table labels, empty-state
+(partner names, video titles, transfer banner heading). Schedule titles
+are translated through an optional `title_ko` on each schedule.json entry
+(league weeks build their own title). Sentences, buttons, table labels, empty-state
 messages and badge descriptions are translated. When adding new visible
 text, add both versions.
 

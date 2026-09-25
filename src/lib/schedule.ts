@@ -10,6 +10,8 @@ export type ScheduleEventType = "league" | "event" | "friendly" | "ceremony";
 export interface ScheduleEvent {
 	date: string | null;
 	title: string;
+	/** Optional Korean title; falls back to `title` when missing. */
+	title_ko?: string;
 	type: ScheduleEventType;
 	/** For `league` entries: which league (e.g. "FA26-L1") and the week within it. */
 	league?: string;
@@ -57,13 +59,14 @@ export const TYPE_LABELS_KO: Record<ScheduleEventType, string> = {
 /**
  * An event's display title. League weeks are built from their league and
  * week ("FA26-L1 · Week 4" / "FA26-L1 · 4주차") so they read naturally in
- * both languages; every other event shows its schedule.json title as written.
+ * both languages; every other event uses its schedule.json `title`, or
+ * `title_ko` in Korean when one is given.
  */
 export function eventTitle(event: ScheduleEvent, lang: Lang): string {
 	if (event.type === "league" && event.league && event.week) {
 		return `${event.league} · ${weekLabel(event.week, lang)}`;
 	}
-	return event.title;
+	return lang === "ko" && event.title_ko ? event.title_ko : event.title;
 }
 
 const MONTH_NAMES = [
