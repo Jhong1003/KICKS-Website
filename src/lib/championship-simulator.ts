@@ -162,3 +162,43 @@ export async function simulate(
 	progress(1);
 	return { credits, trials: count, exact };
 }
+
+export type TitleStatus = "clinched" | "eliminated" | "open";
+
+/**
+ * Settled by points alone, with no randomness: "eliminated" if the team can't
+ * reach another team's *current* points even by winning every remaining
+ * match; "clinched" if the team's current points are already beyond every
+ * other team's maximum. A possible tie on points is left "open", because
+ * the tiebreakers (participation first) can still change.
+ */
+export function titleStatus(model: SimulationModel): Record<string, TitleStatus> {
+	const rules = model.league.rules;
+	const winPoints = (week: number) => (week >= rules.final_week ? rules.final_win_points : rules.win_points);
+	const maxPoints = Object.fromEntries(model.base.map((row) => [row.team_id, row.points]));
+	for (const match of model.remaining) {
+		maxPoints[match.home] += winPoints(match.week);
+		maxPoints[match.away] += winPoints(match.week);
+	}
+	return Object.fromEntries(model.base.map((row) => {
+		const others = model.base.filter((other) => other.team_id !== row.team_id);
+		if (others.some((other) => other.points > maxPoints[row.team_id])) return [row.team_id, "eliminated"];
+		if (others.every((other) => maxPoints[other.team_id] < row.points)) return [row.team_id, "clinched"];
+		return [row.team_id, "open"];
+	}));
+}
+
+/**
+ * The Title Race cell text. Settled teams get a word instead of a number;
+ * otherwise tiny or near-certain simulated shares are shown as "<0.1%" /
+ * ">99.9%", so a 10,000-run 0.0% (or 100.0%) is never mistaken for a
+ * mathematical certainty.
+ */
+export function formatTitleChance(percentage: number, status: TitleStatus): { en: string; ko: string } {
+	if (status === "clinched") return { en: "Clinched", ko: "우승 확정" };
+	if (status === "eliminated") return { en: "Eliminated", ko: "탈락" };
+	if (percentage < 0.1) return { en: "<0.1%", ko: "<0.1%" };
+	if (percentage > 99.9) return { en: ">99.9%", ko: ">99.9%" };
+	const text = `${percentage.toFixed(1)}%`;
+	return { en: text, ko: text };
+}

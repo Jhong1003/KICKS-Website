@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { rankTeams, championshipCredits } from '../src/lib/standings.ts';
-import { buildSimulationModel, matchPoints, poisson, simulate } from '../src/lib/championship-simulator.ts';
+import { buildSimulationModel, formatTitleChance, matchPoints, poisson, simulate, titleStatus } from '../src/lib/championship-simulator.ts';
 const read = path => JSON.parse(fs.readFileSync(new URL(path, import.meta.url), 'utf8'));
 const rules = read('../src/data/league-config.json')._default;
 const league = { id: 'A', rules, teams: ['T1','T2','T3'].map(team_id => ({team_id, name:team_id})) };
@@ -101,4 +101,28 @@ test('checked-in data totals match simulator base without double counting', () =
 test('one random trial is still an estimate, not an exact scenario', async () => {
  const model=buildSimulationModel(league,[match()],standings);
  assert.equal((await simulate(model,{},1,rng())).exact,false);
+});
+test('title status: eliminated, clinched and open by points alone', () => {
+ const played = [];
+ // Weeks 1-3: T1 beats T2 and T3 in all 18 of its matches; T2-T3 all draws.
+ for (let week = 1; week <= 3; week++) for (let i = 0; i < 3; i++) {
+  played.push(match({match_id:`${week}-12-${i}`, week, home_team_id:'T1', away_team_id:'T2', home_score:1, away_score:0}));
+  played.push(match({match_id:`${week}-13-${i}`, week, home_team_id:'T1', away_team_id:'T3', home_score:1, away_score:0}));
+  played.push(match({match_id:`${week}-23-${i}`, week, home_team_id:'T2', away_team_id:'T3', home_score:0, away_score:0}));
+ }
+ // T1 36 pts, T2 and T3 9 pts, week 4 (6 matches each, 3 pts a win) still to play.
+ const model = buildSimulationModel(league, played, standings);
+ const status = titleStatus(model);
+ assert.equal(status.T1, 'clinched');
+ assert.equal(status.T2, 'eliminated');
+ assert.equal(status.T3, 'eliminated');
+ const early = titleStatus(buildSimulationModel(league, [match()], standings));
+ assert.deepEqual(early, {T1:'open', T2:'open', T3:'open'});
+});
+test('title chance labels never show a bare 0.0% or 100.0%', () => {
+ assert.equal(formatTitleChance(0, 'open').en, '<0.1%');
+ assert.equal(formatTitleChance(100, 'open').en, '>99.9%');
+ assert.equal(formatTitleChance(37.25, 'open').en, '37.3%');
+ assert.equal(formatTitleChance(0, 'eliminated').ko, '탈락');
+ assert.equal(formatTitleChance(100, 'clinched').en, 'Clinched');
 });

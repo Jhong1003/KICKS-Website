@@ -41,7 +41,7 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 </section>
 
 <script>
-	import { simulate, type SimulationModel } from "../lib/championship-simulator";
+	import { formatTitleChance, simulate, titleStatus, type SimulationModel } from "../lib/championship-simulator";
 	import { bilingualHtml } from "../lib/i18n";
 	for (const root of document.querySelectorAll<HTMLElement>(".championship-simulator[data-model]")) {
 		const model = JSON.parse(root.dataset.model!) as SimulationModel;
@@ -51,9 +51,15 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 			root.setAttribute("aria-busy", "true");
 			try {
 				const result = await simulate(model, {}, 10000);
+				const statuses = titleStatus(model);
 				for (const row of root.querySelectorAll<HTMLElement>("[data-team-id]")) {
-					const percentage = result.credits[row.dataset.teamId!] * 100;
-					row.querySelector<HTMLElement>("[data-credit]")!.textContent = `${percentage.toFixed(1)}%`;
+					const teamId = row.dataset.teamId!;
+					const status = statuses[teamId];
+					// A settled team's bar is exactly full/empty; otherwise the simulated share.
+					const percentage = status === "clinched" ? 100 : status === "eliminated" ? 0 : result.credits[teamId] * 100;
+					const label = formatTitleChance(result.credits[teamId] * 100, status);
+					row.querySelector<HTMLElement>("[data-credit]")!.innerHTML = bilingualHtml(label.en, label.ko);
+					row.dataset.status = status;
 					const meter = row.querySelector<HTMLMeterElement>("meter")!;
 					meter.value = percentage;
 					meter.hidden = false;
@@ -84,9 +90,10 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 
 <style>
 	.title-race-results { max-width: 700px; margin-top: 1.75rem; }
-	.simulator-team { display: grid; grid-template-columns: minmax(0, 1.2fr) 4.5rem minmax(60px, 1fr); align-items: center; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--color-sage); }
+	.simulator-team { display: grid; grid-template-columns: minmax(0, 1.2fr) 6rem minmax(60px, 1fr); align-items: center; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--color-sage); }
 	.simulator-team strong { font-weight: 600; white-space: nowrap; }
-	[data-credit] { text-align: right; font-variant-numeric: tabular-nums; }
+	[data-credit] { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+	.simulator-team[data-status="eliminated"] { opacity: .55; }
 	meter { display: block; width: 100%; height: .6rem; border: 0; background: var(--color-sage); border-radius: 0; }
 	meter[hidden] { visibility: hidden; display: block; }
 	meter::-webkit-meter-bar { background: var(--color-sage); border: 0; border-radius: 0; }
@@ -96,5 +103,5 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 	.title-race-model { font-size: .75rem; margin: -.4rem 0 0; opacity: .6; }
 	.title-race-status { font-size: .85rem; }
 	.title-race-status:empty { display: none; }
-	@media (max-width: 480px) { .simulator-team { gap: .6rem; grid-template-columns: minmax(0, 1fr) 4rem minmax(50px, .7fr); font-size: .9rem; } }
+	@media (max-width: 480px) { .simulator-team { gap: .6rem; grid-template-columns: minmax(0, 1fr) 5.5rem minmax(50px, .7fr); font-size: .9rem; } }
 </style>

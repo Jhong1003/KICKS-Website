@@ -673,6 +673,15 @@ tied teams' presentation order; only percentages and bars change. Teams
 without standings rows are appended in league team order. TITLE RACE is the
 primary heading, with no subtitle or interactive controls.
 
+Each team's figure goes through `titleStatus` / `formatTitleChance` in
+`src/lib/championship-simulator.ts`: a team that can't reach another team's
+current points even by winning every remaining match shows **Eliminated /
+탈락**, a team whose points no one else can reach shows **Clinched / 우승
+확정** (both decided by points alone, no randomness; a possible points tie
+stays open because the tiebreakers can still change). Otherwise the
+simulated share is shown, with anything under 0.1% as "<0.1%" and over 99.9%
+as ">99.9%", so 10,000 runs never display a misleading 0.0% or 100.0%.
+
 The site shows a read-only result, a simulations / remaining matches line,
 and "Equal team strength · Poisson model". Scenario inputs, Run/Reset and
 How it works are removed from the UI; unused UI event handlers and styles
