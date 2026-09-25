@@ -41,7 +41,12 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 	<main>
 		{
 			showTransferBanner && (
-				<TransferBanner heading={transferNews.heading} transfers={resolvedTransfers} league={latestLeague} />
+				<TransferBanner
+					heading={transferNews.heading}
+					headingEn={transferNews.heading_en}
+					transfers={resolvedTransfers}
+					league={latestLeague}
+				/>
 			)
 		}
 

@@ -1,21 +1,25 @@
 ---
+import T from "./T.astro";
 import { getReadableAccentColor, type ResolvedTransfer } from "../lib/players";
 import { getTeamColor, getTeamName, type League } from "../lib/leagues";
 
 interface Props {
+	/** Korean label (transfer-news.json "heading"). */
 	heading: string;
+	/** English label ("heading_en"); falls back to `heading` when missing. */
+	headingEn?: string;
 	transfers: ResolvedTransfer[];
 	league: League;
 }
 
-const { heading, transfers, league } = Astro.props;
+const { heading, headingEn, transfers, league } = Astro.props;
 
 const teamTextColor = (teamId: string) => getReadableAccentColor(getTeamColor(teamId, league));
 ---
 
 <div class="transfer-banner" id="transfer-banner">
 	<div class="transfer-banner-inner">
-		<span class="transfer-banner-label">{heading}</span>
+		<span class="transfer-banner-label"><T en={headingEn ?? heading} ko={heading} /></span>
 		<div class="transfer-banner-list">
 			{
 				transfers.map((transfer) => (
