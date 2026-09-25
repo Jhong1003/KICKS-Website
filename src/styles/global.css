@@ -2163,7 +2163,31 @@ a.schedule-item-link:hover {
 
 /* 선수 목록: 팀별 / 포지션별 묶음 제목 */
 
-.player-group + .player-group {
+.player-subfilter {
+
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 12px;
+
+}
+
+.player-team-button {
+
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+
+}
+
+/* 팀 하나만 골랐을 때 숨겨진 묶음 뒤에 남는 여백이 생기지 않게 */
+.player-group[hidden] {
+
+	display: none;
+
+}
+
+.player-group:not([hidden]) ~ .player-group:not([hidden]) {
 
 	margin-top: 44px;
 

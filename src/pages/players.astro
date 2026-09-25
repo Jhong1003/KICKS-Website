@@ -29,11 +29,12 @@ interface PlayerGroup {
 	players: PlayerInLeague[];
 }
 
+// Front to back, like a team sheet.
 const POSITION_GROUPS = [
-	{ key: "GK", en: "Goalkeepers", ko: "골키퍼" },
-	{ key: "DF", en: "Defenders", ko: "수비수" },
-	{ key: "MF", en: "Midfielders", ko: "미드필더" },
 	{ key: "FW", en: "Forwards", ko: "공격수" },
+	{ key: "MF", en: "Midfielders", ko: "미드필더" },
+	{ key: "DF", en: "Defenders", ko: "수비수" },
+	{ key: "GK", en: "Goalkeepers", ko: "골키퍼" },
 ];
 
 const primaryPosition = (entry: PlayerInLeague) => entry.player.positions[0] ?? null;
@@ -101,8 +102,26 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 			{
 				views.map((view) => (
 					<div class="player-view" data-view={view.key} hidden={view.key !== "name"}>
+						{view.key === "team" && (
+							<div class="player-subfilter" role="group" aria-label="Choose a team">
+								<button class="player-sort-button" type="button" data-team-filter="all" aria-pressed="true">
+									<T en="All teams" ko="전체" />
+								</button>
+								{view.groups.map((group) => (
+									<button
+										class="player-sort-button player-team-button"
+										type="button"
+										data-team-filter={group.key}
+										aria-pressed="false"
+									>
+										<span class="player-group-dot" style={`background-color: ${group.color}`} />
+										{group.en}
+									</button>
+								))}
+							</div>
+						)}
 						{view.groups.map((group) => (
-							<div class="player-group">
+							<div class="player-group" data-group={group.key}>
 								{group.en && (
 									<h3 class="player-group-title">
 										{group.color && <span class="player-group-dot" style={`background-color: ${group.color}`} />}
@@ -143,6 +162,21 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 			buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
 			views.forEach((view) => {
 				view.hidden = view.dataset.view !== selected;
+			});
+		});
+	});
+
+	// Team view: "All teams" shows every team under its own heading; a team
+	// button shows just that team's players.
+	const teamButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-team-filter]"));
+	const teamGroups = Array.from(document.querySelectorAll<HTMLElement>('[data-view="team"] [data-group]'));
+
+	teamButtons.forEach((button) => {
+		button.addEventListener("click", () => {
+			const team = button.dataset.teamFilter;
+			teamButtons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+			teamGroups.forEach((group) => {
+				group.hidden = team !== "all" && group.dataset.group !== team;
 			});
 		});
 	});
