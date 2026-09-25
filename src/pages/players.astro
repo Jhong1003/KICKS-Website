@@ -4,6 +4,7 @@ import PlayerCard from "../components/PlayerCard.astro";
 import T from "../components/T.astro";
 import profilesData from "../data/player_profiles.json";
 import playerPhotosData from "../data/player-photos.json";
+import leagueTable from "../data/league_table.json";
 import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from "../lib/players";
 import { latestLeague, getTeamColor, getTeamName } from "../lib/leagues";
 
@@ -39,11 +40,20 @@ const POSITION_GROUPS = [
 
 const primaryPosition = (entry: PlayerInLeague) => entry.player.positions[0] ?? null;
 
+// Teams in current standings order (league leader first). The generated
+// table is already in official order, ties included; a league with no
+// results yet keeps its teams-tab order.
+const standingsOrder = leagueTable.filter((row) => row.league === league.id).map((row) => row.team_id);
+const teamsByStanding = [...league.teams].sort((a, b) => {
+	const rank = (id: string) => (standingsOrder.includes(id) ? standingsOrder.indexOf(id) : standingsOrder.length);
+	return rank(a.team_id) - rank(b.team_id);
+});
+
 const views: { key: string; groups: PlayerGroup[] }[] = [
 	{ key: "name", groups: [{ key: "all", players }] },
 	{
 		key: "team",
-		groups: league.teams
+		groups: teamsByStanding
 			.map((team) => ({
 				key: team.team_id,
 				en: team.name,
@@ -163,7 +173,7 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 		});
 	});
 
-	// Team view: one team at a time (the first team is selected to start).
+	// Team view: one team at a time, starting with the league leader.
 	const teamButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-team-filter]"));
 	const teamGroups = Array.from(document.querySelectorAll<HTMLElement>('[data-view="team"] [data-group]'));
 
