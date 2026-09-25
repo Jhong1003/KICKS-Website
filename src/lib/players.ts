@@ -130,8 +130,8 @@ const TIER_ORDER: BadgeTier[] = ["legendary", "rare", "common", "special"];
 
 export const BADGES: Record<BadgeKey, { label: string; description: string; icon: string; tier: BadgeTier }> = {
 	// Common
-	off_the_mark: { label: "Off the Mark", description: "Scored in this league.", icon: "⚽", tier: "common" },
-	provider: { label: "Provider", description: "Set up a teammate's goal in this league.", icon: "🎯", tier: "common" },
+	off_the_mark: { label: "Goal!", description: "Scored in this league.", icon: "⚽", tier: "common" },
+	provider: { label: "Assist!", description: "Set up a teammate's goal in this league.", icon: "🎯", tier: "common" },
 	iron_man: {
 		label: "Iron Man",
 		description: "Hasn't missed a week since joining this league.",
