@@ -104,15 +104,12 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 					<div class="player-view" data-view={view.key} hidden={view.key !== "name"}>
 						{view.key === "team" && (
 							<div class="player-subfilter" role="group" aria-label="Choose a team">
-								<button class="player-sort-button" type="button" data-team-filter="all" aria-pressed="true">
-									<T en="All teams" ko="전체" />
-								</button>
-								{view.groups.map((group) => (
+								{view.groups.map((group, index) => (
 									<button
 										class="player-sort-button player-team-button"
 										type="button"
 										data-team-filter={group.key}
-										aria-pressed="false"
+										aria-pressed={index === 0 ? "true" : "false"}
 									>
 										<span class="player-group-dot" style={`background-color: ${group.color}`} />
 										{group.en}
@@ -120,8 +117,8 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 								))}
 							</div>
 						)}
-						{view.groups.map((group) => (
-							<div class="player-group" data-group={group.key}>
+						{view.groups.map((group, index) => (
+							<div class="player-group" data-group={group.key} hidden={view.key === "team" && index > 0}>
 								{group.en && (
 									<h3 class="player-group-title">
 										{group.color && <span class="player-group-dot" style={`background-color: ${group.color}`} />}
@@ -166,8 +163,7 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 		});
 	});
 
-	// Team view: "All teams" shows every team under its own heading; a team
-	// button shows just that team's players.
+	// Team view: one team at a time (the first team is selected to start).
 	const teamButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-team-filter]"));
 	const teamGroups = Array.from(document.querySelectorAll<HTMLElement>('[data-view="team"] [data-group]'));
 
@@ -176,7 +172,7 @@ const views: { key: string; groups: PlayerGroup[] }[] = [
 			const team = button.dataset.teamFilter;
 			teamButtons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
 			teamGroups.forEach((group) => {
-				group.hidden = team !== "all" && group.dataset.group !== team;
+				group.hidden = group.dataset.group !== team;
 			});
 		});
 	});
