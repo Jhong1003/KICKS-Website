@@ -1089,6 +1089,9 @@ h1 {
 	font-size: 0.9rem;
 	line-height: 1.6;
 
+	/* 영어 설명의 \n 줄바꿈을 그대로 보여줌 (join.astro) */
+	white-space: pre-line;
+
 }
 
 .cta-card .button-primary {
