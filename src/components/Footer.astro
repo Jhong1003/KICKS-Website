@@ -15,5 +15,25 @@ import T from "./T.astro";
 		<span><T en="KakaoTalk" ko="카카오톡" />: ghd991003</span>
 	</div>
 
-	<p class="site-footer-copyright">© {new Date().getFullYear()} KICKS. All rights reserved.</p>
+	<div class="site-footer-copyright">
+		<span>© {new Date().getFullYear()} KICKS. All rights reserved.</span>
+		<span id="daily-visits" hidden>
+			<T>
+				<Fragment slot="en"><span class="visits-heading">TODAY</span><br />👀 <span data-visit-count></span> visitors</Fragment>
+				<Fragment slot="ko">👀 오늘 방문자 · <span data-visit-count></span></Fragment>
+			</T>
+		</span>
+	</div>
 </footer>
+
+<script>
+	import { startVisitCounter } from "../lib/visit-counter";
+	const counter = document.getElementById("daily-visits");
+	if (counter) startVisitCounter(counter);
+</script>
+
+<style>
+	.site-footer-copyright { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; }
+	#daily-visits { white-space: nowrap; }
+	.visits-heading { font-size: 0.65rem; letter-spacing: 0.08em; }
+</style>

@@ -1,0 +1,23 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "kicks-website",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-07-01",
+  "workers_dev": true,
+  "preview_urls": true,
+  "keep_vars": true,
+  // Custom domains remain managed in the Dashboard. Do not add route/routes here.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/visits"]
+  },
+  "d1_databases": [
+    {
+      "binding": "VISITS_DB",
+      "database_name": "kicks-visits",
+      "database_id": "bc3cc827-6e9c-43b1-a092-f40636eded48",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
