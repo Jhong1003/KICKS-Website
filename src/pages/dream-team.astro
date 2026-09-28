@@ -1,0 +1,413 @@
+---
+// Dream Team: drag KICKS players from the list onto the pitch and place them
+// anywhere — where you drop them is your formation (up to 11).
+//
+// Mouse/pen: drag straight away. Touch: press and hold briefly, then drag
+// (so a normal swipe still scrolls the page). Tap-to-place also works: tap a
+// name to pick it up, then tap the pitch. Drag a player off the pitch (or tap
+// "Remove") to take them off.
+//
+// Three squads (1, 2, 3), each kept only in this browser (localStorage, best
+// effort) so a refresh doesn't lose them. Nothing is sent anywhere. Linked from the Players
+// page, not the main menu.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import T from "../components/T.astro";
+import profilesData from "../data/player_profiles.json";
+import { getLeague, getTeamColor, getTeamName } from "../lib/leagues";
+import { getContrastingTextColor, type PlayerProfile } from "../lib/players";
+
+// Every active player, with the team from the most recent league they played in.
+const players = (profilesData as PlayerProfile[])
+	.filter((player) => player.status !== "inactive" && player.leagues.length > 0)
+	.map((player) => {
+		const section = player.leagues[0];
+		const league = getLeague(section.league);
+		const color = getTeamColor(section.current_team_id, league);
+		return {
+			id: player.id,
+			name: player.name,
+			initials: player.avatar_initials,
+			positions: player.positions,
+			team: getTeamName(section.current_team_id, league),
+			color,
+			textColor: getContrastingTextColor(color),
+		};
+	})
+	.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+---
+
+<BaseLayout title="Dream Team | KICKS" description="If you were the head coach: pick your own KICKS XI — drag up to eleven players onto the pitch.">
+	<main>
+		<section class="content-section" aria-labelledby="dream-team-title">
+			<a class="back-link" href="/players"><T en="← All players" ko="← 전체 선수" /></a>
+			<p class="section-label">MY KICKS XI</p>
+			<h1 id="dream-team-title"><T en="If I Were the Head Coach" ko="내가 감독이라면" /></h1>
+			<T
+				as="p"
+				class="about-description"
+				en="Drag up to eleven KICKS players onto the pitch and place them wherever you like. On a phone, press and hold a name, then drag."
+				ko="KICKS 선수를 최대 11명까지 경기장 위 원하는 자리로 끌어다 놓으세요. 휴대폰에서는 이름을 살짝 길게 누른 뒤 끌면 돼요."
+			/>
+
+			<div class="dream-team" id="dream-team" data-players={JSON.stringify(players)}>
+				<div class="dream-pitch-col">
+					<div class="player-sort dream-squad-tabs" role="group" aria-label="Squad">
+						{
+							[1, 2, 3].map((n) => (
+								<button class="player-sort-button" type="button" data-squad={n - 1} aria-pressed={n === 1 ? "true" : "false"}>
+									<T en={`Squad ${n}`} ko={`스쿼드 ${n}`} />
+									<span class="dream-squad-count" data-squad-count={n - 1}></span>
+								</button>
+							))
+						}
+					</div>
+					<div class="dream-pitch" data-pitch aria-label="Pitch">
+						<div class="dream-pitch-lines" aria-hidden="true">
+							<span class="dream-pitch-halfway"></span>
+							<span class="dream-pitch-circle"></span>
+							<span class="dream-pitch-box dream-pitch-box--top"></span>
+							<span class="dream-pitch-box dream-pitch-box--bottom"></span>
+						</div>
+						<div class="dream-slots" data-slots></div>
+						<p class="dream-pitch-hint" data-pitch-hint>
+							<T en="Drag players here" ko="여기로 선수를 끌어 놓으세요" />
+						</p>
+					</div>
+					<div class="dream-team-actions">
+						<span class="dream-count"><span data-count>0</span> / 11</span>
+						<button class="player-sort-button" type="button" data-clear>
+							<T en="Clear" ko="모두 비우기" />
+						</button>
+					</div>
+				</div>
+
+				<div class="dream-bench">
+					<input
+						class="dream-bench-search"
+						type="search"
+						placeholder="Search by name"
+						data-i18n-attrs={JSON.stringify({ placeholder: { en: "Search by name", ko: "이름으로 찾기" } })}
+						data-search
+					/>
+					<ul class="dream-bench-list" data-bench></ul>
+				</div>
+			</div>
+		</section>
+	</main>
+</BaseLayout>
+
+<script>
+	interface Player {
+		id: string; name: string; initials: string; positions: string[];
+		team: string; color: string; textColor: string;
+	}
+	interface Placed { id: string; x: number; y: number }
+
+	const MAX = 11;
+	const SQUADS = 3;
+	const STORAGE_KEY = "kicks-dream-team-squads";
+	/** Where a single squad used to be saved, before there were three. */
+	const OLD_STORAGE_KEY = "kicks-dream-team";
+	const HOLD_MS = 220;
+
+	const root = document.getElementById("dream-team");
+	if (root) {
+		const players = JSON.parse(root.dataset.players ?? "[]") as Player[];
+		const byId = new Map(players.map((player) => [player.id, player]));
+		const pitch = root.querySelector<HTMLElement>("[data-pitch]")!;
+		const slotsEl = root.querySelector<HTMLElement>("[data-slots]")!;
+		const bench = root.querySelector<HTMLUListElement>("[data-bench]")!;
+		const search = root.querySelector<HTMLInputElement>("[data-search]")!;
+		const countEl = root.querySelector<HTMLElement>("[data-count]")!;
+		const hint = root.querySelector<HTMLElement>("[data-pitch-hint]")!;
+		const ko = () => document.documentElement.lang === "ko";
+
+		const clean = (list: unknown): Placed[] =>
+			Array.isArray(list) ? (list as Placed[]).filter((p) => p && byId.has(p.id)).slice(0, MAX) : [];
+
+		let squads: Placed[][] = Array.from({ length: SQUADS }, () => []);
+		let active = 0;
+		try {
+			const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null") as { active?: number; squads?: unknown[] } | null;
+			if (saved?.squads) {
+				squads = squads.map((_, i) => clean(saved.squads![i]));
+				active = Math.min(SQUADS - 1, Math.max(0, Number(saved.active) || 0));
+			} else {
+				// Carry over a squad saved by the earlier single-squad version into Squad 1.
+				squads[0] = clean(JSON.parse(localStorage.getItem(OLD_STORAGE_KEY) ?? "[]"));
+			}
+		} catch { /* Storage may be unavailable; start empty. */ }
+
+		/** The squad being edited (the same array object as squads[active]). */
+		let placed: Placed[] = squads[active];
+
+		/** Tap-to-place: the bench player picked up with a tap, waiting for a tap on the pitch. */
+		let selectedId: string | null = null;
+
+		const save = () => {
+			squads[active] = placed;
+			try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ active, squads })); } catch { /* Best effort. */ }
+		};
+		const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+		function disc(player: Player, className = "dream-slot-disc") {
+			const el = document.createElement("span");
+			el.className = className;
+			el.textContent = player.initials;
+			el.style.backgroundColor = player.color;
+			el.style.color = player.textColor;
+			return el;
+		}
+
+		function render() {
+			slotsEl.replaceChildren(
+				...placed.map((spot) => {
+					const player = byId.get(spot.id)!;
+					const el = document.createElement("div");
+					el.className = "dream-slot";
+					el.dataset.id = spot.id;
+					el.style.left = `${spot.x}%`;
+					el.style.top = `${spot.y}%`;
+					el.setAttribute("role", "img");
+					el.setAttribute("aria-label", player.name);
+					const name = document.createElement("span");
+					name.className = "dream-slot-name";
+					name.textContent = player.name;
+					el.append(disc(player), name);
+					attachDrag(el, spot.id, true);
+					return el;
+				}),
+			);
+
+			const query = search.value.trim();
+			bench.replaceChildren(
+				...players
+					.filter((player) => !query || player.name.includes(query))
+					.map((player) => {
+						const onPitch = placed.some((spot) => spot.id === player.id);
+						const item = document.createElement("li");
+						const chip = document.createElement("button");
+						chip.type = "button";
+						chip.className = "dream-chip";
+						if (onPitch) chip.classList.add("is-placed");
+						if (selectedId === player.id) chip.classList.add("is-selected");
+						const text = document.createElement("span");
+						text.className = "dream-chip-text";
+						const name = document.createElement("strong");
+						name.textContent = player.name;
+						const meta = document.createElement("span");
+						meta.textContent = player.positions.join(" · ");
+						text.append(name, meta);
+						chip.append(disc(player, "dream-slot-disc dream-chip-disc"), text);
+						if (onPitch) {
+							// A small ✕ (same width in every language); tapping the name removes them.
+							const remove = document.createElement("span");
+							remove.className = "dream-chip-remove";
+							remove.textContent = "✕";
+							chip.setAttribute("aria-label", `${player.name} — ${ko() ? "경기장에서 빼기" : "remove from pitch"}`);
+							chip.append(remove);
+						}
+						attachDrag(chip, player.id, false);
+						item.append(chip);
+						return item;
+					}),
+			);
+
+			countEl.textContent = String(placed.length);
+			squads[active] = placed;
+			root!.querySelectorAll<HTMLButtonElement>("[data-squad]").forEach((button) => {
+				const i = Number(button.dataset.squad);
+				button.setAttribute("aria-pressed", String(i === active));
+			});
+			root!.querySelectorAll<HTMLElement>("[data-squad-count]").forEach((el) => {
+				const n = squads[Number(el.dataset.squadCount)].length;
+				el.textContent = n > 0 ? ` · ${n}` : "";
+			});
+			hint.hidden = placed.length > 0;
+			pitch.classList.toggle("is-awaiting-tap", selectedId !== null);
+			save();
+		}
+
+		/** Pitch coordinates (%) for a viewport point, or null if outside the pitch. */
+		function pitchPoint(clientX: number, clientY: number) {
+			const rect = pitch.getBoundingClientRect();
+			if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return null;
+			return {
+				x: clamp(((clientX - rect.left) / rect.width) * 100, 8, 92),
+				y: clamp(((clientY - rect.top) / rect.height) * 100, 7, 93),
+			};
+		}
+
+		function place(id: string, x: number, y: number) {
+			const existing = placed.find((spot) => spot.id === id);
+			if (existing) {
+				existing.x = x;
+				existing.y = y;
+			} else if (placed.length < MAX) {
+				placed.push({ id, x, y });
+			} else {
+				flashFull();
+				return;
+			}
+			render();
+		}
+
+		function removeFromPitch(id: string) {
+			placed = placed.filter((spot) => spot.id !== id);
+			render();
+		}
+
+		function flashFull() {
+			countEl.parentElement?.classList.remove("is-full");
+			void countEl.offsetWidth;
+			countEl.parentElement?.classList.add("is-full");
+		}
+
+		// Dragging ------------------------------------------------------------
+		let dragging: { id: string; fromPitch: boolean; ghost: HTMLElement } | null = null;
+
+		// While dragging on touch, stop the page from scrolling under the finger.
+		document.addEventListener(
+			"touchmove",
+			(event) => { if (dragging) event.preventDefault(); },
+			{ passive: false },
+		);
+
+		function startDrag(id: string, fromPitch: boolean, x: number, y: number) {
+			const player = byId.get(id)!;
+			const ghost = document.createElement("div");
+			ghost.className = "dream-slot dream-ghost";
+			const name = document.createElement("span");
+			name.className = "dream-slot-name";
+			name.textContent = player.name;
+			ghost.append(disc(player), name);
+			document.body.append(ghost);
+			dragging = { id, fromPitch, ghost };
+			moveGhost(x, y);
+			document.documentElement.classList.add("dream-dragging");
+			slotsEl.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"]`)?.classList.add("is-lifted");
+		}
+
+		function moveGhost(x: number, y: number) {
+			if (!dragging) return;
+			dragging.ghost.style.left = `${x}px`;
+			dragging.ghost.style.top = `${y}px`;
+			pitch.classList.toggle("is-drop-target", pitchPoint(x, y) !== null);
+		}
+
+		function endDrag(x: number, y: number) {
+			if (!dragging) return;
+			const { id, fromPitch, ghost } = dragging;
+			ghost.remove();
+			dragging = null;
+			document.documentElement.classList.remove("dream-dragging");
+			pitch.classList.remove("is-drop-target");
+			const point = pitchPoint(x, y);
+			if (point) place(id, point.x, point.y);
+			else if (fromPitch) removeFromPitch(id);
+			else render();
+		}
+
+		function attachDrag(el: HTMLElement, id: string, fromPitch: boolean) {
+			el.addEventListener("pointerdown", (down) => {
+				if (down.button !== 0) return;
+				const startX = down.clientX;
+				const startY = down.clientY;
+				let lastX = startX;
+				let lastY = startY;
+				let started = false;
+				let cancelled = false;
+				const isTouch = down.pointerType === "touch";
+				// Mouse/pen: drag once the pointer moves a few px. Touch: hold still briefly first.
+				const holdTimer = isTouch
+					? window.setTimeout(() => {
+							if (cancelled) return;
+							started = true;
+							navigator.vibrate?.(10);
+							startDrag(id, fromPitch, lastX, lastY);
+						}, HOLD_MS)
+					: 0;
+
+				const onMove = (move: PointerEvent) => {
+					lastX = move.clientX;
+					lastY = move.clientY;
+					const moved = Math.hypot(lastX - startX, lastY - startY);
+					if (!started) {
+						if (isTouch) {
+							// Moved before the hold finished: it's a scroll, not a drag.
+							if (moved > 8) { cancelled = true; cleanup(); }
+							return;
+						}
+						if (moved < 5) return;
+						started = true;
+						startDrag(id, fromPitch, lastX, lastY);
+					}
+					moveGhost(lastX, lastY);
+				};
+				const onUp = (up: PointerEvent) => {
+					cleanup();
+					if (started) {
+						endDrag(up.clientX, up.clientY);
+					} else if (!cancelled) {
+						onTap(id, fromPitch);
+					}
+				};
+				const onCancel = () => {
+					cleanup();
+					if (started) endDrag(-1, -1);
+				};
+				function cleanup() {
+					window.clearTimeout(holdTimer);
+					window.removeEventListener("pointermove", onMove);
+					window.removeEventListener("pointerup", onUp);
+					window.removeEventListener("pointercancel", onCancel);
+				}
+				window.addEventListener("pointermove", onMove);
+				window.addEventListener("pointerup", onUp);
+				window.addEventListener("pointercancel", onCancel);
+			});
+		}
+
+		// Tapping -------------------------------------------------------------
+		function onTap(id: string, fromPitch: boolean) {
+			const onPitch = placed.some((spot) => spot.id === id);
+			if (!fromPitch && onPitch) {
+				// Tapping a bench name that's already on the pitch takes them off.
+				removeFromPitch(id);
+				return;
+			}
+			if (fromPitch) return;
+			selectedId = selectedId === id ? null : id;
+			render();
+		}
+
+		pitch.addEventListener("click", (event) => {
+			if (!selectedId || (event.target as HTMLElement).closest(".dream-slot")) return;
+			const point = pitchPoint(event.clientX, event.clientY);
+			if (!point) return;
+			const id = selectedId;
+			selectedId = null;
+			place(id, point.x, point.y);
+		});
+
+		root.querySelectorAll<HTMLButtonElement>("[data-squad]").forEach((button) => {
+			button.addEventListener("click", () => {
+				squads[active] = placed;
+				active = Number(button.dataset.squad);
+				placed = squads[active];
+				selectedId = null;
+				render();
+			});
+		});
+
+		search.addEventListener("input", render);
+		root.querySelector("[data-clear]")?.addEventListener("click", () => {
+			placed = [];
+			selectedId = null;
+			render();
+		});
+		document.addEventListener("kicks:langchange", render);
+
+		render();
+	}
+</script>
