@@ -82,6 +82,11 @@ const STAT_TEXT: Record<Stat, Text> = {
 	attacking_points: { en: "attacking points", ko: "공격포인트" },
 };
 
+const AWARD_TEXT: Partial<Record<Stat, Text>> = {
+	goals: { en: "Golden Boot", ko: "득점왕" },
+	assists: { en: "Top Assists", ko: "도움왕" },
+};
+
 const STAT_UNIT: Record<Stat, (n: number) => Text> = {
 	goals: (n) => ({ en: `${n} goal${n === 1 ? "" : "s"}`, ko: `${n}골` }),
 	assists: (n) => ({ en: `${n} assist${n === 1 ? "" : "s"}`, ko: `${n}어시스트` }),
@@ -160,14 +165,19 @@ export function buildWrapped(player: PlayerProfile, section: PlayerLeagueSection
 		const tied = values.filter((other) => other === value).length > 1;
 		coveredStats.add(stat);
 		const label = STAT_TEXT[stat];
+		// First place in goals/assists is an award in its own right (same names as
+		// the homepage finale banner); ties share it.
+		const award = rank === 1 ? AWARD_TEXT[stat] : undefined;
+		const awardEn = award ? ` (${tied ? "Joint " : ""}${award.en})` : "";
+		const awardKo = award ? ` (${tied ? "공동 " : ""}${award.ko})` : "";
 		highlights.push({
 			kind: "rank",
 			icon: rank === 1 ? "👑" : rank <= 3 ? "🏅" : "⭐",
 			title:
 				rank <= 3
 					? {
-							en: `${tied ? "T-" : "#"}${rank} in the league for ${label.en}`,
-							ko: `리그 ${label.ko} ${tied ? "공동 " : ""}${rank}위`,
+							en: `${tied ? "T-" : "#"}${rank} in the league for ${label.en}${awardEn}`,
+							ko: `리그 ${label.ko} ${tied ? "공동 " : ""}${rank}위${awardKo}`,
 						}
 					: { en: `Top 25% in the league for ${label.en}`, ko: `리그 ${label.ko} 상위 25%` },
 			sub: STAT_UNIT[stat](value),

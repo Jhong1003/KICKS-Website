@@ -685,7 +685,8 @@ const cardData = {
 	.wrapped-card-stats div { display: flex; flex-direction: column; gap: 2px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }
 	.wrapped-card-stats strong { font-size: 1.8rem; letter-spacing: 0; }
 	.wrapped-card-highlights { display: flex; flex-direction: column; gap: 8px; margin: 16px 0 12px; padding: 0; list-style: none; font-size: 0.92rem; font-weight: 600; }
-	.wrapped-card-highlights li { display: flex; gap: 10px; }
+	.wrapped-card-highlights li { display: flex; align-items: center; gap: 10px; line-height: 1.35; }
+	.wrapped-card-highlights li > span[aria-hidden] { flex-shrink: 0; width: 1.3em; line-height: 1; text-align: center; }
 	.wrapped-card-badge-row { display: flex; flex-direction: column; gap: 8px; }
 	.wrapped-card-badge-count { color: var(--wr-gold); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
 	.wrapped-card-badges { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 0; padding: 0; list-style: none; }
