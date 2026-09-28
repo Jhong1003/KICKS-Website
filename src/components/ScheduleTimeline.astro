@@ -8,10 +8,25 @@ interface Props {
 }
 
 const { events } = Astro.props;
-const groups = groupByMonth(buildScheduleView(events));
+const view = buildScheduleView(events);
+const groups = groupByMonth(view);
+const pastCount = view.filter((event) => event.isPast).length;
 ---
 
-<div class="schedule-timeline" data-schedule-events={JSON.stringify(events)}>
+{/* Past events are folded away by default so upcoming ones are on screen first;
+    this button shows/hides them (count kept current by the script below). */}
+<button
+	class="schedule-past-toggle"
+	type="button"
+	aria-expanded="false"
+	data-schedule-past-toggle
+	hidden={pastCount === 0}
+>
+	<span data-show-label><T en="Show past events" ko="지난 일정 보기" /> (<span data-past-count>{pastCount}</span>)</span>
+	<span data-hide-label hidden><T en="Hide past events" ko="지난 일정 숨기기" /></span>
+</button>
+
+<div class="schedule-timeline schedule-timeline--hide-past" data-schedule-events={JSON.stringify(events)}>
 	{
 		groups.map((group) => (
 			<div class="schedule-month">
@@ -106,5 +121,22 @@ const groups = groupByMonth(buildScheduleView(events));
 				existingLabel.remove();
 			}
 		});
+
+		// Show/hide past events.
+		const toggle = document.querySelector<HTMLButtonElement>("[data-schedule-past-toggle]");
+		if (toggle) {
+			const pastCount = view.filter((event) => event.isPast).length;
+			toggle.hidden = pastCount === 0;
+			const countEl = toggle.querySelector("[data-past-count]");
+			if (countEl) countEl.textContent = String(pastCount);
+			const showLabel = toggle.querySelector<HTMLElement>("[data-show-label]");
+			const hideLabel = toggle.querySelector<HTMLElement>("[data-hide-label]");
+			toggle.addEventListener("click", () => {
+				const showing = root.classList.toggle("schedule-timeline--hide-past") === false;
+				toggle.setAttribute("aria-expanded", String(showing));
+				if (showLabel) showLabel.hidden = showing;
+				if (hideLabel) hideLabel.hidden = !showing;
+			});
+		}
 	}
 </script>

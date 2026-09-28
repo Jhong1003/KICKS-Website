@@ -29,6 +29,13 @@ interface MatchRecord {
 }
 
 const { league } = Astro.props;
+const rules = league.rules;
+const tiebreakText: Record<string, { en: string; ko: string }> = {
+	points: { en: "points", ko: "승점" },
+	participation_rate: { en: "participation", ko: "참여율" },
+	goal_difference: { en: "goal difference", ko: "득실차" },
+	goals_for: { en: "goals scored", ko: "득점" },
+};
 
 // Everything on this page is one league's data — weeks restart at 1 in each
 // league and nothing is combined across leagues. The points/W-D-L rule lives
@@ -128,6 +135,31 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 				/>
 			)
 		}
+		{/* How points and ties work, straight from this league's rules (league-config.json). */}
+		<ul class="league-rules">
+			<li>
+				<T
+					en={`Win ${rules.win_points} pts · Draw ${rules.draw_points} pt${rules.draw_points === 1 ? "" : "s"} · Loss 0`}
+					ko={`승 ${rules.win_points}점 · 무 ${rules.draw_points}점 · 패 0점`}
+				/>
+			</li>
+			{
+				rules.final_win_points !== rules.win_points && (
+					<li class="league-rules-highlight">
+						<T
+							en={`Week ${rules.final_week}${rules.final_week < rules.weeks ? " onward" : " (final week)"}: a win is worth ${rules.final_win_points} pts`}
+							ko={`${rules.final_week}주차${rules.final_week < rules.weeks ? "부터" : "(마지막 주)"}는 승리 ${rules.final_win_points}점`}
+						/>
+					</li>
+				)
+			}
+			<li>
+				<T
+					en={`Tiebreakers: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].en).join(" → ")}`}
+					ko={`동점일 때: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].ko).join(" → ")}`}
+				/>
+			</li>
+		</ul>
 	</section>
 
 	<section class="content-section" id="results" aria-labelledby="results-title">

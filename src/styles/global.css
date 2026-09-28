@@ -2704,6 +2704,79 @@ a.player-card:hover {
 
 }
 
+/* 일정 페이지: 지난 일정은 기본으로 접어 두고 버튼으로 펼침 */
+
+.schedule-timeline--hide-past .schedule-item--past {
+
+	display: none;
+
+}
+
+/* 지난 일정만 있는 달은 달 이름까지 숨김 */
+.schedule-timeline--hide-past .schedule-month:not(:has(.schedule-item:not(.schedule-item--past))) {
+
+	display: none;
+
+}
+
+.schedule-past-toggle {
+
+	margin: 20px 0 4px;
+	padding: 6px 14px;
+	border: 1px solid rgba(41, 41, 41, 0.18);
+	border-radius: 999px;
+	background: none;
+	color: var(--color-dark);
+	font: inherit;
+	font-size: 0.82rem;
+	font-weight: 600;
+	opacity: 0.75;
+	cursor: pointer;
+
+}
+
+.schedule-past-toggle:hover {
+
+	opacity: 1;
+	border-color: var(--color-green);
+
+}
+
+.schedule-past-toggle[hidden] {
+
+	display: none;
+
+}
+
+/* 리그 페이지: 순위표 아래 승점·동점 규칙 안내 (배경 없이 작은 회색 글씨, · 로 구분) */
+
+.league-rules {
+
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 0;
+	margin: 16px 0 0;
+	padding: 0;
+	list-style: none;
+	color: var(--color-dark);
+	font-size: 0.85rem;
+	opacity: 0.7;
+
+}
+
+.league-rules li + li::before {
+
+	content: "·";
+	margin: 0 10px;
+
+}
+
+.league-rules-highlight {
+
+	font-weight: 700;
+
+}
+
 /* 순위표: 끝난 리그의 1위 팀 우승 표시 */
 
 .standings-table tr.standings-champion td {
@@ -3677,7 +3750,7 @@ a.finale-chip-name:hover,
 		min-height: 380px;
 		/* 글자 묶음은 위쪽 큰 제목에 무게가 쏠려 있어서, 사진을 살짝 내려야 둘의
 		   중심이 맞아 보임 */
-		transform: translateY(20px);
+		transform: translateY(36px);
 	}
 	.hero-content > .split-photo--hero img {
 		width: 100%;
