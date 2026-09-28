@@ -111,9 +111,11 @@ import T from "./T.astro";
 	h2 {
 		outline: none;
 		margin: 0;
-		font-size: clamp(2.6rem, 8.6vw, 4.75rem);
-		line-height: 0.95;
-		letter-spacing: -0.055em;
+		font-size: clamp(2.4rem, 7.8vw, 4.1rem);
+		line-height: 0.98;
+		/* Tight, but not so tight that "WELCOME TO" reads as one word. */
+		letter-spacing: -0.035em;
+		word-spacing: 0.1em;
 	}
 	.welcome-subtitle { margin: 28px 0 12px; font-size: clamp(1rem, 3vw, 1.15rem); font-weight: 600; line-height: 1.4; }
 	#welcome-description { margin: 0; color: var(--color-dark); font-size: 0.9rem; line-height: 1.7; }
