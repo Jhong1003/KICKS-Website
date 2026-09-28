@@ -142,8 +142,7 @@ export const TIER_ORDER: BadgeTier[] = ["icon", "legendary", "rare", "common", "
 
 /**
  * `labelKo` only where the Korean name differs (badge names otherwise stay
- * English in both languages). `note`/`noteKo`: a short caveat shown in the
- * All Badges popup, e.g. for badges that can only be earned from a later league.
+ * English in both languages).
  */
 export interface BadgeInfo {
 	label: string;
@@ -152,12 +151,7 @@ export interface BadgeInfo {
 	descriptionKo: string;
 	icon: string;
 	tier: BadgeTier;
-	note?: string;
-	noteKo?: string;
 }
-
-/** Per-match badges need goal_events, which FA26-L1 (weekly totals) doesn't have. */
-const PER_MATCH_NOTE = { note: "Tracked from FA26-L2 onward.", noteKo: "FA26-L2부터 집계해요." };
 
 export const BADGES: Record<BadgeKey, BadgeInfo> = {
 	// Common
@@ -225,7 +219,6 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		descriptionKo: "한 경기에서 2골을 넣었어요.",
 		icon: "✌️",
 		tier: "rare",
-		...PER_MATCH_NOTE,
 	},
 	// Legendary
 	game_changer: {
@@ -269,7 +262,6 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		descriptionKo: "한 경기에서 3골을 넣었어요.",
 		icon: "🎩",
 		tier: "legendary",
-		...PER_MATCH_NOTE,
 	},
 	// Icon — shown as a locked "???" card until someone earns it
 	treble: {
@@ -285,7 +277,6 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		descriptionKo: "한 경기에서 4골을 넣었어요.",
 		icon: "🃏",
 		tier: "icon",
-		...PER_MATCH_NOTE,
 	},
 	back_to_back: {
 		label: "Back-to-Back",

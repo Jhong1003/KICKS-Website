@@ -108,7 +108,6 @@ const tiers = TIER_ORDER.map((tier) => ({
 										)}
 									</p>
 									<T as="p" class="player-badge-description" en={info.description} ko={info.descriptionKo} />
-									{info.note && <T as="p" class="badge-guide-note" en={info.note} ko={info.noteKo ?? info.note} />}
 									{!locked && (
 										<p class="badge-guide-holders">
 											{holders.length === 0 ? (
@@ -235,7 +234,6 @@ const tiers = TIER_ORDER.map((tier) => ({
 		text-transform: uppercase;
 		vertical-align: middle;
 	}
-	.badge-guide-note { margin: 2px 0 0; color: var(--color-dark); font-size: 0.75rem; font-style: italic; opacity: 0.6; }
 	.badge-guide-holders { margin: 6px 0 0; color: var(--color-dark); font-size: 0.78rem; line-height: 1.6; }
 	.badge-guide-holders a { color: var(--color-green); font-weight: 600; }
 	.badge-guide-holders a:hover { text-decoration: underline; }
