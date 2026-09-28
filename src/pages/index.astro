@@ -83,6 +83,17 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 							<span aria-hidden="true">→</span>
 						</a>
 					</div>
+					{
+						/* While the latest league's results are up (same window as the finale
+						   banner), point people to their Wrapped from the first screen. */
+						finale && (
+							<a class="hero-wrapped" href="/players">
+								<span aria-hidden="true">🎁</span>
+								<T en={`${latestLeague.id} Wrapped is here`} ko={`${latestLeague.id} Wrapped가 나왔어요`} />
+								<span aria-hidden="true">→</span>
+							</a>
+						)
+					}
 					<a
 						class="hero-next-up"
 						id="hero-next-up"

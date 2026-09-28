@@ -1755,6 +1755,33 @@ h1 {
 
 /* 히어로: 다음 일정 링크 (Join/View Standings 버튼 아래 한 줄) */
 
+/* 홈: 리그가 끝난 뒤 Wrapped 안내 금색 버튼 (결산 배너와 같은 기간에만) */
+
+.hero-wrapped {
+
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: fit-content;
+	margin-top: 20px;
+	padding: 11px 20px;
+	border-radius: 999px;
+	color: #2a2206;
+	background: linear-gradient(135deg, #fff1c2, #e9c65a);
+	box-shadow: 0 0 0 1px #c9a227, 0 8px 22px rgba(233, 190, 60, 0.3);
+	font-size: 0.95rem;
+	font-weight: 700;
+	transition: transform 120ms ease, box-shadow 120ms ease;
+
+}
+
+.hero-wrapped:hover {
+
+	transform: translateY(-1px);
+	box-shadow: 0 0 0 1px #c9a227, 0 12px 28px rgba(233, 190, 60, 0.4);
+
+}
+
 .hero-next-up {
 
 	/* 점 + 글자 두 칸으로만 나누고 줄바꿈은 글자 안에서만 일어나게 (좁은 화면에서
