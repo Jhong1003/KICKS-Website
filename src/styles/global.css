@@ -405,6 +405,9 @@ h1 {
 	height: 32px;
 	padding: 0;
 	border: none;
+	/* 버튼은 기본적으로 글자색을 물려받지 않아서 iOS에서 파란색(시스템 강조색)이 됨 —
+	   언어 버튼처럼 헤더 글자색(크림색)을 그대로 쓰기 */
+	color: inherit;
 	background: none;
 	cursor: pointer;
 
