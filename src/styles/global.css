@@ -3505,6 +3505,22 @@ main > .content-section:last-of-type {
 
 }
 
+/* 휴대폰: 이름 옆에 두되 이름보다 튀지 않게 작게 */
+@media (max-width: 600px) {
+
+	.wrapped-entry {
+		gap: 6px;
+		padding: 7px 13px;
+		font-size: 0.78rem;
+		box-shadow: 0 0 0 1px #c9a227, 0 4px 10px rgba(201, 162, 39, 0.25);
+	}
+
+	.player-name-row .wrapped-entry {
+		margin-top: 4px;
+	}
+
+}
+
 .wrapped-entry:hover {
 
 	transform: translateY(-1px);
