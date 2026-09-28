@@ -170,7 +170,10 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 							`${video.league ? `${video.league} · ` : ""}${weekLabel(video.week, "en")} · ${formatShortDate(video.date, "en")}`,
 							`${video.league ? `${video.league} · ` : ""}${weekLabel(video.week, "ko")} · ${formatShortDate(video.date, "ko")}`,
 						)}</div>
-						<h3 class="video-card-title">${video.title}</h3>
+						<h3 class="video-card-title">${bilingualHtml(
+							`${weekLabel(video.week, "en")} Full Match`,
+							`${weekLabel(video.week, "ko")} 풀영상`,
+						)}</h3>
 						<a class="button-primary" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">
 							${bilingualHtml("Watch on Google Drive", "구글 드라이브에서 보기")}
 						</a>
