@@ -100,9 +100,9 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 										ko={`${nextUpEvent.isToday ? "오늘" : formatShortDate(nextUpEvent.date!, "ko")} · ${eventTitle(nextUpEvent, "ko")}`}
 									/>
 								)}
-							</span>
+							{/* The arrow sits right after the text (no space between, so it can't wrap onto a line of its own). */}
+							</span><span class="hero-next-up-arrow" aria-hidden="true">→</span>
 						</span>
-						<span aria-hidden="true">→</span>
 					</a>
 					{
 						goalCountdown.total > 0 && (

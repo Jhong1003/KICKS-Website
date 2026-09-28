@@ -1757,13 +1757,15 @@ h1 {
 
 .hero-next-up {
 
+	/* 점 + 글자 두 칸으로만 나누고 줄바꿈은 글자 안에서만 일어나게 (좁은 화면에서
+	   점과 화살표가 따로 떨어진 줄로 밀려나지 않도록). 화살표는 글자 끝에 붙어 있음. */
 	display: inline-flex;
-	flex-wrap: wrap;
-	align-items: center;
+	align-items: flex-start;
 	gap: 9px;
 	margin-top: 28px;
 	color: var(--color-sage);
 	font-size: 0.9rem;
+	line-height: 1.5;
 
 }
 
@@ -1795,6 +1797,8 @@ h1 {
 	height: 7px;
 	flex-shrink: 0;
 	margin-inline: 3.5px;
+	/* 첫 줄 가운데에 오도록: (줄 높이 1.5em - 7px) / 2 */
+	margin-top: calc((1.5em - 7px) / 2);
 	border-radius: 50%;
 	background-color: var(--color-sage);
 
@@ -1803,6 +1807,19 @@ h1 {
 .hero-next-up:hover .hero-next-up-dot {
 
 	background-color: var(--color-background);
+
+}
+
+.hero-next-up-text {
+
+	min-width: 0;
+
+}
+
+.hero-next-up-arrow {
+
+	margin-left: 6px;
+	white-space: nowrap;
 
 }
 
