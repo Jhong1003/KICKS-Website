@@ -4,14 +4,14 @@ import T from "./T.astro";
 
 <dialog id="welcome-popup" aria-labelledby="welcome-title" aria-describedby="welcome-description">
 	<div class="welcome-panel">
-		<button class="welcome-close" type="button" aria-label="Close welcome popup" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close welcome popup", ko: "환영 팝업 닫기" } })} data-welcome-close autofocus>
+		<button class="welcome-close" type="button" aria-label="Close welcome popup" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close welcome popup", ko: "환영 팝업 닫기" } })} data-welcome-close>
 			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 				<path d="m6 6 12 12M18 6 6 18" />
 			</svg>
 		</button>
 		<div class="welcome-copy">
 			<p class="welcome-brand">KICKS · UIUC</p>
-			<h2 id="welcome-title" lang="en"><T><Fragment slot="en">WELCOME<br />TO KICKS.</Fragment><Fragment slot="ko">WELCOME<br />TO KICKS</Fragment></T></h2>
+			<h2 id="welcome-title" lang="en" tabindex="-1" autofocus><T><Fragment slot="en">WELCOME TO<br />KICKS.</Fragment><Fragment slot="ko">WELCOME TO<br />KICKS.</Fragment></T></h2>
 			<p class="welcome-subtitle"><T en="The new home of KICKS is here." ko="새로운 KICKS 웹사이트를 만나보세요." /></p>
 			<p id="welcome-description"><T><Fragment slot="en">Follow the league. Meet the players.<br />Explore the moments that make KICKS.</Fragment><Fragment slot="ko">경기 결과부터 선수 기록, KICKS의 다양한 순간까지<br />이곳에서 모두 확인할 수 있습니다.</Fragment></T></p>
 			<p class="welcome-meta">FA26 · UIUC · FUTSAL</p>
@@ -109,6 +109,7 @@ import T from "./T.astro";
 	}
 	.welcome-brand { margin: 0 48px 40px 0; }
 	h2 {
+		outline: none;
 		margin: 0;
 		font-size: clamp(2.6rem, 8.6vw, 4.75rem);
 		line-height: 0.95;
