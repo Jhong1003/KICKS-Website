@@ -8,6 +8,7 @@ import profilesData from "../../data/player_profiles.json";
 import playerPhotosData from "../../data/player-photos.json";
 import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
+import { isLeagueFinished } from "../../lib/finale";
 
 export function getStaticPaths() {
 	const profiles = profilesData as PlayerProfile[];
@@ -53,11 +54,20 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 							<p class="section-label">
 								{isLatest ? section.league : <T en="PREVIOUS LEAGUE" ko="이전 리그" />} · {teamName}
 							</p>
-							{isLatest ? (
-								<h1 id="player-detail-title">{player.name}</h1>
-							) : (
-								<h2 id={`player-league-${section.league}`}>{section.league}</h2>
-							)}
+							<div class="player-name-row">
+								{isLatest ? (
+									<h1 id="player-detail-title">{player.name}</h1>
+								) : (
+									<h2 id={`player-league-${section.league}`}>{section.league}</h2>
+								)}
+								{isLeagueFinished(section.league) && player.status !== "inactive" && (
+									<a class="wrapped-entry" href={`/wrapped/${section.league}/${player.id}`}>
+										<span aria-hidden="true">🎁</span>
+										<T en={`My ${section.league} Wrapped`} ko={`나의 ${section.league} Wrapped 보기`} />
+										<span aria-hidden="true">→</span>
+									</a>
+								)}
+							</div>
 							{isLatest && player.positions.length > 0 && (
 								<p class="player-positions">
 									{player.positions.map((position) => (

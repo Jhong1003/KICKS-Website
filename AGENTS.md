@@ -422,6 +422,22 @@ because teams are re-drawn every league, which made "first week"/"just
 joined" meaningless. The old week-based `brace`/`hat_trick` became
 `on_fire`, and the Iron Man tag became the `iron_man` badge.)
 
+**KICKS Wrapped** (`/wrapped/<league>/<id>`, [src/pages/wrapped/[league]/[id].astro](src/pages/wrapped/[league]/[id].astro),
+rules in [src/lib/wrapped.ts](src/lib/wrapped.ts)): a per-player, per-league
+recap as full-screen story slides, built only for *finished* leagues and
+non-inactive players; linked from the player page (gold "Wrapped" button) and
+the homepage finale banner. League ranks appear only when good (top 3 or top
+25% of active players, ties shared). Every player gets their best three
+highlights from a scored list (league rank, champion, team/position leader,
+share of team goals, clean sheets, clutch final week, rising form, iron man,
+joined mid-league, two teams, runner-up, team's best week, first goal/assist,
+games played), each with a guard against hollow claims: position leader needs
+3+ players in the group, share of team goals needs 2+ weeks played, "rising"
+needs 2+ attacking points in the last week, team record only when winning,
+no claims that a player caused a result, absences never spelled out. Own
+goals get a fun slide but never a highlight or the shareable image. The last
+slide saves a 1080×1920 image drawn on a canvas in the language on screen.
+
 **Own goals**: `player_stats`'s `own_goals` column (blank/missing = 0,
 normalized once in `load_sheets()` so every caller can assume it exists).
 Tracked entirely separately from `goals` — never added into a player's

@@ -2635,6 +2635,64 @@ a.player-card:hover {
 
 }
 
+/* 선수 페이지 Wrapped 진입 버튼 (끝난 리그에서만) */
+
+.player-name-row {
+
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px 24px;
+
+}
+
+.wrapped-entry {
+
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 18px;
+	border-radius: 999px;
+	color: #2a2206;
+	background: linear-gradient(135deg, #fff1c2, #e9c65a);
+	box-shadow: 0 0 0 1px #c9a227, 0 6px 16px rgba(201, 162, 39, 0.3);
+	font-size: 0.9rem;
+	font-weight: 700;
+	transition: transform 120ms ease, box-shadow 120ms ease;
+
+}
+
+/* 이름 글자의 시각적 중심에 맞게 살짝 아래로 */
+.player-name-row .wrapped-entry {
+
+	position: relative;
+	top: 3px;
+
+}
+
+.wrapped-entry:hover {
+
+	transform: translateY(-1px);
+	box-shadow: 0 0 0 1px #c9a227, 0 10px 22px rgba(201, 162, 39, 0.4);
+
+}
+
+.finale-chip--wrapped {
+
+	color: #3b2f05;
+	font-weight: 700;
+	background: linear-gradient(135deg, #fff1c2, #f3dc8e);
+
+}
+
+.finale-chip--wrapped:hover {
+
+	text-decoration: underline;
+	text-underline-offset: 2px;
+
+}
+
 /* 배지 제목 줄 + "배지 목록" 팝업 버튼 */
 
 .player-badge-head {

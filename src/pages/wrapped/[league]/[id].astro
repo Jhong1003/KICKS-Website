@@ -1,0 +1,719 @@
+---
+// KICKS Wrapped: one player's recap of one finished league, as full-screen
+// story slides (tap/click right = next, left = back; arrow keys; swipe).
+// The last slide is a summary card that can be saved as a 1080×1920 image
+// (drawn on a canvas from the JSON below) or shared as a link.
+// All the numbers and highlight rules live in src/lib/wrapped.ts.
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import T from "../../../components/T.astro";
+import { leagues, getTeamColor, type League } from "../../../lib/leagues";
+import { BADGES, sortBadges, type PlayerLeagueSection, type PlayerProfile } from "../../../lib/players";
+import { buildWrapped, wrappedPlayers } from "../../../lib/wrapped";
+
+export function getStaticPaths() {
+	return leagues.flatMap((league) =>
+		wrappedPlayers(league).map(({ player, section }) => ({
+			params: { league: league.id, id: player.id },
+			props: { league, player, section },
+		})),
+	);
+}
+
+interface Props {
+	league: League;
+	player: PlayerProfile;
+	section: PlayerLeagueSection;
+}
+
+const { league, player, section } = Astro.props;
+const data = buildWrapped(player, section, league);
+const badges = sortBadges(section.badges);
+const teamColor = getTeamColor(data.team.teamId, league);
+const best = section.personal_best_week;
+// The share card shows every badge (except the own-goal one) as a plain emoji.
+const cardBadges = badges
+	.filter((key) => key !== "own_goal_award")
+	.map((key) => ({ icon: BADGES[key].icon, tier: key === "champion" ? "champion" : BADGES[key].tier }));
+const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+// What the canvas needs to draw the summary image in either language.
+const cardData = {
+	name: player.name,
+	league: league.id,
+	team: data.team.teamName,
+	teamColor,
+	champion: data.team.champion,
+	rank: data.team.rank,
+	goals: data.goals,
+	assists: data.assists,
+	points: data.attackingPoints,
+	games: data.games,
+	tag: section.play_style_tag,
+	positions: player.positions,
+	badges: cardBadges,
+	highlights: data.highlights.map(({ icon, title, sub }) => ({ icon, title, sub })),
+};
+---
+
+<BaseLayout
+	title={`${player.name} · ${league.id} Wrapped | KICKS`}
+	description={`${player.name}'s ${league.id} season recap on KICKS.`}
+	header="custom"
+>
+	<div class="wrapped" id="wrapped" data-player-url={`/players/${player.id}`}>
+		<div class="wrapped-stage" style={`--team-color: ${teamColor}`}>
+			<div class="wrapped-progress" aria-hidden="true"></div>
+
+			<div class="wrapped-top">
+				<span class="wrapped-brand">KICKS WRAPPED</span>
+				<div class="wrapped-top-actions">
+					<button class="wrapped-lang" type="button" data-wrapped-lang>EN | 한</button>
+					<a
+						class="wrapped-close"
+						href={`/players/${player.id}`}
+						aria-label="Close Wrapped"
+						data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close Wrapped", ko: "Wrapped 닫기" } })}
+					>
+						✕
+					</a>
+				</div>
+			</div>
+
+			<!-- 1. Intro -->
+			<section class="wrapped-slide wrapped-slide--intro">
+				<p class="wrapped-eyebrow">{league.id}</p>
+				<div class="wrapped-name-row">
+					<h1 class="wrapped-hero">{player.name}</h1>
+					{
+						player.positions.length > 0 && (
+							<p class="wrapped-positions">
+								{player.positions.map((position) => (
+									<span class={`position-chip position-${position}`}>{position}</span>
+								))}
+							</p>
+						)
+					}
+				</div>
+				<T
+					as="p"
+					class="wrapped-lead"
+					en={`${data.league.weeks} weeks. ${data.league.matches} matches. ${data.league.goals} goals across the league.`}
+					ko={`${data.league.weeks}주, ${data.league.matches}경기, 리그 전체 ${data.league.goals}골.`}
+				/>
+				<T
+					as="p"
+					class="wrapped-lead wrapped-lead--strong"
+					en={`And you were out there for ${plural(data.games, "game")}.`}
+					ko={`그중 당신은 ${data.games}경기를 함께 뛰었어요.`}
+				/>
+				<T as="p" class="wrapped-hint" en="Tap to continue →" ko="탭해서 넘기기 →" />
+			</section>
+
+			<!-- 2. Numbers -->
+			<section class="wrapped-slide">
+				<T as="p" class="wrapped-eyebrow" en="Your numbers" ko="당신의 숫자" />
+				<div class="wrapped-stats">
+					<div><span class="wrapped-stat-value">{data.goals}</span><T class="wrapped-stat-label" en="Goals" ko="골" /></div>
+					<div><span class="wrapped-stat-value">{data.assists}</span><T class="wrapped-stat-label" en="Assists" ko="어시스트" /></div>
+					<div><span class="wrapped-stat-value">{data.attackingPoints}</span><T class="wrapped-stat-label" en="Attacking pts" ko="공격포인트" /></div>
+					<div><span class="wrapped-stat-value">{data.games}</span><T class="wrapped-stat-label" en="Games" ko="경기" /></div>
+				</div>
+				{
+					data.attackingPoints === 0 && (
+						<T
+							as="p"
+							class="wrapped-lead"
+							en={`Some seasons aren't about the scoresheet. ${plural(data.games, "game")} with the team is its own story.`}
+							ko={`기록지에 다 담기지 않는 시즌도 있어요. 팀과 함께한 ${data.games}경기가 그 자체로 이야기예요.`}
+						/>
+					)
+				}
+			</section>
+
+			<!-- 3. Highlights -->
+			<section class="wrapped-slide">
+				<T as="p" class="wrapped-eyebrow" en="Your highlights" ko="당신의 하이라이트" />
+				<ol class="wrapped-highlights">
+					{
+						data.highlights.map((highlight) => (
+							<li>
+								<span class="wrapped-highlight-icon" aria-hidden="true">{highlight.icon}</span>
+								<div>
+									<T as="p" class="wrapped-highlight-title" en={highlight.title.en} ko={highlight.title.ko} />
+									<T as="p" class="wrapped-highlight-sub" en={highlight.sub.en} ko={highlight.sub.ko} />
+								</div>
+							</li>
+						))
+					}
+				</ol>
+			</section>
+
+			<!-- 4. Best week -->
+			{
+				best && (
+					<section class="wrapped-slide">
+						<T as="p" class="wrapped-eyebrow" en="Your best week" ko="당신의 최고의 주" />
+						<T as="p" class="wrapped-hero" en={`Week ${best.week}`} ko={`${best.week}주차`} />
+						<T
+							as="p"
+							class="wrapped-lead wrapped-lead--strong"
+							en={`${plural(best.goals, "goal")} · ${plural(best.assists, "assist")}`}
+							ko={`${best.goals}골 · ${best.assists}어시스트`}
+						/>
+						<T
+							as="p"
+							class="wrapped-lead"
+							en={`${plural(best.attacking_points, "attacking point")} in a single week.`}
+							ko={`한 주에 공격포인트 ${best.attacking_points}개를 만들었어요.`}
+						/>
+					</section>
+				)
+			}
+
+			<!-- 5. Style + badges -->
+			<section class="wrapped-slide">
+				<T as="p" class="wrapped-eyebrow" en="Your style" ko="당신의 스타일" />
+				<p class="wrapped-hero wrapped-hero--tag">{section.play_style_tag}</p>
+				<T
+					as="p"
+					class="wrapped-lead"
+					en={`${plural(badges.length, "badge")} earned this league`}
+					ko={`이번 리그에서 배지 ${badges.length}개를 모았어요`}
+				/>
+				<ul class="wrapped-badges">
+					{
+						badges.map((key) => (
+							<li class:list={["wrapped-badge", `wrapped-badge--${BADGES[key].tier}`, { "wrapped-badge--champion": key === "champion" }]}>
+								<span aria-hidden="true">{BADGES[key].icon}</span>
+								<T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} />
+							</li>
+						))
+					}
+				</ul>
+			</section>
+
+			<!-- 6. Team -->
+			<section class:list={["wrapped-slide", { "wrapped-slide--champion": data.team.champion }]}>
+				<T as="p" class="wrapped-eyebrow" en="Your team" ko="당신의 팀" />
+				{
+					data.team.champion ? (
+						<>
+							<p class="wrapped-trophy" aria-hidden="true">🏆</p>
+							<T as="p" class="wrapped-hero" en="Champions" ko="우승" />
+							<p class="wrapped-team-name">{data.team.teamName}</p>
+						</>
+					) : (
+						<>
+							<p class="wrapped-team-name wrapped-team-name--big">{data.team.teamName}</p>
+							<T
+								as="p"
+								class="wrapped-lead wrapped-lead--strong"
+								en={`Finished #${data.team.rank} in ${league.id}`}
+								ko={`${league.id} 최종 ${data.team.rank}위`}
+							/>
+						</>
+					)
+				}
+				{
+					data.previousTeams.length > 0 && (
+						<T
+							as="p"
+							class="wrapped-lead"
+							en={`Earlier this league: ${data.previousTeams.join(", ")}.`}
+							ko={`이번 리그 초반에는 ${data.previousTeams.join(", ")}에서 뛰었어요.`}
+						/>
+					)
+				}
+			</section>
+
+			<!-- 7. Own goal (just for fun; never on the share card) -->
+			{
+				data.ownGoalAward && (
+					<section class="wrapped-slide">
+						<T as="p" class="wrapped-eyebrow" en="One more thing" ko="그리고 하나 더" />
+						<p class="wrapped-trophy" aria-hidden="true">🪃</p>
+						<T as="p" class="wrapped-hero wrapped-hero--small" en="Own Goal Award" ko="자책골 어워드" />
+						<T
+							as="p"
+							class="wrapped-lead"
+							en="You generously helped the other team too. It happens to the best of us!"
+							ko="상대 팀에게도 너그러웠던 당신. 누구에게나 있을 수 있는 일이에요!"
+						/>
+					</section>
+				)
+			}
+
+			<!-- 8. Summary card -->
+			<section class="wrapped-slide wrapped-slide--summary">
+				<div class="wrapped-card">
+					<p class="wrapped-card-brand">KICKS · {league.id} WRAPPED</p>
+					<p class="wrapped-card-name">
+						{player.name}
+						{player.positions.map((position) => (
+							<span class={`position-chip position-${position}`}>{position}</span>
+						))}
+					</p>
+					<p class="wrapped-card-team">
+						{data.team.champion && <span aria-hidden="true">🏆 </span>}{data.team.teamName} · {section.play_style_tag}
+					</p>
+					<div class="wrapped-card-stats">
+						<div><strong>{data.goals}</strong><T en="Goals" ko="골" /></div>
+						<div><strong>{data.assists}</strong><T en="Assists" ko="어시" /></div>
+						<div><strong>{data.games}</strong><T en="Games" ko="경기" /></div>
+					</div>
+					<ul class="wrapped-card-highlights">
+						{
+							data.highlights.map((highlight) => (
+								<li>
+									<span aria-hidden="true">{highlight.icon}</span>
+									<T en={highlight.title.en} ko={highlight.title.ko} />
+								</li>
+							))
+						}
+					</ul>
+					{
+						cardBadges.length > 0 && (
+							<div class="wrapped-card-badge-row">
+								<T
+									class="wrapped-card-badge-count"
+									en={plural(cardBadges.length, "badge")}
+									ko={`배지 ${cardBadges.length}개`}
+								/>
+								<ul class="wrapped-card-badges" aria-hidden="true">
+									{cardBadges.map((badge) => (
+										<li class={`wrapped-card-badge wrapped-card-badge--${badge.tier}`}>{badge.icon}</li>
+									))}
+								</ul>
+							</div>
+						)
+					}
+				</div>
+				<div class="wrapped-actions" data-wrapped-actions>
+					<button type="button" class="wrapped-button wrapped-button--primary" data-wrapped-save>
+						<T en="Save image" ko="이미지 저장" />
+					</button>
+					<button type="button" class="wrapped-button" data-wrapped-copy>
+						<span data-copy-label><T en="Copy link" ko="링크 복사" /></span>
+						<span data-copy-done hidden><T en="Copied!" ko="복사됐어요!" /></span>
+					</button>
+					<a class="wrapped-button wrapped-button--ghost" href={`/players/${player.id}`}>
+						<T en="Player page" ko="선수 페이지" />
+					</a>
+				</div>
+			</section>
+		</div>
+	</div>
+
+	<script type="application/json" id="wrapped-card-data" set:html={JSON.stringify(cardData)} />
+</BaseLayout>
+
+<script>
+	interface Text { en: string; ko: string }
+	interface CardData {
+		name: string; league: string; team: string; teamColor: string; champion: boolean; rank: number;
+		goals: number; assists: number; points: number; games: number; tag: string; positions: string[];
+		badges: { icon: string; tier: string }[];
+		highlights: { icon: string; title: Text; sub: Text }[];
+	}
+
+	const root = document.getElementById("wrapped");
+	if (root) {
+		const slides = [...root.querySelectorAll<HTMLElement>(".wrapped-slide")];
+		const progress = root.querySelector<HTMLElement>(".wrapped-progress")!;
+		progress.innerHTML = slides.map(() => "<span><i></i></span>").join("");
+		const bars = [...progress.querySelectorAll("span")];
+		let current = 0;
+
+		const show = (index: number) => {
+			current = Math.max(0, Math.min(slides.length - 1, index));
+			slides.forEach((slide, i) => slide.classList.toggle("is-active", i === current));
+			bars.forEach((bar, i) => bar.classList.toggle("is-done", i <= current));
+		};
+		show(0);
+		document.documentElement.classList.add("wrapped-open");
+
+		// Taps on the stage: right two-thirds = next, left third = back.
+		// Buttons and links keep their own behavior.
+		const stage = root.querySelector<HTMLElement>(".wrapped-stage")!;
+		let startX = 0;
+		let startY = 0;
+		stage.addEventListener("pointerdown", (event) => { startX = event.clientX; startY = event.clientY; });
+		stage.addEventListener("pointerup", (event) => {
+			if ((event.target as HTMLElement).closest("a, button")) return;
+			const dx = event.clientX - startX;
+			const dy = event.clientY - startY;
+			if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+				show(current + (dx < 0 ? 1 : -1));
+				return;
+			}
+			if (Math.abs(dx) > 10 || Math.abs(dy) > 10) return;
+			const rect = stage.getBoundingClientRect();
+			show(current + (event.clientX - rect.left < rect.width / 3 ? -1 : 1));
+		});
+		document.addEventListener("keydown", (event) => {
+			if (event.key === "ArrowRight" || event.key === " ") { event.preventDefault(); show(current + 1); }
+			if (event.key === "ArrowLeft") show(current - 1);
+			if (event.key === "Escape") window.location.href = root.dataset.playerUrl ?? "/players";
+		});
+
+		root.querySelector("[data-wrapped-lang]")?.addEventListener("click", () => {
+			const next = document.documentElement.lang === "ko" ? "en" : "ko";
+			(window as unknown as { kicksSetLang: (lang: string, remember: boolean) => void }).kicksSetLang(next, true);
+		});
+
+		// Link copy.
+		root.querySelector("[data-wrapped-copy]")?.addEventListener("click", async () => {
+			try {
+				await navigator.clipboard.writeText(window.location.href);
+				const label = root.querySelector<HTMLElement>("[data-copy-label]")!;
+				const done = root.querySelector<HTMLElement>("[data-copy-done]")!;
+				label.hidden = true;
+				done.hidden = false;
+				setTimeout(() => { label.hidden = false; done.hidden = true; }, 1800);
+			} catch {
+				window.prompt("Copy this link", window.location.href);
+			}
+		});
+
+		// Summary image, drawn in the language currently shown.
+		const card = JSON.parse(document.getElementById("wrapped-card-data")?.textContent ?? "{}") as CardData;
+		root.querySelector("[data-wrapped-save]")?.addEventListener("click", async () => {
+			const lang = document.documentElement.lang === "ko" ? "ko" : "en";
+			const blob = await drawCard(card, lang);
+			if (!blob) return;
+			const file = new File([blob], `kicks-${card.league}-wrapped.png`, { type: "image/png" });
+			const nav = navigator as Navigator & { canShare?: (data: { files: File[] }) => boolean };
+			if (nav.canShare?.({ files: [file] }) && matchMedia("(pointer: coarse)").matches) {
+				try { await navigator.share({ files: [file] }); return; } catch (error) {
+					if ((error as DOMException).name === "AbortError") return;
+				}
+			}
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = file.name;
+			link.click();
+			setTimeout(() => URL.revokeObjectURL(url), 1000);
+		});
+	}
+
+	const POSITION_COLORS: Record<string, string> = { GK: "#f0a202", DF: "#2f6fed", MF: "#2e9e5b", FW: "#d7263d" };
+	const FONT = '-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif';
+
+	/** Draws `text` wrapped to `maxWidth`, returning the y after the last line. */
+	function wrapText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
+		const words = text.split(" ");
+		let line = "";
+		for (const word of words) {
+			const test = line ? `${line} ${word}` : word;
+			if (ctx.measureText(test).width > maxWidth && line) {
+				ctx.fillText(line, x, y);
+				line = word;
+				y += lineHeight;
+			} else {
+				line = test;
+			}
+		}
+		ctx.fillText(line, x, y);
+		return y + lineHeight;
+	}
+
+	async function drawCard(card: CardData, lang: "en" | "ko"): Promise<Blob | null> {
+		await document.fonts?.ready;
+		const W = 1080;
+		const H = 1920;
+		const canvas = document.createElement("canvas");
+		canvas.width = W;
+		canvas.height = H;
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return null;
+		const t = (text: { en: string; ko: string }) => text[lang];
+		const gold = "#e9c65a";
+		const cream = "#f7f6f2";
+
+		const background = ctx.createLinearGradient(0, 0, W, H);
+		background.addColorStop(0, "#3f5128");
+		background.addColorStop(1, "#1b2411");
+		ctx.fillStyle = background;
+		ctx.fillRect(0, 0, W, H);
+
+		const x = 96;
+		ctx.textBaseline = "alphabetic";
+		ctx.fillStyle = gold;
+		ctx.font = `700 34px ${FONT}`;
+		ctx.fillText(`KICKS · ${card.league} WRAPPED`, x, 170);
+
+		ctx.fillStyle = cream;
+		ctx.font = `700 150px ${FONT}`;
+		ctx.fillText(card.name, x, 360);
+
+		// Position chips, same colors as on the site.
+		let chipX = x + ctx.measureText(card.name).width + 36;
+		ctx.font = `700 36px ${FONT}`;
+		for (const position of card.positions) {
+			const width = ctx.measureText(position).width + 44;
+			if (chipX + width > W - x) break;
+			ctx.fillStyle = POSITION_COLORS[position] ?? "#7f8c8d";
+			ctx.beginPath();
+			ctx.roundRect(chipX, 296, width, 60, 30);
+			ctx.fill();
+			ctx.fillStyle = "#ffffff";
+			ctx.fillText(position, chipX + 22, 339);
+			chipX += width + 14;
+		}
+
+		ctx.font = `600 44px ${FONT}`;
+		ctx.fillStyle = "rgba(247, 246, 242, 0.85)";
+		const teamLine = card.champion
+			? `🏆 ${card.team} · ${lang === "ko" ? "우승" : "Champions"}`
+			: `${card.team} · ${lang === "ko" ? `최종 ${card.rank}위` : `Finished #${card.rank}`}`;
+		ctx.fillText(teamLine, x, 450);
+		ctx.fillStyle = gold;
+		ctx.font = `700 38px ${FONT}`;
+		ctx.fillText(card.tag.toUpperCase(), x, 520);
+
+		// Stats.
+		const stats = [
+			[card.goals, lang === "ko" ? "골" : "GOALS"],
+			[card.assists, lang === "ko" ? "어시스트" : "ASSISTS"],
+			[card.games, lang === "ko" ? "경기" : "GAMES"],
+		] as const;
+		const colW = (W - x * 2) / 3;
+		ctx.strokeStyle = "rgba(247, 246, 242, 0.2)";
+		ctx.lineWidth = 2;
+		ctx.beginPath(); ctx.moveTo(x, 600); ctx.lineTo(W - x, 600); ctx.moveTo(x, 860); ctx.lineTo(W - x, 860); ctx.stroke();
+		stats.forEach(([value, label], i) => {
+			const cx = x + colW * i + colW / 2;
+			ctx.textAlign = "center";
+			ctx.fillStyle = cream;
+			ctx.font = `700 130px ${FONT}`;
+			ctx.fillText(String(value), cx, 770);
+			ctx.fillStyle = "rgba(247, 246, 242, 0.7)";
+			ctx.font = `700 32px ${FONT}`;
+			ctx.fillText(label, cx, 825);
+		});
+		ctx.textAlign = "left";
+
+		// Highlights.
+		ctx.fillStyle = gold;
+		ctx.font = `700 34px ${FONT}`;
+		ctx.fillText(lang === "ko" ? "하이라이트" : "HIGHLIGHTS", x, 960);
+		let y = 1050;
+		for (const highlight of card.highlights) {
+			ctx.font = `64px ${FONT}`;
+			ctx.fillText(highlight.icon, x, y + 8);
+			ctx.fillStyle = cream;
+			ctx.font = `700 48px ${FONT}`;
+			const afterTitle = wrapText(ctx, t(highlight.title), x + 100, y, W - x * 2 - 100, 58);
+			ctx.fillStyle = "rgba(247, 246, 242, 0.65)";
+			ctx.font = `500 34px ${FONT}`;
+			const afterSub = wrapText(ctx, t(highlight.sub), x + 100, afterTitle - 6, W - x * 2 - 100, 44);
+			ctx.fillStyle = gold;
+			y = afterSub + 50;
+		}
+
+		// Badges: every one as a plain emoji, wrapping as needed.
+		if (card.badges.length > 0) {
+			const size = 84;
+			const gap = 16;
+			let badgeY = Math.max(y + 10, 1540);
+			ctx.fillStyle = gold;
+			ctx.font = `700 30px ${FONT}`;
+			ctx.fillText(lang === "ko" ? `배지 ${card.badges.length}개` : `${card.badges.length} BADGES`, x, badgeY);
+			badgeY += 24;
+			let badgeX = x;
+			ctx.font = `60px ${FONT}`;
+			ctx.textBaseline = "middle";
+			for (const badge of card.badges) {
+				if (badgeX + size > W - x) {
+					badgeX = x;
+					badgeY += size + gap;
+				}
+				if (badgeY + size > 1780) break;
+				ctx.fillText(badge.icon, badgeX, badgeY + size / 2);
+				badgeX += size + gap;
+			}
+			ctx.textBaseline = "alphabetic";
+		}
+
+		ctx.fillStyle = "rgba(247, 246, 242, 0.6)";
+		ctx.font = `700 34px ${FONT}`;
+		ctx.fillText("kicksuiuc.com", x, 1830);
+
+		return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+	}
+</script>
+
+<style is:global>
+	html.wrapped-open { overflow: hidden; }
+
+	.wrapped {
+		--wr-gold: #e9c65a;
+		--wr-cream: #f7f6f2;
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+		display: grid;
+		place-items: center;
+		background: #141b0d;
+	}
+
+	.wrapped-stage {
+		position: relative;
+		width: min(100vw, calc(100dvh * 9 / 16));
+		height: 100dvh;
+		max-height: 100dvh;
+		overflow: hidden;
+		color: var(--wr-cream);
+		background: linear-gradient(160deg, #3f5128, #1b2411);
+		user-select: none;
+		touch-action: pan-y;
+		cursor: pointer;
+	}
+
+	@media (min-width: 700px) {
+		.wrapped-stage { height: min(92dvh, 900px); border-radius: 18px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45); }
+	}
+
+	.wrapped-progress {
+		position: absolute;
+		top: 16px;
+		left: 16px;
+		right: 16px;
+		z-index: 2;
+		display: flex;
+		gap: 4px;
+	}
+	.wrapped-progress span { flex: 1; height: 3px; border-radius: 2px; background: rgba(247, 246, 242, 0.25); overflow: hidden; }
+	.wrapped-progress span i { display: block; height: 100%; width: 0; background: var(--wr-cream); transition: width 250ms ease; }
+	.wrapped-progress span.is-done i { width: 100%; }
+
+	.wrapped-top {
+		position: absolute;
+		top: 30px;
+		left: 20px;
+		right: 12px;
+		z-index: 2;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.wrapped-brand { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.18em; color: var(--wr-gold); }
+	.wrapped-top-actions { display: flex; align-items: center; gap: 6px; }
+	.wrapped-lang, .wrapped-close {
+		display: grid;
+		place-items: center;
+		min-width: 40px;
+		height: 40px;
+		padding: 0 10px;
+		border: 0;
+		border-radius: 999px;
+		color: var(--wr-cream);
+		background: rgba(247, 246, 242, 0.12);
+		font: inherit;
+		font-size: 0.72rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.wrapped-close { font-size: 1rem; }
+	.wrapped-lang:hover, .wrapped-close:hover { background: rgba(247, 246, 242, 0.24); }
+
+	.wrapped-slide {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding: 96px 28px 48px;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(12px);
+		transition: opacity 280ms ease, transform 280ms ease, visibility 0s linear 280ms;
+	}
+	.wrapped-slide.is-active { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+
+	.wrapped-slide--champion { background: radial-gradient(circle at 50% 30%, rgba(233, 198, 90, 0.35), transparent 65%); }
+
+	.wrapped-eyebrow { margin: 0 0 14px; color: var(--wr-gold); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+	.wrapped-hero { margin: 0 0 20px; font-size: clamp(2.6rem, 13vw, 4rem); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+	.wrapped-name-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 22px; }
+	.wrapped-name-row .wrapped-hero { margin: 0; }
+	.wrapped-positions { display: flex; gap: 8px; margin: 0; }
+	.wrapped .position-chip { color: #fff; }
+	.wrapped-card-name { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+	.wrapped-card-name .position-chip { font-size: 0.72rem; padding: 0.2rem 0.65rem; letter-spacing: 0; }
+	.wrapped-hero--tag { font-size: clamp(2.2rem, 11vw, 3.4rem); }
+	.wrapped-hero--small { font-size: clamp(2rem, 9vw, 2.8rem); }
+	.wrapped-lead { margin: 0 0 10px; font-size: 1.05rem; line-height: 1.5; opacity: 0.85; }
+	.wrapped-lead--strong { font-size: 1.25rem; font-weight: 700; opacity: 1; }
+	.wrapped-hint { position: absolute; bottom: 36px; left: 28px; margin: 0; font-size: 0.8rem; opacity: 0.55; }
+
+	.wrapped-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px 16px; margin: 20px 0 32px; }
+	.wrapped-stats > div { display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid rgba(247, 246, 242, 0.2); }
+	.wrapped-stat-value { font-size: clamp(3.6rem, 19vw, 5.6rem); font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+	.wrapped-stat-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; }
+	/* Korean labels have no uppercase to lean on, so they read smaller at the same size. */
+	.wrapped-stat-label[data-lang="ko"] { font-size: 0.86rem; letter-spacing: 0.02em; }
+	.wrapped-card-stats [data-lang="ko"] { font-size: 0.8rem; letter-spacing: 0.02em; }
+
+	.wrapped-highlights { display: flex; flex-direction: column; gap: 14px; margin: 8px 0 0; padding: 0; list-style: none; }
+	.wrapped-highlights li { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 12px; background: rgba(247, 246, 242, 0.08); }
+	.wrapped-highlight-icon { font-size: 1.8rem; line-height: 1; }
+	.wrapped-highlight-title { margin: 0; font-size: 1.08rem; font-weight: 700; line-height: 1.35; }
+	.wrapped-highlight-sub { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.7; }
+
+	.wrapped-badges { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; padding: 0; list-style: none; }
+	.wrapped-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(247, 246, 242, 0.1); font-size: 0.82rem; font-weight: 600; }
+	.wrapped-badge--rare { box-shadow: inset 0 0 0 1px #7fa6d8; }
+	.wrapped-badge--legendary, .wrapped-badge--icon { box-shadow: inset 0 0 0 1px var(--wr-gold); }
+	.wrapped-badge--champion { color: #3b2f05; background: linear-gradient(135deg, #fff1c2, var(--wr-gold)); }
+
+	.wrapped-trophy { margin: 0 0 8px; font-size: 4.5rem; line-height: 1; }
+	.wrapped-team-name { margin: 0 0 16px; font-size: 1.5rem; font-weight: 700; }
+	.wrapped-team-name--big { font-size: clamp(2.2rem, 11vw, 3.2rem); line-height: 1.1; letter-spacing: -0.03em; }
+
+	/* Centered like the other slides; auto margins (not justify-content) keep the
+	   top reachable by scrolling when the card is taller than a short screen. */
+	.wrapped-slide--summary { justify-content: flex-start; padding-top: 88px; overflow-y: auto; cursor: default; }
+	.wrapped-slide--summary > :first-child { margin-top: auto; }
+	.wrapped-slide--summary > :last-child { margin-bottom: auto; }
+	.wrapped-card { padding: 22px 20px; border: 1px solid rgba(233, 198, 90, 0.5); border-radius: 16px; background: rgba(20, 27, 13, 0.55); }
+	.wrapped-card-brand { margin: 0 0 12px; color: var(--wr-gold); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.14em; }
+	.wrapped-card-name { margin: 0; font-size: 2.2rem; font-weight: 700; line-height: 1.1; }
+	.wrapped-card-team { margin: 6px 0 16px; font-size: 0.9rem; opacity: 0.85; }
+	.wrapped-card-stats { display: grid; grid-template-columns: repeat(3, 1fr); padding: 12px 0; border-block: 1px solid rgba(247, 246, 242, 0.18); text-align: center; }
+	.wrapped-card-stats div { display: flex; flex-direction: column; gap: 2px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85; }
+	.wrapped-card-stats strong { font-size: 1.8rem; letter-spacing: 0; }
+	.wrapped-card-highlights { display: flex; flex-direction: column; gap: 8px; margin: 16px 0 12px; padding: 0; list-style: none; font-size: 0.92rem; font-weight: 600; }
+	.wrapped-card-highlights li { display: flex; gap: 10px; }
+	.wrapped-card-badge-row { display: flex; flex-direction: column; gap: 8px; }
+	.wrapped-card-badge-count { color: var(--wr-gold); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+	.wrapped-card-badges { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 0; padding: 0; list-style: none; }
+	.wrapped-card-badge { font-size: 1.3rem; line-height: 1.2; }
+
+	.wrapped-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+	.wrapped-button {
+		flex: 1 1 auto;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 46px;
+		padding: 0 16px;
+		border: 1px solid rgba(247, 246, 242, 0.4);
+		border-radius: 999px;
+		color: var(--wr-cream);
+		background: transparent;
+		font: inherit;
+		font-size: 0.88rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.wrapped-button--primary { border-color: var(--wr-gold); color: #2a2206; background: var(--wr-gold); }
+	.wrapped-button--ghost { border-color: transparent; opacity: 0.75; }
+	.wrapped-button:hover { filter: brightness(1.08); }
+	.wrapped-button:focus-visible, .wrapped-lang:focus-visible, .wrapped-close:focus-visible { outline: 2px solid var(--wr-gold); outline-offset: 2px; }
+
+	@media (prefers-reduced-motion: reduce) {
+		.wrapped-slide { transform: none; transition: opacity 1ms, visibility 0s; }
+	}
+</style>
