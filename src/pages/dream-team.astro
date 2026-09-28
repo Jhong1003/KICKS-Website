@@ -285,11 +285,29 @@ const players = (profilesData as PlayerProfile[])
 			dragging = { id, fromPitch, ghost };
 			moveGhost(x, y);
 			document.documentElement.classList.add("dream-dragging");
+			scrollTimer = requestAnimationFrame(autoScroll);
 			slotsEl.querySelector<HTMLElement>(`[data-id="${CSS.escape(id)}"]`)?.classList.add("is-lifted");
+		}
+
+		// Auto-scroll while dragging near the top/bottom edge of the screen, so the
+		// pitch can be reached even if it has scrolled out of view.
+		const EDGE = 70;
+		let pointer = { x: 0, y: 0 };
+		let scrollTimer = 0;
+		function autoScroll() {
+			if (!dragging) return;
+			const { y } = pointer;
+			const speed = y < EDGE ? -(EDGE - y) / 4 : y > window.innerHeight - EDGE ? (y - (window.innerHeight - EDGE)) / 4 : 0;
+			if (speed) {
+				window.scrollBy(0, speed);
+				pitch.classList.toggle("is-drop-target", pitchPoint(pointer.x, pointer.y) !== null);
+			}
+			scrollTimer = requestAnimationFrame(autoScroll);
 		}
 
 		function moveGhost(x: number, y: number) {
 			if (!dragging) return;
+			pointer = { x, y };
 			dragging.ghost.style.left = `${x}px`;
 			dragging.ghost.style.top = `${y}px`;
 			pitch.classList.toggle("is-drop-target", pitchPoint(x, y) !== null);
@@ -298,6 +316,7 @@ const players = (profilesData as PlayerProfile[])
 		function endDrag(x: number, y: number) {
 			if (!dragging) return;
 			const { id, fromPitch, ghost } = dragging;
+			cancelAnimationFrame(scrollTimer);
 			ghost.remove();
 			dragging = null;
 			document.documentElement.classList.remove("dream-dragging");

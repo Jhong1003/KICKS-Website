@@ -2744,7 +2744,32 @@ a.player-card:hover {
 
 	.dream-team {
 		grid-template-columns: minmax(0, 1fr);
-		gap: 20px;
+		gap: 16px;
+	}
+
+	/* 휴대폰: 명단을 스크롤해도 경기장이 화면 위에 붙어 있어서 끌어 올릴 곳이
+	   항상 보이게. 화면을 너무 가리지 않도록 경기장은 화면 높이의 약 절반. */
+	.dream-pitch-col {
+		position: sticky;
+		top: 0;
+		z-index: 5;
+		padding: 8px 0 10px;
+		background-color: var(--color-background);
+		box-shadow: 0 8px 12px -10px rgba(0, 0, 0, 0.25);
+	}
+
+	.dream-pitch {
+		width: auto;
+		height: min(52vh, 133vw);
+		margin: 0 auto;
+	}
+
+	.dream-squad-tabs {
+		margin-bottom: 8px;
+	}
+
+	.dream-team-actions {
+		margin-top: 8px;
 	}
 
 }
@@ -3179,6 +3204,21 @@ html.dream-dragging * {
 .league-rules-highlight {
 
 	font-weight: 700;
+
+}
+
+/* 좁은 화면: 한 줄에 다 안 들어가서 "·"가 줄 맨 앞에 오는 게 어색하니,
+   항목마다 한 줄씩 세로로 쌓고 구분점은 뺌 */
+@media (max-width: 700px) {
+
+	.league-rules {
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.league-rules li + li::before {
+		content: none;
+	}
 
 }
 
