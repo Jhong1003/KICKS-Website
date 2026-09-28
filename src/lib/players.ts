@@ -266,8 +266,8 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 	// Icon — shown as a locked "???" card until someone earns it
 	treble: {
 		label: "Treble",
-		description: "Won the league, finished first in attacking points, and attended every week of it.",
-		descriptionKo: "한 리그에서 우승, 공격포인트 1위, 전 주차 출석을 모두 해냈어요.",
+		description: "Won the league, topped attacking points, never missed a week.",
+		descriptionKo: "리그 우승·공격포인트 1위·전 주차 출석을 모두 해냈어요.",
 		icon: "👑",
 		tier: "icon",
 	},

@@ -4,6 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Header from "../components/Header.astro";
 import StandingsTable from "../components/StandingsTable.astro";
 import T from "../components/T.astro";
+import LeagueFinaleBanner from "../components/LeagueFinaleBanner.astro";
 import TransferBanner from "../components/TransferBanner.astro";
 import WelcomePopup from "../components/WelcomePopup.astro";
 import leagueTable from "../data/league_table.json";
@@ -16,6 +17,7 @@ import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule"
 import { formatShortDate } from "../lib/i18n";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
 import { latestLeague, getTeamName } from "../lib/leagues";
+import { getLeagueFinale } from "../lib/finale";
 import { buildGoalCountdown, isCelebratingMilestone, type MatchScore } from "../lib/goals";
 
 const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
@@ -26,8 +28,11 @@ const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData 
 const standings = leagueTable
 	.filter((row) => row.league === latestLeague.id)
 	.map((row) => ({ ...row, team: getTeamName(row.team_id, latestLeague) }));
+// Once the latest league is finished, its results banner takes over the top
+// slot and the (now stale) transfer news steps aside.
+const finale = getLeagueFinale(latestLeague);
 const showTransferBanner =
-	transferNews.enabled && transferNews.league === latestLeague.id && resolvedTransfers.length > 0;
+	!finale && transferNews.enabled && transferNews.league === latestLeague.id && resolvedTransfers.length > 0;
 // Club-wide all-time goals (every league summed). Celebration state is as of
 // build time here; the script below re-checks it against the visitor's date.
 const goalCountdown = buildGoalCountdown(matchesData as MatchScore[]);
@@ -41,6 +46,7 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 >
 	<WelcomePopup />
 	<main>
+		{finale && <LeagueFinaleBanner league={latestLeague} finale={finale} />}
 		{
 			showTransferBanner && (
 				<TransferBanner

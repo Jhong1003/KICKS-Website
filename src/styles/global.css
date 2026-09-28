@@ -2962,6 +2962,152 @@ a.player-card:hover {
 
 }
 
+/* 홈 화면 리그 결산 배너 (리그가 끝나면 이적 배너 자리에 표시) */
+
+.finale-banner {
+
+	background: linear-gradient(90deg, #f6e7b8, #fbf3da);
+	border-bottom: 1px solid rgba(201, 162, 39, 0.45);
+
+}
+
+.finale-banner[hidden] {
+
+	display: none;
+
+}
+
+.finale-banner-inner {
+
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 12px clamp(24px, 6vw, 88px);
+
+}
+
+.finale-banner-label {
+
+	flex-shrink: 0;
+	color: #7a5f0e;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	white-space: nowrap;
+
+}
+
+.finale-banner-list {
+
+	display: flex;
+	flex: 1;
+	gap: 10px;
+	overflow-x: auto;
+	scrollbar-width: thin;
+
+}
+
+.finale-chip {
+
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: 6px;
+	padding: 6px 12px;
+	border: 1px solid rgba(201, 162, 39, 0.45);
+	border-radius: 999px;
+	background-color: var(--color-background);
+	color: var(--color-dark);
+	font-size: 0.8rem;
+	white-space: nowrap;
+
+}
+
+.finale-chip--champion {
+
+	border-color: #c9a227;
+	box-shadow: 0 0 10px rgba(233, 190, 60, 0.45);
+
+}
+
+.finale-chip-title {
+
+	color: #7a5f0e;
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+
+}
+
+.finale-chip-name {
+
+	color: var(--color-dark);
+	font-weight: 700;
+
+}
+
+a.finale-chip-name:hover,
+.finale-chip--champion:hover .finale-chip-name {
+
+	text-decoration: underline;
+	text-underline-offset: 2px;
+
+}
+
+.finale-chip-sep,
+.finale-chip-count {
+
+	color: var(--color-dark);
+	opacity: 0.6;
+
+}
+
+.finale-banner-close {
+
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: none;
+	color: var(--color-dark);
+	font-size: 0.85rem;
+	opacity: 0.6;
+	cursor: pointer;
+
+}
+
+.finale-banner-close:hover {
+
+	background-color: rgba(41, 41, 41, 0.08);
+	opacity: 1;
+
+}
+
+@media (max-width: 700px) {
+
+	.finale-banner-inner {
+		gap: 10px;
+		padding: 10px 20px;
+	}
+
+	.finale-banner-label {
+		display: none;
+	}
+
+	.finale-chip {
+		padding: 5px 10px;
+		font-size: 0.75rem;
+	}
+
+}
+
 .player-positions {
 	display: flex;
 	gap: 0.5rem;

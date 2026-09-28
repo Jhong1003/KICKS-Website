@@ -1,0 +1,85 @@
+---
+// Gold strip at the top of the homepage while the latest league is finished
+// and the next one hasn't recorded a result yet (see src/lib/finale.ts).
+import T from "./T.astro";
+import type { LeagueFinale, LeagueAward } from "../lib/finale";
+import { getReadableAccentColor } from "../lib/players";
+import { getTeamColor, getTeamName, type League } from "../lib/leagues";
+
+interface Props {
+	league: League;
+	finale: LeagueFinale;
+}
+
+const { league, finale } = Astro.props;
+
+const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: string; award: LeagueAward | null }[] = [
+	{ icon: "👟", en: "Golden Boot", ko: "득점왕", unitEn: "goals", unitKo: "골", award: finale.goldenBoot },
+	{ icon: "🎯", en: "Top Assists", ko: "도움왕", unitEn: "assists", unitKo: "어시스트", award: finale.topAssists },
+];
+---
+
+<div class="finale-banner" id="finale-banner">
+	<div class="finale-banner-inner">
+		<span class="finale-banner-label">
+			<T en={`${league.id} Final`} ko={`${league.id} 결산`} />
+		</span>
+		<div class="finale-banner-list">
+			{
+				finale.championTeamIds.map((teamId) => (
+					<a class="finale-chip finale-chip--champion" href="/league">
+						<span aria-hidden="true">🏆</span>
+						<span class="finale-chip-title"><T en="Champion" ko="우승" /></span>
+						<span class="finale-chip-name" style={`color: ${getReadableAccentColor(getTeamColor(teamId, league))}`}>
+							{getTeamName(teamId, league)}
+						</span>
+					</a>
+				))
+			}
+			{
+				awards.map(({ icon, en, ko, unitEn, unitKo, award }) =>
+					award ? (
+						<div class="finale-chip">
+							<span aria-hidden="true">{icon}</span>
+							<span class="finale-chip-title"><T en={en} ko={ko} /></span>
+							{award.winners.map((winner, index) => (
+								<>
+									{index > 0 && <span class="finale-chip-sep">·</span>}
+									<a class="finale-chip-name" href={`/players/${winner.id}`}>{winner.name}</a>
+								</>
+							))}
+							<span class="finale-chip-count">
+								<T en={`${award.count} ${unitEn}`} ko={`${award.count}${unitKo}`} />
+							</span>
+						</div>
+					) : null,
+				)
+			}
+		</div>
+		<button
+			class="finale-banner-close"
+			type="button"
+			aria-label="Dismiss league results"
+			data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Dismiss league results", ko: "리그 결산 닫기" } })}
+		>
+			✕
+		</button>
+	</div>
+</div>
+
+<script>
+	// Like the transfer banner: closing hides it for the rest of this visit only.
+	const DISMISSED_KEY = "kicks-finale-banner-dismissed";
+	const banner = document.getElementById("finale-banner");
+
+	if (banner) {
+		try {
+			if (sessionStorage.getItem(DISMISSED_KEY) === "1") banner.hidden = true;
+		} catch { /* Storage may be disabled. */ }
+
+		banner.querySelector(".finale-banner-close")?.addEventListener("click", () => {
+			banner.hidden = true;
+			try { sessionStorage.setItem(DISMISSED_KEY, "1"); } catch { /* Closing still works. */ }
+		});
+	}
+</script>
