@@ -3383,44 +3383,20 @@ a.finale-chip-name:hover,
 
 }
 
-.finale-chip--wrapped {
-
-	order: 1;
-
-}
-
-/* 휴대폰: 옆으로 스크롤하지 않고 두 줄로 — 첫 줄에 우승·득점왕·도움왕을 전부
-   (상 이름 글자는 빼고 아이콘으로 구분), 둘째 줄에 Wrapped 버튼을 폭 가득 */
 @media (max-width: 700px) {
 
 	.finale-banner-inner {
-		align-items: flex-start;
 		gap: 10px;
-		padding: 10px 16px 12px;
+		padding: 10px 20px;
 	}
 
-	.finale-banner-label,
-	.finale-chip-title {
+	.finale-banner-label {
 		display: none;
 	}
 
-	.finale-banner-list {
-		flex-wrap: wrap;
-		gap: 6px;
-		overflow: visible;
-	}
-
 	.finale-chip {
-		gap: 4px;
 		padding: 5px 10px;
 		font-size: 0.75rem;
-	}
-
-	.finale-chip--wrapped {
-		flex-basis: 100%;
-		justify-content: center;
-		padding: 9px 12px;
-		font-size: 0.85rem;
 	}
 
 }
