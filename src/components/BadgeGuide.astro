@@ -1,0 +1,259 @@
+---
+// "All Badges" popup on the player detail page: every badge, rarest tier
+// first, with its condition and who holds it in this league. The page opens
+// it with a button carrying data-badge-guide-open="<dialog id>".
+//
+// Icon badges nobody has earned in *any* league yet stay locked: 🔒 and
+// "???" in place of the icon and name, condition still shown, so there's
+// something to chase. Other tiers are never locked — an unearned one just
+// says "Nobody yet". Everything is computed at build time from
+// player_profiles.json, same as the rest of the page.
+import T from "./T.astro";
+import profilesData from "../data/player_profiles.json";
+import {
+	BADGES,
+	BADGE_TIER_LABELS,
+	BADGE_TIER_LABELS_KO,
+	FEATURED_BADGE,
+	TIER_ORDER,
+	getSection,
+	type BadgeKey,
+	type PlayerProfile,
+} from "../lib/players";
+
+interface Props {
+	id: string;
+	league: string;
+	/** The badges of the player whose page this is, highlighted as earned. */
+	playerBadges: BadgeKey[];
+}
+
+const { id, league, playerBadges } = Astro.props;
+const profiles = profilesData as PlayerProfile[];
+
+const earnedAnywhere = new Set(profiles.flatMap((player) => player.leagues.flatMap((section) => section.badges)));
+
+const holdersIn = (key: BadgeKey) =>
+	profiles
+		.filter((player) => player.status !== "inactive" && getSection(player, league)?.badges.includes(key))
+		.map((player) => ({ id: player.id, name: player.name }))
+		.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+
+const tiers = TIER_ORDER.map((tier) => ({
+	tier,
+	badges: (Object.keys(BADGES) as BadgeKey[])
+		.filter((key) => BADGES[key].tier === tier)
+		.map((key) => ({
+			key,
+			info: BADGES[key],
+			locked: tier === "icon" && !earnedAnywhere.has(key),
+			mine: playerBadges.includes(key),
+			holders: holdersIn(key),
+		})),
+}));
+---
+
+<dialog class="badge-guide" id={id} aria-labelledby={`${id}-title`}>
+	<div class="badge-guide-head">
+		<div>
+			<h2 id={`${id}-title`}><T en="All Badges" ko="배지 목록" /></h2>
+			<p class="badge-guide-sub">
+				<T en={`Holders shown for ${league}`} ko={`${league} 획득자 기준`} />
+			</p>
+		</div>
+		<button
+			class="badge-guide-close"
+			type="button"
+			aria-label="Close"
+			data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close", ko: "닫기" } })}
+			data-badge-guide-close
+		>
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+				<path d="m6 6 12 12M18 6 6 18"></path>
+			</svg>
+		</button>
+	</div>
+
+	<div class="badge-guide-body">
+		{
+			tiers.map(({ tier, badges }) => (
+				<section class="badge-guide-tier">
+					<h3 class={`badge-guide-tier-title badge-guide-tier-title--${tier}`}>
+						<T en={BADGE_TIER_LABELS[tier]} ko={BADGE_TIER_LABELS_KO[tier]} />
+					</h3>
+					<ul class="badge-guide-list">
+						{badges.map(({ key, info, locked, mine, holders }) => (
+							<li
+								class:list={[
+									"player-badge-item",
+									`player-badge-item--${tier}`,
+									"badge-guide-item",
+									{
+										"badge-guide-item--locked": locked,
+										"badge-guide-item--mine": mine,
+										"player-badge-item--champion": key === FEATURED_BADGE,
+									},
+								]}
+							>
+								<span class="player-badge-icon" aria-hidden="true">
+									{locked ? "🔒" : info.icon}
+								</span>
+								<div>
+									<p class="player-badge-label">
+										{locked ? "???" : <T en={info.label} ko={info.labelKo ?? info.label} />}
+										{mine && (
+											<span class="badge-guide-mine">
+												<T en="Earned" ko="획득" />
+											</span>
+										)}
+									</p>
+									<T as="p" class="player-badge-description" en={info.description} ko={info.descriptionKo} />
+									{info.note && <T as="p" class="badge-guide-note" en={info.note} ko={info.noteKo ?? info.note} />}
+									{!locked && (
+										<p class="badge-guide-holders">
+											{holders.length === 0 ? (
+												<T en="Nobody yet" ko="아직 없음" />
+											) : (
+												holders.map((holder, index) => (
+													<>
+														{index > 0 && ", "}
+														<a href={`/players/${holder.id}`}>{holder.name}</a>
+													</>
+												))
+											)}
+										</p>
+									)}
+								</div>
+							</li>
+						))}
+					</ul>
+				</section>
+			))
+		}
+	</div>
+</dialog>
+
+<script>
+	// Native <dialog>: ESC closes it on its own; this adds the open buttons,
+	// the ✕ button, a click outside the panel, and locks the page scroll behind.
+	document.querySelectorAll<HTMLElement>("[data-badge-guide-open]").forEach((button) => {
+		const dialog = document.getElementById(button.dataset.badgeGuideOpen ?? "");
+		if (!(dialog instanceof HTMLDialogElement)) return;
+
+		button.addEventListener("click", () => {
+			document.documentElement.classList.add("badge-guide-open");
+			dialog.showModal();
+			dialog.querySelector<HTMLElement>(".badge-guide-body")?.scrollTo({ top: 0 });
+		});
+		dialog.addEventListener("close", () => {
+			document.documentElement.classList.remove("badge-guide-open");
+			button.focus({ preventScroll: true });
+		});
+		dialog.querySelector("[data-badge-guide-close]")?.addEventListener("click", () => dialog.close());
+
+		// Both ends of the click must be outside, so a drag that starts on the panel doesn't close it.
+		let startedOutside = false;
+		const isOutside = (event: MouseEvent) => {
+			const rect = dialog.getBoundingClientRect();
+			return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+		};
+		dialog.addEventListener("pointerdown", (event) => { startedOutside = isOutside(event); });
+		dialog.addEventListener("click", (event) => { if (startedOutside && isOutside(event)) dialog.close(); });
+	});
+</script>
+
+<style>
+	:global(html.badge-guide-open) { overflow: hidden; }
+
+	.badge-guide {
+		width: min(560px, calc(100% - 32px));
+		max-width: none;
+		max-height: calc(100dvh - 32px);
+		margin: auto;
+		padding: 0;
+		border: 1px solid rgba(63, 81, 40, 0.25);
+		border-radius: 6px;
+		color: var(--color-green);
+		background: var(--color-background);
+		overscroll-behavior: contain;
+	}
+	.badge-guide[open] { display: flex; flex-direction: column; }
+	.badge-guide::backdrop { background: rgba(20, 29, 14, 0.4); }
+
+	.badge-guide-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 16px;
+		padding: 20px 20px 16px 24px;
+		border-bottom: 1px solid rgba(63, 81, 40, 0.2);
+	}
+	.badge-guide-head h2 { margin: 0; font-size: 1.4rem; }
+	.badge-guide-sub { margin: 4px 0 0; color: var(--color-dark); font-size: 0.8rem; opacity: 0.7; }
+	.badge-guide-close {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		border: 1px solid transparent;
+		border-radius: 6px;
+		color: inherit;
+		background: transparent;
+		cursor: pointer;
+	}
+	.badge-guide-close:hover { background: var(--color-sage); }
+	.badge-guide-close:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
+
+	.badge-guide-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 8px 24px 28px; }
+	.badge-guide-tier { margin-top: 20px; }
+	.badge-guide-tier-title {
+		margin: 0 0 12px;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+	}
+	.badge-guide-tier-title--legendary { color: #7a5f0e; }
+	.badge-guide-tier-title--rare { color: #2f5f99; }
+
+	.badge-guide-list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+	.badge-guide-item { padding: 10px 12px; border: 1px solid transparent; border-radius: 6px; }
+	.badge-guide-item--mine { border-color: rgba(63, 81, 40, 0.35); background: rgba(220, 226, 211, 0.45); }
+	.badge-guide-item--locked .player-badge-icon { filter: grayscale(1); opacity: 0.7; }
+	.badge-guide-item--locked .player-badge-label { letter-spacing: 0.15em; }
+
+	.badge-guide-mine {
+		margin-left: 8px;
+		padding: 1px 8px;
+		border-radius: 999px;
+		color: var(--color-background);
+		background: var(--color-green);
+		font-size: 0.6rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		vertical-align: middle;
+	}
+	.badge-guide-note { margin: 2px 0 0; color: var(--color-dark); font-size: 0.75rem; font-style: italic; opacity: 0.6; }
+	.badge-guide-holders { margin: 6px 0 0; color: var(--color-dark); font-size: 0.78rem; line-height: 1.6; }
+	.badge-guide-holders a { color: var(--color-green); font-weight: 600; }
+	.badge-guide-holders a:hover { text-decoration: underline; }
+
+	/* Phones: a full-width sheet that rises from the bottom. */
+	@media (max-width: 600px) {
+		.badge-guide {
+			width: 100%;
+			max-height: 88dvh;
+			margin: auto 0 0;
+			border-bottom: 0;
+			border-radius: 14px 14px 0 0;
+		}
+		.badge-guide-head { padding: 16px 12px 12px 16px; }
+		.badge-guide-body { padding: 4px 16px 24px; }
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.badge-guide[open] { animation: badge-guide-in 160ms ease-out; }
+		@keyframes badge-guide-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+	}
+</style>

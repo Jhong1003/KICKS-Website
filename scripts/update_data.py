@@ -576,6 +576,7 @@ MAESTRO_ASSISTS = 3  # assists in a single week
 THE_WALL_CLEAN_SHEETS = 3  # team clean sheets in a single week
 BRACE_GOALS = 2  # goals in a single *match* (needs goal_events, so FA26-L2 onward)
 HAT_TRICK_GOALS = 3  # goals in a single match (also counts as a Brace)
+POKER_GOALS = 4  # goals in a single match (Icon; also counts as Hat-trick and Brace)
 OWN_GOAL_AWARD_MIN = 1  # 1+ own goal in the league
 
 DEFENSIVE_POSITIONS = {"DF", "GK"}
@@ -655,6 +656,8 @@ def _badges(
     max_match_goals: int,
     wall_weeks: set[tuple[int, str]],
     champion: bool,
+    top_scorer: bool,
+    weeks_played: int,
     moved_teams: bool,
 ) -> list[str]:
     """Every badge a player has earned in one league (a player can have many).
@@ -667,6 +670,10 @@ def _badges(
 
     `rows` is the player's player_stats rows for this league — one per week
     from the week they joined (absent weeks are rows with games = 0).
+    `top_scorer` = first in the league's attacking-points ranking (see
+    _top_attackers); `weeks_played` = weeks the league has had so far.
+    `back_to_back` is added afterwards in build_player_profiles, since it
+    needs the player's other leagues.
     """
     attended = rows[rows["games"] > 0]
     weekly_points = attended["goals"] + attended["assists"]
@@ -674,6 +681,11 @@ def _badges(
     own_goals = int(rows["own_goals"].sum())
 
     badges = []
+    # Icon — "???"-locked on the site until someone earns one
+    if champion and top_scorer and len(attended) == weeks_played:
+        badges.append("treble")
+    if max_match_goals >= POKER_GOALS:
+        badges.append("poker")
     # Common
     if goals >= 1:
         badges.append("off_the_mark")
@@ -763,6 +775,23 @@ def _champions(matches: pd.DataFrame, league_table: list[dict]) -> dict[str, set
     return champions
 
 
+def _top_attackers(player_stats: pd.DataFrame) -> dict[str, set[str]]:
+    """player_id(s) first in each league's attacking-points ranking, for Treble.
+
+    Same order as the leaderboard (attacking points -> goals -> assists), but
+    without its final name-order fallback: a player still level on all three
+    shares first place. Attendance, the leaderboard's last real tiebreaker,
+    is left out because Treble already requires every week attended.
+    """
+    top: dict[str, set[str]] = {}
+    for league, league_stats in player_stats.groupby("league", sort=False):
+        totals = league_stats.groupby("player_id")[["goals", "assists"]].sum()
+        keys = list(zip(totals["goals"] + totals["assists"], totals["goals"], totals["assists"]))
+        best = max(keys)
+        top[league] = {player_id for player_id, key in zip(totals.index, keys) if key == best}
+    return top
+
+
 def _max_match_goals(goal_events: pd.DataFrame, player_ids: dict[str, str]) -> dict[tuple[str, str], int]:
     """(league, player_id) -> most goals that player scored in one match.
 
@@ -793,6 +822,7 @@ def _league_section(
     max_match_goals: int,
     wall_weeks: set[tuple[int, str]],
     champion_teams: set[str],
+    top_scorer: bool,
 ) -> dict:
     """One player's profile for a single league (stats, tag, badges)."""
     rows = rows.sort_values("week")
@@ -832,6 +862,8 @@ def _league_section(
             max_match_goals=max_match_goals,
             wall_weeks=wall_weeks,
             champion=current_team_id in champion_teams,
+            top_scorer=top_scorer,
+            weeks_played=weeks_played,
             moved_teams=len(segments) > 1,
         ),
     }
@@ -859,8 +891,10 @@ def build_player_profiles(
     get one automatically once their first week of stats is entered.
 
     `matches` and `league_table` feed the team-based badges (The Wall,
-    Champion); `goal_events` (still name-based) feeds the per-match ones
-    (Brace, Hat-trick).
+    Champion, Treble); `goal_events` (still name-based) feeds the per-match
+    ones (Brace, Hat-trick, Poker). Back-to-Back is the one badge that
+    looks across leagues: champion of two leagues in a row (consecutive in
+    `league_order`), awarded in the second one.
     """
     weeks_played = player_stats.groupby("league")["week"].nunique().to_dict()
     player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0, "own_goals": 0})
@@ -871,6 +905,7 @@ def build_player_profiles(
 
     wall_weeks = _wall_weeks(matches)
     champions = _champions(matches, league_table)
+    top_attackers = _top_attackers(player_stats)
     max_match_goals = _max_match_goals(goal_events, dict(zip(players["player"], players["player_id"])))
 
     profiles = []
@@ -887,10 +922,16 @@ def build_player_profiles(
                 max_match_goals=max_match_goals.get((league, player_id), 0),
                 wall_weeks=wall_weeks.get(league, set()),
                 champion_teams=champions.get(league, set()),
+                top_scorer=player_id in top_attackers.get(league, set()),
             )
             for league, rows in player_rows.groupby("league", sort=False)
         ]
         sections.sort(key=lambda section: league_rank[section["league"]], reverse=True)
+        won = {section["league"] for section in sections if "champion" in section["badges"]}
+        for section in sections:
+            rank = league_rank[section["league"]]
+            if section["league"] in won and rank > 0 and league_order[rank - 1] in won:
+                section["badges"].insert(0, "back_to_back")
 
         profiles.append(
             {

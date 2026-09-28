@@ -71,6 +71,9 @@ export type BadgeKey =
 	| "maestro"
 	| "delivery_service"
 	| "hat_trick"
+	| "treble"
+	| "poker"
+	| "back_to_back"
 	| "own_goal_award"
 	| "journeyman";
 
@@ -117,9 +120,10 @@ export interface PlayerInLeague {
  * How hard a badge is to earn. Fixed per badge (never recalculated from how
  * many people hold it); "special" is for the just-for-fun story badges.
  */
-export type BadgeTier = "legendary" | "rare" | "common" | "special";
+export type BadgeTier = "icon" | "legendary" | "rare" | "common" | "special";
 
 export const BADGE_TIER_LABELS: Record<BadgeTier, string> = {
+	icon: "Icon",
 	legendary: "Legendary",
 	rare: "Rare",
 	common: "Common",
@@ -127,15 +131,20 @@ export const BADGE_TIER_LABELS: Record<BadgeTier, string> = {
 };
 
 export const BADGE_TIER_LABELS_KO: Record<BadgeTier, string> = {
+	icon: "아이콘",
 	legendary: "전설",
 	rare: "레어",
 	common: "일반",
 	special: "스페셜",
 };
 
-const TIER_ORDER: BadgeTier[] = ["legendary", "rare", "common", "special"];
+export const TIER_ORDER: BadgeTier[] = ["icon", "legendary", "rare", "common", "special"];
 
-/** `labelKo` only where the Korean name differs (badge names otherwise stay English in both languages). */
+/**
+ * `labelKo` only where the Korean name differs (badge names otherwise stay
+ * English in both languages). `note`/`noteKo`: a short caveat shown in the
+ * All Badges popup, e.g. for badges that can only be earned from a later league.
+ */
 export interface BadgeInfo {
 	label: string;
 	labelKo?: string;
@@ -143,7 +152,12 @@ export interface BadgeInfo {
 	descriptionKo: string;
 	icon: string;
 	tier: BadgeTier;
+	note?: string;
+	noteKo?: string;
 }
+
+/** Per-match badges need goal_events, which FA26-L1 (weekly totals) doesn't have. */
+const PER_MATCH_NOTE = { note: "Tracked from FA26-L2 onward.", noteKo: "FA26-L2부터 집계해요." };
 
 export const BADGES: Record<BadgeKey, BadgeInfo> = {
 	// Common
@@ -211,6 +225,7 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		descriptionKo: "한 경기에서 2골을 넣었어요.",
 		icon: "✌️",
 		tier: "rare",
+		...PER_MATCH_NOTE,
 	},
 	// Legendary
 	game_changer: {
@@ -254,6 +269,30 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		descriptionKo: "한 경기에서 3골을 넣었어요.",
 		icon: "🎩",
 		tier: "legendary",
+		...PER_MATCH_NOTE,
+	},
+	// Icon — shown as a locked "???" card until someone earns it
+	treble: {
+		label: "Treble",
+		description: "Won the league, finished first in attacking points, and attended every week of it.",
+		descriptionKo: "한 리그에서 우승, 공격포인트 1위, 전 주차 출석을 모두 해냈어요.",
+		icon: "👑",
+		tier: "icon",
+	},
+	poker: {
+		label: "Poker",
+		description: "Scored 4 goals in a single match.",
+		descriptionKo: "한 경기에서 4골을 넣었어요.",
+		icon: "🃏",
+		tier: "icon",
+		...PER_MATCH_NOTE,
+	},
+	back_to_back: {
+		label: "Back-to-Back",
+		description: "Won two leagues in a row.",
+		descriptionKo: "두 리그 연속 우승을 차지했어요.",
+		icon: "🔁",
+		tier: "icon",
 	},
 	// Special — just for fun
 	own_goal_award: {
@@ -272,9 +311,20 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 	},
 };
 
-/** Badges rarest-first (legendary, rare, common, then the fun ones), keeping the pipeline's order within a tier. */
+/**
+ * Champion stays a Rare badge (every player on the winning team gets it, so
+ * it says little about the player alone), but a league title is the season's
+ * headline: it's shown first after the Icon badges and gets its own gold
+ * look (`player-badge-item--champion` / `player-card-badge--champion`).
+ */
+export const FEATURED_BADGE: BadgeKey = "champion";
+
+const badgeRank = (key: BadgeKey) =>
+	key === FEATURED_BADGE ? TIER_ORDER.indexOf("legendary") - 0.5 : TIER_ORDER.indexOf(BADGES[key].tier);
+
+/** Badges rarest-first (icon, champion, legendary, rare, common, then the fun ones), keeping the pipeline's order within a tier. */
 export function sortBadges(keys: BadgeKey[]): BadgeKey[] {
-	return [...keys].sort((a, b) => TIER_ORDER.indexOf(BADGES[a].tier) - TIER_ORDER.indexOf(BADGES[b].tier));
+	return [...keys].sort((a, b) => badgeRank(a) - badgeRank(b));
 }
 
 /** WCAG relative luminance of a hex color, or null if it doesn't parse. */

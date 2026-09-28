@@ -48,6 +48,9 @@ const matches = inLeague(matchesData as MatchRecord[]).map((match) => ({
 	home_team: teamName(match.home_team_id),
 	away_team: teamName(match.away_team_id),
 }));
+// Same rule as the pipeline's Champion badge (_champions in update_data.py):
+// a league is finished once every fixture has a score.
+const finished = matches.length > 0 && matches.every((match) => match.home_score !== null && match.away_score !== null);
 const weekSummaries = inLeague(weekSummariesData).map((row) => ({ ...row, team: teamName(row.team_id) }));
 const leaderboard = inLeague(leaderboardData)
 	.filter((player) => player.status !== "inactive")
@@ -115,7 +118,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		<h2 id="standings-title"><T en="League Table" ko="순위표" /></h2>
 		{
 			standings.length > 0 ? (
-				<StandingsTable rows={standings} />
+				<StandingsTable rows={standings} finished={finished} />
 			) : (
 				<T
 					as="p"

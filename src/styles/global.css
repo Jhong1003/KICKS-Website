@@ -2404,6 +2404,16 @@ a.player-card:hover {
 
 }
 
+/* 아이콘(최상위) 등급: 진한 초록 바탕에 금색 이중 테두리 */
+
+.player-card-badge--icon,
+.player-badge-item--icon .player-badge-icon {
+
+	background-color: var(--color-green);
+	box-shadow: 0 0 0 2px #c9a227, 0 0 0 4px #f6e7b8;
+
+}
+
 /* 큰 카드 (선수 상세 페이지) */
 
 .player-card--large {
@@ -2536,6 +2546,135 @@ a.player-card:hover {
 
 	background-color: #f6e7b8;
 	color: #7a5f0e;
+
+}
+
+.player-badge-item--icon .player-badge-tier {
+
+	background-color: var(--color-green);
+	color: #f6e7b8;
+
+}
+
+/* Champion: 등급은 레어지만 시즌의 주인공이라 금빛으로 강조 (맨 앞 정렬은 sortBadges) */
+
+.player-card-badge--champion,
+.player-badge-item--champion .player-badge-icon {
+
+	background: radial-gradient(circle at 35% 30%, #fff6d6, #f1cf63 70%, #c9a227);
+	box-shadow: 0 0 0 2px #c9a227, 0 0 12px 2px rgba(233, 190, 60, 0.55);
+
+}
+
+.player-badge-item--champion .player-badge-label {
+
+	color: #7a5f0e;
+
+}
+
+.player-badge-item--champion .player-badge-tier {
+
+	background-color: #f6e7b8;
+	color: #7a5f0e;
+
+}
+
+.player-detail-meta .player-badge-item--champion {
+
+	margin: -6px -10px;
+	padding: 6px 10px;
+	border-radius: 8px;
+	background: linear-gradient(90deg, rgba(246, 231, 184, 0.75), rgba(246, 231, 184, 0));
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+	.player-card-badge--champion,
+	.player-badge-item--champion .player-badge-icon {
+
+		animation: champion-glow 2.4s ease-in-out infinite;
+
+	}
+
+	@keyframes champion-glow {
+
+		50% { box-shadow: 0 0 0 2px #c9a227, 0 0 18px 5px rgba(233, 190, 60, 0.75); }
+
+	}
+
+}
+
+/* 순위표: 끝난 리그의 1위 팀 우승 표시 */
+
+.standings-table tr.standings-champion td {
+
+	background: linear-gradient(90deg, rgba(246, 231, 184, 0.8), rgba(246, 231, 184, 0.25));
+
+}
+
+.standings-champion-name {
+
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	white-space: nowrap;
+
+}
+
+.standings-champion-chip {
+
+	padding: 1px 8px;
+	border-radius: 999px;
+	background-color: #c9a227;
+	color: #fffaf0;
+	font-size: 0.6rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+
+}
+
+/* 배지 제목 줄 + "배지 목록" 팝업 버튼 */
+
+.player-badge-head {
+
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+
+}
+
+.player-badge-head .section-label {
+
+	margin: 0;
+
+}
+
+.player-badge-guide-link {
+
+	padding: 4px 0;
+	border: 0;
+	color: var(--color-green);
+	background: none;
+	font: inherit;
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
+
+}
+
+.player-badge-guide-link:hover {
+
+	text-decoration: underline;
+
+}
+
+.player-badge-guide-link:focus-visible {
+
+	outline: 2px solid var(--color-green);
+	outline-offset: 3px;
 
 }
 

@@ -1,11 +1,12 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PlayerCard from "../../components/PlayerCard.astro";
+import BadgeGuide from "../../components/BadgeGuide.astro";
 import T from "../../components/T.astro";
 import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
 import playerPhotosData from "../../data/player-photos.json";
-import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, sortBadges, type PlayerProfile } from "../../lib/players";
+import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 
 export function getStaticPaths() {
@@ -102,10 +103,25 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 									)}
 
 									<div class="player-detail-meta">
-										<p class="section-label"><T en="BADGES" ko="배지" /></p>
+										<div class="player-badge-head">
+											<p class="section-label"><T en="BADGES" ko="배지" /></p>
+											<button
+												class="player-badge-guide-link"
+												type="button"
+												aria-haspopup="dialog"
+												data-badge-guide-open={`badge-guide-${section.league}`}
+											>
+												<T en="All Badges" ko="배지 목록" /> →
+											</button>
+										</div>
+										<BadgeGuide
+											id={`badge-guide-${section.league}`}
+											league={section.league}
+											playerBadges={section.badges}
+										/>
 										<div class="player-badge-list">
 											{sortBadges(section.badges).map((key) => (
-												<div class={`player-badge-item player-badge-item--${BADGES[key].tier}`}>
+												<div class:list={["player-badge-item", `player-badge-item--${BADGES[key].tier}`, { "player-badge-item--champion": key === FEATURED_BADGE }]}>
 													<span class="player-badge-icon" aria-hidden="true">
 														{BADGES[key].icon}
 													</span>

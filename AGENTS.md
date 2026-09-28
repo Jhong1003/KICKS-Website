@@ -386,6 +386,15 @@ people hold one — and pages show badges rarest-first (`sortBadges`).
 "Attended" means a week with `games > 0`; a player's rows start the week
 they joined, so late joiners aren't penalised.
 
+- Icon (above Legendary): `treble` (champion + first in the league's
+  attacking-points ranking — AP → goals → assists, still level = shared
+  first — + attended every week of the league), `poker` (4 goals in one
+  match; FA26-L2 onward like `brace`), `back_to_back` (champion of two
+  leagues in a row, consecutive in `league_order`; awarded in the second
+  one, added in `build_player_profiles` since it spans leagues). In the
+  "All Badges" popup (`BadgeGuide.astro`, opened from the player page) an
+  Icon badge nobody has earned in any league yet shows as 🔒 "???" with
+  only its condition; other tiers are never locked.
 - Common: `off_the_mark` (scored in the league), `provider` (assisted),
   `iron_man` (attended every week since joining), `squad_member`
   (fallback when nothing else triggered, so **everyone has at least one
