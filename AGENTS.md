@@ -422,6 +422,16 @@ because teams are re-drawn every league, which made "first week"/"just
 joined" meaningless. The old week-based `brace`/`hat_trick` became
 `on_fire`, and the Iron Man tag became the `iron_man` badge.)
 
+**Hall of Fame** (`/hall-of-fame`, in the main menu): one `LeagueHonours.astro`
+block per finished league, newest first — champion team with its (non-inactive)
+roster, Golden Boot and Top Assists (shared on a tie; same logic as the
+homepage finale banner, `src/lib/finale.ts`), kept for good. Below them is
+`ClubRecords.astro`, the club's
+all-time bests from [src/lib/records.ts](src/lib/records.ts): most goals /
+assists / attacking points in a week, most goals / assists in a league,
+biggest win, most team goals in a week. Ties share a record; inactive players
+are left out. Per-match player records can join once goal_events has data.
+
 **KICKS Wrapped** (`/wrapped/<league>/<id>`, [src/pages/wrapped/[league]/[id].astro](src/pages/wrapped/[league]/[id].astro),
 rules in [src/lib/wrapped.ts](src/lib/wrapped.ts)): a per-player, per-league
 recap as full-screen story slides, built only for *finished* leagues and

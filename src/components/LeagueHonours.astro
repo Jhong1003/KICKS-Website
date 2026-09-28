@@ -1,0 +1,80 @@
+---
+// One finished league's honours on the Hall of Fame page: the champion (team +
+// roster) and the two automatic awards. Unlike the homepage finale banner,
+// this stays for good, so every past league keeps its honours. Awards reuse src/lib/finale.ts
+// (co-winners on a tie, inactive players left out).
+import T from "./T.astro";
+import profilesData from "../data/player_profiles.json";
+import { getLeagueFinale } from "../lib/finale";
+import { getTeamColor, getTeamName, type League } from "../lib/leagues";
+import { getReadableAccentColor, getSection, type PlayerProfile } from "../lib/players";
+
+interface Props {
+	league: League;
+}
+
+const { league } = Astro.props;
+const finale = getLeagueFinale(league);
+const profiles = profilesData as PlayerProfile[];
+
+const champions = (finale?.championTeamIds ?? []).map((teamId) => ({
+	teamId,
+	name: getTeamName(teamId, league),
+	color: getReadableAccentColor(getTeamColor(teamId, league)),
+	roster: profiles
+		.filter((player) => player.status !== "inactive" && getSection(player, league.id)?.current_team_id === teamId)
+		.map((player) => ({ id: player.id, name: player.name }))
+		.sort((a, b) => a.name.localeCompare(b.name, "ko")),
+}));
+
+const awards = finale
+	? [
+			{ icon: "👟", en: "Golden Boot", ko: "득점왕", unitEn: "goals", unitKo: "골", award: finale.goldenBoot },
+			{ icon: "🎯", en: "Top Assists", ko: "도움왕", unitEn: "assists", unitKo: "어시스트", award: finale.topAssists },
+		]
+	: [];
+---
+
+{
+	finale && (
+		<section class="content-section honours" aria-labelledby={`honours-${league.id}`}>
+			<p class="section-label"><T en="HONOURS" ko="수상" /></p>
+			<h2 id={`honours-${league.id}`}>{league.id}</h2>
+
+			<div class="honours-grid">
+				{champions.map((team) => (
+					<div class="honours-card honours-card--champion">
+						<p class="honours-card-label">
+							<span aria-hidden="true">🏆</span> <T en="Champions" ko="우승" />
+						</p>
+						<p class="honours-card-winner" style={`color: ${team.color}`}>{team.name}</p>
+						<ul class="honours-roster">
+							{team.roster.map((player) => (
+								<li><a href={`/players/${player.id}`}>{player.name}</a></li>
+							))}
+						</ul>
+					</div>
+				))}
+
+				{awards.map(({ icon, en, ko, unitEn, unitKo, award }) =>
+					award ? (
+						<div class="honours-card">
+							<p class="honours-card-label">
+								<span aria-hidden="true">{icon}</span> <T en={en} ko={ko} />
+							</p>
+							<p class="honours-card-winner">
+								{award.winners.map((winner, index) => (
+									<>
+										{index > 0 && <span class="honours-sep"> · </span>}
+										<a href={`/players/${winner.id}`}>{winner.name}</a>
+									</>
+								))}
+							</p>
+							<T as="p" class="honours-card-count" en={`${award.count} ${unitEn}`} ko={`${award.count}${unitKo}`} />
+						</div>
+					) : null,
+				)}
+			</div>
+		</section>
+	)
+}

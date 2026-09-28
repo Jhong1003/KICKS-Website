@@ -2638,6 +2638,209 @@ a.player-card:hover {
 
 }
 
+/* 명예의 전당 페이지: 소개 문단과 첫 리그 블록을 붙여서 한 흐름으로 */
+
+.hall-of-fame-intro {
+
+	padding-bottom: 0;
+
+}
+
+.hall-of-fame-intro + .content-section {
+
+	padding-top: 48px;
+	border-top: none;
+
+}
+
+/* 리그 페이지: 명예의 전당 (끝난 리그) */
+
+.honours-grid {
+
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 16px;
+	margin-top: 28px;
+
+}
+
+.honours-card {
+
+	padding: 20px 22px;
+	border: 1px solid rgba(201, 162, 39, 0.45);
+	border-radius: 12px;
+	background: linear-gradient(135deg, #fbf3da, var(--color-background));
+
+}
+
+.honours-card--champion {
+
+	grid-column: 1 / -1;
+	border-color: #c9a227;
+	background: linear-gradient(135deg, #f6e7b8, #fbf3da 60%, var(--color-background));
+	box-shadow: 0 0 18px rgba(233, 190, 60, 0.25);
+
+}
+
+.honours-card-label {
+
+	margin: 0;
+	color: #7a5f0e;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+
+}
+
+.honours-card-winner {
+
+	margin: 8px 0 0;
+	color: var(--color-dark);
+	font-size: 1.6rem;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+
+}
+
+.honours-card--champion .honours-card-winner {
+
+	font-size: clamp(1.8rem, 5vw, 2.6rem);
+
+}
+
+.honours-card-winner a:hover,
+.honours-roster a:hover,
+.record-holders a:hover {
+
+	text-decoration: underline;
+	text-underline-offset: 3px;
+
+}
+
+.honours-card-count {
+
+	margin: 4px 0 0;
+	color: var(--color-dark);
+	font-size: 0.9rem;
+	opacity: 0.7;
+
+}
+
+.honours-roster {
+
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 16px 0 0;
+	padding: 0;
+	list-style: none;
+
+}
+
+.honours-roster a {
+
+	display: inline-block;
+	padding: 4px 12px;
+	border: 1px solid rgba(201, 162, 39, 0.5);
+	border-radius: 999px;
+	background-color: rgba(255, 255, 255, 0.6);
+	color: var(--color-dark);
+	font-size: 0.85rem;
+	font-weight: 600;
+
+}
+
+/* 리그 페이지: KICKS 기록 */
+
+.records-intro {
+
+	margin-top: 12px;
+	font-size: 0.95rem;
+
+}
+
+.records-grid {
+
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 14px;
+	margin: 24px 0 0;
+	padding: 0;
+	list-style: none;
+
+}
+
+.record-card {
+
+	padding: 18px 20px;
+	border: 1px solid rgba(41, 41, 41, 0.12);
+	border-radius: 12px;
+	background-color: #fff;
+
+}
+
+.record-label {
+
+	margin: 0;
+	color: var(--color-green);
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+
+}
+
+.record-value {
+
+	margin: 10px 0 0;
+	color: var(--color-dark);
+	font-size: 2.4rem;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: -0.03em;
+
+}
+
+.record-unit {
+
+	margin-left: 6px;
+	font-size: 0.95rem;
+	font-weight: 600;
+	letter-spacing: 0;
+	opacity: 0.7;
+
+}
+
+.record-holders {
+
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 12px 0 0;
+	padding: 0;
+	list-style: none;
+	color: var(--color-dark);
+	font-size: 0.92rem;
+	font-weight: 600;
+
+}
+
+.record-holders a {
+
+	color: var(--color-green);
+
+}
+
+.record-context {
+
+	margin-left: 8px;
+	font-size: 0.8rem;
+	font-weight: 400;
+	opacity: 0.6;
+
+}
+
 /* 선수 페이지 Wrapped 진입 버튼 (끝난 리그에서만) */
 
 .player-name-row {

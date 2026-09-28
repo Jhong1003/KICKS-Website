@@ -1,0 +1,41 @@
+---
+// Hall of Fame: every finished league's champion and awards (newest first),
+// then the club's all-time records. Grows by itself as leagues finish.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ClubRecords from "../components/ClubRecords.astro";
+import LeagueHonours from "../components/LeagueHonours.astro";
+import T from "../components/T.astro";
+import { isLeagueFinished } from "../lib/finale";
+import { leagues } from "../lib/leagues";
+
+const finishedLeagues = leagues.filter((league) => isLeagueFinished(league.id)).reverse();
+---
+
+<BaseLayout title="Hall of Fame | KICKS" description="KICKS league champions, award winners, and club records.">
+	<main>
+		<section class="content-section hall-of-fame-intro" aria-labelledby="hall-of-fame-title">
+			<p class="section-label"><T en="HALL OF FAME" ko="명예의 전당" /></p>
+			<h1 id="hall-of-fame-title"><T en="Hall of Fame" ko="명예의 전당" /></h1>
+			<T
+				as="p"
+				class="about-description"
+				en="Every KICKS league's champions and award winners, and the club's all-time records."
+				ko="KICKS 리그의 우승팀과 수상자, 그리고 역대 클럽 기록을 모아 두는 곳이에요."
+			/>
+			{
+				finishedLeagues.length === 0 && (
+					<T
+						as="p"
+						class="about-description"
+						en="Honours appear here once the first league is finished."
+						ko="첫 리그가 끝나면 이곳에 수상 기록이 나타나요."
+					/>
+				)
+			}
+		</section>
+
+		{finishedLeagues.map((league) => <LeagueHonours league={league} />)}
+
+		<ClubRecords />
+	</main>
+</BaseLayout>

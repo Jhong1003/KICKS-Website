@@ -1,0 +1,44 @@
+---
+// "KICKS Records": the club's all-time bests across every league (see
+// src/lib/records.ts), at the bottom of the Hall of Fame page. A record belongs
+// to the club rather than to one league; each holder notes where it was set.
+import T from "./T.astro";
+import { buildClubRecords } from "../lib/records";
+
+const records = buildClubRecords();
+---
+
+{
+	records.length > 0 && (
+		<section class="content-section" aria-labelledby="club-records-title">
+			<h2 id="club-records-title"><T en="KICKS Records" ko="KICKS 기록" /></h2>
+			<T
+				as="p"
+				class="about-description records-intro"
+				en="The club's best performances across every league. Ties share the record."
+				ko="모든 리그를 통틀어 KICKS 최고 기록이에요. 동률이면 함께 기록돼요."
+			/>
+			<ul class="records-grid">
+				{records.map((record) => (
+					<li class="record-card">
+						<p class="record-label">
+							<span aria-hidden="true">{record.icon}</span> <T en={record.label.en} ko={record.label.ko} />
+						</p>
+						<p class="record-value">
+							{record.value}
+							<T class="record-unit" en={record.unit.en} ko={record.unit.ko} />
+						</p>
+						<ul class="record-holders">
+							{record.holders.map((holder) => (
+								<li>
+									{holder.playerId ? <a href={`/players/${holder.playerId}`}>{holder.name}</a> : <span>{holder.name}</span>}
+									<T class="record-context" en={holder.context.en} ko={holder.context.ko} />
+								</li>
+							))}
+						</ul>
+					</li>
+				))}
+			</ul>
+		</section>
+	)
+}
