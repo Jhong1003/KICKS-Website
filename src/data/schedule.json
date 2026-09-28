@@ -4,7 +4,7 @@
   { "date": "2026-09-20", "title": "FA26-L1 · Week 3", "type": "league", "league": "FA26-L1", "week": 3 },
   { "date": "2026-09-27", "title": "FA26-L1 · Week 4", "type": "league", "league": "FA26-L1", "week": 4 },
   { "date": "2026-10-03", "title": "KICKS vs Inazuma (JSA) · Friendly Match", "title_ko": "KICKS vs 이나즈마 (JSA) · 친선경기", "type": "friendly" },
-  { "date": "2026-10-04", "title": "KICKS 11 vs 11 · Event Match", "title_ko": "KICKS 11 대 11 · 이벤트 매치", "type": "event" },
+  { "date": "2026-10-04", "title": "KICKS 11 vs 11 · Special Match", "title_ko": "KICKS 11 대 11 · 스페셜 매치", "type": "event" },
   { "date": "2026-10-11", "title": "FA26-L2 · Week 1", "type": "league", "league": "FA26-L2", "week": 1 },
   { "date": "2026-10-18", "title": "FA26-L2 · Week 2", "type": "league", "league": "FA26-L2", "week": 2 },
   { "date": "2026-10-25", "title": "FA26-L2 · Week 3", "type": "league", "league": "FA26-L2", "week": 3 },
