@@ -12,6 +12,8 @@ interface Props {
 }
 
 const { league, finale } = Astro.props;
+/** "L1" from "FA26-L1", for the short Wrapped chip. */
+const leagueShort = league.id.split("-").pop() ?? league.id;
 
 const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: string; award: LeagueAward | null }[] = [
 	{ icon: "👟", en: "Golden Boot", ko: "득점왕", unitEn: "goals", unitKo: "골", award: finale.goldenBoot },
@@ -25,6 +27,11 @@ const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: st
 			<T en={`${league.id} Final`} ko={`${league.id} 결산`} />
 		</span>
 		<div class="finale-banner-list">
+			{/* Last on wide screens; on a phone it gets its own full-width row under the results (see global.css). */}
+			<a class="finale-chip finale-chip--wrapped" href="/players">
+				<span aria-hidden="true">🎁</span>
+				<T en={`Your ${leagueShort} Wrapped →`} ko={`나의 ${leagueShort} Wrapped →`} />
+			</a>
 			{
 				finale.championTeamIds.map((teamId) => (
 					<a class="finale-chip finale-chip--champion" href="/league">
@@ -55,10 +62,6 @@ const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: st
 					) : null,
 				)
 			}
-			<a class="finale-chip finale-chip--wrapped" href="/players">
-				<span aria-hidden="true">🎁</span>
-				<T en="Find your Wrapped on your player page →" ko="선수 페이지에서 나의 Wrapped 보기 →" />
-			</a>
 		</div>
 		<button
 			class="finale-banner-close"
