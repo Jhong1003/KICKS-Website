@@ -485,9 +485,10 @@ h1 {
 
 /* 내부 페이지 공통 섹션 (About/Join/League/Gallery/Videos/Partners) */
 
+/* 섹션 사이 간격은 사이트 전체 80px로 통일 (아래 40px + 위 40px, 가운데 구분선) */
 .content-section {
 
-	padding: 96px clamp(24px, 6vw, 88px);
+	padding: 96px clamp(24px, 6vw, 88px) 40px;
 	background-color: var(--color-background);
 	color: var(--color-dark);
 
@@ -495,7 +496,7 @@ h1 {
 
 .content-section + .content-section {
 
-	padding-top: 64px;
+	padding-top: 40px;
 	border-top: 1px solid rgba(41, 41, 41, 0.08);
 
 }
@@ -2638,17 +2639,25 @@ a.player-card:hover {
 
 }
 
-/* 명예의 전당 페이지: 소개 문단과 첫 리그 블록을 붙여서 한 흐름으로 */
+/* 페이지 마지막 섹션은 푸터 앞에 여유를 둠 */
 
-.hall-of-fame-intro {
+main > .content-section:last-of-type {
+
+	padding-bottom: 72px;
+
+}
+
+/* 명예의 전당 페이지: 소개 → 첫 리그는 구분선 없이 80px로 이어짐 */
+
+.hall-of-fame .hall-of-fame-intro {
 
 	padding-bottom: 0;
 
 }
 
-.hall-of-fame-intro + .content-section {
+.hall-of-fame .hall-of-fame-intro + .content-section {
 
-	padding-top: 48px;
+	padding-top: 80px;
 	border-top: none;
 
 }
@@ -3613,9 +3622,9 @@ a.finale-chip-name:hover,
 @media (max-width: 600px) {
 	.content-section {
 		padding-top: 40px;
-		padding-bottom: 64px;
+		padding-bottom: 40px;
 	}
 	.content-section + .content-section {
-		padding-top: 48px;
+		padding-top: 40px;
 	}
 }
