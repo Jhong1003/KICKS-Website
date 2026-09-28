@@ -437,6 +437,15 @@ const cardData = {
 		ctx.fillStyle = background;
 		ctx.fillRect(0, 0, W, H);
 
+		// Instagram draws its own header (profile, progress bar) over the top of a
+		// story and the reply bar over the bottom, so everything below is laid out
+		// on the full 1080×1920 grid and then shrunk into the middle, leaving the
+		// top ~14% and bottom ~14% as background only.
+		const SAFE_SCALE = 0.8;
+		ctx.save();
+		ctx.translate((W * (1 - SAFE_SCALE)) / 2, 270 - 120 * SAFE_SCALE);
+		ctx.scale(SAFE_SCALE, SAFE_SCALE);
+
 		const x = 96;
 		ctx.textBaseline = "alphabetic";
 		ctx.fillStyle = gold;
@@ -539,6 +548,7 @@ const cardData = {
 		ctx.fillStyle = "rgba(247, 246, 242, 0.6)";
 		ctx.font = `700 34px ${FONT}`;
 		ctx.fillText("kicksuiuc.com", x, 1830);
+		ctx.restore();
 
 		return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 	}
