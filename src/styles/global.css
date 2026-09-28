@@ -280,6 +280,23 @@ h1 {
 
 }
 
+/* 홈: 리그가 끝난 뒤 Wrapped 안내 금색 버튼 (결산 배너와 같은 기간에만, 다른 버튼과 같은 줄·같은 높이) */
+
+.hero-button--wrapped {
+
+	border-color: #c9a227;
+	background: linear-gradient(135deg, #fff1c2, #e9c65a);
+	color: #2a2206;
+	box-shadow: 0 8px 22px rgba(233, 190, 60, 0.28);
+
+}
+
+.hero-button--wrapped:hover {
+
+	background: linear-gradient(135deg, #fff6d6, #f0d27a);
+
+}
+
 /* 첫 화면 하단 문구 */
 
 .hero-footer {
@@ -309,10 +326,25 @@ h1 {
 
 .about-description {
 
+	/* 줄바꿈 위치를 문단 전체를 보고 골라서 마지막 줄에 한두 단어만 남거나
+	   어색하게 끊기는 걸 줄임 (지원 안 하는 브라우저는 평소처럼 줄바꿈) */
+	text-wrap: pretty;
 	max-width: 680px;
 	margin: 28px 0 0;
 	font-size: 1.1rem;
 	line-height: 1.8;
+
+}
+
+/* 옆에 사진 없이 문단만 있는 섹션(PC)에서는 옆 빈자리를 써서 한 문장이 거의 한 줄에
+   들어가게 넓게. 사진 옆 소개 글(.about-intro-text 안)은 그대로 680px. */
+@media (min-width: 861px) {
+
+	.content-section > .about-description {
+
+		max-width: 1200px;
+
+	}
 
 }
 
@@ -516,6 +548,49 @@ h1 {
 
 	flex: 1;
 	min-width: 0;
+
+}
+
+/* 소개 페이지 단체 사진 (PC): 글자는 읽기 좋은 폭(680px)만 쓰고 사진이 나머지를
+   채워서 가운데 빈틈을 없앰. 16:9로 살짝만 잘라(원본 3:2) 너무 옆으로 길어 보이지 않게 하고,
+   위 나무·아래 잔디를 조금씩만 줄임. 휴대폰은 원래대로 전체 사진. */
+@media (min-width: 861px) {
+
+	.about-intro:has(.about-photo) {
+
+		gap: 64px;
+
+	}
+
+	/* 글자 묶음 맨 위의 작은 "WHO WE ARE" 줄 때문에 제목·본문이 사진보다 아래로
+	   처져 보여서, 그 줄 높이의 절반만큼 올려 제목·본문이 사진과 세로 가운데로 맞게 함 */
+	.about-intro:has(.about-photo) > .about-intro-text {
+
+		flex: 0 1 760px;
+		transform: translateY(-24px);
+
+	}
+
+	.about-intro:has(.about-photo) .about-description {
+
+		max-width: none;
+
+	}
+
+	.about-photo {
+
+		flex: 1 1 0;
+		aspect-ratio: 16 / 9;
+
+	}
+
+	.about-photo img {
+
+		height: 100%;
+		object-fit: cover;
+		object-position: center 50%;
+
+	}
 
 }
 
@@ -1754,33 +1829,6 @@ h1 {
 }
 
 /* 히어로: 다음 일정 링크 (Join/View Standings 버튼 아래 한 줄) */
-
-/* 홈: 리그가 끝난 뒤 Wrapped 안내 금색 버튼 (결산 배너와 같은 기간에만) */
-
-.hero-wrapped {
-
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	width: fit-content;
-	margin-top: 20px;
-	padding: 11px 20px;
-	border-radius: 999px;
-	color: #2a2206;
-	background: linear-gradient(135deg, #fff1c2, #e9c65a);
-	box-shadow: 0 0 0 1px #c9a227, 0 8px 22px rgba(233, 190, 60, 0.3);
-	font-size: 0.95rem;
-	font-weight: 700;
-	transition: transform 120ms ease, box-shadow 120ms ease;
-
-}
-
-.hero-wrapped:hover {
-
-	transform: translateY(-1px);
-	box-shadow: 0 0 0 1px #c9a227, 0 12px 28px rgba(233, 190, 60, 0.4);
-
-}
 
 .hero-next-up {
 
@@ -3605,52 +3653,52 @@ a.finale-chip-name:hover,
 	.hero {
 		min-height: calc(100vh - 64px);
 	}
+	/* 글자 칸 + 사진 칸(52%). 좌우 여백은 대칭(46px).
+	   글자는 사진 높이의 세로 가운데. */
 	.hero > .hero-content {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) min(590px, calc(100% / 2));
-		padding: 64px 8px 64px 46px;
-		gap: 0;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 52%);
+		align-items: center;
+		column-gap: 64px;
+		/* 글자 왼쪽 들여쓰기(46px)와 사진 오른쪽 여백을 똑같이 맞춤 */
+		padding: 56px 46px;
 	}
 	.hero-content > .hero-text {
 		margin-inline-start: 0;
+		max-width: 640px;
 	}
+	/* 사진은 16:10으로 칸 폭을 꽉 채우되, 화면이 낮은 노트북에서도 아래
+	   "Champaign–Urbana" 줄이 첫 화면에 들어오도록 높이를 화면 높이에 맞춰 제한 */
 	.hero-content > .split-photo--hero {
-		flex: 1;
-		max-width: 590px;
-	}
-}
-
-/* Preserve the full wide photograph without cropping. */
-.hero-content > .split-photo--hero img {
-	object-fit: contain;
-	object-position: left top;
-}
-@media (min-width: 1261px) {
-	.hero-content > .split-photo--hero {
-		position: relative;
+		width: 100%;
+		max-width: none;
+		aspect-ratio: 16 / 10;
+		max-height: calc(100vh - 380px);
+		min-height: 380px;
+		/* 글자 묶음은 위쪽 큰 제목에 무게가 쏠려 있어서, 사진을 살짝 내려야 둘의
+		   중심이 맞아 보임 */
+		transform: translateY(20px);
 	}
 	.hero-content > .split-photo--hero img {
-		position: absolute;
-		left: 0;
-		top: 20px;
-		width: auto;
+		width: 100%;
 		height: 100%;
-		max-width: none;
+		object-fit: cover;
+		object-position: center 55%;
 	}
 }
 
-/* Keep the hero composition together on wide desktop screens. */
-@media (min-width: 1600px) {
-	.hero > .hero-content {
-		grid-template-columns: minmax(620px, 1fr) 590px;
-		column-gap: 48px;
-		padding-inline-end: clamp(98px, calc(40vw - 542px), 220px);
+/* 860px 이하(휴대폰)와 861~1260px: 넓은 사진 전체가 잘리지 않게 */
+@media (max-width: 1260px) {
+	.hero-content > .split-photo--hero img {
+		object-fit: contain;
+		object-position: left top;
 	}
 }
 
-@media (min-width: 1600px) {
-	.hero-content > .hero-text {
-		max-width: 620px;
+/* PC에서는 Wrapped 안내가 위 결산 배너에 보이니 첫 화면 버튼은 휴대폰에서만 */
+@media (min-width: 861px) {
+	.hero-button--wrapped {
+		display: none;
 	}
 }
 

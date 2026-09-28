@@ -60,8 +60,8 @@ const features = [
 						ko="KICKS는 실제로 경쟁하는 리그인 만큼, 어느 정도 경기 경험이 있는 멤버를 찾고 있습니다. 풋살을 좋아하고 팀원들과 함께 경쟁하며 성장하고 싶은 분께 잘 맞는 동아리입니다."
 					/>
 				</div>
-				<div class="split-photo">
-					<Image src={aboutImage} alt="KICKS club members playing futsal" width={640} quality={85} />
+				<div class="split-photo about-photo">
+					<Image src={aboutImage} alt="KICKS club members playing futsal" width={1200} quality={85} />
 				</div>
 			</div>
 		</section>
@@ -96,12 +96,17 @@ const features = [
 
 		<section class="content-section" aria-labelledby="who-should-join-title">
 			<h2 id="who-should-join-title"><T en="Who Should Join" ko="이런 분을 찾아요" /></h2>
-			<T
-				as="p"
-				class="about-description"
-				en="Freshmen, current students, transfer students, and graduate students are all welcome to apply. If you have game experience, love futsal, and want to compete, stay active, and make great memories in college, we'd love to have you."
-				ko="신입생, 재학생, 편입생, 대학원생 모두 지원할 수 있어요. 경기 경험이 있고, 풋살을 좋아하고, 대학 생활 동안 함께 경쟁하며 건강하게 좋은 추억을 만들고 싶다면 언제든 환영합니다."
-			/>
+			{/* One sentence per line (each starts on its own line). */}
+			<T as="p" class="about-description">
+				<Fragment slot="en">
+					Freshmen, current students, transfer students, and graduate students are all welcome to apply.<br />
+					If you have game experience, love futsal, and want to compete, stay active, and make great memories in college, we'd love to have you.
+				</Fragment>
+				<Fragment slot="ko">
+					신입생, 재학생, 편입생, 대학원생 모두 지원할 수 있어요.<br />
+					경기 경험이 있고, 풋살을 좋아하고, 대학&nbsp;생활 동안 함께 경쟁하며 건강하게 좋은 추억을 만들고 싶다면 언제든 환영합니다.
+				</Fragment>
+			</T>
 			<T as="p" class="about-description">
 				<Fragment slot="en">
 					Questions? Reach out on Instagram
