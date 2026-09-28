@@ -417,11 +417,26 @@ const cardData = {
 		return lines;
 	}
 
+	/** fillText with CSS-style letter-spacing (drawn glyph by glyph, so it works in every browser). */
+	function spacedText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, spacing: number, align: "left" | "center" = "left") {
+		const chars = [...text];
+		const width = chars.reduce((sum, char) => sum + ctx.measureText(char).width + spacing, -spacing);
+		let cursor = align === "center" ? x - width / 2 : x;
+		const previous = ctx.textAlign;
+		ctx.textAlign = "left";
+		for (const char of chars) {
+			ctx.fillText(char, cursor, y);
+			cursor += ctx.measureText(char).width + spacing;
+		}
+		ctx.textAlign = previous;
+	}
+
 	/**
-	 * The share image: the same summary card as the last slide, drawn as a
-	 * rounded card on the green background. The card is centered and kept inside
-	 * Instagram's safe zone — the story header covers roughly the top 250px and
-	 * the reply bar the bottom 250px, so nothing important goes there.
+	 * The share image: a copy of the summary card on the last slide. Every size
+	 * below is the card's CSS value multiplied by S (the card is ~336px wide on
+	 * a phone and 940px here), so the saved image looks like what's on screen.
+	 * The card is centered and kept inside Instagram's safe zone — the story
+	 * header covers roughly the top 250px and the reply bar the bottom 250px.
 	 */
 	async function drawCard(card: CardData, lang: "en" | "ko"): Promise<Blob | null> {
 		await document.fonts?.ready;
@@ -435,97 +450,113 @@ const cardData = {
 		const t = (text: { en: string; ko: string }) => text[lang];
 		const gold = "#e9c65a";
 		const cream = "#f7f6f2";
-		const dim = "rgba(247, 246, 242, 0.75)";
-		const rule = "rgba(247, 246, 242, 0.18)";
 
-		const background = ctx.createLinearGradient(0, 0, W, H);
+		// Background: same 160° gradient as the slides.
+		const background = ctx.createLinearGradient(W * 0.33, 0, W * 0.67, H);
 		background.addColorStop(0, "#3f5128");
 		background.addColorStop(1, "#1b2411");
 		ctx.fillStyle = background;
 		ctx.fillRect(0, 0, W, H);
 
-		// Card geometry.
-		const cardX = 70;
-		const cardW = W - cardX * 2;
-		const pad = 60;
-		const left = cardX + pad;
-		const inner = cardW - pad * 2;
-		const iconCol = 76;
-		const badgeSize = 64;
-		const badgeGap = 14;
+		const cardW = 940;
+		const S = cardW / 336;
+		const px = (css: number) => Math.round(css * S);
+		const cardX = (W - cardW) / 2;
+		const padX = px(20);
+		const padY = px(22);
+		const left = cardX + padX;
+		const inner = cardW - padX * 2;
 
-		// Measure the parts whose height depends on the text first.
-		ctx.font = `700 40px ${FONT}`;
+		// Font sizes (CSS rem × 16 × S).
+		const brandSize = px(10.56);
+		const nameSize = px(35.2);
+		const chipSize = px(11.5);
+		const teamSize = px(14.4);
+		const statSize = px(28.8);
+		const statLabelSize = px(lang === "ko" ? 12.8 : 10.9);
+		const highlightSize = px(14.7);
+		const highlightLine = Math.round(highlightSize * 1.35);
+		const badgeLabelSize = px(10.9);
+		const emojiSize = px(20.8);
+		const iconCol = Math.round(highlightSize * 1.3) + px(10);
+
+		// Measure what wraps.
+		ctx.font = `600 ${highlightSize}px ${FONT}`;
 		const highlightLines = card.highlights.map((highlight) => wrapLines(ctx, t(highlight.title), inner - iconCol));
-		const perRow = Math.max(1, Math.floor((inner + badgeGap) / (badgeSize + badgeGap)));
+		ctx.font = `${emojiSize}px ${FONT}`;
+		const emojiStep = emojiSize + px(8);
+		const perRow = Math.max(1, Math.floor((inner + px(8)) / emojiStep));
 		const badgeRows = Math.ceil(card.badges.length / perRow);
+		const emojiRow = Math.round(emojiSize * 1.2);
 
-		const heights = {
-			brand: 34,
-			name: 150,
-			team: 60,
-			stats: 220,
-			highlights: highlightLines.reduce((sum, lines) => sum + lines.length * 52 + 26, 0),
-			badges: card.badges.length > 0 ? 50 + badgeRows * (badgeSize + badgeGap) : 0,
+		const blocks = {
+			brand: brandSize + px(12),
+			name: Math.round(nameSize * 1.1),
+			team: px(6) + Math.round(teamSize * 1.4) + px(16),
+			stats: px(12) * 2 + Math.round(statSize * 1.1) + px(2) + Math.round(statLabelSize * 1.3),
+			highlights:
+				px(16) + highlightLines.reduce((sum, lines) => sum + lines.length * highlightLine, 0) + px(8) * (highlightLines.length - 1) + px(12),
+			badges: card.badges.length > 0 ? Math.round(badgeLabelSize * 1.3) + px(8) + badgeRows * emojiRow + (badgeRows - 1) * px(4) : 0,
 		};
-		const cardH = pad * 2 + heights.brand + heights.name + heights.team + heights.stats + 30 + heights.highlights + heights.badges;
-		const footerGap = 56;
-		const total = cardH + footerGap + 34;
-		// Center in the safe zone (250px top and bottom), never starting above it.
-		const cardY = Math.max(250, Math.round(250 + (H - 500 - total) / 2));
+		const cardH = padY * 2 + Object.values(blocks).reduce((a, b) => a + b, 0);
+		const footer = px(18) + 30;
+		const cardY = Math.max(250, Math.round(250 + (H - 500 - cardH - footer) / 2));
 
 		// Card.
 		ctx.beginPath();
-		ctx.roundRect(cardX, cardY, cardW, cardH, 44);
+		ctx.roundRect(cardX, cardY, cardW, cardH, px(16));
 		ctx.fillStyle = "rgba(20, 27, 13, 0.55)";
 		ctx.fill();
-		ctx.lineWidth = 3;
-		ctx.strokeStyle = "rgba(233, 198, 90, 0.55)";
+		ctx.lineWidth = Math.max(2, Math.round(S));
+		ctx.strokeStyle = "rgba(233, 198, 90, 0.5)";
 		ctx.stroke();
 
-		let y = cardY + pad;
-		ctx.textBaseline = "alphabetic";
+		let y = cardY + padY;
+		ctx.textBaseline = "top";
 
-		// Brand.
+		// Brand line.
 		ctx.fillStyle = gold;
-		ctx.font = `800 28px ${FONT}`;
-		ctx.fillText(`KICKS · ${card.league} WRAPPED`, left, y + 28);
-		y += heights.brand;
+		ctx.font = `800 ${brandSize}px ${FONT}`;
+		spacedText(ctx, `KICKS · ${card.league} WRAPPED`, left, y, brandSize * 0.14);
+		y += blocks.brand;
 
-		// Name + position chips.
+		// Name + position chips (vertically centered on the name).
 		ctx.fillStyle = cream;
-		ctx.font = `700 112px ${FONT}`;
-		const nameBaseline = y + 122;
-		ctx.fillText(card.name, left, nameBaseline);
-		let chipX = left + ctx.measureText(card.name).width + 28;
-		ctx.font = `700 32px ${FONT}`;
+		ctx.font = `700 ${nameSize}px ${FONT}`;
+		ctx.fillText(card.name, left, y);
+		const nameMid = y + blocks.name / 2;
+		let chipX = left + ctx.measureText(card.name).width + px(8);
+		ctx.font = `700 ${chipSize}px ${FONT}`;
+		ctx.textBaseline = "middle";
+		const chipH = Math.round(chipSize * 1.25 + px(6.4));
 		for (const position of card.positions) {
-			const width = ctx.measureText(position).width + 40;
+			const width = ctx.measureText(position).width + px(10.4) * 2;
 			if (chipX + width > left + inner) break;
 			ctx.fillStyle = POSITION_COLORS[position] ?? "#7f8c8d";
 			ctx.beginPath();
-			ctx.roundRect(chipX, nameBaseline - 70, width, 54, 27);
+			ctx.roundRect(chipX, nameMid - chipH / 2, width, chipH, chipH / 2);
 			ctx.fill();
 			ctx.fillStyle = "#ffffff";
-			ctx.fillText(position, chipX + 20, nameBaseline - 32);
-			chipX += width + 12;
+			ctx.fillText(position, chipX + px(10.4), nameMid + 1);
+			chipX += width + px(8);
 		}
-		y += heights.name;
+		ctx.textBaseline = "top";
+		y += blocks.name + px(6);
 
-		// Team · style (same line as the card on screen).
-		ctx.fillStyle = dim;
-		ctx.font = `500 38px ${FONT}`;
-		ctx.fillText(`${card.champion ? "🏆 " : ""}${card.team} · ${card.tag}`, left, y + 30);
-		y += heights.team;
+		// Team · style.
+		ctx.fillStyle = "rgba(247, 246, 242, 0.85)";
+		ctx.font = `400 ${teamSize}px ${FONT}`;
+		ctx.fillText(`${card.champion ? "🏆 " : ""}${card.team} · ${card.tag}`, left, y + Math.round(teamSize * 0.2));
+		y += blocks.team - px(6);
 
 		// Stats between two rules.
-		ctx.strokeStyle = rule;
-		ctx.lineWidth = 2;
+		ctx.strokeStyle = "rgba(247, 246, 242, 0.18)";
+		ctx.lineWidth = Math.max(2, Math.round(S));
 		ctx.beginPath();
 		ctx.moveTo(left, y);
 		ctx.lineTo(left + inner, y);
-		ctx.moveTo(left, y + heights.stats);
-		ctx.lineTo(left + inner, y + heights.stats);
+		ctx.moveTo(left, y + blocks.stats);
+		ctx.lineTo(left + inner, y + blocks.stats);
 		ctx.stroke();
 		const stats = [
 			[card.goals, lang === "ko" ? "골" : "GOALS"],
@@ -533,59 +564,62 @@ const cardData = {
 			[card.games, lang === "ko" ? "경기" : "GAMES"],
 		] as const;
 		const colW = inner / 3;
-		ctx.textAlign = "center";
 		stats.forEach(([value, label], i) => {
 			const cx = left + colW * i + colW / 2;
-			ctx.fillStyle = cream;
-			ctx.font = `700 100px ${FONT}`;
-			ctx.fillText(String(value), cx, y + 130);
-			ctx.fillStyle = dim;
-			ctx.font = `700 ${lang === "ko" ? 32 : 26}px ${FONT}`;
-			ctx.fillText(label, cx, y + 180);
+			ctx.textAlign = "center";
+			ctx.fillStyle = "rgba(247, 246, 242, 0.95)";
+			ctx.font = `800 ${statSize}px ${FONT}`;
+			ctx.fillText(String(value), cx, y + px(12));
+			ctx.fillStyle = "rgba(247, 246, 242, 0.85)";
+			ctx.font = `700 ${statLabelSize}px ${FONT}`;
+			spacedText(ctx, label, cx, y + px(12) + Math.round(statSize * 1.1) + px(2), lang === "ko" ? statLabelSize * 0.02 : statLabelSize * 0.06, "center");
 		});
 		ctx.textAlign = "left";
-		y += heights.stats + 30;
+		y += blocks.stats + px(16);
 
-		// Highlights: icon + title only, like the card on screen.
+		// Highlights: emoji + title, emoji centered on the text block.
 		card.highlights.forEach((highlight, i) => {
 			const lines = highlightLines[i];
-			const blockH = lines.length * 52;
-			ctx.font = `44px ${FONT}`;
+			const blockH = lines.length * highlightLine;
 			ctx.textBaseline = "middle";
-			ctx.fillText(highlight.icon, left, y + blockH / 2);
-			ctx.textBaseline = "alphabetic";
+			ctx.textAlign = "center";
+			ctx.font = `${highlightSize}px ${FONT}`;
+			ctx.fillText(highlight.icon, left + (highlightSize * 1.3) / 2, y + blockH / 2);
+			ctx.textAlign = "left";
+			ctx.textBaseline = "top";
 			ctx.fillStyle = cream;
-			ctx.font = `700 40px ${FONT}`;
-			lines.forEach((line, n) => ctx.fillText(line, left + iconCol, y + 40 + n * 52));
-			y += blockH + 26;
+			ctx.font = `600 ${highlightSize}px ${FONT}`;
+			lines.forEach((line, n) => ctx.fillText(line, left + iconCol, y + n * highlightLine + (highlightLine - highlightSize) / 2));
+			y += blockH + px(8);
 		});
+		y += px(12) - px(8);
 
-		// Badges: plain emoji.
+		// Badges.
 		if (card.badges.length > 0) {
-			y += 10;
 			ctx.fillStyle = gold;
-			ctx.font = `800 26px ${FONT}`;
-			ctx.fillText(lang === "ko" ? `배지 ${card.badges.length}개` : `${card.badges.length} BADGES`, left, y + 26);
-			y += 40;
-			ctx.font = `52px ${FONT}`;
+			ctx.font = `800 ${badgeLabelSize}px ${FONT}`;
+			spacedText(ctx, lang === "ko" ? `배지 ${card.badges.length}개` : `${card.badges.length} BADGES`, left, y, badgeLabelSize * 0.1);
+			y += Math.round(badgeLabelSize * 1.3) + px(8);
+			ctx.font = `${emojiSize}px ${FONT}`;
 			ctx.textBaseline = "middle";
 			card.badges.forEach((badge, i) => {
 				const row = Math.floor(i / perRow);
 				const col = i % perRow;
-				ctx.fillText(badge.icon, left + col * (badgeSize + badgeGap), y + row * (badgeSize + badgeGap) + badgeSize / 2);
+				ctx.fillText(badge.icon, left + col * emojiStep, y + row * (emojiRow + px(4)) + emojiRow / 2);
 			});
-			ctx.textBaseline = "alphabetic";
 		}
 
 		// Site address under the card.
-		ctx.fillStyle = "rgba(247, 246, 242, 0.6)";
-		ctx.font = `700 32px ${FONT}`;
+		ctx.textBaseline = "alphabetic";
 		ctx.textAlign = "center";
-		ctx.fillText("kicksuiuc.com", W / 2, cardY + cardH + footerGap + 26);
+		ctx.fillStyle = "rgba(247, 246, 242, 0.55)";
+		ctx.font = `700 30px ${FONT}`;
+		ctx.fillText("kicksuiuc.com", W / 2, cardY + cardH + footer);
 		ctx.textAlign = "left";
 
 		return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
 	}
+
 
 </script>
 
