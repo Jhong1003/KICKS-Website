@@ -200,8 +200,8 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 	},
 	the_wall: {
 		label: "The Wall",
-		description: "Defended in a week the team kept 3+ clean sheets.",
-		descriptionKo: "팀이 한 주에 무실점 경기를 3번 이상 기록한 주에 함께 수비했어요.",
+		description: "Played at the back in a week the team kept 3+ clean sheets.",
+		descriptionKo: "팀이 한 주에 무실점 3경기 이상을 기록할 때 수비진으로 함께했어요.",
 		icon: "🧱",
 		tier: "rare",
 	},
