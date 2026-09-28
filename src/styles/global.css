@@ -53,7 +53,10 @@ a {
 
 .site-header {
 
+	/* z-index keeps the opened mobile menu above positioned page content
+	   (e.g. the player page's Wrapped button). */
 	position: relative;
+	z-index: 50;
 	display: flex;
 	align-items: center;
 	gap: 24px;
@@ -2663,11 +2666,11 @@ a.player-card:hover {
 
 }
 
-/* 이름 글자의 시각적 중심에 맞게 살짝 아래로 */
+/* 이름 글자의 시각적 중심에 맞게 살짝 아래로 (가운데 정렬이라 margin 6px = 3px 이동;
+   position을 쓰면 모바일 메뉴 위로 올라와서 margin으로 처리) */
 .player-name-row .wrapped-entry {
 
-	position: relative;
-	top: 3px;
+	margin-top: 6px;
 
 }
 
