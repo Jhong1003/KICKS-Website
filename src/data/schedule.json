@@ -8,11 +8,11 @@
   { "date": "2026-10-10", "title": "KICKS Fundraiser", "title_ko": "KICKS 펀드레이징", "type": "event", "tbd": true },
   { "date": "2026-10-10", "title": "FA26-L2 · Week 1", "type": "league", "league": "FA26-L2", "week": 1 },
   { "date": "2026-10-17", "title": "FA26-L2 · Week 2", "type": "league", "league": "FA26-L2", "week": 2 },
-  { "date": "2026-10-23", "title": "KICKS Team Dinner #1 · League 1 Awards", "title_ko": "KICKS 전체회식 1 · 리그 1 시상", "type": "event" },
+  { "date": "2026-10-23", "title": "League 1 Awards & Team Dinner #1", "title_ko": "리그 1 어워드 & 전체회식 1", "type": "ceremony" },
   { "date": "2026-10-24", "title": "FA26-L2 · Week 3", "type": "league", "league": "FA26-L2", "week": 3 },
   { "date": "2026-10-31", "title": "FA26-L2 · Week 4", "type": "league", "league": "FA26-L2", "week": 4 },
   { "date": "2026-11-07", "title": "KICKS 11 vs 11 · Event Match", "title_ko": "KICKS 11 대 11 · 이벤트 매치", "type": "event" },
   { "date": "2026-11-14", "title": "Final Futsal of the Season", "title_ko": "시즌 마지막 풋살", "type": "event" },
   { "date": null, "title": "Friendly Match vs International Team", "title_ko": "유학생 팀과의 친선경기", "type": "friendly" },
-  { "date": "2026-12-05", "title": "KICKS Awards & Team Dinner #2", "title_ko": "KICKS 어워드 & 전체회식 2", "type": "ceremony" }
+  { "date": "2026-12-05", "title": "League 2 Awards & Team Dinner #2", "title_ko": "리그 2 어워드 & 전체회식 2", "type": "ceremony" }
 ]
