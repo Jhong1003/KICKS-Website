@@ -112,12 +112,3 @@ These are decided now but run only after FA26-L2 ends:
 - Elo. It may come later as a pre-registered shadow model.
 - Title-race probabilities. These wait until the tie rule for simulated participation rates is
   defined.
-
-## Appendix — FA26-L2 pre-season note
-
-Recorded before week 1 for a later look-back, not as a forecast:
-
-- **Organiser's judgement:** the three drafted teams look roughly even.
-- **FA26-L1 numbers:** expected attacking points per week, summing each player's "points per
-  attended week × attendance rate", come out as A 10.0 / B 10.0 / C 14.5. These rest on four
-  weeks of data and are inflated for players from the L1 champion.
