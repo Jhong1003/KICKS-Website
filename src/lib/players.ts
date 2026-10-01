@@ -60,9 +60,13 @@ export type BadgeKey =
 	| "provider"
 	| "iron_man"
 	| "squad_member"
+	| "clean_sheet"
+	| "number_one"
 	| "on_fire"
 	| "libero"
 	| "the_wall"
+	| "lockdown"
+	| "giant_killer"
 	| "champion"
 	| "brace"
 	| "game_changer"
@@ -71,6 +75,8 @@ export type BadgeKey =
 	| "maestro"
 	| "delivery_service"
 	| "hat_trick"
+	| "great_wall"
+	| "clean_sheet_machine"
 	| "treble"
 	| "poker"
 	| "back_to_back"
@@ -183,6 +189,21 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		icon: "🤝",
 		tier: "common",
 	},
+	// Defender badges (primary DF/GK, counted only in weeks they played) — see _defender_badges
+	clean_sheet: {
+		label: "Clean Sheet",
+		description: "Played in defense in a week the team kept a clean sheet.",
+		descriptionKo: "수비진으로 뛴 주에 팀이 무실점 경기를 했어요.",
+		icon: "🧤",
+		tier: "common",
+	},
+	number_one: {
+		label: "Number 1",
+		description: "The team's goalkeeper.",
+		descriptionKo: "팀의 골키퍼예요.",
+		icon: "🥅",
+		tier: "common",
+	},
 	// Rare
 	on_fire: {
 		label: "On Fire",
@@ -203,6 +224,20 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		description: "Played in defense during a week the team kept 3+ clean sheets.",
 		descriptionKo: "팀이 한 주에 무실점 3경기 이상을 기록할 때 수비진으로 함께했어요.",
 		icon: "🧱",
+		tier: "rare",
+	},
+	lockdown: {
+		label: "Lockdown",
+		description: "Played in defense in a week the team conceded at most 1 goal per game.",
+		descriptionKo: "수비진으로 뛴 주에 팀이 경기당 1실점 이하로 막았어요.",
+		icon: "🔒",
+		tier: "rare",
+	},
+	giant_killer: {
+		label: "Giant Killer",
+		description: "Kept a clean sheet against the league champion.",
+		descriptionKo: "리그 우승팀을 상대로 무실점 경기를 해냈어요.",
+		icon: "🗡️",
 		tier: "rare",
 	},
 	champion: {
@@ -261,6 +296,20 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		description: "Scored 3 goals in a single match.",
 		descriptionKo: "한 경기에서 3골을 넣었어요.",
 		icon: "🎩",
+		tier: "legendary",
+	},
+	great_wall: {
+		label: "Great Wall",
+		description: "Played in defense in a week the team kept 5+ clean sheets.",
+		descriptionKo: "팀이 한 주에 무실점 5경기 이상을 기록할 때 수비진으로 함께했어요.",
+		icon: "🏯",
+		tier: "legendary",
+	},
+	clean_sheet_machine: {
+		label: "Clean Sheet Machine",
+		description: "10+ team clean sheets across the weeks played in defense this league.",
+		descriptionKo: "이번 리그에서 수비진으로 뛴 주에 팀 무실점 경기가 10번 이상이에요.",
+		icon: "🤖",
 		tier: "legendary",
 	},
 	// Icon — shown as a locked "???" card until someone earns it

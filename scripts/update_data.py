@@ -574,6 +574,8 @@ FOX_IN_THE_BOX_GOALS = 5  # goals in the league
 DELIVERY_SERVICE_ASSISTS = 5  # assists in the league
 MAESTRO_ASSISTS = 3  # assists in a single week
 THE_WALL_CLEAN_SHEETS = 3  # team clean sheets in a single week
+GREAT_WALL_CLEAN_SHEETS = 5  # team clean sheets in a single week (Legendary)
+CLEAN_SHEET_MACHINE_TOTAL = 10  # team clean sheets across the player's attended weeks in a league
 BRACE_GOALS = 2  # goals in a single *match* (needs goal_events, so FA26-L2 onward)
 HAT_TRICK_GOALS = 3  # goals in a single match (also counts as a Brace)
 POKER_GOALS = 4  # goals in a single match (Icon; also counts as Hat-trick and Brace)
@@ -654,7 +656,8 @@ def _badges(
     *,
     primary_position: str | None,
     max_match_goals: int,
-    wall_weeks: set[tuple[int, str]],
+    team_weeks: dict[tuple[int, str], list[tuple[int, int, str]]],
+    champion_teams: set[str],
     champion: bool,
     top_scorer: bool,
     weeks_played: int,
@@ -672,6 +675,9 @@ def _badges(
     from the week they joined (absent weeks are rows with games = 0).
     `top_scorer` = first in the league's attacking-points ranking (see
     _top_attackers); `weeks_played` = weeks the league has had so far.
+    `team_weeks` is _team_weeks for this league and `champion_teams` the
+    league's champion(s) (empty until it finishes) — both feed the defender
+    badges (see _defender_badges).
     `back_to_back` is added afterwards in build_player_profiles, since it
     needs the player's other leagues.
     """
@@ -698,10 +704,6 @@ def _badges(
         badges.append("on_fire")
     if primary_position == "DF" and goals + assists >= 1:
         badges.append("libero")
-    if primary_position in DEFENSIVE_POSITIONS and any(
-        (int(week), team_id) in wall_weeks for week, team_id in zip(attended["week"], attended["team_id"])
-    ):
-        badges.append("the_wall")
     if champion:
         badges.append("champion")
     if max_match_goals >= BRACE_GOALS:
@@ -719,6 +721,8 @@ def _badges(
         badges.append("delivery_service")
     if max_match_goals >= HAT_TRICK_GOALS:
         badges.append("hat_trick")
+    if primary_position in DEFENSIVE_POSITIONS:
+        badges.extend(_defender_badges(attended, primary_position, team_weeks, champion_teams))
     # Just for fun — the club tracks an own-goal award, and a mid-league move
     # is part of a player's story. Neither is a real "achievement".
     if own_goals >= OWN_GOAL_AWARD_MIN:
@@ -742,19 +746,64 @@ def _positions_for(player_id: str, positions: pd.DataFrame) -> list[str]:
     return [value for value in (row["primary_position"], row["secondary_position"]) if not pd.isna(value)]
 
 
-def _wall_weeks(matches: pd.DataFrame) -> dict[str, set[tuple[int, str]]]:
-    """(week, team_id) pairs per league where the team kept THE_WALL_CLEAN_SHEETS+
-    clean sheets that week."""
+def _team_weeks(matches: pd.DataFrame) -> dict[str, dict[tuple[int, str], list[tuple[int, int, str]]]]:
+    """Per league: (week, team_id) -> that team's played games that week, as
+    (goals_for, goals_against, opponent_id). Feeds the defender badges."""
     team_rows = _team_match_rows(matches)
-    if team_rows.empty:
-        return {}
-    clean = team_rows[team_rows["goals_against"] == 0]
-    counts = clean.groupby(["league", "week", "team_id"]).size()
-    walls: dict[str, set[tuple[int, str]]] = {}
-    for (league, week, team_id), count in counts.items():
-        if count >= THE_WALL_CLEAN_SHEETS:
-            walls.setdefault(league, set()).add((int(week), team_id))
-    return walls
+    weeks: dict[str, dict[tuple[int, str], list[tuple[int, int, str]]]] = {}
+    for row in team_rows.itertuples(index=False):
+        games = weeks.setdefault(row.league, {}).setdefault((int(row.week), row.team_id), [])
+        games.append((int(row.goals_for), int(row.goals_against), row.opponent_id))
+    return weeks
+
+
+def _defender_badges(
+    attended: pd.DataFrame,
+    primary_position: str | None,
+    team_weeks: dict[tuple[int, str], list[tuple[int, int, str]]],
+    champion_teams: set[str],
+) -> list[str]:
+    """Badges for a DF/GK, earned through their team's defending in the weeks
+    they actually played (a week they missed never counts for them).
+
+    Common: Clean Sheet (any team clean sheet), Number 1 (primary position GK).
+    Rare: Lockdown (a week conceding at most one goal per game), Giant Killer
+    (a clean sheet against the finished league's champion, own team not
+    champion), The Wall (THE_WALL_CLEAN_SHEETS+ clean sheets in a week).
+    Legendary: Great Wall (GREAT_WALL_CLEAN_SHEETS+ clean sheets in a week),
+    Clean Sheet Machine (CLEAN_SHEET_MACHINE_TOTAL+ clean sheets in total).
+    """
+    if attended.empty:
+        return []
+    played = {
+        int(week): (team_id, team_weeks.get((int(week), team_id), []))
+        for week, team_id in zip(attended["week"], attended["team_id"])
+    }
+    weekly_clean = {week: sum(1 for _, against, _ in games if against == 0) for week, (_, games) in played.items()}
+    all_games = [(team_id, game) for team_id, games in played.values() for game in games]
+
+    badges = []
+    # Common
+    if any(weekly_clean.values()):
+        badges.append("clean_sheet")
+    if primary_position == "GK":
+        badges.append("number_one")
+    # Rare
+    if any(games and sum(against for _, against, _ in games) <= len(games) for _, games in played.values()):
+        badges.append("lockdown")
+    if any(
+        against == 0 and opponent in champion_teams and team_id not in champion_teams
+        for team_id, (_, against, opponent) in all_games
+    ):
+        badges.append("giant_killer")
+    if any(count >= THE_WALL_CLEAN_SHEETS for count in weekly_clean.values()):
+        badges.append("the_wall")
+    # Legendary
+    if any(count >= GREAT_WALL_CLEAN_SHEETS for count in weekly_clean.values()):
+        badges.append("great_wall")
+    if sum(weekly_clean.values()) >= CLEAN_SHEET_MACHINE_TOTAL:
+        badges.append("clean_sheet_machine")
+    return badges
 
 
 def _champions(matches: pd.DataFrame, league_table: list[dict]) -> dict[str, set[str]]:
@@ -820,7 +869,7 @@ def _league_section(
     *,
     primary_position: str | None,
     max_match_goals: int,
-    wall_weeks: set[tuple[int, str]],
+    team_weeks: dict[tuple[int, str], list[tuple[int, int, str]]],
     champion_teams: set[str],
     top_scorer: bool,
 ) -> dict:
@@ -860,7 +909,8 @@ def _league_section(
             rows,
             primary_position=primary_position,
             max_match_goals=max_match_goals,
-            wall_weeks=wall_weeks,
+            team_weeks=team_weeks,
+            champion_teams=champion_teams,
             champion=current_team_id in champion_teams,
             top_scorer=top_scorer,
             weeks_played=weeks_played,
@@ -890,8 +940,8 @@ def build_player_profiles(
     rows in player_stats) don't have anything to show on a card - they'll
     get one automatically once their first week of stats is entered.
 
-    `matches` and `league_table` feed the team-based badges (The Wall,
-    Champion, Treble); `goal_events` (still name-based) feeds the per-match
+    `matches` and `league_table` feed the team-based badges (the defender
+    badges, Champion, Treble); `goal_events` (still name-based) feeds the per-match
     ones (Brace, Hat-trick, Poker). Back-to-Back is the one badge that
     looks across leagues: champion of two leagues in a row (consecutive in
     `league_order`), awarded in the second one.
@@ -903,7 +953,7 @@ def build_player_profiles(
     statuses = by_id["status"].dropna()
     league_rank = {league: index for index, league in enumerate(league_order)}
 
-    wall_weeks = _wall_weeks(matches)
+    team_weeks = _team_weeks(matches)
     champions = _champions(matches, league_table)
     top_attackers = _top_attackers(player_stats)
     max_match_goals = _max_match_goals(goal_events, dict(zip(players["player"], players["player_id"])))
@@ -920,7 +970,7 @@ def build_player_profiles(
                 int(weeks_played[league]),
                 primary_position=primary_position,
                 max_match_goals=max_match_goals.get((league, player_id), 0),
-                wall_weeks=wall_weeks.get(league, set()),
+                team_weeks=team_weeks.get(league, {}),
                 champion_teams=champions.get(league, set()),
                 top_scorer=player_id in top_attackers.get(league, set()),
             )

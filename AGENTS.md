@@ -400,21 +400,31 @@ they joined, so late joiners aren't penalised.
   (fallback when nothing else triggered, so **everyone has at least one
   badge** per league).
 - Rare: `on_fire` (3+ goals + assists in one week), `libero` (primary DF
-  with a goal or assist), `the_wall` (primary DF/GK who attended a week
-  their team kept 3+ clean sheets), `champion` (on the rank-1 team of a
+  with a goal or assist), `champion` (on the rank-1 team of a
   *finished* league — every fixture scored), `brace` (2 goals in one match).
 - Legendary: `game_changer` (2+ goals and 2+ assists in one week), `crack`
   (2+ goals + assists in each of two consecutive attended weeks — once
   earned it stays), `fox_in_the_box` (5+ league goals), `maestro` (3+
   assists in one week), `delivery_service` (5+ league assists), `hat_trick`
   (3 goals in one match).
+- Defender badges (primary DF/GK only, `_defender_badges`; only weeks the
+  player attended count, using the team they played for that week):
+  - Common: `clean_sheet` (a team clean sheet), `number_one` (primary
+    position GK).
+  - Rare: `lockdown` (a week conceding at most 1 goal per game),
+    `giant_killer` (clean sheet vs the finished league's champion while on
+    another team), `the_wall` (3+ clean sheets in one week).
+  - Legendary: `great_wall` (5+ clean sheets in one week),
+    `clean_sheet_machine` (10+ team clean sheets in total).
+  These exist so defenders on any team can earn something, not only the
+  champion's back line.
 - Special (just for fun): `own_goal_award` (1+ own goal — the club runs an
   own-goal award), `journeyman` (played for more than one team in the
   league).
 
 `brace`/`hat_trick` need per-match goals, which only `goal_events` has
 (`_max_match_goals`), so they start in FA26-L2; FA26-L1 was recorded as
-weekly totals. Team-based badges (`the_wall`, `champion`) are deliberately
+weekly totals. Apart from the defender set, team-based badges (`champion`) are kept
 few, since they mostly reflect team strength rather than the player.
 
 (There used to be `week1_starter` and `rookie` badges; they were dropped
