@@ -176,7 +176,7 @@ the numbers live in `src/data/league-config.json`, not in code):
 | 용도 | Cron (UTC) | 대략 현지시각(CDT) |
 |---|---|---|
 | 평상시 매일 3회 | `0 13,19,1 * * *` | 오전 8시 / 오후 2시 / 오후 8시 |
-| 일요일 경기 집중 (30분마다) | `*/30 2-8 * * 1` | 일요일 밤 9시 ~ 월요일 새벽 3시 |
+| 토요일 경기 집중 (30분마다) | `*/30 2-8 * * 0` | 토요일 밤 9시 ~ 일요일 새벽 3시 |
 
 **수동 실행**: GitHub 저장소 → Actions 탭 → "Update League Data" →
 "Run workflow" 버튼. (모바일 GitHub 앱에서도 동일하게 가능합니다.)

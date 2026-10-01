@@ -189,8 +189,8 @@ the whole pipeline unattended: validate → regenerate → commit-and-push only
 if the JSON actually changed. Cloudflare deploys on that push, so a Sheet
 edit alone is enough to update the live site.
 
-- **Triggers**: `schedule` (3x/day baseline, plus every 30 min from Sunday
-  9pm to Monday 3am Central — see the cron comments in the workflow file
+- **Triggers**: `schedule` (3x/day baseline, plus every 30 min from Saturday
+  9pm to Sunday 3am Central, after league matches — see the cron comments in the workflow file
   for the UTC math) and `workflow_dispatch` (manual run from the Actions
   tab or GitHub mobile app). Cron is UTC-only and doesn't observe DST, so
   the local times drift ±1 hour twice a year — accepted rather than

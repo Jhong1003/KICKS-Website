@@ -10,7 +10,7 @@ on:
     # drift by an hour against Central time twice a year. Comments below
     # assume CDT (UTC-5, roughly March-November).
     - cron: "0 13,19,1 * * *" # daily baseline: ~8am / 2pm / 8pm Central
-    - cron: "*/30 2-8 * * 1" # Sunday 9pm - Monday 3am Central, every 30 min
+    - cron: "*/30 2-8 * * 0" # Saturday 9pm - Sunday 3am Central (match night), every 30 min
   workflow_dispatch: {}
 
 permissions:
