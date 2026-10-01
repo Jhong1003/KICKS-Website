@@ -1,0 +1,356 @@
+---
+// Cumulative points after each week, one line per team, with a one-line
+// story above it (raceStory). Shown in the league page's points-chart popup
+// (PointsRaceDialog, `compact`), opened from a link under each week's table; the full-size version is kept for a
+// standalone section if ever needed. The data is standings_history.json: the pipeline
+// rebuilds the official table after every week (same points rule and
+// tiebreakers) and checks that the last week equals league_table.json.
+//
+// Title follows the league's state: "Points Race" while it's running,
+// "How It Unfolded" once every fixture has a score. The x-axis always runs to
+// the league's last week, so a running league shows the weeks still to come.
+//
+// Identity is never color alone: team colors are fixed by the club (gold and
+// red are hard to tell apart for colorblind readers), so each team also gets
+// its own marker shape and a direct label at the end of its line.
+import T from "./T.astro";
+import historyData from "../data/standings_history.json";
+import { getTeamColor, getTeamName, type League } from "../lib/leagues";
+import { COMPACT_RACE_SIZE, RACE_SIZE, buildPointsRace, raceStory, type HistoryRow } from "../lib/points-race";
+
+interface Props {
+	league: League;
+	finished: boolean;
+	/** Small version without the big heading and legend, beside a week's results table. */
+	compact?: boolean;
+}
+
+const { league, finished, compact = false } = Astro.props;
+const rules = league.rules;
+const rows = (historyData as HistoryRow[]).filter((row) => row.league === league.id);
+const teams = league.teams.map((team) => ({
+	id: team.team_id,
+	name: getTeamName(team.team_id, league),
+	color: getTeamColor(team.team_id, league),
+}));
+const size = compact ? COMPACT_RACE_SIZE : RACE_SIZE;
+const race = buildPointsRace(rows, teams, rules.weeks, size);
+const { width: W, height: H } = size;
+const story = raceStory(rows, Object.fromEntries(teams.map((team) => [team.id, team.name])), finished);
+const plot = race.plot;
+// The final-week band: only when that week's win is worth more.
+const bonus = rules.final_win_points !== rules.win_points ? race.band(rules.final_week) : null;
+const teamMeta = Object.fromEntries(race.series.map((team) => [team.id, { name: team.name, color: team.color, shape: team.shape }]));
+const diamond = (cx: number, cy: number, s: number) => `${cx},${cy - s} ${cx + s},${cy} ${cx},${cy + s} ${cx - s},${cy}`;
+const titleId = `points-race-${league.id}${compact ? "-compact" : ""}`;
+const Wrapper = compact ? "div" : "section";
+---
+
+{
+	rows.length > 0 && (
+		<Wrapper class:list={["points-race", { "content-section": !compact, "points-race--compact": compact }]} aria-labelledby={titleId}>
+			<div class="points-race-text">
+			{compact ? (
+				<h3 id={titleId} class="points-race-compact-title">
+					{finished ? <T en="How It Unfolded" ko="주차별 흐름" /> : <T en="Points Race" ko="승점 레이스" />}
+				</h3>
+			) : (
+				<>
+					<h2 id={titleId}>
+						{finished ? <T en="How It Unfolded" ko="주차별 흐름" /> : <T en="Points Race" ko="승점 레이스" />}
+					</h2>
+					<T as="p" class="about-description points-race-sub" en="Points after each week." ko="주차별 누적 승점이에요." />
+				</>
+			)}
+
+			{story && (
+				<div class="points-race-story">
+					<T as="p" class="points-race-headline" en={story.headline.en} ko={story.headline.ko} />
+					{story.gaps.length > 1 && (
+						<p class="points-race-gaps">
+							<T en="Lead over 2nd: " ko="2위와의 격차 " />
+							{story.gaps.map((gap, index) => (
+								<>
+									{index > 0 && <span aria-hidden="true"> → </span>}
+									{index === story.gaps.length - 1 ? <strong>{gap}</strong> : gap}
+								</>
+							))}
+							<T en=" pts" ko="점" />
+						</p>
+					)}
+				</div>
+			)}
+
+			</div>
+
+			{!compact && <ul class="points-race-legend">
+				{race.series.map((team) => (
+					<li>
+						<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+							{team.shape === "square" ? (
+								<rect x="1.5" y="1.5" width="9" height="9" rx="1" fill={team.color} />
+							) : team.shape === "diamond" ? (
+								<polygon points={diamond(6, 6, 5.8)} fill={team.color} />
+							) : (
+								<circle cx="6" cy="6" r="4.5" fill={team.color} />
+							)}
+						</svg>
+						{team.name}
+					</li>
+				))}
+			</ul>}
+
+			<div class="points-race-chart" data-points-race data-tooltip={JSON.stringify(race.tooltip)} data-teams={JSON.stringify(teamMeta)}>
+				<svg viewBox={`0 0 ${W} ${H}`}>
+					{bonus && (
+						<g class="points-race-bonus">
+							<rect x={bonus.x} y={plot.top} width={bonus.width} height={plot.height} />
+							<text x={bonus.x + bonus.width / 2} y={plot.top - 7} text-anchor="middle">
+								<tspan data-lang="en">{`Win = ${rules.final_win_points} pts`}</tspan>
+								<tspan data-lang="ko">{`승리 ${rules.final_win_points}점`}</tspan>
+							</text>
+						</g>
+					)}
+
+					<g class="points-race-grid" aria-hidden="true">
+						{race.yTicks.map((tick) => (
+							<>
+								<line x1={plot.left} x2={plot.left + plot.width} y1={tick.y} y2={tick.y} />
+								<text x={plot.left - 6} y={tick.y} text-anchor="end" dominant-baseline="middle">{tick.value}</text>
+							</>
+						))}
+						{race.weekTicks.map(({ week, x }) => (
+							<text class="points-race-week" x={x} y={plot.bottom + (compact ? 14 : 16)} text-anchor="middle">
+								<tspan data-lang="en">{`W${week}`}</tspan>
+								<tspan data-lang="ko">{`${week}주`}</tspan>
+							</text>
+						))}
+					</g>
+
+					<line class="points-race-crosshair" data-crosshair y1={plot.top} y2={plot.bottom} x1="0" x2="0" />
+
+					{race.series.map((team) => (
+						<g aria-hidden="true">
+							<path class="points-race-line" d={team.path} stroke={team.color} />
+							{team.points.slice(1).map((p) =>
+								team.shape === "square" ? (
+									<rect class="points-race-marker" x={p.cx - 4.5} y={p.cy - 4.5} width="9" height="9" rx="1" fill={team.color} />
+								) : team.shape === "diamond" ? (
+									<polygon class="points-race-marker" points={diamond(p.cx, p.cy, 5.8)} fill={team.color} />
+								) : (
+									<circle class="points-race-marker" cx={p.cx} cy={p.cy} r="4.5" fill={team.color} />
+								),
+							)}
+						</g>
+					))}
+
+					{race.labels.map((label) => (
+						<text class="points-race-label" x={label.x} y={label.y} dominant-baseline="middle">{label.name}</text>
+					))}
+
+					{race.hits.map((hit) => (
+						<rect
+							class="points-race-hit"
+							data-week={hit.week}
+							x={hit.x}
+							y={plot.top}
+							width={hit.width}
+							height={plot.height}
+							tabindex="0"
+							role="button"
+							aria-label={`Week ${hit.week}`}
+						/>
+					))}
+				</svg>
+				<div class="points-race-tooltip" data-tip hidden></div>
+			</div>
+
+			<table class="points-race-table">
+				<caption><T en="Points after each week" ko="주차별 누적 승점" /></caption>
+				<thead>
+					<tr>
+						<th scope="col"><T en="Team" ko="팀" /></th>
+						{race.weeks.map((week) => <th scope="col"><T en={`Week ${week}`} ko={`${week}주차`} /></th>)}
+					</tr>
+				</thead>
+				<tbody>
+					{race.series.map((team) => (
+						<tr>
+							<th scope="row">{team.name}</th>
+							{team.points.slice(1).map((p) => <td>{p.points}</td>)}
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</Wrapper>
+	)
+}
+
+<script>
+	import { bilingualHtml } from "../lib/i18n";
+
+	type Row = { team: string; rank: number; points: number; gd: number };
+	type Meta = { name: string; color: string; shape: string };
+
+	for (const root of document.querySelectorAll<HTMLElement>("[data-points-race]")) {
+		const data = JSON.parse(root.dataset.tooltip!) as Record<string, Row[]>;
+		const teams = JSON.parse(root.dataset.teams!) as Record<string, Meta>;
+		const tip = root.querySelector<HTMLElement>("[data-tip]")!;
+		const crosshair = root.querySelector<SVGLineElement>("[data-crosshair]")!;
+		const svg = root.querySelector("svg")!;
+		let pinned: SVGRectElement | null = null;
+
+		const swatch = (meta: Meta) => {
+			const shape =
+				meta.shape === "square"
+					? `<rect x="1.5" y="1.5" width="9" height="9" rx="1" fill="${meta.color}"/>`
+					: meta.shape === "diamond"
+						? `<polygon points="6,0.2 11.8,6 6,11.8 0.2,6" fill="${meta.color}"/>`
+						: `<circle cx="6" cy="6" r="4.5" fill="${meta.color}"/>`;
+			return `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">${shape}</svg>`;
+		};
+
+		function show(hit: SVGRectElement) {
+			const week = hit.dataset.week!;
+			const rows = data[week] ?? [];
+			const head = bilingualHtml(`Week ${week}`, `${week}주차`);
+			const body = rows
+				.map((row) => {
+					const meta = teams[row.team];
+					const gd = row.gd > 0 ? `+${row.gd}` : `${row.gd}`;
+					return `<li>${swatch(meta)}<span class="points-race-tip-rank">${row.rank}</span><span class="points-race-tip-name">${meta.name}</span><strong>${row.points}${bilingualHtml(" pts", "점")}</strong><span class="points-race-tip-gd">${bilingualHtml("GD ", "득실 ")}${gd}</span></li>`;
+				})
+				.join("");
+			tip.innerHTML = `<p>${head}</p><ul>${body}</ul>`;
+			tip.hidden = false;
+
+			const cx = Number(hit.getAttribute("x")) + Number(hit.getAttribute("width")) / 2;
+			crosshair.setAttribute("x1", String(cx));
+			crosshair.setAttribute("x2", String(cx));
+			crosshair.classList.add("is-visible");
+
+			// Place the tooltip beside the crosshair, flipping left near the right edge.
+			const box = svg.getBoundingClientRect();
+			const scale = box.width / svg.viewBox.baseVal.width;
+			const left = cx * scale;
+			const flip = left > box.width / 2;
+			tip.style.left = flip ? "" : `${left + 10}px`;
+			tip.style.right = flip ? `${box.width - left + 10}px` : "";
+		}
+		function hide() {
+			if (pinned) return;
+			tip.hidden = true;
+			crosshair.classList.remove("is-visible");
+		}
+
+		for (const hit of root.querySelectorAll<SVGRectElement>("[data-week]")) {
+			hit.addEventListener("pointerenter", (event) => { if (event.pointerType === "mouse") show(hit); });
+			hit.addEventListener("pointerleave", (event) => { if (event.pointerType === "mouse") hide(); });
+			hit.addEventListener("focus", () => show(hit));
+			hit.addEventListener("blur", () => { pinned = null; hide(); });
+			// Tap (or click) pins it; tapping the same week again closes it.
+			hit.addEventListener("click", () => {
+				if (pinned === hit) { pinned = null; hide(); return; }
+				pinned = hit;
+				show(hit);
+			});
+		}
+		document.addEventListener("click", (event) => {
+			if (pinned && !root.contains(event.target as Node)) { pinned = null; hide(); }
+		});
+	}
+</script>
+
+<style>
+	.points-race-sub { margin-top: 4px; }
+
+	.points-race-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 18px;
+		margin: 16px 0 8px;
+		padding: 0;
+		list-style: none;
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+	.points-race-legend li { display: inline-flex; align-items: center; gap: 6px; }
+
+	.points-race-chart { position: relative; max-width: 620px; }
+	.points-race-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+	.points-race-chart text { fill: var(--color-dark); font-size: 11px; }
+
+	.points-race-grid line { stroke: rgba(41, 41, 41, 0.1); stroke-width: 1; }
+	.points-race-grid text { fill: rgba(41, 41, 41, 0.55); font-size: 10px; }
+
+	.points-race-bonus rect { fill: rgba(246, 231, 184, 0.55); }
+	.points-race-bonus text { fill: #7a5f0e; font-size: 9.5px; font-weight: 700; }
+
+	.points-race-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+	.points-race-marker { stroke: var(--color-background); stroke-width: 2; }
+	.points-race-label { font-weight: 700; }
+
+	.points-race-crosshair { stroke: rgba(41, 41, 41, 0.35); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0; }
+	.points-race-crosshair.is-visible { opacity: 1; }
+
+	.points-race-hit { fill: transparent; cursor: pointer; outline: none; }
+	.points-race-hit:focus-visible { stroke: var(--color-green); stroke-width: 1.5; }
+
+	.points-race-tooltip {
+		position: absolute;
+		top: 8px;
+		z-index: 2;
+		min-width: 168px;
+		padding: 10px 12px;
+		border: 1px solid rgba(63, 81, 40, 0.25);
+		border-radius: 6px;
+		background: var(--color-background);
+		box-shadow: 0 4px 14px rgba(20, 29, 14, 0.12);
+		font-size: 0.8rem;
+		pointer-events: none;
+	}
+	.points-race-tooltip :global(p) { margin: 0 0 6px; font-weight: 700; }
+	.points-race-tooltip :global(ul) { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+	.points-race-tooltip :global(li) { display: grid; grid-template-columns: 12px 12px 1fr auto auto; align-items: center; gap: 6px; white-space: nowrap; }
+	.points-race-tooltip :global(.points-race-tip-rank) { opacity: 0.6; }
+	.points-race-tooltip :global(.points-race-tip-gd) { opacity: 0.6; font-size: 0.72rem; }
+
+	.points-race-story { margin: 6px 0 14px; }
+	.points-race-headline { margin: 0; word-break: keep-all; text-wrap: balance; font-size: 1.35rem; font-weight: 800; line-height: 1.35; letter-spacing: -0.01em; }
+	.points-race-gaps { margin: 6px 0 0; font-size: 0.85rem; opacity: 0.7; font-variant-numeric: tabular-nums; }
+	.points-race-gaps strong { opacity: 1; }
+	.points-race--compact .points-race-headline { font-size: 1.1rem; }
+
+	/* Compact: inside the points-chart popup. */
+	.points-race--compact { flex: 1 1 300px; max-width: 400px; min-width: 0; }
+	.points-race-compact-title {
+		margin: 0 0 6px;
+		color: var(--color-green);
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		opacity: 0.75;
+	}
+	.points-race--compact .points-race-chart { max-width: none; }
+	.points-race--compact .points-race-chart text { font-size: 10px; }
+	.points-race--compact .points-race-grid text { font-size: 9px; }
+	.points-race--compact .points-race-bonus text { font-size: 8.5px; }
+
+	/* Screen-reader table: the same numbers as the chart. */
+	.points-race-table {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+
+	/* Wider screens scale the whole SVG up, so text goes smaller in SVG units. */
+	@media (min-width: 700px) {
+		.points-race:not(.points-race--compact) .points-race-chart text { font-size: 8.5px; }
+		.points-race:not(.points-race--compact) .points-race-grid text { font-size: 7.5px; }
+		.points-race:not(.points-race--compact) .points-race-bonus text { font-size: 7.5px; }
+	}
+</style>

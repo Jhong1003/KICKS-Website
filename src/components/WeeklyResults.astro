@@ -34,9 +34,11 @@ interface Week {
 interface Props {
 	weeks: Week[];
 	defaultWeek: number;
+	/** When set, each week's table gets a link that opens this points-chart popup. */
+	raceDialogId?: string;
 }
 
-const { weeks, defaultWeek } = Astro.props;
+const { weeks, defaultWeek, raceDialogId } = Astro.props;
 
 const matchesForRound = (week: Week, round: number) => week.matches.filter((match) => match.round === round);
 ---
@@ -96,6 +98,11 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 							))}
 						</tbody>
 					</table>
+				)}
+				{raceDialogId && week.summary.length > 0 && (
+					<button class="week-race-link" type="button" aria-haspopup="dialog" data-race-open={raceDialogId}>
+						<span aria-hidden="true">📈</span> <T en="Points by week chart" ko="주차별 승점 그래프 보기" /> →
+					</button>
 				)}
 
 				<div class="week-rounds">

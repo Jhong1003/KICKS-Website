@@ -416,6 +416,43 @@ def build_league_table(matches: pd.DataFrame, player_stats: pd.DataFrame, roster
     return records
 
 
+HISTORY_FIELDS = ["league", "week", "team_id", "rank", "points", "goal_difference", "goals_for", "participation_rate"]
+
+
+def build_standings_history(matches: pd.DataFrame, player_stats: pd.DataFrame, players: pd.DataFrame) -> list[dict]:
+    """The league table as it stood after each week, for the points-race chart.
+
+    For every week that has at least one completed match, rebuild the table
+    from scratch with build_league_table (so the official points rule and
+    tiebreakers apply unchanged) using only that week and earlier: matches,
+    player_stats and therefore participation and the active roster as they
+    were then. The last week must equal the real league table — main()
+    checks that, so the chart can never drift from the standings.
+    """
+    played = matches.dropna(subset=["home_score", "away_score"])
+    history: list[dict] = []
+    for league, league_played in played.groupby("league", sort=False):
+        for week in sorted(int(w) for w in league_played["week"].unique()):
+            league_matches = matches[(matches["league"] == league) & (matches["week"] <= week)]
+            stats = player_stats[(player_stats["league"] == league) & (player_stats["week"] <= week)]
+            table = build_league_table(league_matches, stats, build_rosters(stats, players))
+            history.extend({**{key: row[key] for key in HISTORY_FIELDS if key != "week"}, "week": week} for row in table)
+    return [{key: row[key] for key in HISTORY_FIELDS} for row in history]
+
+
+def _check_history(history: list[dict], league_table: list[dict]) -> None:
+    """Each league's latest history week must match the official table exactly."""
+    for league in {row["league"] for row in league_table}:
+        rows = [row for row in history if row["league"] == league]
+        last = max(row["week"] for row in rows)
+        final = {row["team_id"]: row for row in rows if row["week"] == last}
+        for official in (row for row in league_table if row["league"] == league):
+            mine = final.get(official["team_id"])
+            fields = [key for key in HISTORY_FIELDS if key not in ("league", "week")]
+            if mine is None or any(mine[key] != official[key] for key in fields):
+                raise ValueError(f"standings history for {league} week {last} doesn't match league_table ({official['team_id']})")
+
+
 # ---------------------------------------------------------------------------
 # Match results and upcoming fixtures
 # ---------------------------------------------------------------------------
@@ -1140,9 +1177,12 @@ def main() -> None:
     rosters = build_rosters(player_stats, players)
 
     league_table = build_league_table(matches, player_stats, rosters)
+    standings_history = build_standings_history(matches, player_stats, players)
+    _check_history(standings_history, league_table)
 
     write_json("leagues.json", leagues)
     write_json("league_table.json", league_table)
+    write_json("standings_history.json", standings_history)
     write_json("matches.json", build_matches(matches))
     write_json("week_summaries.json", build_week_summaries(matches))
     write_json("player_leaderboard.json", build_leaderboard(player_stats, players))

@@ -447,7 +447,7 @@ keyboard controls. Without JavaScript, both sections remain available.
 Title Race automatically runs the existing 10,000-trial simulation once per
 page load. Team rows stay in generated official standings order, including
 tied teams' presentation order; only percentages and bars change. Teams
-without standings rows are appended in league team order. TITLE RACE is the
+without standings rows are appended in league team order. "Title Chances" (우승 확률) is the
 primary heading, with no subtitle or interactive controls.
 
 The site shows a read-only result, a simulations / remaining matches line,

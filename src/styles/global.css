@@ -939,6 +939,39 @@ h1 {
 
 /* 주간 팀 기록 미니 표 */
 
+/* 표 바로 아래: 주차별 승점 그래프 팝업 열기 (PointsRaceDialog) */
+.week-race-link {
+
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: -16px 0 32px;
+	padding: 0 0 2px;
+	border: 0;
+	border-bottom: 1px dashed var(--color-green);
+	background: none;
+	color: var(--color-green);
+	font: inherit;
+	font-size: 0.85rem;
+	font-weight: 700;
+	cursor: pointer;
+
+}
+
+.week-race-link:hover {
+
+	border-bottom-style: solid;
+
+}
+
+.week-race-link:focus-visible {
+
+	outline: 2px solid var(--color-green);
+	outline-offset: 3px;
+
+}
+
+
 .week-summary-table {
 
 	width: 100%;

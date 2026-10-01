@@ -1,5 +1,6 @@
 ---
 import ChampionshipSimulator from "./ChampionshipSimulator.astro";
+import PointsRaceDialog from "./PointsRaceDialog.astro";
 import StandingsTable from "./StandingsTable.astro";
 import WeeklyResults from "./WeeklyResults.astro";
 import PlayerStatsTable from "./PlayerStatsTable.astro";
@@ -9,7 +10,9 @@ import matchesData from "../data/matches.json";
 import weekSummariesData from "../data/week_summaries.json";
 import leaderboardData from "../data/player_leaderboard.json";
 import profilesData from "../data/player_profiles.json";
+import historyData from "../data/standings_history.json";
 import { leagues, getTeamName, type League } from "../lib/leagues";
+import { pointsRaceDialogId } from "../lib/points-race";
 
 interface Props {
 	league: League;
@@ -68,6 +71,9 @@ const leaderboard = inLeague(leaderboardData)
 		player: playerNames.get(row.player_id) ?? row.player_id,
 		team: teamName(row.team_id),
 	}));
+
+// The points-chart popup only exists once the league has a week of standings.
+const hasRaceHistory = historyData.some((row) => row.league === league.id);
 
 // Most recent week first, so the results section can show one tab per week,
 // each broken down by round.
@@ -166,7 +172,10 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		<h2 id="results-title"><T en="Match Results" ko="경기 결과" /></h2>
 		{
 			weeks.length > 0 ? (
-				<WeeklyResults weeks={weeks} defaultWeek={defaultWeek} />
+				<>
+					<WeeklyResults weeks={weeks} defaultWeek={defaultWeek} raceDialogId={hasRaceHistory ? pointsRaceDialogId(league.id) : undefined} />
+					<PointsRaceDialog league={league} finished={finished} />
+				</>
 			) : (
 				<T
 					as="p"

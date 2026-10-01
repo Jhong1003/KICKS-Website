@@ -1,0 +1,122 @@
+[
+  {
+    "league": "FA26-L1",
+    "week": 1,
+    "team_id": "T2",
+    "rank": 1,
+    "points": 9,
+    "goal_difference": 6,
+    "goals_for": 8,
+    "participation_rate": 1.0
+  },
+  {
+    "league": "FA26-L1",
+    "week": 1,
+    "team_id": "T1",
+    "rank": 2,
+    "points": 6,
+    "goal_difference": 1,
+    "goals_for": 6,
+    "participation_rate": 0.75
+  },
+  {
+    "league": "FA26-L1",
+    "week": 1,
+    "team_id": "T3",
+    "rank": 3,
+    "points": 3,
+    "goal_difference": -7,
+    "goals_for": 3,
+    "participation_rate": 0.778
+  },
+  {
+    "league": "FA26-L1",
+    "week": 2,
+    "team_id": "T2",
+    "rank": 1,
+    "points": 19,
+    "goal_difference": 11,
+    "goals_for": 15,
+    "participation_rate": 1.0
+  },
+  {
+    "league": "FA26-L1",
+    "week": 2,
+    "team_id": "T1",
+    "rank": 2,
+    "points": 14,
+    "goal_difference": 3,
+    "goals_for": 13,
+    "participation_rate": 0.875
+  },
+  {
+    "league": "FA26-L1",
+    "week": 2,
+    "team_id": "T3",
+    "rank": 3,
+    "points": 3,
+    "goal_difference": -14,
+    "goals_for": 5,
+    "participation_rate": 0.833
+  },
+  {
+    "league": "FA26-L1",
+    "week": 3,
+    "team_id": "T2",
+    "rank": 1,
+    "points": 26,
+    "goal_difference": 15,
+    "goals_for": 24,
+    "participation_rate": 0.889
+  },
+  {
+    "league": "FA26-L1",
+    "week": 3,
+    "team_id": "T1",
+    "rank": 2,
+    "points": 17,
+    "goal_difference": -3,
+    "goals_for": 19,
+    "participation_rate": 0.815
+  },
+  {
+    "league": "FA26-L1",
+    "week": 3,
+    "team_id": "T3",
+    "rank": 3,
+    "points": 11,
+    "goal_difference": -12,
+    "goals_for": 14,
+    "participation_rate": 0.758
+  },
+  {
+    "league": "FA26-L1",
+    "week": 4,
+    "team_id": "T2",
+    "rank": 1,
+    "points": 38,
+    "goal_difference": 20,
+    "goals_for": 35,
+    "participation_rate": 0.8
+  },
+  {
+    "league": "FA26-L1",
+    "week": 4,
+    "team_id": "T1",
+    "rank": 2,
+    "points": 25,
+    "goal_difference": -4,
+    "goals_for": 24,
+    "participation_rate": 0.775
+  },
+  {
+    "league": "FA26-L1",
+    "week": 4,
+    "team_id": "T3",
+    "rank": 3,
+    "points": 16,
+    "goal_difference": -16,
+    "goals_for": 18,
+    "participation_rate": 0.825
+  }
+]

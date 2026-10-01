@@ -1,0 +1,129 @@
+---
+// Popup holding the points-race chart and its story line (PointsRaceChart,
+// compact). Opened by the "points chart" link under each week's table in
+// Match Results (WeeklyResults, data-race-open="<this id>"), so the chart is
+// one tap away without crowding the results. Same dialog behavior as the
+// All Badges popup (BadgeGuide.astro).
+import T from "./T.astro";
+import PointsRaceChart from "./PointsRaceChart.astro";
+import historyData from "../data/standings_history.json";
+import type { League } from "../lib/leagues";
+import { pointsRaceDialogId } from "../lib/points-race";
+
+interface Props {
+	league: League;
+	finished: boolean;
+}
+
+const { league, finished } = Astro.props;
+const hasHistory = (historyData as { league: string }[]).some((row) => row.league === league.id);
+const id = pointsRaceDialogId(league.id);
+---
+
+{
+	hasHistory && (
+		<>
+			<dialog class="race-dialog" id={id} aria-label="Points by week">
+				<div class="race-dialog-head">
+					<button
+						class="race-dialog-close"
+						type="button"
+						aria-label="Close"
+						data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close", ko: "닫기" } })}
+						data-race-close
+					>
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+							<path d="m6 6 12 12M18 6 6 18"></path>
+						</svg>
+					</button>
+				</div>
+				<div class="race-dialog-body">
+					<PointsRaceChart league={league} finished={finished} compact />
+				</div>
+			</dialog>
+		</>
+	)
+}
+
+<script>
+	// One dialog per league, opened by any number of links (one per week tab).
+	document.querySelectorAll<HTMLDialogElement>("dialog.race-dialog").forEach((dialog) => {
+		const openers = document.querySelectorAll<HTMLElement>(`[data-race-open="${dialog.id}"]`);
+		let opener: HTMLElement | null = null;
+
+		openers.forEach((button) =>
+			button.addEventListener("click", () => {
+				opener = button;
+				document.documentElement.classList.add("race-dialog-open");
+				dialog.showModal();
+			}),
+		);
+		dialog.addEventListener("close", () => {
+			document.documentElement.classList.remove("race-dialog-open");
+			opener?.focus({ preventScroll: true });
+		});
+		dialog.querySelector("[data-race-close]")?.addEventListener("click", () => dialog.close());
+
+		// Both ends of the click must be outside, so a drag that starts on the panel doesn't close it.
+		let startedOutside = false;
+		const isOutside = (event: MouseEvent) => {
+			const rect = dialog.getBoundingClientRect();
+			return event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+		};
+		dialog.addEventListener("pointerdown", (event) => { startedOutside = isOutside(event); });
+		dialog.addEventListener("click", (event) => { if (startedOutside && isOutside(event)) dialog.close(); });
+	});
+</script>
+
+<style>
+	:global(html.race-dialog-open) { overflow: hidden; }
+
+	.race-dialog {
+		width: min(560px, calc(100% - 32px));
+		max-width: none;
+		max-height: calc(100dvh - 32px);
+		margin: auto;
+		padding: 0;
+		border: 1px solid rgba(63, 81, 40, 0.25);
+		border-radius: 6px;
+		color: var(--color-dark);
+		background: var(--color-background);
+		overscroll-behavior: contain;
+	}
+	.race-dialog[open] { display: flex; flex-direction: column; }
+	.race-dialog::backdrop { background: rgba(20, 29, 14, 0.4); }
+
+	.race-dialog-head { display: flex; justify-content: flex-end; padding: 8px 8px 0; }
+	.race-dialog-close {
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		border: 1px solid transparent;
+		border-radius: 6px;
+		color: inherit;
+		background: transparent;
+		cursor: pointer;
+	}
+	.race-dialog-close:hover { background: var(--color-sage); }
+	.race-dialog-close:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
+
+	.race-dialog-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 28px 28px; }
+	.race-dialog-body :global(.points-race--compact) { max-width: none; }
+
+	/* Phones: a full-width sheet that rises from the bottom. */
+	@media (max-width: 600px) {
+		.race-dialog {
+			width: 100%;
+			max-height: 88dvh;
+			margin: auto 0 0;
+			border-bottom: 0;
+			border-radius: 14px 14px 0 0;
+		}
+		.race-dialog-body { padding: 0 16px 24px; }
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.race-dialog[open] { animation: race-dialog-in 160ms ease-out; }
+		@keyframes race-dialog-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+	}
+</style>

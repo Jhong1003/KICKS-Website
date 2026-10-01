@@ -34,7 +34,7 @@ try {
  await page.goto(origin + '/league/'); await waitResult();
  assert.equal(await page.locator('#overview').isVisible(), true);
  assert.equal(await page.locator('#player-stats').isVisible(), false);
- assert.deepEqual(await page.locator('#overview h2').allTextContents(), ['League Table', 'Match Results', 'TITLE RACE']);
+ assert.deepEqual(await page.locator('#overview h2').allTextContents(), ['League Table', 'Match Results', 'Title Chances']);
  const expected = JSON.parse(fs.readFileSync(new URL('../src/data/league_table.json', import.meta.url))).filter(r => r.league === 'FA26-L1').map(r => r.team_id);
  assert.deepEqual(await order(), expected);
  const baseline = await credits(); const calls = await page.evaluate(() => window.randomCalls);
