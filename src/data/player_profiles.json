@@ -66,7 +66,9 @@
           "libero",
           "crack",
           "maestro",
-          "delivery_service"
+          "delivery_service",
+          "clean_sheet",
+          "giant_killer"
         ]
       }
     ]
@@ -300,6 +302,9 @@
           "provider",
           "iron_man",
           "libero",
+          "clean_sheet",
+          "lockdown",
+          "giant_killer",
           "journeyman"
         ]
       }
@@ -433,8 +438,12 @@
           "off_the_mark",
           "iron_man",
           "libero",
+          "champion",
+          "clean_sheet",
+          "lockdown",
           "the_wall",
-          "champion"
+          "great_wall",
+          "clean_sheet_machine"
         ]
       }
     ]
@@ -494,8 +503,12 @@
         "play_style_tag": "Rock",
         "badges": [
           "iron_man",
+          "champion",
+          "clean_sheet",
+          "lockdown",
           "the_wall",
-          "champion"
+          "great_wall",
+          "clean_sheet_machine"
         ]
       }
     ]
@@ -562,6 +575,9 @@
         "play_style_tag": "Rock",
         "badges": [
           "iron_man",
+          "clean_sheet",
+          "lockdown",
+          "giant_killer",
           "journeyman"
         ]
       }
@@ -760,7 +776,9 @@
         "play_style_tag": "Rock",
         "badges": [
           "provider",
-          "libero"
+          "libero",
+          "clean_sheet",
+          "giant_killer"
         ]
       }
     ]
@@ -830,11 +848,15 @@
           "iron_man",
           "on_fire",
           "libero",
-          "the_wall",
           "champion",
           "crack",
           "fox_in_the_box",
-          "maestro"
+          "maestro",
+          "clean_sheet",
+          "lockdown",
+          "the_wall",
+          "great_wall",
+          "clean_sheet_machine"
         ]
       }
     ]
@@ -960,7 +982,8 @@
         "badges": [
           "off_the_mark",
           "provider",
-          "libero"
+          "libero",
+          "clean_sheet"
         ]
       }
     ]
@@ -1026,7 +1049,10 @@
         "play_style_tag": "Playmaker",
         "badges": [
           "provider",
-          "libero"
+          "libero",
+          "clean_sheet",
+          "lockdown",
+          "giant_killer"
         ]
       }
     ]
@@ -1154,8 +1180,11 @@
         "personal_best_week": null,
         "play_style_tag": "Rock",
         "badges": [
+          "champion",
+          "clean_sheet",
+          "lockdown",
           "the_wall",
-          "champion"
+          "great_wall"
         ]
       }
     ]
@@ -1357,7 +1386,9 @@
         "personal_best_week": null,
         "play_style_tag": "Rock",
         "badges": [
-          "iron_man"
+          "iron_man",
+          "clean_sheet",
+          "giant_killer"
         ]
       }
     ]
@@ -1538,7 +1569,11 @@
         "personal_best_week": null,
         "play_style_tag": "Black Spider",
         "badges": [
-          "iron_man"
+          "iron_man",
+          "clean_sheet",
+          "number_one",
+          "lockdown",
+          "giant_killer"
         ]
       }
     ]
@@ -1649,7 +1684,10 @@
           "off_the_mark",
           "provider",
           "iron_man",
-          "libero"
+          "libero",
+          "clean_sheet",
+          "lockdown",
+          "giant_killer"
         ]
       }
     ]
@@ -1702,6 +1740,9 @@
         "badges": [
           "iron_man",
           "champion",
+          "clean_sheet",
+          "lockdown",
+          "giant_killer",
           "journeyman"
         ]
       }
@@ -1873,6 +1914,8 @@
         "play_style_tag": "Rock",
         "badges": [
           "iron_man",
+          "clean_sheet",
+          "giant_killer",
           "own_goal_award"
         ]
       }
