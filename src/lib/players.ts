@@ -65,7 +65,6 @@ export type BadgeKey =
 	| "on_fire"
 	| "libero"
 	| "the_wall"
-	| "lockdown"
 	| "giant_killer"
 	| "champion"
 	| "brace"
@@ -76,7 +75,6 @@ export type BadgeKey =
 	| "delivery_service"
 	| "hat_trick"
 	| "great_wall"
-	| "clean_sheet_machine"
 	| "treble"
 	| "poker"
 	| "back_to_back"
@@ -226,13 +224,6 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		icon: "🧱",
 		tier: "rare",
 	},
-	lockdown: {
-		label: "Lockdown",
-		description: "Played in defense in a week the team conceded at most 1 goal per game.",
-		descriptionKo: "수비진으로 뛴 주에 팀이 경기당 1실점 이하로 막았어요.",
-		icon: "🔒",
-		tier: "rare",
-	},
 	giant_killer: {
 		label: "Giant Killer",
 		description: "Kept a clean sheet against the league champion.",
@@ -305,13 +296,6 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		icon: "🏯",
 		tier: "legendary",
 	},
-	clean_sheet_machine: {
-		label: "Clean Sheet Machine",
-		description: "10+ team clean sheets across the weeks played in defense this league.",
-		descriptionKo: "이번 리그에서 수비진으로 뛴 주에 팀 무실점 경기가 10번 이상이에요.",
-		icon: "🤖",
-		tier: "legendary",
-	},
 	// Icon — shown as a locked "???" card until someone earns it
 	treble: {
 		label: "Treble",
@@ -357,6 +341,25 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
  * headline: it's shown first after the Icon badges and gets its own gold
  * look (`player-badge-item--champion` / `player-card-badge--champion`).
  */
+/**
+ * Step-up badges, lowest step first. The data pipeline keeps only the highest
+ * step a player reached (BADGE_LADDERS in scripts/update_data.py — keep in
+ * sync), so a player with a higher step also counts as holding the lower ones.
+ */
+export const BADGE_LADDERS: BadgeKey[][] = [
+	["off_the_mark", "fox_in_the_box"],
+	["provider", "maestro", "delivery_service"],
+	["brace", "hat_trick", "poker"],
+	["clean_sheet", "the_wall", "great_wall"],
+];
+
+/** Whether `badges` holds `key` itself or a higher step of its ladder. */
+export function holdsBadge(badges: BadgeKey[], key: BadgeKey): boolean {
+	if (badges.includes(key)) return true;
+	const ladder = BADGE_LADDERS.find((steps) => steps.includes(key));
+	return !!ladder && ladder.slice(ladder.indexOf(key) + 1).some((step) => badges.includes(step));
+}
+
 export const FEATURED_BADGE: BadgeKey = "champion";
 
 const badgeRank = (key: BadgeKey) =>

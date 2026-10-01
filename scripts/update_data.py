@@ -575,13 +575,31 @@ DELIVERY_SERVICE_ASSISTS = 5  # assists in the league
 MAESTRO_ASSISTS = 3  # assists in a single week
 THE_WALL_CLEAN_SHEETS = 3  # team clean sheets in a single week
 GREAT_WALL_CLEAN_SHEETS = 5  # team clean sheets in a single week (Legendary)
-CLEAN_SHEET_MACHINE_TOTAL = 10  # team clean sheets across the player's attended weeks in a league
 BRACE_GOALS = 2  # goals in a single *match* (needs goal_events, so FA26-L2 onward)
 HAT_TRICK_GOALS = 3  # goals in a single match (also counts as a Brace)
 POKER_GOALS = 4  # goals in a single match (Icon; also counts as Hat-trick and Brace)
 OWN_GOAL_AWARD_MIN = 1  # 1+ own goal in the league
 
 DEFENSIVE_POSITIONS = {"DF", "GK"}
+
+# Step-up badges: a player keeps only the highest step they reached, so one
+# achievement doesn't fill a card several times over. Lowest step first.
+# Keep in sync with BADGE_LADDERS in src/lib/players.ts.
+BADGE_LADDERS = [
+    ["off_the_mark", "fox_in_the_box"],
+    ["provider", "maestro", "delivery_service"],
+    ["brace", "hat_trick", "poker"],
+    ["clean_sheet", "the_wall", "great_wall"],
+]
+
+
+def _highest_steps(badges: list[str]) -> list[str]:
+    """Drops every badge that a higher step of the same ladder replaces."""
+    replaced = set()
+    for ladder in BADGE_LADDERS:
+        reached = [key for key in ladder if key in badges]
+        replaced.update(reached[:-1])
+    return [key for key in badges if key not in replaced]
 
 
 def _avatar_initials(name: str) -> str:
@@ -729,6 +747,7 @@ def _badges(
         badges.append("own_goal_award")
     if moved_teams:
         badges.append("journeyman")
+    badges = _highest_steps(badges)
     if not badges:
         badges.append("squad_member")
     return badges
@@ -767,11 +786,11 @@ def _defender_badges(
     they actually played (a week they missed never counts for them).
 
     Common: Clean Sheet (any team clean sheet), Number 1 (primary position GK).
-    Rare: Lockdown (a week conceding at most one goal per game), Giant Killer
-    (a clean sheet against the finished league's champion, own team not
-    champion), The Wall (THE_WALL_CLEAN_SHEETS+ clean sheets in a week).
-    Legendary: Great Wall (GREAT_WALL_CLEAN_SHEETS+ clean sheets in a week),
-    Clean Sheet Machine (CLEAN_SHEET_MACHINE_TOTAL+ clean sheets in total).
+    Rare: Giant Killer (a clean sheet against the finished league's champion,
+    own team not champion), The Wall (THE_WALL_CLEAN_SHEETS+ clean sheets in
+    a week).
+    Legendary: Great Wall (GREAT_WALL_CLEAN_SHEETS+ clean sheets in a week).
+    Clean Sheet / The Wall / Great Wall are one ladder (see BADGE_LADDERS).
     """
     if attended.empty:
         return []
@@ -789,8 +808,6 @@ def _defender_badges(
     if primary_position == "GK":
         badges.append("number_one")
     # Rare
-    if any(games and sum(against for _, against, _ in games) <= len(games) for _, games in played.values()):
-        badges.append("lockdown")
     if any(
         against == 0 and opponent in champion_teams and team_id not in champion_teams
         for team_id, (_, against, opponent) in all_games
@@ -801,8 +818,6 @@ def _defender_badges(
     # Legendary
     if any(count >= GREAT_WALL_CLEAN_SHEETS for count in weekly_clean.values()):
         badges.append("great_wall")
-    if sum(weekly_clean.values()) >= CLEAN_SHEET_MACHINE_TOTAL:
-        badges.append("clean_sheet_machine")
     return badges
 
 

@@ -411,16 +411,21 @@ they joined, so late joiners aren't penalised.
   player attended count, using the team they played for that week):
   - Common: `clean_sheet` (a team clean sheet), `number_one` (primary
     position GK).
-  - Rare: `lockdown` (a week conceding at most 1 goal per game),
-    `giant_killer` (clean sheet vs the finished league's champion while on
+  - Rare: `giant_killer` (clean sheet vs the finished league's champion while on
     another team), `the_wall` (3+ clean sheets in one week).
-  - Legendary: `great_wall` (5+ clean sheets in one week),
-    `clean_sheet_machine` (10+ team clean sheets in total).
+  - Legendary: `great_wall` (5+ clean sheets in one week).
   These exist so defenders on any team can earn something, not only the
   champion's back line.
 - Special (just for fun): `own_goal_award` (1+ own goal — the club runs an
   own-goal award), `journeyman` (played for more than one team in the
   league).
+
+**Step-up badges** (`BADGE_LADDERS`, in both `update_data.py` and
+`src/lib/players.ts`): off_the_mark → fox_in_the_box; provider → maestro →
+delivery_service; brace → hat_trick → poker; clean_sheet → the_wall →
+great_wall. A card keeps only the highest step reached, so one achievement
+doesn't fill a card several times; the All Badges popup still lists a
+higher-step player as a holder of the lower steps (`holdsBadge`).
 
 `brace`/`hat_trick` need per-match goals, which only `goal_events` has
 (`_max_match_goals`), so they start in FA26-L2; FA26-L1 was recorded as

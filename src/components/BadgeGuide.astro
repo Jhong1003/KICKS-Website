@@ -6,7 +6,9 @@
 // Icon badges nobody has earned in *any* league yet stay locked: 🔒 and
 // "???" in place of the icon and name, condition still shown, so there's
 // something to chase. Other tiers are never locked — an unearned one just
-// says "Nobody yet". Everything is computed at build time from
+// says "Nobody yet". A step-up badge (BADGE_LADDERS) counts as earned by
+// anyone who reached a higher step, even though their card only shows the
+// highest. Everything is computed at build time from
 // player_profiles.json, same as the rest of the page.
 import T from "./T.astro";
 import profilesData from "../data/player_profiles.json";
@@ -17,6 +19,7 @@ import {
 	FEATURED_BADGE,
 	TIER_ORDER,
 	getSection,
+	holdsBadge,
 	type BadgeKey,
 	type PlayerProfile,
 } from "../lib/players";
@@ -35,7 +38,7 @@ const earnedAnywhere = new Set(profiles.flatMap((player) => player.leagues.flatM
 
 const holdersIn = (key: BadgeKey) =>
 	profiles
-		.filter((player) => player.status !== "inactive" && getSection(player, league)?.badges.includes(key))
+		.filter((player) => player.status !== "inactive" && holdsBadge(getSection(player, league)?.badges ?? [], key))
 		.map((player) => ({ id: player.id, name: player.name }))
 		.sort((a, b) => a.name.localeCompare(b.name, "ko"));
 
@@ -47,7 +50,7 @@ const tiers = TIER_ORDER.map((tier) => ({
 			key,
 			info: BADGES[key],
 			locked: tier === "icon" && !earnedAnywhere.has(key),
-			mine: playerBadges.includes(key),
+			mine: holdsBadge(playerBadges, key),
 			holders: holdersIn(key),
 		})),
 }));
