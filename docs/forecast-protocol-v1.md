@@ -65,9 +65,10 @@ always has data by the time μ is used. (For reference, FA26-L1 was 77 / 72 = 1.
 
 - **Deadline: Friday 23:59 America/Chicago**, the night before each Saturday league week.
   For example, week 1 (Sat Oct 10) is due Fri Oct 9, 23:59.
-- A forecast counts as published when it is committed to this repository *and* posted in the
-  KICKS group chat, both before the deadline.
-- Week 1 may be generated and posted by hand.
+- A forecast counts as published when it is committed to this repository before the deadline.
+  The commit time on `main` is the record. Sharing it anywhere else, such as the KICKS group chat
+  or the website, is optional and is not part of the rule.
+- Week 1 may be generated and committed by hand.
 - No forecast may be generated after its deadline.
 
 ## 6. Stored fields
