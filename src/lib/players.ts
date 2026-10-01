@@ -236,7 +236,7 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		description: "Won the league.",
 		descriptionKo: "리그 우승!",
 		icon: "🏆",
-		tier: "rare",
+		tier: "legendary",
 	},
 	brace: {
 		label: "Brace",
@@ -336,12 +336,6 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 };
 
 /**
- * Champion stays a Rare badge (every player on the winning team gets it, so
- * it says little about the player alone), but a league title is the season's
- * headline: it's shown first after the Icon badges and gets its own gold
- * look (`player-badge-item--champion` / `player-card-badge--champion`).
- */
-/**
  * Step-up badges, lowest step first. The data pipeline keeps only the highest
  * step a player reached (BADGE_LADDERS in scripts/update_data.py — keep in
  * sync), so a player with a higher step also counts as holding the lower ones.
@@ -360,6 +354,11 @@ export function holdsBadge(badges: BadgeKey[], key: BadgeKey): boolean {
 	return !!ladder && ladder.slice(ladder.indexOf(key) + 1).some((step) => badges.includes(step));
 }
 
+/**
+ * Champion is a Legendary badge — a league title is the season's headline —
+ * and is shown first among them (right after the Icon badges) with its own
+ * gold look (`player-badge-item--champion` / `player-card-badge--champion`).
+ */
 export const FEATURED_BADGE: BadgeKey = "champion";
 
 const badgeRank = (key: BadgeKey) =>

@@ -400,9 +400,10 @@ they joined, so late joiners aren't penalised.
   (fallback when nothing else triggered, so **everyone has at least one
   badge** per league).
 - Rare: `on_fire` (3+ goals + assists in one week), `libero` (primary DF
-  with a goal or assist), `champion` (on the rank-1 team of a
-  *finished* league — every fixture scored), `brace` (2 goals in one match).
-- Legendary: `game_changer` (2+ goals and 2+ assists in one week), `crack`
+  with a goal or assist), `brace` (2 goals in one match).
+- Legendary: `champion` (on the rank-1 team of a *finished* league — every
+  fixture scored; shown first among Legendary with its own gold look),
+  `game_changer` (2+ goals and 2+ assists in one week), `crack`
   (2+ goals + assists in each of two consecutive attended weeks — once
   earned it stays), `fox_in_the_box` (5+ league goals), `maestro` (3+
   assists in one week), `delivery_service` (5+ league assists), `hat_trick`
