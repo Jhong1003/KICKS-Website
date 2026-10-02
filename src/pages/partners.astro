@@ -53,19 +53,22 @@ import partners from "../data/partners.json";
 		gap: 16px;
 		margin: 24px 0 8px;
 		padding: 20px 24px;
+		border: 1px solid var(--color-sage);
+		border-left: 4px solid var(--color-green);
 		border-radius: 8px;
-		background-color: var(--color-green);
-		color: var(--color-background);
+		background-color: #fff;
+		color: var(--color-dark);
 		text-decoration: none;
-		transition: box-shadow 0.15s ease;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
 	}
 
 	.member-benefits-banner:hover {
-		box-shadow: 0 6px 16px rgba(41, 41, 41, 0.15);
+		border-color: var(--color-green);
+		box-shadow: 0 6px 16px rgba(41, 41, 41, 0.08);
 	}
 
 	.member-benefits-banner:focus-visible {
-		outline: 3px solid var(--color-sage);
+		outline: 3px solid var(--color-green);
 		outline-offset: 2px;
 	}
 
@@ -82,14 +85,14 @@ import partners from "../data/partners.json";
 
 	.member-benefits-banner :global(.member-benefits-sub) {
 		font-size: 0.9rem;
-		opacity: 0.85;
+		opacity: 0.7;
 	}
 
 	.member-benefits-button {
 		padding: 10px 20px;
 		border-radius: 6px;
-		background-color: var(--color-background);
-		color: var(--color-green);
+		background-color: var(--color-green);
+		color: var(--color-background);
 		font-weight: 700;
 		white-space: nowrap;
 	}
