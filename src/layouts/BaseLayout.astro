@@ -7,12 +7,15 @@ interface Props {
 	title: string;
 	description?: string;
 	header?: "default" | "custom";
+	/** Keep link-only pages (e.g. member perks) out of search results. */
+	noindex?: boolean;
 }
 
 const {
 	title,
 	description = "UIUC Korean-inspired futsal community · 리그 순위, 선수 기록, 경기 일정",
 	header = "default",
+	noindex = false,
 } = Astro.props;
 
 // Astro.site (set in astro.config.mjs) makes these absolute regardless of
@@ -81,6 +84,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
 		<title>{title}</title>
+		{noindex && <meta name="robots" content="noindex, nofollow" />}
 
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="alternate icon" href="/favicon.ico" />

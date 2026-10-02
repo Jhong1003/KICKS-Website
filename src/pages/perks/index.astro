@@ -1,0 +1,521 @@
+---
+// Member perks (see docs/member-perks.md). Link-only page: not in the
+// header menu and kept out of search results. Members unlock it once per
+// phone with the shared club code + their name; after that, opening a
+// partner's coupon is one tap. Each open is logged server-side
+// (functions/api/perks.js) so staff can see usage in real time.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+import perks from "../../data/perks.json";
+import profiles from "../../data/player_profiles.json";
+
+const members = profiles
+	.filter((p) => p.status !== "inactive")
+	.map((p) => ({ player_id: p.player_id, name: p.name }))
+	.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+---
+
+<BaseLayout
+	title="Member Perks | KICKS"
+	description="Members-only partner perks for KICKS."
+	noindex
+>
+	<main>
+		<section class="content-section" aria-labelledby="perks-title">
+			<p class="section-label"><T en="MEMBERS ONLY" ko="멤버 전용" /></p>
+			<h1 id="perks-title"><T en="Member Perks" ko="멤버 혜택" /></h1>
+
+			<div id="perks-unlock" class="lock-screen">
+				<svg class="lock-screen-icon" viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10H7Zm2 0h6V7a3 3 0 0 0-6 0v3Z"
+						fill="currentColor"
+					/>
+				</svg>
+				<h2 class="lock-screen-title"><T en="KICKS Members Only" ko="KICKS 멤버 전용" /></h2>
+				<T
+					as="p"
+					class="lock-screen-text"
+					en="Pick your name and enter the member code from the group chat. You only need to do this once on this phone."
+					ko="이름을 고르고 단톡방에 공지된 멤버 코드를 입력하세요. 이 폰에서는 한 번만 하면 돼요."
+				/>
+				<form id="perks-unlock-form" class="unlock-form perks-unlock-form">
+					<label class="perks-field-label" for="perks-member">
+						<T en="Your name" ko="이름" />
+					</label>
+					<select id="perks-member" class="unlock-input" required>
+						<option value="" disabled selected>—</option>
+						{members.map((m) => <option value={m.player_id}>{m.name}</option>)}
+					</select>
+					<label class="perks-field-label" for="perks-code">
+						<T en="Member code" ko="멤버 코드" />
+					</label>
+					<input
+						type="password"
+						id="perks-code"
+						class="unlock-input"
+						autocomplete="off"
+						placeholder="Member code"
+						data-i18n-attrs={JSON.stringify({ placeholder: { en: "Member code", ko: "멤버 코드" } })}
+						required
+					/>
+					<button class="button-primary unlock-button" type="submit"><T en="Unlock" ko="잠금 해제" /></button>
+				</form>
+				<p id="perks-unlock-error" class="unlock-error" hidden></p>
+			</div>
+
+			<div id="perks-home" hidden>
+				<p class="perks-hello">
+					<span id="perks-hello-name"></span>
+					<button type="button" id="perks-switch" class="perks-text-button">
+						<T en="Not you?" ko="다른 멤버로 바꾸기" />
+					</button>
+				</p>
+				<T
+					as="p"
+					class="about-description"
+					en="At the counter, tap the restaurant and show the screen to the staff."
+					ko="계산할 때 가게를 누르고 화면을 직원에게 보여주세요."
+				/>
+				<ul class="perks-list">
+					{
+						perks.map((perk) => (
+							<li class="perk-card" data-perk-id={perk.perk_id} data-valid-until={perk.valid_until}>
+								<div class="perk-card-body">
+									<h3 class="perk-card-name">{perk.name}</h3>
+									<T as="p" class="perk-card-offer" en={perk.offer_en} ko={perk.offer_ko} />
+									{perk.valid_until && (
+										<p class="perk-card-until">
+											<T en="Valid through" ko="사용 기한" /> {perk.valid_until}
+										</p>
+									)}
+								</div>
+								{perk.active ? (
+									<button type="button" class="button-primary perk-use" data-perk-id={perk.perk_id}>
+										<T en="Use now" ko="지금 사용하기" />
+									</button>
+								) : (
+									<span class="perk-soon">
+										<T en="Coming soon" ko="준비 중" />
+									</span>
+								)}
+							</li>
+						))
+					}
+				</ul>
+				<p id="perks-error" class="unlock-error" hidden></p>
+			</div>
+		</section>
+
+		<div id="perks-coupon" class="perk-coupon" role="dialog" aria-modal="true" aria-labelledby="perk-coupon-partner" hidden>
+			<div class="perk-coupon-card">
+				<p class="perk-coupon-brand">KICKS MEMBER</p>
+				<h2 id="perk-coupon-partner" class="perk-coupon-partner"></h2>
+				<p id="perk-coupon-offer" class="perk-coupon-offer"></p>
+				<p id="perk-coupon-member" class="perk-coupon-member"></p>
+				<div class="perk-coupon-live">
+					<span class="perk-coupon-pulse" aria-hidden="true"></span>
+					<span id="perk-coupon-clock" class="perk-coupon-clock"></span>
+				</div>
+				<p id="perk-coupon-date" class="perk-coupon-date"></p>
+				<p id="perk-coupon-opened" class="perk-coupon-opened"></p>
+				<T
+					as="p"
+					class="perk-coupon-note"
+					en="Show this screen to the staff. The live clock means it isn't a screenshot."
+					ko="이 화면을 직원에게 보여주세요. 시계가 움직이면 캡처가 아니라는 뜻이에요."
+				/>
+				<button type="button" id="perk-coupon-close" class="perk-coupon-close">
+					<T en="Done" ko="닫기" />
+				</button>
+			</div>
+		</div>
+	</main>
+</BaseLayout>
+
+<script type="application/json" id="perks-data" set:html={JSON.stringify({ perks, members })} />
+
+<script>
+	import { bilingualHtml } from "../../lib/i18n";
+
+	type Perk = { perk_id: string; name: string; offer_en: string; offer_ko: string; active: boolean };
+	type Member = { player_id: string; name: string };
+	type Saved = { code: string; player_id: string };
+
+	const STORAGE_KEY = "kicks-perks-member";
+	const COUPON_MS = 10 * 60 * 1000;
+	const TZ = "America/Chicago";
+
+	const data = JSON.parse(document.getElementById("perks-data")!.textContent || "{}") as {
+		perks: Perk[];
+		members: Member[];
+	};
+	const $ = <E extends HTMLElement>(id: string) => document.getElementById(id) as E;
+	const unlock = $("perks-unlock");
+	const home = $("perks-home");
+	const coupon = $("perks-coupon");
+	const unlockError = $("perks-unlock-error");
+	const homeError = $("perks-error");
+
+	const nameOf = (id: string) => data.members.find((m) => m.player_id === id)?.name ?? "";
+
+	function load(): Saved | null {
+		try {
+			const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+			return saved && saved.code && saved.player_id ? saved : null;
+		} catch {
+			return null;
+		}
+	}
+	function save(value: Saved | null) {
+		try {
+			if (value) localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
+			else localStorage.removeItem(STORAGE_KEY);
+		} catch {
+			/* private mode: they'll just unlock again next time */
+		}
+	}
+
+	const MESSAGES: Record<string, [string, string]> = {
+		code: ["That code didn't work. Check the group chat for the current code.", "코드가 맞지 않아요. 단톡방에서 지금 코드를 확인해주세요."],
+		member: ["We couldn't find that member. Ask a KICKS staff member.", "멤버 정보를 찾을 수 없어요. 운영진에게 문의해주세요."],
+		perk: ["This perk isn't available right now.", "지금은 사용할 수 없는 혜택이에요."],
+		unavailable: ["Perks aren't available right now. Please try again later.", "지금은 혜택을 열 수 없어요. 잠시 후 다시 시도해주세요."],
+		network: ["Couldn't connect. Check your internet and try again.", "연결이 안 돼요. 인터넷을 확인하고 다시 시도해주세요."],
+	};
+	function showError(el: HTMLElement, key: string) {
+		const [en, ko] = MESSAGES[key] ?? MESSAGES.unavailable;
+		el.innerHTML = bilingualHtml(en, ko);
+		el.hidden = false;
+	}
+
+	async function call(path: string, body: object): Promise<{ status: number; json: any }> {
+		const response = await fetch(path, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(body),
+		});
+		let json: any = null;
+		try {
+			json = await response.json();
+		} catch {}
+		return { status: response.status, json };
+	}
+
+	function showUnlock(prefill?: string) {
+		coupon.hidden = true;
+		home.hidden = true;
+		unlock.hidden = false;
+		if (prefill) ($("perks-member") as HTMLSelectElement).value = prefill;
+	}
+	function showHome(saved: Saved) {
+		unlock.hidden = true;
+		home.hidden = false;
+		homeError.hidden = true;
+		$("perks-hello-name").innerHTML = bilingualHtml(`Hi, ${nameOf(saved.player_id)}`, `${nameOf(saved.player_id)}님, 안녕하세요`);
+	}
+
+	$("perks-unlock-form").addEventListener("submit", async (event) => {
+		event.preventDefault();
+		unlockError.hidden = true;
+		const player_id = ($("perks-member") as HTMLSelectElement).value;
+		const code = ($("perks-code") as HTMLInputElement).value.trim();
+		if (!player_id || !code) return;
+		try {
+			const { status, json } = await call("/api/perks/verify", { code, player_id });
+			if (status === 200 && json?.ok) {
+				save({ code, player_id });
+				($("perks-code") as HTMLInputElement).value = "";
+				showHome({ code, player_id });
+			} else showError(unlockError, json?.error ?? "unavailable");
+		} catch {
+			showError(unlockError, "network");
+		}
+	});
+
+	$("perks-switch").addEventListener("click", () => {
+		save(null);
+		showUnlock();
+	});
+
+	// ---- Coupon screen -------------------------------------------------
+	let clockTimer = 0;
+	let closeTimer = 0;
+	const timeFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", second: "2-digit" });
+	const shortTimeFmt = new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" });
+	const dateEn = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric", year: "numeric" });
+	const dateKo = new Intl.DateTimeFormat("ko-KR", { timeZone: TZ, year: "numeric", month: "long", day: "numeric", weekday: "short" });
+
+	function tick() {
+		$("perk-coupon-clock").textContent = timeFmt.format(new Date());
+	}
+	function closeCoupon() {
+		window.clearInterval(clockTimer);
+		window.clearTimeout(closeTimer);
+		coupon.hidden = true;
+		document.body.classList.remove("perk-coupon-open");
+	}
+	function openCoupon(perk: Perk, saved: Saved, redeemedAt: string) {
+		$("perk-coupon-partner").textContent = perk.name;
+		$("perk-coupon-offer").innerHTML = bilingualHtml(perk.offer_en, perk.offer_ko);
+		$("perk-coupon-member").textContent = nameOf(saved.player_id);
+		const now = new Date();
+		$("perk-coupon-date").innerHTML = bilingualHtml(dateEn.format(now), dateKo.format(now));
+		const opened = shortTimeFmt.format(new Date(redeemedAt));
+		$("perk-coupon-opened").innerHTML = bilingualHtml(`Opened at ${opened}`, `${opened}에 열림`);
+		tick();
+		clockTimer = window.setInterval(tick, 1000);
+		closeTimer = window.setTimeout(closeCoupon, COUPON_MS);
+		coupon.hidden = false;
+		document.body.classList.add("perk-coupon-open");
+		$("perk-coupon-close").focus();
+	}
+
+	home.addEventListener("click", async (event) => {
+		const button = (event.target as HTMLElement).closest<HTMLButtonElement>(".perk-use");
+		if (!button) return;
+		const saved = load();
+		const perk = data.perks.find((p) => p.perk_id === button.dataset.perkId);
+		if (!saved) return showUnlock();
+		if (!perk) return;
+		homeError.hidden = true;
+		button.disabled = true;
+		try {
+			const { status, json } = await call("/api/perks/redeem", { ...saved, perk_id: perk.perk_id });
+			if (status === 200 && json?.ok) openCoupon(perk, saved, json.redeemed_at);
+			else if (status === 401) {
+				// The club code was changed: unlock again with the new one.
+				save(null);
+				showUnlock(saved.player_id);
+				showError(unlockError, "code");
+			} else showError(homeError, json?.error ?? "unavailable");
+		} catch {
+			showError(homeError, "network");
+		} finally {
+			button.disabled = false;
+		}
+	});
+
+	$("perk-coupon-close").addEventListener("click", closeCoupon);
+	document.addEventListener("keydown", (event) => {
+		if (event.key === "Escape" && !coupon.hidden) closeCoupon();
+	});
+
+	const saved = load();
+	if (saved && nameOf(saved.player_id)) showHome(saved);
+	else showUnlock();
+</script>
+
+<style>
+	.perks-unlock-form {
+		flex-direction: column;
+		align-items: stretch;
+		width: 100%;
+		gap: 8px;
+	}
+
+	.perks-field-label {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--color-green);
+	}
+
+	.perks-hello {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 12px;
+		margin: 24px 0 4px;
+		font-size: 1.2rem;
+		font-weight: 700;
+	}
+
+	.perks-text-button {
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--color-green);
+		font: inherit;
+		font-size: 0.85rem;
+		font-weight: 500;
+		text-decoration: underline;
+		cursor: pointer;
+	}
+
+	.perks-list {
+		display: grid;
+		gap: 16px;
+		margin: 24px 0 0;
+		padding: 0;
+		list-style: none;
+		max-width: 560px;
+	}
+
+	.perk-card {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		padding: 20px;
+		border: 1px solid var(--color-sage);
+		border-radius: 16px;
+		background-color: #fff;
+	}
+
+	.perk-card-name {
+		margin: 0 0 4px;
+		font-size: 1.15rem;
+	}
+
+	.perk-card-offer,
+	.perk-card-until {
+		margin: 0;
+	}
+
+	.perk-card-offer {
+		color: var(--color-green);
+		font-weight: 600;
+	}
+
+	.perk-card-until {
+		margin-top: 4px;
+		font-size: 0.8rem;
+		opacity: 0.7;
+	}
+
+	.perk-soon {
+		padding: 8px 14px;
+		border-radius: 999px;
+		background-color: var(--color-sage);
+		color: var(--color-green);
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+
+	.perk-coupon {
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 16px;
+		background-color: var(--color-green);
+	}
+
+	.perk-coupon[hidden] {
+		display: none;
+	}
+
+	:global(body.perk-coupon-open) {
+		overflow: hidden;
+	}
+
+	.perk-coupon-card {
+		width: 100%;
+		max-width: 400px;
+		padding: 32px 24px;
+		border-radius: 24px;
+		background-color: var(--color-background);
+		color: var(--color-dark);
+		text-align: center;
+	}
+
+	.perk-coupon-brand {
+		margin: 0;
+		color: var(--color-green);
+		font-size: 0.8rem;
+		font-weight: 800;
+		letter-spacing: 0.2em;
+	}
+
+	.perk-coupon-partner {
+		margin: 12px 0 4px;
+		max-width: none;
+		font-size: 1.8rem;
+		line-height: 1.2;
+	}
+
+	.perk-coupon-offer {
+		margin: 0;
+		color: var(--color-green);
+		font-size: 1.3rem;
+		font-weight: 800;
+	}
+
+	.perk-coupon-member {
+		margin: 20px 0 0;
+		font-size: 1.4rem;
+		font-weight: 700;
+	}
+
+	.perk-coupon-live {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		margin-top: 20px;
+	}
+
+	.perk-coupon-clock {
+		font-size: 2.4rem;
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: -0.02em;
+	}
+
+	.perk-coupon-pulse {
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background-color: #2fa84f;
+		animation: perk-pulse 1.2s ease-in-out infinite;
+	}
+
+	@keyframes perk-pulse {
+		0%,
+		100% {
+			transform: scale(0.7);
+			opacity: 0.5;
+		}
+		50% {
+			transform: scale(1.15);
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.perk-coupon-pulse {
+			animation-duration: 3s;
+		}
+	}
+
+	.perk-coupon-date,
+	.perk-coupon-opened,
+	.perk-coupon-note {
+		margin: 6px 0 0;
+		font-size: 0.9rem;
+	}
+
+	.perk-coupon-opened {
+		opacity: 0.7;
+	}
+
+	.perk-coupon-note {
+		margin-top: 20px;
+		opacity: 0.8;
+	}
+
+	.perk-coupon-close {
+		margin-top: 24px;
+		padding: 12px 32px;
+		border: 0;
+		border-radius: 999px;
+		background-color: var(--color-green);
+		color: var(--color-background);
+		font: inherit;
+		font-weight: 700;
+		cursor: pointer;
+	}
+</style>

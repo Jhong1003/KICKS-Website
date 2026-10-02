@@ -1,0 +1,227 @@
+---
+// Staff-only usage log for member perks (see docs/member-perks.md).
+// Asks for the staff key (PERKS_ADMIN_KEY), kept only for this browser tab.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+import perks from "../../data/perks.json";
+import profiles from "../../data/player_profiles.json";
+
+const names = Object.fromEntries(profiles.map((p) => [p.player_id, p.name]));
+const partners = Object.fromEntries(perks.map((p) => [p.perk_id, p.name]));
+---
+
+<BaseLayout title="Perks Log | KICKS" description="KICKS staff: member perk usage." noindex>
+	<main>
+		<section class="content-section" aria-labelledby="perks-log-title">
+			<p class="section-label"><T en="STAFF ONLY" ko="운영진 전용" /></p>
+			<h1 id="perks-log-title"><T en="Member Perks Log" ko="멤버 혜택 사용 기록" /></h1>
+
+			<form id="log-unlock" class="unlock-form">
+				<input
+					type="password"
+					id="log-key"
+					class="unlock-input"
+					autocomplete="off"
+					placeholder="Staff key"
+					data-i18n-attrs={JSON.stringify({ placeholder: { en: "Staff key", ko: "운영진 키" } })}
+					required
+				/>
+				<button class="button-primary unlock-button" type="submit"><T en="Open" ko="열기" /></button>
+			</form>
+			<p id="log-error" class="unlock-error" hidden></p>
+
+			<div id="log-view" hidden>
+				<div class="log-toolbar">
+					<button type="button" id="log-refresh" class="perks-small-button"><T en="Refresh" ko="새로고침" /></button>
+					<button type="button" id="log-csv" class="perks-small-button"><T en="Download CSV" ko="CSV 다운로드" /></button>
+					<span id="log-updated" class="log-updated"></span>
+				</div>
+				<div id="log-totals" class="log-totals"></div>
+				<div class="log-table-wrap">
+					<table class="log-table">
+						<thead>
+							<tr>
+								<th><T en="Time (Chicago)" ko="시간 (시카고)" /></th>
+								<th><T en="Member" ko="멤버" /></th>
+								<th><T en="Restaurant" ko="가게" /></th>
+							</tr>
+						</thead>
+						<tbody id="log-rows"></tbody>
+					</table>
+				</div>
+			</div>
+		</section>
+	</main>
+</BaseLayout>
+
+<script type="application/json" id="log-data" set:html={JSON.stringify({ names, partners })} />
+
+<script>
+	import { bilingualHtml } from "../../lib/i18n";
+
+	type Row = { perk_id: string; player_id: string; redeemed_at: string };
+	type Total = { perk_id: string; uses: number; members: number };
+
+	const KEY = "kicks-perks-staff-key";
+	const { names, partners } = JSON.parse(document.getElementById("log-data")!.textContent || "{}") as {
+		names: Record<string, string>;
+		partners: Record<string, string>;
+	};
+	const $ = <E extends HTMLElement>(id: string) => document.getElementById(id) as E;
+	const fmt = new Intl.DateTimeFormat("en-US", {
+		timeZone: "America/Chicago", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+	});
+	const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+	let rows: Row[] = [];
+
+	const getKey = () => {
+		try { return sessionStorage.getItem(KEY) || ""; } catch { return ""; }
+	};
+	const setKey = (value: string) => {
+		try { value ? sessionStorage.setItem(KEY, value) : sessionStorage.removeItem(KEY); } catch {}
+	};
+
+	function render(totals: Total[]) {
+		$("log-totals").innerHTML = Object.keys(partners).map((id) => {
+			const t = totals.find((x) => x.perk_id === id);
+			return `<div class="log-total"><p class="log-total-name">${esc(partners[id])}</p>
+				<p class="log-total-number">${t?.uses ?? 0}</p>
+				<p class="log-total-sub">${bilingualHtml(`uses · ${t?.members ?? 0} members`, `회 사용 · 멤버 ${t?.members ?? 0}명`)}</p></div>`;
+		}).join("");
+		$("log-rows").innerHTML = rows.length
+			? rows.map((r) => `<tr><td>${esc(fmt.format(new Date(r.redeemed_at)))}</td>
+				<td>${esc(names[r.player_id] ?? r.player_id)}</td><td>${esc(partners[r.perk_id] ?? r.perk_id)}</td></tr>`).join("")
+			: `<tr><td colspan="3">${bilingualHtml("No uses yet.", "아직 사용 기록이 없어요.")}</td></tr>`;
+		const now = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit", second: "2-digit" }).format(new Date());
+		$("log-updated").innerHTML = bilingualHtml(`Updated ${now}`, `${now} 업데이트`);
+	}
+
+	async function refresh() {
+		const key = getKey();
+		if (!key) return;
+		const error = $("log-error");
+		error.hidden = true;
+		try {
+			const response = await fetch("/api/perks/log", { headers: { Authorization: `Bearer ${key}` } });
+			if (response.status === 401) {
+				setKey("");
+				$("log-view").hidden = true;
+				$("log-unlock").hidden = false;
+				error.innerHTML = bilingualHtml("Wrong staff key.", "운영진 키가 맞지 않아요.");
+				error.hidden = false;
+				return;
+			}
+			if (!response.ok) throw new Error(String(response.status));
+			const data = await response.json();
+			rows = data.redemptions ?? [];
+			$("log-unlock").hidden = true;
+			$("log-view").hidden = false;
+			render(data.totals ?? []);
+		} catch {
+			error.innerHTML = bilingualHtml("Couldn't load the log. Try again.", "기록을 불러오지 못했어요. 다시 시도해주세요.");
+			error.hidden = false;
+		}
+	}
+
+	$("log-unlock").addEventListener("submit", (event) => {
+		event.preventDefault();
+		setKey(($("log-key") as HTMLInputElement).value.trim());
+		($("log-key") as HTMLInputElement).value = "";
+		refresh();
+	});
+	$("log-refresh").addEventListener("click", refresh);
+	$("log-csv").addEventListener("click", () => {
+		const lines = [["time_utc", "member", "player_id", "restaurant"],
+			...rows.map((r) => [r.redeemed_at, names[r.player_id] ?? "", r.player_id, partners[r.perk_id] ?? r.perk_id])];
+		const csv = "﻿" + lines.map((l) => l.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+		const link = document.createElement("a");
+		link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+		link.download = "kicks-perks-log.csv";
+		link.click();
+		URL.revokeObjectURL(link.href);
+	});
+
+	refresh();
+	window.setInterval(() => { if (!document.hidden) refresh(); }, 60_000);
+</script>
+
+<style>
+	.log-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+		margin-top: 24px;
+	}
+
+	.perks-small-button {
+		padding: 8px 16px;
+		border: 1px solid var(--color-green);
+		border-radius: 999px;
+		background: none;
+		color: var(--color-green);
+		font: inherit;
+		font-size: 0.85rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.log-updated {
+		font-size: 0.8rem;
+		opacity: 0.7;
+	}
+
+	.log-totals {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 16px;
+		margin-top: 20px;
+		max-width: 560px;
+	}
+
+	.log-total {
+		padding: 16px;
+		border: 1px solid var(--color-sage);
+		border-radius: 16px;
+		background-color: #fff;
+	}
+
+	.log-total p {
+		margin: 0;
+	}
+
+	.log-total-name {
+		font-weight: 700;
+	}
+
+	.log-total-number {
+		color: var(--color-green);
+		font-size: 2rem;
+		font-weight: 800;
+	}
+
+	.log-total-sub {
+		font-size: 0.85rem;
+		opacity: 0.75;
+	}
+
+	.log-table-wrap {
+		margin-top: 24px;
+		overflow-x: auto;
+	}
+
+	.log-table {
+		width: 100%;
+		max-width: 560px;
+		border-collapse: collapse;
+		font-size: 0.9rem;
+	}
+
+	.log-table th,
+	.log-table td {
+		padding: 8px 10px;
+		border-bottom: 1px solid var(--color-sage);
+		text-align: left;
+		white-space: nowrap;
+	}
+</style>

@@ -10,7 +10,7 @@ test('existing Worker, assets, URLs and actual D1 binding configuration', () => 
   assert.equal(config.name, 'kicks-website');
   assert.equal(config.main, 'worker/index.js');
   assert.equal(config.assets.directory, './dist');
-  assert.deepEqual(config.assets.run_worker_first, ['/api/visits']);
+  assert.deepEqual(config.assets.run_worker_first, ['/api/visits', '/api/perks/*']);
   assert.equal(config.workers_dev, true);
   assert.equal(config.preview_urls, true);
   assert.equal(config.keep_vars, true);

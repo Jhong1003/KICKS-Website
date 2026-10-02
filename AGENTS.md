@@ -19,7 +19,7 @@ site reads.
 
 - [src/pages/](src/pages/) — one route per file (`index`, `about`,
   `league`, `league/[league]`, `players`, `players/[id]`, `schedule`, `join`, `partners`,
-  `gallery`, `full-matches`).
+  `gallery`, `full-matches`, link-only `perks` + `perks/admin`).
 - [src/components/](src/components/) — Astro components used by the pages
   (e.g. `LeagueView`, `StandingsTable`, `PlayerStatsTable`, `WeeklyResults`,
   `ScheduleTimeline`, `PlayerCard`, `WeeklyStatsChart`, `PhotoGallery`,
@@ -31,8 +31,9 @@ site reads.
   `player_leaderboard.json`, `player_profiles.json`, `leagues.json`,
   `partners.json`, plus the encrypted `full-matches.enc.json`). **Never
   hand-edit the generated files** — regenerate them instead (see pipeline
-  below). Four files in this folder are the hand-edited exception, never
-  touched by the pipeline: [schedule.json](src/data/schedule.json) (season
+  below). Five files in this folder are the hand-edited exception, never
+  touched by the pipeline: [perks.json](src/data/perks.json) (member perks,
+  see "Member perks" below), [schedule.json](src/data/schedule.json) (season
   calendar, see below), [league-config.json](src/data/league-config.json)
   (per-league rules, see "Leagues" below),
   [player-photos.json](src/data/player-photos.json) (optional real player
@@ -612,6 +613,18 @@ overwrites `src/data/full-matches.enc.json`. The PBKDF2/AES-GCM parameters
 in that script must stay in sync with `src/pages/full-matches.astro`.
 Commit and push the updated `.enc.json` file afterward like any other
 change.
+
+### Member perks
+
+`/perks` is a link-only, members-only coupon screen for partner
+restaurants; `/perks/admin` is the staff usage log. Members unlock once per
+phone with a shared code (`PERKS_CODE` secret) + their name; each coupon
+open is logged in D1 (`perk_redemptions`, same `VISITS_DB` binding) through
+`functions/api/perks.js`. **The member code and staff key
+(`PERKS_ADMIN_KEY`) are Worker secrets — never put them in this repo.**
+Restaurants and offers live in `src/data/perks.json` (`active: false` =
+"Coming soon"). Full details, setup and secrets:
+[docs/member-perks.md](docs/member-perks.md).
 
 ### Languages (EN / 한)
 
