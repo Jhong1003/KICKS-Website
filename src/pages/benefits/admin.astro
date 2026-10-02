@@ -1,5 +1,5 @@
 ---
-// Staff-only usage log for member perks (see docs/member-perks.md).
+// Staff-only usage log for member benefits (see docs/member-perks.md).
 // Asks for the staff key (PERKS_ADMIN_KEY), kept only for this browser tab.
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import T from "../../components/T.astro";
@@ -10,11 +10,11 @@ const names = Object.fromEntries(profiles.map((p) => [p.player_id, p.name]));
 const partners = Object.fromEntries(perks.map((p) => [p.perk_id, p.name]));
 ---
 
-<BaseLayout title="Perks Log | KICKS" description="KICKS staff: member perk usage." noindex>
+<BaseLayout title="Benefits Log | KICKS" description="KICKS staff: member benefit usage." noindex>
 	<main>
 		<section class="content-section" aria-labelledby="perks-log-title">
 			<p class="section-label"><T en="STAFF ONLY" ko="운영진 전용" /></p>
-			<h1 id="perks-log-title"><T en="Member Perks Log" ko="멤버 혜택 사용 기록" /></h1>
+			<h1 id="perks-log-title"><T en="Member Benefits Log" ko="멤버 혜택 사용 기록" /></h1>
 
 			<form id="log-unlock" class="unlock-form">
 				<input

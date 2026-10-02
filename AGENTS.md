@@ -19,7 +19,7 @@ site reads.
 
 - [src/pages/](src/pages/) — one route per file (`index`, `about`,
   `league`, `league/[league]`, `players`, `players/[id]`, `schedule`, `join`, `partners`,
-  `gallery`, `full-matches`, link-only `perks` + `perks/admin`).
+  `gallery`, `full-matches`, `benefits` + `benefits/admin` (member benefits, linked from Partners)).
 - [src/components/](src/components/) — Astro components used by the pages
   (e.g. `LeagueView`, `StandingsTable`, `PlayerStatsTable`, `WeeklyResults`,
   `ScheduleTimeline`, `PlayerCard`, `WeeklyStatsChart`, `PhotoGallery`,
@@ -616,8 +616,9 @@ change.
 
 ### Member perks
 
-`/perks` is a link-only, members-only coupon screen for partner
-restaurants; `/perks/admin` is the staff usage log. Members unlock once per
+`/benefits` is the members-only coupon screen ("Member Benefits", linked from
+the Partners page) for partner
+restaurants; `/benefits/admin` is the staff usage log. Members unlock once per
 phone with a shared code (`PERKS_CODE` secret) + their name; each coupon
 open is logged in D1 (`perk_redemptions`, same `VISITS_DB` binding) through
 `functions/api/perks.js`. **The member code and staff key

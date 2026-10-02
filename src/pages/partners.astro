@@ -18,6 +18,19 @@ import partners from "../data/partners.json";
 				ko="KICKS와 함께하는 파트너들입니다. 언제나 KICKS를 응원해주셔서 진심으로 감사드립니다."
 			/>
 			<PartnerGrid partners={partners} />
+
+			<div class="cta-card member-benefits-cta">
+				<T class="cta-card-title" en="KICKS member? Get your benefits here" ko="KICKS 멤버라면 여기서 혜택 받기" />
+				<T
+					as="p"
+					class="cta-card-description"
+					en="Show your member screen at our partner restaurants. Members only: you'll need the member code from the group chat."
+					ko="파트너 식당에서 멤버 화면을 보여주세요. 멤버 전용이라 단톡방에 공지된 멤버 코드가 필요해요."
+				/>
+				<a class="button-primary" href="/benefits/">
+					<T en="Member Benefits" ko="멤버 혜택" />
+				</a>
+			</div>
 		</section>
 
 		<section class="content-section" aria-labelledby="inquiry-title">
@@ -32,3 +45,10 @@ import partners from "../data/partners.json";
 		</section>
 	</main>
 </BaseLayout>
+
+<style>
+	.member-benefits-cta {
+		max-width: 560px;
+		margin-top: 32px;
+	}
+</style>

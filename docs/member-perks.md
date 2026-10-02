@@ -1,12 +1,13 @@
-# Member perks (`/perks`)
+# Member benefits (`/benefits`)
 
 A members-only coupon screen for partner restaurants (FA26: SGD and Kung Fu
-Tea), with a real-time usage log for staff. Link-only: not in the header
-menu, and both pages are `noindex`.
+Tea), with a real-time usage log for staff. Not in the header menu: the
+Partners page links to it ("Member Benefits"), and both pages are
+`noindex`. Internals (API, config, table, secrets) keep the older "perks" name.
 
 ## How members use it
 
-1. Open `kicksuiuc.com/perks` (link shared in the group chat; save it to the
+1. Open `kicksuiuc.com/benefits` (link shared in the group chat; save it to the
    home screen).
 2. First time on a phone: pick your name and enter the **member code** from
    the group chat. The phone remembers both (localStorage
@@ -46,7 +47,7 @@ old code and asks for the new one (the name stays selected).
   (binding `VISITS_DB`, `kicks-visits`), created by
   [migrations/0002_perk_redemptions.sql](../migrations/0002_perk_redemptions.sql).
   Stored per use: restaurant, `player_id`, time. No IP, device or name.
-- **Staff log** — `/perks/admin`: enter the staff key (kept for that tab
+- **Staff log** — `/benefits/admin`: enter the staff key (kept for that tab
   only), see live totals and every use, refresh every 60s, download CSV for
   the end-of-season partner report.
 
@@ -57,14 +58,14 @@ Secrets, type **Secret**) or with Wrangler:
 
 ```sh
 npx wrangler secret put PERKS_CODE        # the code members type
-npx wrangler secret put PERKS_ADMIN_KEY   # the staff key for /perks/admin
+npx wrangler secret put PERKS_ADMIN_KEY   # the staff key for /benefits/admin
 ```
 
 Use something longer than 4 digits for `PERKS_CODE` (e.g. two words and a
 number) — there's no attempt limit. To change it mid-season, run the same
 command again; members are asked for the new code on their next tap.
 
-Until both are set, the API answers 503 and the page shows "Perks aren't
+Until both are set, the API answers 503 and the page shows "Benefits aren't
 available right now".
 
 ## One-time setup (production)
