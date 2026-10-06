@@ -75,7 +75,12 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 						<section class="content-section" aria-labelledby={`player-league-${section.league}`}>
 							<div class="player-name-row">
 								<p class="section-label" id={`player-league-${section.league}`}>
-									{section.league} · {teamName}
+									{section.league} ·{" "}
+									{section.current_team_id ? (
+										<a class="player-team-link" href={`/league/${section.league}/team/${section.current_team_id}`}>{teamName}</a>
+									) : (
+										teamName
+									)}
 								</p>
 								{isLeagueFinished(section.league) && isShownInLeague(player, section.league) && (
 									<a class="wrapped-entry" href={`/wrapped/${section.league}/${player.id}`}>

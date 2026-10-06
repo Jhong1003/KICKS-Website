@@ -733,6 +733,34 @@ h1 {
 
 }
 
+/* Team names link to the team page (/league/<league>/team/<id>). */
+.standings-table .team-link,
+.player-team-link {
+
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-color: rgba(41, 41, 41, 0.25);
+	text-underline-offset: 3px;
+
+}
+
+.standings-table .team-link:hover,
+.player-team-link:hover {
+
+	text-decoration-color: currentColor;
+
+}
+
+.player-group-team-link {
+
+	margin-left: auto;
+	color: var(--color-green);
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-decoration: none;
+
+}
+
 .standings-table .points {
 
 	font-weight: 700;

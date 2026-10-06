@@ -19,7 +19,10 @@ site reads.
 
 - [src/pages/](src/pages/) — one route per file (`index`, `about`,
   `league`, `league/[league]`, `players`, `players/[id]`, `schedule`, `join`, `partners`,
-  `gallery`, `full-matches`, `benefits` + `benefits/admin` (member benefits, linked from Partners)).
+  `gallery`, `full-matches`, `benefits` + `benefits/admin` (member benefits, linked from Partners),
+  `league/[league]/team/[team]` — one team's page within one league (record, squad
+  forwards→GK by name, never by a stat, results week by week); linked from team names in
+  the standings tables, the /players team view and the player page).
 - [src/components/](src/components/) — Astro components used by the pages
   (e.g. `LeagueView`, `StandingsTable`, `PlayerStatsTable`, `WeeklyResults`,
   `ScheduleTimeline`, `PlayerCard`, `WeeklyStatsChart`, `PhotoGallery`,

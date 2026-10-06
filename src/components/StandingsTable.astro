@@ -13,6 +13,8 @@ interface StandingsRow {
 	goal_difference: number;
 	points: number;
 	participation_rate: number;
+	/** The team's page (/league/<league>/team/<team_id>), when the caller knows the league. */
+	href?: string;
 }
 
 interface Props {
@@ -65,11 +67,13 @@ const columns = [
 						<td class="team-name">
 							{finished && row.rank === 1 ? (
 								<span class="standings-champion-name">
-									<span aria-hidden="true">🏆</span> {row.team}
+									<span aria-hidden="true">🏆</span> {row.href ? <a class="team-link" href={row.href}>{row.team}</a> : row.team}
 									<span class="standings-champion-chip">
 										<T en="Champion" ko="우승" />
 									</span>
 								</span>
+							) : row.href ? (
+								<a class="team-link" href={row.href}>{row.team}</a>
 							) : (
 								row.team
 							)}

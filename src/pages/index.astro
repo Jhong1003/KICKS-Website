@@ -27,7 +27,11 @@ const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
 const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData as PlayerProfile[], transferNews.league);
 const standings = leagueTable
 	.filter((row) => row.league === latestLeague.id)
-	.map((row) => ({ ...row, team: getTeamName(row.team_id, latestLeague) }));
+	.map((row) => ({
+		...row,
+		team: getTeamName(row.team_id, latestLeague),
+		href: `/league/${latestLeague.id}/team/${row.team_id}`,
+	}));
 // Once the latest league is finished, its results banner takes over the top
 // slot and the (now stale) transfer news steps aside.
 const finale = getLeagueFinale(latestLeague);

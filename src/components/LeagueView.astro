@@ -55,7 +55,11 @@ function inLeague<T extends { league: string }>(rows: T[]): T[] {
 const teamName = (teamId: string | null) => getTeamName(teamId, league);
 const playerNames = new Map(profilesData.map((profile) => [profile.player_id, profile.name]));
 
-const standings = inLeague(leagueTableData).map((row) => ({ ...row, team: teamName(row.team_id) }));
+const standings = inLeague(leagueTableData).map((row) => ({
+	...row,
+	team: teamName(row.team_id),
+	href: `/league/${league.id}/team/${row.team_id}`,
+}));
 const matches = inLeague(matchesData as MatchRecord[]).map((match) => ({
 	...match,
 	home_team: teamName(match.home_team_id),

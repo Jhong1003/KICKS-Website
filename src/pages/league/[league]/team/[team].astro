@@ -1,0 +1,525 @@
+---
+// One team's page within one league: /league/<league>/team/<team_id>
+// (e.g. /league/FA26-L2/team/T1). Team ids are only unique inside a league
+// and teams are re-drawn every league, so a team page always belongs to
+// exactly one league — nothing here is combined across leagues.
+//
+// Shows the team's record (from league_table.json, already in official
+// order), its squad (player cards, forwards to goalkeeper; never ordered by
+// a stat, same rule as /players) and its fixtures/results week by week.
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import PlayerCard from "../../../../components/PlayerCard.astro";
+import T from "../../../../components/T.astro";
+import leagueTableData from "../../../../data/league_table.json";
+import matchesData from "../../../../data/matches.json";
+import profilesData from "../../../../data/player_profiles.json";
+import playerPhotosData from "../../../../data/player-photos.json";
+import { leagues, getTeamColor, getTeamName, type League, type LeagueTeam } from "../../../../lib/leagues";
+import { getSection, getContrastingTextColor, type PlayerInLeague, type PlayerProfile } from "../../../../lib/players";
+import { isLeagueFinished, isShownInLeague } from "../../../../lib/finale";
+import { formatShortDate, weekLabel } from "../../../../lib/i18n";
+
+export function getStaticPaths() {
+	return leagues.flatMap((league) => league.teams.map((team) => ({ params: { league: league.id, team: team.team_id }, props: { league, team } })));
+}
+
+interface Props {
+	league: League;
+	team: LeagueTeam;
+}
+
+interface MatchRecord {
+	league: string;
+	match_id: string;
+	week: number;
+	round: number;
+	date: string;
+	home_team_id: string | null;
+	away_team_id: string | null;
+	home_score: number | null;
+	away_score: number | null;
+	status: "completed" | "scheduled";
+}
+
+const { league, team } = Astro.props;
+const color = getTeamColor(team.team_id, league);
+const headerText = getContrastingTextColor(color);
+const playerPhotos = playerPhotosData as Record<string, string>;
+const finished = isLeagueFinished(league.id);
+
+// --- Record -----------------------------------------------------------------
+const table = leagueTableData.filter((row) => row.league === league.id);
+const row = table.find((entry) => entry.team_id === team.team_id);
+const sharedRank = row ? table.filter((entry) => entry.rank === row.rank).length > 1 : false;
+const isChampion = finished && row?.rank === 1;
+
+// --- Squad --------------------------------------------------------------------
+const POSITION_ORDER = ["FW", "MF", "DF", "GK"];
+const positionRank = (entry: PlayerInLeague) => {
+	const index = POSITION_ORDER.indexOf(entry.player.positions[0] ?? "");
+	return index === -1 ? POSITION_ORDER.length : index;
+};
+const collator = new Intl.Collator("ko");
+
+const inLeague = (profilesData as PlayerProfile[]).flatMap((player): PlayerInLeague[] => {
+	const section = getSection(player, league.id);
+	return section && isShownInLeague(player, league.id) ? [{ player, section }] : [];
+});
+const squad = inLeague
+	.filter(({ section }) => section.current_team_id === team.team_id)
+	.sort((a, b) => positionRank(a) - positionRank(b) || collator.compare(a.player.name, b.player.name));
+// Players who moved to another team mid-league but played here first.
+const formerPlayers = inLeague
+	.filter(({ section }) => section.current_team_id !== team.team_id && section.team_history.some((segment) => segment.team_id === team.team_id))
+	.sort((a, b) => collator.compare(a.player.name, b.player.name));
+
+// --- Fixtures & results -------------------------------------------------------
+const teamMatches = (matchesData as MatchRecord[])
+	.filter((match) => match.league === league.id && (match.home_team_id === team.team_id || match.away_team_id === team.team_id))
+	.map((match) => {
+		const home = match.home_team_id === team.team_id;
+		const opponentId = home ? match.away_team_id : match.home_team_id;
+		const scored = match.home_score !== null && match.away_score !== null;
+		const ours = scored ? (home ? match.home_score! : match.away_score!) : null;
+		const theirs = scored ? (home ? match.away_score! : match.home_score!) : null;
+		const result = ours === null || theirs === null ? null : ours > theirs ? "W" : ours < theirs ? "L" : "D";
+		return { ...match, opponentId, ours, theirs, result };
+	})
+	.sort((a, b) => a.week - b.week || a.round - b.round || a.match_id.localeCompare(b.match_id));
+
+const weeks = [...new Set(teamMatches.map((match) => match.week))].map((week) => {
+	const matches = teamMatches.filter((match) => match.week === week);
+	const played = matches.filter((match) => match.result);
+	return {
+		week,
+		date: matches[0].date,
+		matches,
+		record: {
+			W: played.filter((match) => match.result === "W").length,
+			D: played.filter((match) => match.result === "D").length,
+			L: played.filter((match) => match.result === "L").length,
+		},
+		played: played.length,
+	};
+});
+
+const RESULT_TEXT = {
+	W: { en: "W", ko: "승" },
+	D: { en: "D", ko: "무" },
+	L: { en: "L", ko: "패" },
+} as const;
+
+const otherTeams = league.teams.filter((entry) => entry.team_id !== team.team_id);
+---
+
+<BaseLayout title={`${team.name} · ${league.id} | KICKS`} description={`${team.name} in KICKS ${league.id}: record, squad, and results.`}>
+	<main>
+		<section class="team-hero" style={`--team-color: ${color}; --team-text: ${headerText};`} aria-labelledby="team-title">
+			<a class="team-back" href={`/league/${league.id}`}>
+				← <T en={`${league.id} league`} ko={`${league.id} 리그`} />
+			</a>
+			<p class="team-league">{league.id}</p>
+			<h1 id="team-title">
+				{isChampion && <span aria-hidden="true">🏆 </span>}
+				{team.name}
+			</h1>
+			{
+				row && row.played > 0 ? (
+					<p class="team-summary">
+						{isChampion ? (
+							<T en="Champion" ko="우승" />
+						) : sharedRank ? (
+							<T en={`T-${row.rank}`} ko={`공동 ${row.rank}위`} />
+						) : (
+							<T en={`#${row.rank}`} ko={`${row.rank}위`} />
+						)}
+						<span aria-hidden="true"> · </span>
+						<T en={`${row.points} pts`} ko={`승점 ${row.points}`} />
+						<span aria-hidden="true"> · </span>
+						<T en={`${row.wins}W ${row.draws}D ${row.losses}L`} ko={`${row.wins}승 ${row.draws}무 ${row.losses}패`} />
+					</p>
+				) : (
+					<T as="p" class="team-summary" en="First match coming up" ko="첫 경기를 기다리는 중" />
+				)
+			}
+		</section>
+
+		{
+			row && row.played > 0 && (
+				<section class="content-section team-stats-section" aria-label="Team stats">
+					<dl class="team-stats">
+						<div>
+							<dt><T en="Played" ko="경기" /></dt>
+							<dd>{row.played}</dd>
+						</div>
+						<div>
+							<dt><T en="Goals for" ko="득점" /></dt>
+							<dd>{row.goals_for}</dd>
+						</div>
+						<div>
+							<dt><T en="Goals against" ko="실점" /></dt>
+							<dd>{row.goals_against}</dd>
+						</div>
+						<div>
+							<dt><T en="Goal diff." ko="득실" /></dt>
+							<dd>{row.goal_difference > 0 ? `+${row.goal_difference}` : row.goal_difference}</dd>
+						</div>
+						<div>
+							<dt><T en="Participation" ko="참여율" /></dt>
+							<dd>{(row.participation_rate * 100).toFixed(1)}%</dd>
+						</div>
+					</dl>
+				</section>
+			)
+		}
+
+		<section class="content-section" aria-labelledby="squad-title">
+			<h2 id="squad-title">
+				<T en="Squad" ko="선수단" />
+				<span class="team-count">{squad.length}</span>
+			</h2>
+			{
+				squad.length > 0 ? (
+					<div class="player-grid">
+						{squad.map(({ player, section }) => (
+							<PlayerCard
+								player={player}
+								section={section}
+								teamName={team.name}
+								teamColor={color}
+								href={`/players/${player.id}?league=${league.id}`}
+								avatarPhoto={playerPhotos[player.id]}
+							/>
+						))}
+					</div>
+				) : (
+					<T as="p" class="about-description" en="The squad hasn't been announced yet." ko="아직 선수단이 발표되지 않았어요." />
+				)
+			}
+			{
+				formerPlayers.length > 0 && (
+					<p class="team-former">
+						<T en="Also played here earlier in this league:" ko="이번 리그 초반에 함께 뛴 선수:" />{" "}
+						{formerPlayers.map(({ player }, index) => (
+							<>
+								{index > 0 && ", "}
+								<a href={`/players/${player.id}?league=${league.id}`}>{player.name}</a>
+							</>
+						))}
+					</p>
+				)
+			}
+		</section>
+
+		<section class="content-section" aria-labelledby="team-results-title">
+			<h2 id="team-results-title"><T en="Results & Fixtures" ko="경기 결과 & 일정" /></h2>
+			{
+				weeks.length === 0 ? (
+					<T as="p" class="about-description" en="No fixtures yet." ko="아직 경기 일정이 없어요." />
+				) : (
+					<div class="team-weeks">
+						{weeks.map((week) => (
+							<div class="team-week">
+								<div class="team-week-head">
+									<a href={`/league/${league.id}?week=${week.week}#results`}>
+										<T en={weekLabel(week.week, "en")} ko={weekLabel(week.week, "ko")} />
+									</a>
+									<span class="team-week-date">
+										<T en={formatShortDate(week.date, "en")} ko={formatShortDate(week.date, "ko")} />
+									</span>
+									{week.played > 0 && (
+										<span class="team-week-record">
+											<T
+												en={`${week.record.W}W ${week.record.D}D ${week.record.L}L`}
+												ko={`${week.record.W}승 ${week.record.D}무 ${week.record.L}패`}
+											/>
+										</span>
+									)}
+								</div>
+								<ul class="team-matches">
+									{week.matches.map((match) => (
+										<li class="team-match">
+											{match.result ? (
+												<span class={`team-result team-result--${match.result}`}>
+													<T en={RESULT_TEXT[match.result].en} ko={RESULT_TEXT[match.result].ko} />
+												</span>
+											) : (
+												<span class="team-result team-result--upcoming">–</span>
+											)}
+											<span class="team-match-opponent">
+												<span class="team-dot" style={`background-color: ${getTeamColor(match.opponentId, league)}`} aria-hidden="true" />
+												<T en="vs" ko="vs" />{" "}
+												{match.opponentId ? (
+													<a href={`/league/${league.id}/team/${match.opponentId}`}>{getTeamName(match.opponentId, league)}</a>
+												) : (
+													"TBD"
+												)}
+											</span>
+											<span class="team-match-score">
+												{match.ours !== null ? `${match.ours} – ${match.theirs}` : ""}
+											</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
+					</div>
+				)
+			}
+		</section>
+
+		{
+			otherTeams.length > 0 && (
+				<section class="content-section" aria-label="Other teams">
+					<p class="section-label"><T en={`OTHER ${league.id} TEAMS`} ko={`${league.id} 다른 팀`} /></p>
+					<div class="team-others">
+						{otherTeams.map((other) => (
+							<a class="team-other" href={`/league/${league.id}/team/${other.team_id}`}>
+								<span class="team-dot" style={`background-color: ${getTeamColor(other.team_id, league)}`} aria-hidden="true" />
+								{other.name}
+							</a>
+						))}
+					</div>
+				</section>
+			)
+		}
+	</main>
+</BaseLayout>
+
+<style>
+	.team-hero {
+		padding: 96px clamp(24px, 6vw, 88px) 40px;
+		background-color: var(--team-color);
+		color: var(--team-text);
+	}
+
+	.team-hero h1 {
+		margin: 4px 0 0;
+		font-size: clamp(2.2rem, 6vw, 3.6rem);
+		line-height: 1.1;
+	}
+
+	.team-back {
+		display: inline-block;
+		margin-bottom: 20px;
+		color: inherit;
+		font-size: 0.85rem;
+		font-weight: 600;
+		text-decoration: none;
+		opacity: 0.85;
+	}
+
+	.team-back:hover {
+		opacity: 1;
+		text-decoration: underline;
+	}
+
+	.team-league {
+		margin: 0;
+		font-size: 0.8rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		opacity: 0.85;
+	}
+
+	.team-summary {
+		margin: 12px 0 0;
+		font-size: 1.05rem;
+		font-weight: 600;
+	}
+
+	.team-stats-section {
+		padding-top: 32px;
+		padding-bottom: 8px;
+	}
+
+	.team-stats {
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 12px;
+		margin: 0;
+	}
+
+	.team-stats div {
+		padding: 14px 12px;
+		border: 1px solid var(--color-sage);
+		border-radius: 8px;
+		background-color: #fff;
+		text-align: center;
+	}
+
+	.team-stats dt {
+		font-size: 0.75rem;
+		font-weight: 700;
+		opacity: 0.65;
+	}
+
+	.team-stats dd {
+		margin: 4px 0 0;
+		font-size: 1.4rem;
+		font-weight: 700;
+	}
+
+	.team-count {
+		margin-left: 8px;
+		font-size: 0.9rem;
+		font-weight: 600;
+		opacity: 0.5;
+	}
+
+	.team-former {
+		margin: 20px 0 0;
+		font-size: 0.9rem;
+	}
+
+	.team-former a,
+	.team-match-opponent a,
+	.team-week-head a {
+		color: var(--color-green);
+		font-weight: 600;
+	}
+
+	.team-weeks {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		gap: 16px;
+		margin-top: 20px;
+	}
+
+	.team-week {
+		border: 1px solid var(--color-sage);
+		border-radius: 8px;
+		background-color: #fff;
+		overflow: hidden;
+	}
+
+	.team-week-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 8px;
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--color-sage);
+		font-size: 0.9rem;
+	}
+
+	.team-week-date {
+		font-size: 0.8rem;
+		opacity: 0.65;
+	}
+
+	.team-week-record {
+		margin-left: auto;
+		font-size: 0.8rem;
+		font-weight: 700;
+	}
+
+	.team-matches {
+		margin: 0;
+		padding: 6px 16px;
+		list-style: none;
+	}
+
+	.team-match {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 7px 0;
+		font-size: 0.9rem;
+	}
+
+	.team-match + .team-match {
+		border-top: 1px solid rgba(41, 41, 41, 0.06);
+	}
+
+	.team-result {
+		display: inline-grid;
+		place-items: center;
+		min-width: 26px;
+		height: 22px;
+		padding: 0 4px;
+		border-radius: 4px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: #fff;
+	}
+
+	.team-result--W {
+		background-color: var(--color-green);
+	}
+
+	.team-result--D {
+		background-color: #8a8a8a;
+	}
+
+	.team-result--L {
+		background-color: #b54141;
+	}
+
+	.team-result--upcoming {
+		background-color: var(--color-sage);
+		color: var(--color-dark);
+	}
+
+	.team-match-opponent {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.team-match-score {
+		margin-left: auto;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.team-dot {
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		flex-shrink: 0;
+	}
+
+	.team-others {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin-top: 12px;
+	}
+
+	.team-other {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 16px;
+		border: 1px solid var(--color-sage);
+		border-radius: 999px;
+		background-color: #fff;
+		color: var(--color-dark);
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.team-other:hover {
+		border-color: var(--color-green);
+	}
+
+	@media (max-width: 700px) {
+		.team-hero {
+			padding-top: 72px;
+		}
+
+		.team-stats {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+
+		.team-stats div {
+			padding: 10px 6px;
+		}
+
+		.team-stats dd {
+			font-size: 1.15rem;
+		}
+	}
+</style>

@@ -187,6 +187,11 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 												{group.color && <span class="player-group-dot" style={`background-color: ${group.color}`} />}
 												<T en={group.en} ko={group.ko ?? group.en} />
 												<span class="player-group-count">{group.players.length}</span>
+												{view.key === "team" && (
+													<a class="player-group-team-link" href={`/league/${league.id}/team/${group.key}`}>
+														<T en="Team page →" ko="팀 페이지 →" />
+													</a>
+												)}
 											</h3>
 										)}
 										<div class="player-grid">
