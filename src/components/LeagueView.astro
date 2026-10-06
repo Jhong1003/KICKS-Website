@@ -200,7 +200,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			leaderboard.length > 0 ? (
 				<>
 					<T as="p" class="about-description" en="Click a column header to sort." ko="열 제목을 누르면 정렬돼요." />
-					<PlayerStatsTable players={leaderboard} />
+					<PlayerStatsTable players={leaderboard} leagueId={league.id} />
 				</>
 			) : (
 				<T

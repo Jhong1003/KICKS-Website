@@ -3513,6 +3513,26 @@ main > .content-section:last-of-type {
 
 /* 선수 페이지 Wrapped 진입 버튼 (끝난 리그에서만) */
 
+/* 선수 상세: 이름·포지션·리그 버튼은 위에 한 번, 리그별 기록은 그 아래 패널로 */
+
+.player-detail-head {
+
+	padding-bottom: 0;
+
+}
+
+.player-detail-head .league-switcher {
+
+	margin-top: 24px;
+
+}
+
+[data-league-panel] > .content-section:first-child {
+
+	padding-top: 32px;
+
+}
+
 .player-name-row {
 
 	display: flex;

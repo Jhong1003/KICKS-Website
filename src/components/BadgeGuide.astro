@@ -120,7 +120,7 @@ const tiers = TIER_ORDER.map((tier) => ({
 												holders.map((holder, index) => (
 													<>
 														{index > 0 && ", "}
-														<a href={`/players/${holder.id}`}>{holder.name}</a>
+														<a href={`/players/${holder.id}?league=${league}`}>{holder.name}</a>
 													</>
 												))
 											)}

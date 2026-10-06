@@ -50,7 +50,7 @@ const awards = finale
 						<p class="honours-card-winner" style={`color: ${team.color}`}>{team.name}</p>
 						<ul class="honours-roster">
 							{team.roster.map((player) => (
-								<li><a href={`/players/${player.id}`}>{player.name}</a></li>
+								<li><a href={`/players/${player.id}?league=${league.id}`}>{player.name}</a></li>
 							))}
 						</ul>
 					</div>
@@ -66,7 +66,7 @@ const awards = finale
 								{award.winners.map((winner, index) => (
 									<>
 										{index > 0 && <span class="honours-sep"> · </span>}
-										<a href={`/players/${winner.id}`}>{winner.name}</a>
+										<a href={`/players/${winner.id}?league=${league.id}`}>{winner.name}</a>
 									</>
 								))}
 							</p>

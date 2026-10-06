@@ -375,8 +375,12 @@ players, even before that league's first game. Each roster is viewable by name, 
 grouped per team (buttons, league leader first; players forwards to
 goalkeeper) or per primary position (never by a stat). Only the name view is
 alphabetical: team/position views shuffle within a position on every visit;
-`/players/[id]` shows every
-section, newest first. Each section has:
+`/players/[id]` shows one
+section at a time with league buttons (newest first, opened by default);
+`?league=<id>` opens a specific one, and every link from a league-specific
+place (that league's roster, Player Stats, Hall of Fame, records, badge
+guide, finale banner, Wrapped) passes it, so a click from FA26-L1 lands on
+the FA26-L1 record and badges. Each section has:
 
 - League totals, that league's team, and team history (previous teams in
   that league, if any — most players only ever have one).

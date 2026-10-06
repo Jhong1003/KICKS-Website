@@ -45,7 +45,7 @@ const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: st
 							{award.winners.map((winner, index) => (
 								<>
 									{index > 0 && <span class="finale-chip-sep">·</span>}
-									<a class="finale-chip-name" href={`/players/${winner.id}`}>{winner.name}</a>
+									<a class="finale-chip-name" href={`/players/${winner.id}?league=${league.id}`}>{winner.name}</a>
 								</>
 							))}
 							<span class="finale-chip-count">

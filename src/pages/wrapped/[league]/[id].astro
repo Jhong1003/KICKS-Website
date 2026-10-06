@@ -60,7 +60,7 @@ const cardData = {
 	description={`${player.name}'s ${league.id} season recap on KICKS.`}
 	header="custom"
 >
-	<div class="wrapped" id="wrapped" data-player-url={`/players/${player.id}`}>
+	<div class="wrapped" id="wrapped" data-player-url={`/players/${player.id}?league=${league.id}`}>
 		<div class="wrapped-stage" style={`--team-color: ${teamColor}`}>
 			<div class="wrapped-progress" aria-hidden="true"></div>
 
@@ -70,7 +70,7 @@ const cardData = {
 					<button class="wrapped-lang" type="button" data-wrapped-lang>EN | 한</button>
 					<a
 						class="wrapped-close"
-						href={`/players/${player.id}`}
+						href={`/players/${player.id}?league=${league.id}`}
 						aria-label="Close Wrapped"
 						data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close Wrapped", ko: "Wrapped 닫기" } })}
 					>
@@ -296,7 +296,7 @@ const cardData = {
 						<span data-copy-label><T en="Copy link" ko="링크 복사" /></span>
 						<span data-copy-done hidden><T en="Copied!" ko="복사됐어요!" /></span>
 					</button>
-					<a class="wrapped-button wrapped-button--ghost" href={`/players/${player.id}`}>
+					<a class="wrapped-button wrapped-button--ghost" href={`/players/${player.id}?league=${league.id}`}>
 						<T en="Player page" ko="선수 페이지" />
 					</a>
 				</div>

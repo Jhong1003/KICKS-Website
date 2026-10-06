@@ -16,6 +16,8 @@ import type { Text } from "./wrapped";
 export interface RecordHolder {
 	/** Player slug for a /players/<id> link; absent for team records. */
 	playerId?: string;
+	/** League the record was set in (player link opens that league on their page). */
+	league?: string;
 	name: string;
 	/** Where it happened, e.g. "FA26-L1 · Week 3". */
 	context: Text;
@@ -76,7 +78,7 @@ export function buildClubRecords(): ClubRecord[] {
 			label,
 			value: top.value,
 			unit: unit(top.value),
-			holders: top.items.map((w) => ({ playerId: w.player.id, name: w.player.name, context: weekText(w.league, w.week) })),
+			holders: top.items.map((w) => ({ playerId: w.player.id, league: w.league, name: w.player.name, context: weekText(w.league, w.week) })),
 		});
 	};
 	const playerLeague = (key: string, icon: string, label: Text, unit: (n: number) => Text, pick: (s: (typeof seasons)[number]) => number) => {
@@ -88,7 +90,7 @@ export function buildClubRecords(): ClubRecord[] {
 			label,
 			value: top.value,
 			unit: unit(top.value),
-			holders: top.items.map((s) => ({ playerId: s.player.id, name: s.player.name, context: leagueText(s.league) })),
+			holders: top.items.map((s) => ({ playerId: s.player.id, league: s.league, name: s.player.name, context: leagueText(s.league) })),
 		});
 	};
 

@@ -15,9 +15,12 @@ interface Player {
 
 interface Props {
 	players: Player[];
+	/** The league these rows belong to; player links open that league on their page. */
+	leagueId?: string;
 }
 
-const { players } = Astro.props;
+const { players, leagueId } = Astro.props;
+const playerHref = (id: string) => (leagueId ? `/players/${id}?league=${leagueId}` : `/players/${id}`);
 
 const columns = [
 	{ key: "rank", label: "Rank", labelKo: "순위", type: "number" },
@@ -49,7 +52,7 @@ const columns = [
 					<tr class={player.rank <= 3 ? "player-row-top" : undefined}>
 						<td data-sort-value={player.rank}>{player.rank}</td>
 						<td class="player-stats-name" data-sort-value={player.player.toLowerCase()}>
-							<a href={`/players/${player.id}`}>{player.player}</a>
+							<a href={playerHref(player.id)}>{player.player}</a>
 						</td>
 						<td data-sort-value={player.team.toLowerCase()}>{player.team}</td>
 						<td data-sort-value={player.weeks_attended}>

@@ -196,7 +196,7 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 													section={section}
 													teamName={getTeamName(section.current_team_id, league)}
 													teamColor={getTeamColor(section.current_team_id, league)}
-													href={`/players/${player.id}`}
+													href={`/players/${player.id}?league=${league.id}`}
 													avatarPhoto={playerPhotos[player.id]}
 												/>
 											))}

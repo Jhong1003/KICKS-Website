@@ -31,7 +31,7 @@ const records = buildClubRecords();
 						<ul class="record-holders">
 							{record.holders.map((holder) => (
 								<li>
-									{holder.playerId ? <a href={`/players/${holder.playerId}`}>{holder.name}</a> : <span>{holder.name}</span>}
+									{holder.playerId ? <a href={holder.league ? `/players/${holder.playerId}?league=${holder.league}` : `/players/${holder.playerId}`}>{holder.name}</a> : <span>{holder.name}</span>}
 									<T class="record-context" en={holder.context.en} ko={holder.context.ko} />
 								</li>
 							))}
