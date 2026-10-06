@@ -753,6 +753,18 @@ Verification (offline):
 - `npm run build`
 
 
+### Match Forecasts
+
+`MatchForecasts.astro` (League page Overview, between Match Results and Title
+Chances) shows a league's most recent published forecast week from
+[forecasts/forecasts.csv](forecasts/forecasts.csv), read at build time by
+[src/lib/forecasts.ts](src/lib/forecasts.ts) (`?raw` import). One stacked
+bar per pairing and model (team colors, gray for the draw), percentages
+rounded for display only. Hidden for a league with no forecasts. The CSV is
+the publication record under [docs/forecast-protocol-v1.md](docs/forecast-protocol-v1.md):
+append-only, committed before each Friday 23:59 deadline — the site never
+writes to it.
+
 ### League sections and Title Race UI
 
 League pages keep their existing paths and offer OVERVIEW / PLAYER STATS

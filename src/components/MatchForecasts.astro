@@ -1,0 +1,104 @@
+---
+// "Match Forecasts": this league's latest published win/draw/loss forecasts
+// (src/lib/forecasts.ts). Read-only — the published record is the CSV in the
+// repo, committed before each week's Friday-night deadline.
+import T from "./T.astro";
+import { getTeamColor, getTeamName, type League } from "../lib/leagues";
+import { MODEL_LABELS, latestForecastWeek, percent } from "../lib/forecasts";
+import { getReadableAccentColor } from "../lib/players";
+
+interface Props {
+	league: League;
+}
+
+const { league } = Astro.props;
+const latest = latestForecastWeek(league.id);
+const PROTOCOL_URL = "https://github.com/Jhong1003/KICKS-Website/blob/main/docs/forecast-protocol-v1.md";
+const RECORD_URL = "https://github.com/Jhong1003/KICKS-Website/commits/main/forecasts/forecasts.csv";
+---
+
+{
+	latest && (
+		<section class="content-section match-forecasts" id="forecasts" aria-labelledby="forecasts-title">
+			<h2 id="forecasts-title"><T en="Match Forecasts" ko="경기 예측" /></h2>
+			<T
+				as="p"
+				class="about-description"
+				en={`Week ${latest.week} · Win / draw / loss chances for one match of each pairing, published before kickoff.`}
+				ko={`${latest.week}주차 · 대진별 한 경기의 승·무·패 확률이에요. 경기 전에 공개했어요.`}
+			/>
+			<div class="forecast-list">
+				{latest.pairings.map((pairing) => {
+					const colorA = getTeamColor(pairing.teamA, league);
+					const colorB = getTeamColor(pairing.teamB, league);
+					const nameA = getTeamName(pairing.teamA, league);
+					const nameB = getTeamName(pairing.teamB, league);
+					return (
+						<div class="forecast-pairing">
+							<p class="forecast-teams">
+								<span style={`color: ${getReadableAccentColor(colorA)}`}>{nameA}</span>
+								<span class="forecast-vs">vs</span>
+								<span style={`color: ${getReadableAccentColor(colorB)}`}>{nameB}</span>
+							</p>
+							{pairing.rows.map((row) => (
+								<div class="forecast-row">
+									{pairing.rows.length > 1 && (
+										<p class="forecast-model">
+											<T en={MODEL_LABELS[row.model].en} ko={MODEL_LABELS[row.model].ko} />
+										</p>
+									)}
+									<div
+										class="forecast-bar"
+										role="img"
+										aria-label={`${nameA} ${percent(row.pA)}, draw ${percent(row.pDraw)}, ${nameB} ${percent(row.pB)}`}
+									>
+										<span style={`width: ${row.pA * 100}%; background-color: ${colorA}`} />
+										<span class="forecast-bar-draw" style={`width: ${row.pDraw * 100}%`} />
+										<span style={`width: ${row.pB * 100}%; background-color: ${colorB}`} />
+									</div>
+									<div class="forecast-numbers">
+										<span>{nameA} <strong>{percent(row.pA)}</strong></span>
+										<span><T en="Draw" ko="무승부" /> <strong>{percent(row.pDraw)}</strong></span>
+										<span>{nameB} <strong>{percent(row.pB)}</strong></span>
+									</div>
+								</div>
+							))}
+						</div>
+					);
+				})}
+			</div>
+			{
+				latest.pairings.every((pairing) => pairing.rows.every((row) => row.model === "baseline")) && (
+					<T
+						as="p"
+						class="forecast-note"
+						en="No results from this league yet, so every pairing gets the same baseline: the previous league's draw rate, with the rest split evenly. From week 2 a model also uses this league's scores."
+						ko="아직 이 리그 경기 결과가 없어서 모든 대진이 같은 기준선이에요. 지난 리그의 무승부 비율을 쓰고 나머지를 반씩 나눴어요. 2주차부터는 이번 리그 점수를 반영한 모델 예측도 나와요."
+					/>
+				)
+			}
+			<p class="forecast-links">
+				<a href={PROTOCOL_URL} target="_blank" rel="noopener noreferrer"><T en="How the forecasts work" ko="예측 방법" /> ↗</a>
+				<a href={RECORD_URL} target="_blank" rel="noopener noreferrer"><T en="Publication record" ko="공개 기록" /> ↗</a>
+			</p>
+		</section>
+	)
+}
+
+<style>
+	.forecast-list { max-width: 700px; margin-top: 1.75rem; }
+	.forecast-pairing { padding: 1rem 0; border-bottom: 1px solid var(--color-sage); }
+	.forecast-teams { display: flex; align-items: baseline; gap: .6rem; margin: 0 0 .6rem; font-weight: 600; }
+	.forecast-vs { font-size: .75rem; font-weight: 500; opacity: .55; }
+	.forecast-row + .forecast-row { margin-top: .8rem; }
+	.forecast-model { margin: 0 0 .35rem; font-size: .75rem; opacity: .65; }
+	.forecast-bar { display: flex; height: .6rem; background: var(--color-sage); }
+	.forecast-bar span { display: block; height: 100%; }
+	.forecast-bar-draw { background-color: #b9b9b2; }
+	.forecast-numbers { display: flex; justify-content: space-between; gap: .75rem; margin-top: .4rem; font-size: .85rem; font-variant-numeric: tabular-nums; }
+	.forecast-numbers span:nth-child(2) { text-align: center; }
+	.forecast-numbers span:last-child { text-align: right; }
+	.forecast-note { max-width: 700px; margin: 1rem 0 0; font-size: .8rem; opacity: .75; }
+	.forecast-links { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; margin: 1rem 0 0; font-size: .85rem; }
+	.forecast-links a { color: var(--color-green); font-weight: 600; }
+</style>

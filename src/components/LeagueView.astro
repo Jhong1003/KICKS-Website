@@ -4,6 +4,7 @@ import PointsRaceDialog from "./PointsRaceDialog.astro";
 import StandingsTable from "./StandingsTable.astro";
 import WeeklyResults from "./WeeklyResults.astro";
 import PlayerStatsTable from "./PlayerStatsTable.astro";
+import MatchForecasts from "./MatchForecasts.astro";
 import T from "./T.astro";
 import leagueTableData from "../data/league_table.json";
 import matchesData from "../data/matches.json";
@@ -189,6 +190,8 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			)
 		}
 	</section>
+
+	<MatchForecasts league={league} />
 
 	<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
 
