@@ -5,8 +5,12 @@
 // exactly one league — nothing here is combined across leagues.
 //
 // Shows the team's record (from league_table.json, already in official
-// order), its squad (player cards, forwards to goalkeeper; never ordered by
-// a stat, same rule as /players) and its fixtures/results week by week.
+// order), "This League" panels from src/lib/team-stats.ts (recent form,
+// head-to-head, team records, team leaders counting only weeks on this
+// team, published title chances), its squad (player cards, forwards to
+// goalkeeper; never ordered by a stat, same rule as /players) and its
+// fixtures/results week by week. Captain/motto/photo come from the
+// hand-edited src/data/team-info.json.
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
 import PlayerCard from "../../../../components/PlayerCard.astro";
 import T from "../../../../components/T.astro";
@@ -18,6 +22,9 @@ import { leagues, getTeamColor, getTeamName, type League, type LeagueTeam } from
 import { getSection, getContrastingTextColor, type PlayerInLeague, type PlayerProfile } from "../../../../lib/players";
 import { isLeagueFinished, isShownInLeague } from "../../../../lib/finale";
 import { formatShortDate, weekLabel } from "../../../../lib/i18n";
+import { titleHistory } from "../../../../lib/forecasts";
+import { headToHead, recentForm, teamLeaders, teamRecords, teamResults } from "../../../../lib/team-stats";
+import teamInfoData from "../../../../data/team-info.json";
 
 export function getStaticPaths() {
 	return leagues.flatMap((league) => league.teams.map((team) => ({ params: { league: league.id, team: team.team_id }, props: { league, team } })));
@@ -110,6 +117,35 @@ const RESULT_TEXT = {
 } as const;
 
 const otherTeams = league.teams.filter((entry) => entry.team_id !== team.team_id);
+
+// --- This league's numbers (src/lib/team-stats.ts) -----------------------------
+const results = teamResults(matchesData as MatchRecord[], league.id, team.team_id);
+const form = recentForm(results);
+const h2h = headToHead(results, otherTeams.map((entry) => entry.team_id)).filter((entry) => entry.played > 0);
+const records = teamRecords(results);
+const nameOf = new Map(inLeague.map(({ player }) => [player.player_id, player]));
+const leaders = teamLeaders(
+	inLeague.map(({ player, section }) => ({ playerId: player.player_id, weekly: section.weekly_stats })),
+	team.team_id,
+);
+const leaderPlayers = (ids: string[]) => ids.flatMap((id) => (nameOf.has(id) ? [nameOf.get(id)!] : []));
+
+// Published title chances (forecasts/title_forecasts.csv), this team only.
+const titleChances = titleHistory(league.id)
+	.filter((entry) => entry.chances[team.team_id] !== undefined)
+	.map((entry) => ({ week: entry.week, p: entry.chances[team.team_id] }));
+const pct = (p: number) => (p < 0.001 ? "<0.1%" : p > 0.999 ? ">99.9%" : `${(p * 100).toFixed(p < 0.1 ? 1 : 0)}%`);
+
+// Hand-edited extras (src/data/team-info.json): captain (exact name), motto, photo.
+interface TeamInfo {
+	captain?: string;
+	motto?: string;
+	motto_en?: string;
+	photo?: string;
+}
+const info = ((teamInfoData as Record<string, Record<string, TeamInfo>>)[league.id] ?? {})[team.team_id] ?? {};
+const captain = info.captain ? (profilesData as PlayerProfile[]).find((player) => player.name === info.captain) : undefined;
+const captainId = captain?.player_id;
 ---
 
 <BaseLayout title={`${team.name} · ${league.id} | KICKS`} description={`${team.name} in KICKS ${league.id}: record, squad, and results.`}>
@@ -142,6 +178,16 @@ const otherTeams = league.teams.filter((entry) => entry.team_id !== team.team_id
 					<T as="p" class="team-summary" en="First match coming up" ko="첫 경기를 기다리는 중" />
 				)
 			}
+			{
+				info.captain && (
+					<p class="team-captain">
+						<span class="team-captain-mark" aria-hidden="true">C</span>
+						<T en="Captain" ko="주장" />{" "}
+						{captain ? <a href={`/players/${captain.id}?league=${league.id}`}>{captain.name}</a> : info.captain}
+					</p>
+				)
+			}
+			{info.motto && <T as="p" class="team-motto" en={`“${info.motto_en ?? info.motto}”`} ko={`“${info.motto}”`} />}
 		</section>
 
 		{
@@ -173,6 +219,147 @@ const otherTeams = league.teams.filter((entry) => entry.team_id !== team.team_id
 			)
 		}
 
+		{
+			info.photo && (
+				<section class="content-section team-photo-section" aria-label="Team photo">
+					<img class="team-photo" src={info.photo} alt={`${team.name} team photo`} />
+				</section>
+			)
+		}
+
+		{
+			(results.length > 0 || titleChances.length > 0) && (
+				<section class="content-section" aria-labelledby="team-season-title">
+					<h2 id="team-season-title"><T en="This League" ko="이번 리그" /></h2>
+					<div class="team-panels">
+						{form.length > 0 && (
+							<div class="team-panel">
+								<h3><T en="Recent form" ko="최근 흐름" /></h3>
+								<ol class="team-form" aria-label="Most recent last">
+									{form.map((match) => (
+										<li
+											class={`team-result team-result--${match.result}`}
+											title={`${weekLabel(match.week, "en")} · vs ${getTeamName(match.opponentId, league)} ${match.ours}–${match.theirs}`}
+										>
+											<T en={RESULT_TEXT[match.result].en} ko={RESULT_TEXT[match.result].ko} />
+										</li>
+									))}
+								</ol>
+								<T as="p" class="team-panel-note" en="Last 6 matches, most recent on the right" ko="최근 6경기, 오른쪽이 가장 최근" />
+							</div>
+						)}
+
+						{h2h.length > 0 && (
+							<div class="team-panel">
+								<h3><T en="Head-to-head" ko="상대 전적" /></h3>
+								<ul class="team-h2h">
+									{h2h.map((entry) => (
+										<li>
+											<span class="team-match-opponent">
+												<span class="team-dot" style={`background-color: ${getTeamColor(entry.opponentId, league)}`} aria-hidden="true" />
+												<a href={`/league/${league.id}/team/${entry.opponentId}`}>{getTeamName(entry.opponentId, league)}</a>
+											</span>
+											<span class="team-h2h-record">
+												<T en={`${entry.W}W ${entry.D}D ${entry.L}L`} ko={`${entry.W}승 ${entry.D}무 ${entry.L}패`} />
+											</span>
+											<span class="team-h2h-goals">{entry.goalsFor}–{entry.goalsAgainst}</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						)}
+
+						{results.length > 0 && (
+							<div class="team-panel">
+								<h3><T en="Team records" ko="팀 기록" /></h3>
+								<dl class="team-records">
+									{records.biggestWins.length > 0 && (
+										<div>
+											<dt><T en="Biggest win" ko="최다 점수차 승리" /></dt>
+											<dd>
+												{records.biggestWins.map((match, index) => (
+													<span class="team-record-line">
+														{index > 0 && <br />}
+														{match.ours}–{match.theirs} vs {getTeamName(match.opponentId, league)}
+														<span class="team-record-week">
+															{" "}
+															(<T en={weekLabel(match.week, "en")} ko={weekLabel(match.week, "ko")} />)
+														</span>
+													</span>
+												))}
+											</dd>
+										</div>
+									)}
+									{records.longestWinStreak > 1 && (
+										<div>
+											<dt><T en="Longest winning run" ko="최다 연승" /></dt>
+											<dd><T en={`${records.longestWinStreak} in a row`} ko={`${records.longestWinStreak}연승`} /></dd>
+										</div>
+									)}
+									{records.longestUnbeaten > 1 && (
+										<div>
+											<dt><T en="Longest unbeaten run" ko="최다 연속 무패" /></dt>
+											<dd><T en={`${records.longestUnbeaten} matches`} ko={`${records.longestUnbeaten}경기`} /></dd>
+										</div>
+									)}
+									<div>
+										<dt><T en="Clean sheets" ko="무실점 경기" /></dt>
+										<dd>{records.cleanSheets}</dd>
+									</div>
+								</dl>
+							</div>
+						)}
+
+						{(leaders.goals.playerIds.length > 0 || leaders.assists.playerIds.length > 0) && (
+							<div class="team-panel">
+								<h3><T en="Team leaders" ko="팀 내 최다 기록" /></h3>
+								<dl class="team-records">
+									{[
+										{ key: "goals", en: "Goals", ko: "골", entry: leaders.goals },
+										{ key: "assists", en: "Assists", ko: "어시스트", entry: leaders.assists },
+									]
+										.filter(({ entry }) => entry.playerIds.length > 0)
+										.map(({ en, ko, entry }) => (
+											<div>
+												<dt><T en={en} ko={ko} /></dt>
+												<dd>
+													{leaderPlayers(entry.playerIds).map((player, index) => (
+														<>
+															{index > 0 && ", "}
+															<a href={`/players/${player.id}?league=${league.id}`}>{player.name}</a>
+														</>
+													))}
+													<span class="team-record-week"> · {entry.value}</span>
+												</dd>
+											</div>
+										))}
+								</dl>
+								<T as="p" class="team-panel-note" en="Only matches played for this team count" ko="이 팀에서 뛴 기록만 셉니다" />
+							</div>
+						)}
+
+						{titleChances.length > 0 && (
+							<div class="team-panel">
+								<h3><T en="Title chances by week" ko="주차별 우승 확률" /></h3>
+								<ol class="team-title-chances">
+									{titleChances.map((entry) => (
+										<li>
+											<span><T en={weekLabel(entry.week, "en")} ko={weekLabel(entry.week, "ko")} /></span>
+											<span class="team-title-bar" aria-hidden="true">
+												<span style={`width: ${Math.max(2, entry.p * 100)}%; background-color: ${color}`} />
+											</span>
+											<strong>{pct(entry.p)}</strong>
+										</li>
+									))}
+								</ol>
+								<T as="p" class="team-panel-note" en="Published before each week's matches" ko="매주 경기 전에 미리 공개한 숫자예요" />
+							</div>
+						)}
+					</div>
+				</section>
+			)
+		}
+
 		<section class="content-section" aria-labelledby="squad-title">
 			<h2 id="squad-title">
 				<T en="Squad" ko="선수단" />
@@ -182,6 +369,10 @@ const otherTeams = league.teams.filter((entry) => entry.team_id !== team.team_id
 				squad.length > 0 ? (
 					<div class="player-grid">
 						{squad.map(({ player, section }) => (
+							<div class:list={["team-squad-card", { "team-squad-card--captain": player.player_id === captainId }]}>
+							{player.player_id === captainId && (
+								<span class="team-captain-mark team-captain-mark--card" title="Captain" aria-label="Captain">C</span>
+							)}
 							<PlayerCard
 								player={player}
 								section={section}
@@ -190,6 +381,7 @@ const otherTeams = league.teams.filter((entry) => entry.team_id !== team.team_id
 								href={`/players/${player.id}?league=${league.id}`}
 								avatarPhoto={playerPhotos[player.id]}
 							/>
+							</div>
 						))}
 					</div>
 				) : (
@@ -503,6 +695,202 @@ const otherTeams = league.teams.filter((entry) => entry.team_id !== team.team_id
 
 	.team-other:hover {
 		border-color: var(--color-green);
+	}
+
+	.team-captain {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 14px 0 0;
+		font-size: 0.95rem;
+	}
+
+	.team-captain a {
+		color: inherit;
+		font-weight: 700;
+	}
+
+	.team-captain-mark {
+		display: inline-grid;
+		place-items: center;
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		background-color: var(--team-text);
+		color: var(--team-color);
+		font-size: 0.75rem;
+		font-weight: 800;
+	}
+
+	.team-motto {
+		margin: 10px 0 0;
+		font-size: 1rem;
+		font-style: italic;
+		opacity: 0.9;
+	}
+
+	.team-photo-section {
+		padding-top: 32px;
+		padding-bottom: 8px;
+	}
+
+	.team-photo {
+		display: block;
+		width: 100%;
+		max-height: 520px;
+		object-fit: cover;
+		border-radius: 8px;
+	}
+
+	.team-panels {
+		display: grid;
+		align-items: start;
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+		gap: 16px;
+		margin-top: 20px;
+	}
+
+	.team-panel {
+		padding: 16px;
+		border: 1px solid var(--color-sage);
+		border-radius: 8px;
+		background-color: #fff;
+	}
+
+	.team-panel h3 {
+		margin: 0 0 12px;
+		color: var(--color-green);
+		font-size: 0.95rem;
+	}
+
+	.team-panel-note {
+		margin: 10px 0 0;
+		font-size: 0.75rem;
+		opacity: 0.6;
+	}
+
+	.team-form {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.team-form .team-result {
+		min-width: 30px;
+		height: 30px;
+		border-radius: 50%;
+	}
+
+	.team-h2h {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.team-h2h li {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 6px 0;
+		font-size: 0.9rem;
+	}
+
+	.team-h2h li + li {
+		border-top: 1px solid rgba(41, 41, 41, 0.06);
+	}
+
+	.team-h2h-record {
+		margin-left: auto;
+		font-weight: 700;
+	}
+
+	.team-h2h-goals {
+		min-width: 44px;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+		opacity: 0.7;
+	}
+
+	.team-records {
+		margin: 0;
+	}
+
+	.team-records div + div {
+		margin-top: 10px;
+	}
+
+	.team-records dt {
+		font-size: 0.75rem;
+		font-weight: 700;
+		opacity: 0.6;
+	}
+
+	.team-records dd {
+		margin: 2px 0 0;
+		font-size: 0.95rem;
+		font-weight: 600;
+	}
+
+	.team-records a {
+		color: var(--color-green);
+	}
+
+	.team-record-week {
+		font-weight: 400;
+		opacity: 0.65;
+	}
+
+	.team-title-chances {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.team-title-chances li {
+		display: grid;
+		grid-template-columns: 56px 1fr 56px;
+		align-items: center;
+		gap: 10px;
+		padding: 4px 0;
+		font-size: 0.85rem;
+	}
+
+	.team-title-chances strong {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.team-title-bar {
+		height: 8px;
+		border-radius: 4px;
+		background-color: var(--color-sage);
+		overflow: hidden;
+	}
+
+	.team-title-bar span {
+		display: block;
+		height: 100%;
+	}
+
+	.team-squad-card {
+		position: relative;
+		display: grid;
+	}
+
+	.team-captain-mark--card {
+		position: absolute;
+		top: -8px;
+		left: -8px;
+		z-index: 1;
+		width: 26px;
+		height: 26px;
+		background-color: var(--color-dark);
+		color: #fff;
+		font-size: 0.8rem;
+		box-shadow: 0 0 0 2px var(--color-background);
 	}
 
 	@media (max-width: 700px) {

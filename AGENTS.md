@@ -22,7 +22,8 @@ site reads.
   `gallery`, `full-matches`, `benefits` + `benefits/admin` (member benefits, linked from Partners),
   `league/[league]/team/[team]` — one team's page within one league (record, squad
   forwards→GK by name, never by a stat, results week by week); linked from team names in
-  the standings tables, the /players team view and the player page).
+  the standings tables, the /players team view and the player page; numbers in
+  `src/lib/team-stats.ts`, tested by `tests/team-stats.test.mjs`).
 - [src/components/](src/components/) — Astro components used by the pages
   (e.g. `LeagueView`, `StandingsTable`, `PlayerStatsTable`, `WeeklyResults`,
   `ScheduleTimeline`, `PlayerCard`, `WeeklyStatsChart`, `PhotoGallery`,
@@ -34,7 +35,7 @@ site reads.
   `player_leaderboard.json`, `player_profiles.json`, `leagues.json`,
   `partners.json`, plus the encrypted `full-matches.enc.json`). **Never
   hand-edit the generated files** — regenerate them instead (see pipeline
-  below). Six files in this folder are the hand-edited exception, never
+  below). Seven files in this folder are the hand-edited exception, never
   touched by the pipeline: [perks.json](src/data/perks.json) (member perks,
   see "Member perks" below), [board.json](src/data/board.json)
   (the club board: role, major, favorite player, fun fact, Instagram; each
@@ -43,9 +44,11 @@ site reads.
   calendar, see below), [league-config.json](src/data/league-config.json)
   (per-league rules, see "Leagues" below),
   [player-photos.json](src/data/player-photos.json) (optional real player
-  photos, see "Player profiles" below), and
+  photos, see "Player profiles" below),
   [transfer-news.json](src/data/transfer-news.json) (homepage transfer
-  banner, see below).
+  banner, see below), and [team-info.json](src/data/team-info.json)
+  (per league → team_id: optional `captain` (exact player name), `motto` /
+  `motto_en`, `photo` (a path under public/) for the team pages).
 - [src/lib/schedule.ts](src/lib/schedule.ts) — shared helpers (date
   formatting, past/upcoming/next-up flags, month grouping) used by both
   the Schedule page and the homepage's "Next up" card.
