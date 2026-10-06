@@ -1,0 +1,4 @@
+league,week,team,model,p_title,runs,seed,data_through_week,generated_at,code_commit,status
+FA26-L2,1,T1,baseline,0.3333333333333333,,,0,2026-10-06T08:55:07Z,5d7b5e952ceb53abba8f9fbddfcaca595db51c64,published
+FA26-L2,1,T2,baseline,0.3333333333333333,,,0,2026-10-06T08:55:07Z,5d7b5e952ceb53abba8f9fbddfcaca595db51c64,published
+FA26-L2,1,T3,baseline,0.3333333333333333,,,0,2026-10-06T08:55:07Z,5d7b5e952ceb53abba8f9fbddfcaca595db51c64,published
