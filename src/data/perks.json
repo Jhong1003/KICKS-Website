@@ -2,17 +2,17 @@
   {
     "perk_id": "sgd",
     "name": "SGD (So Gong Dong)",
-    "offer_en": "KICKS member offer",
-    "offer_ko": "KICKS 멤버 혜택",
+    "offer_en": "10% off dine-in orders of $25+",
+    "offer_ko": "매장 식사 $25 이상 10% 할인",
     "valid_until": "2026-12-31",
-    "active": false
+    "active": true
   },
   {
     "perk_id": "kung-fu-tea",
     "name": "Kung Fu Tea",
-    "offer_en": "KICKS member offer",
-    "offer_ko": "KICKS 멤버 혜택",
+    "offer_en": "10% off dine-in orders of $25+",
+    "offer_ko": "매장 주문 $25 이상 10% 할인",
     "valid_until": "2026-12-31",
-    "active": false
+    "active": true
   }
 ]

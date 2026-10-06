@@ -72,11 +72,12 @@ test('verify: right code + member only, same-origin POST only, never logs', asyn
   db.close();
 });
 
-test('redeem: closed perks are refused (nothing is active until a partner confirms)', async () => {
+test('redeem: unknown or closed perks are refused', async () => {
   const { db, env } = setup();
-  const r = await onRequest({ request: post('/api/perks/redeem', { code: 'kicks-2026', player_id: member, perk_id: 'sgd' }), env });
+  const r = await onRequest({ request: post('/api/perks/redeem', { code: 'kicks-2026', player_id: member, perk_id: 'no-such-place' }), env });
   assert.equal(r.status, 404);
   assert.equal((await r.json()).error, 'perk');
+  assert.equal(db.prepare('SELECT COUNT(*) AS n FROM perk_redemptions').get().n, 0);
   db.close();
 });
 
