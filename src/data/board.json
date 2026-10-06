@@ -48,18 +48,6 @@
 		"instagram": "haiososo"
 	},
 	{
-		"name": "박수인",
-		"name_en": "Sooin Park",
-		"role": "Club Manager",
-		"member_id": "M001",
-		"major": "Aerospace Engineering",
-		"positions": "Cheerleader / Benchwarmer",
-		"favorite_player": "Erling Haaland",
-		"fun_fact": "하키선수였는데 스케이트 못탐",
-		"fun_fact_en": "Used to be a hockey player, but can't skate",
-		"instagram": "s._.in07"
-	},
-	{
 		"name": "김주미",
 		"name_en": "Joomi Kim",
 		"role": "Event Manager",
@@ -70,5 +58,17 @@
 		"fun_fact": "기숙사에서 전자레인지로 꽈배기 데우다가 태움",
 		"fun_fact_en": "Burned a twisted doughnut reheating it in the dorm microwave",
 		"instagram": "duru.joomi"
+	},
+	{
+		"name": "박수인",
+		"name_en": "Sooin Park",
+		"role": "Club Manager",
+		"member_id": "M001",
+		"major": "Aerospace Engineering",
+		"positions": "Cheerleader / Benchwarmer",
+		"favorite_player": "Erling Haaland",
+		"fun_fact": "하키선수였는데 스케이트 못탐",
+		"fun_fact_en": "Used to be a hockey player, but can't skate",
+		"instagram": "s._.in07"
 	}
 ]
