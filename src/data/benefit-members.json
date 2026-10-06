@@ -1,1 +1,4 @@
-[]
+[
+	{ "member_id": "M001", "name": "김주미", "role": "Event Manager" },
+	{ "member_id": "M002", "name": "박수인", "role": "Club Manager" }
+]
