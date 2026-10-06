@@ -725,10 +725,14 @@ team. `matches_per_pair_per_week` records this in league-config. There is
 no knockout or separate final: cumulative week 1–4 standings decide the
 championship. The final-week win points still apply.
 
-Future goals are independent Poisson draws with the SAME lambda for both
-teams: the current league's completed-match total goals / (2 × completed
-matches). No other league, team strength or home advantage is used. User
-scenario scores never change lambda. Participation stays at its current,
+Future goals are independent Poisson draws using the **same Poisson v1
+team strengths as the published match forecasts** (src/lib/poisson-model.ts,
+docs/forecast-protocol-v1.md §4.2): μ = the current league's completed-match
+goals / (2 × completed matches); each team's attack/defense is shrunk toward
+μ with k = 6; a team scores λ = attack · opponent's defense / μ. No other
+league or home advantage is used. Early in a league the shrinkage keeps
+teams close to equal. User scenario scores never change the strengths.
+Participation stays at its current,
 pipeline-rounded value. All four criteria tied means each co-leader gets
 1 / number-of-co-leaders championship credit. UI percentages are mean
 credit, not probability of sole victory or inclusion in a shared title.
@@ -792,7 +796,8 @@ simulated share is shown, with anything under 0.1% as "<0.1%" and over 99.9%
 as ">99.9%", so 10,000 runs never display a misleading 0.0% or 100.0%.
 
 The site shows a read-only result, a simulations / remaining matches line,
-and "Equal team strength · Poisson model". Scenario inputs, Run/Reset and
+and a model line saying team strength comes from this league's goals (same
+model as Match Forecasts). Scenario inputs, Run/Reset and
 How it works are removed from the UI; unused UI event handlers and styles
 are removed too. Tab changes do not rerun the simulation. Detailed model
 assumptions remain documented above. The core simulator still supports

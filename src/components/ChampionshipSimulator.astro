@@ -33,7 +33,7 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 		<p class="title-race-meta" data-simulator-meta>
 			<T en={`${model.remaining.length} matches remaining`} ko={`남은 경기 ${model.remaining.length}개`} />
 		</p>
-		<p class="title-race-model"><T en="Equal team strength · Poisson model" ko="세 팀 전력 동일 가정 · 포아송 모델" /></p>
+		<p class="title-race-model"><T en="Team strength from this league's goals · Poisson model (same as Match Forecasts)" ko="이번 리그 득점·실점으로 팀 전력 반영 · 포아송 모델 (경기 예측과 같은 방식)" /></p>
 		<p class="title-race-status" data-simulator-status role="status" aria-live="polite"><T en="Calculating…" ko="결과를 계산합니다…" /></p>
 		<noscript><p><T en="Turn on JavaScript to see the results." ko="결과를 보려면 JavaScript를 활성화해주세요." /></p></noscript>
 

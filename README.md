@@ -398,9 +398,13 @@ Feel free to check [our documentation](https://docs.astro.build) or jump into ou
 ## Championship simulator
 
 League pages offer a browser-only simulator with 10,000 Monte Carlo trials.
-All teams have the same independent Poisson scoring distribution; lambda
-is the current league's completed-match goals / (2 × completed matches).
-No cross-league records or team-strength estimates are used. Completed
+Goals are independent Poisson draws using the same Poisson v1 team
+strengths as the published match forecasts (src/lib/poisson-model.ts):
+μ = the current league's completed-match goals / (2 × completed matches),
+each team's attack/defense shrunk toward μ with k = 6, and
+λ = attack · opponent defense / μ. No cross-league records are used. Title
+Chances are shown on the site only — they are not published forecasts and
+are not scored. Completed
 count and lambda are used internally; small-sample limitations and model
 assumptions are documented here. High-scoring outliers still affect lambda;
 actual score dependence and tactical changes are not modeled.
@@ -454,7 +458,8 @@ without standings rows are appended in league team order. "Title Chances" (우�
 primary heading, with no subtitle or interactive controls.
 
 The site shows a read-only result, a simulations / remaining matches line,
-and "Equal team strength · Poisson model". Scenario inputs, Run/Reset and
+and a model line saying team strength comes from this league's goals (same
+model as Match Forecasts). Scenario inputs, Run/Reset and
 How it works are removed from the UI; unused UI event handlers and styles
 are removed too. Tab changes do not rerun the simulation. Detailed model
 assumptions remain documented above. The core simulator still supports

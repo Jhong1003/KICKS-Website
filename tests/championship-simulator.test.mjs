@@ -126,3 +126,17 @@ test('title chance labels never show a bare 0.0% or 100.0%', () => {
  assert.equal(formatTitleChance(0, 'eliminated').ko, '탈락');
  assert.equal(formatTitleChance(100, 'clinched').en, 'Clinched');
 });
+
+test('team strengths: a team that has outscored others gets more title credit', async () => {
+  // Week 1 finished with T1 winning big; points level otherwise not involved.
+  const done = [
+    match({ match_id: 'w1a', home_team_id: 'T1', away_team_id: 'T2', home_score: 4, away_score: 0 }),
+    match({ match_id: 'w1b', home_team_id: 'T2', away_team_id: 'T3', home_score: 1, away_score: 1 }),
+    match({ match_id: 'w1c', home_team_id: 'T3', away_team_id: 'T1', home_score: 0, away_score: 3 }),
+  ];
+  const model = buildSimulationModel(league, done, standings);
+  assert.ok(model.strengths.attack.T1 > model.strengths.attack.T2);
+  assert.ok(model.strengths.defense.T1 < model.strengths.defense.T3);
+  const result = await simulate(model, {}, 4000, rng(7));
+  assert.ok(result.credits.T1 > result.credits.T2 && result.credits.T1 > result.credits.T3);
+});

@@ -1,5 +1,6 @@
 import type { League, LeagueRules } from "./leagues";
 import { championshipCredits, type TeamStanding } from "./standings.ts";
+import { expectedGoals, teamStrengths, type ScoredMatch, type TeamStrengths } from "./poisson-model.ts";
 
 export interface MatchRecord {
 	league: string;
@@ -23,7 +24,10 @@ export interface SimulationModel {
 	base: TeamStanding[];
 	remaining: FutureMatch[];
 	completed: number;
+	/** Pooled goals per team per game (μ); null before the first completed match. */
 	lambda: number | null;
+	/** Poisson v1 attack/defense per team, the same as the published match forecasts. */
+	strengths: TeamStrengths;
 }
 export type FixedScores = Record<string, [number, number]>;
 
@@ -63,7 +67,7 @@ export function buildSimulationModel(
 	const base = ids.map((id) => ({ team_id: id, points: 0, goals_for: 0, goal_difference: 0,
 		participation_rate: standings.find((row) => row.league === league.id && row.team_id === id)?.participation_rate ?? 0 }));
 	let completed = 0;
-	let goals = 0;
+	const scored: ScoredMatch[] = [];
 	for (const match of matches) {
 		if (knownIds.has(match.match_id) || !Number.isInteger(match.week) || match.week < 1 || match.week > rules.weeks ||
 			(match.home_team_id !== null && !ids.includes(match.home_team_id)) ||
@@ -78,7 +82,7 @@ export function buildSimulationModel(
 			}
 			addResult(base, match.home_team_id, match.away_team_id, match.home_score, match.away_score, match.week, rules);
 			completed++;
-			goals += match.home_score + match.away_score;
+			scored.push({ home: match.home_team_id, away: match.away_team_id, homeGoals: match.home_score, awayGoals: match.away_score });
 		} else if (match.status !== "scheduled" || match.home_score !== null || match.away_score !== null) {
 			throw new Error("미완료 경기의 상태 또는 스코어를 확인해주세요.");
 		}
@@ -113,8 +117,9 @@ export function buildSimulationModel(
 		if (!fits(0, slots)) throw new Error(`Week ${week}: 미정 대진과 남은 팀 조합이 일치하지 않습니다.`);
 		remaining.push(...slots);
 	}
+	const strengths = teamStrengths(ids, scored);
 	return { league, base, remaining: remaining.sort((a, b) => a.week - b.week), completed,
-		lambda: completed ? goals / (2 * completed) : null };
+		lambda: strengths.mu, strengths };
 }
 
 /** Exponential waiting times avoid exp(-lambda) underflow; no goal cap or rounding of lambda. */
@@ -149,7 +154,10 @@ export async function simulate(
 	for (let trial = 0; trial < count; trial++) {
 		const rows = model.base.map((row) => ({ ...row }));
 		for (const match of model.remaining) {
-			const [h, a] = fixed[match.key] ?? [poisson(model.lambda!, random), poisson(model.lambda!, random)];
+			const [h, a] = fixed[match.key] ?? [
+				poisson(expectedGoals(model.strengths, match.home, match.away), random),
+				poisson(expectedGoals(model.strengths, match.away, match.home), random),
+			];
 			addResult(rows, match.home, match.away, h, a, match.week, model.league.rules);
 		}
 		const credit = championshipCredits(rows, model.league.rules.ranking_criteria);
