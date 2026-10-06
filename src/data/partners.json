@@ -1,5 +1,23 @@
 [
   {
+    "partner_id": "sgd-dubu",
+    "name": "SGD Dubu So Gong Dong Tofu & Korean BBQ",
+    "logo": "/partners/sgd-dubu.png",
+    "logo_scale": 0.8,
+    "address": "707 S 6th St #105, Champaign, IL 61820",
+    "url": "https://www.google.com/maps/search/?api=1&query=SGD+Dubu+So+Gong+Dong+Tofu+707+S+6th+St+Champaign+IL",
+    "link_label": "View on Google Maps"
+  },
+  {
+    "partner_id": "kung-fu-tea",
+    "name": "Kung Fu Tea",
+    "logo": "/partners/kung-fu-tea.png",
+    "logo_scale": 0.32,
+    "address": "707 S 6th St #107, Champaign, IL 61820",
+    "url": "https://www.kungfutea.com/",
+    "link_label": "Visit website"
+  },
+  {
     "partner_id": "star-karaoke",
     "name": "Star Karaoke",
     "logo": "/partners/star-karaoke.png",
