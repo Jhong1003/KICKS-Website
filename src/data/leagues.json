@@ -35,5 +35,42 @@
         "color": "#e03131"
       }
     ]
+  },
+  {
+    "id": "FA26-L2",
+    "latest": false,
+    "started": false,
+    "rules": {
+      "weeks": 4,
+      "final_week": 4,
+      "win_points": 2,
+      "final_win_points": 3,
+      "draw_points": 1,
+      "matches_per_week": 9,
+      "matches_per_pair_per_week": 3,
+      "ranking_criteria": [
+        "points",
+        "participation_rate",
+        "goal_difference",
+        "goals_for"
+      ]
+    },
+    "teams": [
+      {
+        "team_id": "T1",
+        "name": "A",
+        "color": "#e03131"
+      },
+      {
+        "team_id": "T2",
+        "name": "B",
+        "color": "#1c7ed6"
+      },
+      {
+        "team_id": "T3",
+        "name": "C",
+        "color": "#b8860b"
+      }
+    ]
   }
 ]
