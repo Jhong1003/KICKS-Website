@@ -1,0 +1,279 @@
+---
+// "Meet the Board" on the About page, from hand-edited src/data/board.json
+// (the same file member benefits reads). Each card shows the short version
+// (avatar, name, role, fun fact); tapping it opens the rest (major,
+// positions, favorite player, Instagram, player profile). Uses
+// <details>/<summary>, so it works without JavaScript.
+import board from "../data/board.json";
+import profiles from "../data/player_profiles.json";
+import T from "./T.astro";
+
+interface BoardMember {
+	name: string;
+	name_en: string;
+	role: string;
+	player_id?: string;
+	member_id?: string;
+	major?: string;
+	positions?: string;
+	favorite_player?: string;
+	fun_fact?: string;
+	fun_fact_en?: string;
+	instagram?: string;
+	/** Optional photo under public/, e.g. "/board/jihwan.jpg". Initials otherwise. */
+	photo?: string;
+}
+
+const ROLE_KO: Record<string, string> = {
+	President: "회장",
+	"Vice President": "부회장",
+	"Operations Manager": "운영 매니저",
+	Treasurer: "총무",
+	"Club Manager": "클럽 매니저",
+	"Event Manager": "이벤트 매니저",
+};
+
+const slugByPlayerId = new Map(profiles.map((profile) => [profile.player_id, profile.id]));
+
+// Same rule as player cards (_avatar_initials): last two characters of the name.
+const initials = (name: string) => (name.length <= 2 ? name : name.slice(-2));
+
+const members = (board as BoardMember[]).map((member) => ({
+	...member,
+	profileId: member.player_id ? slugByPlayerId.get(member.player_id) : undefined,
+}));
+---
+
+<section class="content-section" aria-labelledby="board-title">
+	<h2 id="board-title"><T en="Meet the Board" ko="운영진 소개" /></h2>
+	<p class="board-intro">
+		<T
+			en="The people who keep KICKS running. Tap a card to learn more."
+			ko="KICKS를 함께 꾸려가는 사람들이에요. 카드를 누르면 더 볼 수 있어요."
+		/>
+	</p>
+	<div class="board-grid">
+		{
+			members.map((member) => (
+				<details class="board-card">
+					<summary>
+						<span class="board-avatar">
+							{member.photo ? <img src={member.photo} alt="" /> : <span aria-hidden="true">{initials(member.name)}</span>}
+						</span>
+						<span class="board-name">{member.name}</span>
+						<span class="board-name-en">{member.name_en}</span>
+						<span class="board-role"><T en={member.role} ko={ROLE_KO[member.role] ?? member.role} /></span>
+						{member.fun_fact && (
+							<span class="board-fact"><T en={member.fun_fact_en ?? member.fun_fact} ko={member.fun_fact} /></span>
+						)}
+						<span class="board-more" aria-hidden="true"><T en="More" ko="더 보기" /></span>
+					</summary>
+					<dl class="board-details">
+						{member.major && (
+							<div>
+								<dt><T en="Major" ko="전공" /></dt>
+								<dd>{member.major}</dd>
+							</div>
+						)}
+						{member.positions && (
+							<div>
+								<dt><T en="Position" ko="포지션" /></dt>
+								<dd>{member.positions}</dd>
+							</div>
+						)}
+						{member.favorite_player && (
+							<div>
+								<dt><T en="Favorite player" ko="좋아하는 선수" /></dt>
+								<dd>{member.favorite_player}</dd>
+							</div>
+						)}
+						{member.instagram && (
+							<div>
+								<dt>Instagram</dt>
+								<dd>
+									<a href={`https://www.instagram.com/${member.instagram}`} target="_blank" rel="noopener noreferrer">
+										@{member.instagram}
+									</a>
+								</dd>
+							</div>
+						)}
+					</dl>
+					{member.profileId && (
+						<a class="board-profile-link" href={`/players/${member.profileId}`}>
+							<T en="Player profile →" ko="선수 프로필 →" />
+						</a>
+					)}
+				</details>
+			))
+		}
+	</div>
+</section>
+
+<style>
+	.board-intro {
+		margin: 8px 0 0;
+		font-size: 0.95rem;
+		line-height: 1.7;
+	}
+
+	.board-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 20px;
+		margin-top: 28px;
+		align-items: start;
+	}
+
+	.board-card {
+		border: 1px solid var(--color-sage);
+		border-radius: 8px;
+		background-color: #fff;
+	}
+
+	.board-card summary {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+		padding: 22px 16px 14px;
+		text-align: center;
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.board-card summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.board-card summary:focus-visible {
+		outline: 2px solid var(--color-green);
+		outline-offset: 2px;
+		border-radius: 8px;
+	}
+
+	.board-avatar {
+		display: grid;
+		place-items: center;
+		width: 72px;
+		height: 72px;
+		margin-bottom: 8px;
+		overflow: hidden;
+		border-radius: 50%;
+		background-color: var(--color-sage);
+		color: var(--color-green);
+		font-size: 1.2rem;
+		font-weight: 700;
+	}
+
+	.board-avatar img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.board-name {
+		font-size: 1.05rem;
+		font-weight: 700;
+	}
+
+	.board-name-en {
+		font-size: 0.8rem;
+		opacity: 0.6;
+	}
+
+	.board-role {
+		margin-top: 2px;
+		color: var(--color-green);
+		font-size: 0.85rem;
+		font-weight: 700;
+	}
+
+	.board-fact {
+		margin-top: 8px;
+		font-size: 0.88rem;
+		line-height: 1.55;
+	}
+
+	.board-more {
+		margin-top: 10px;
+		color: var(--color-green);
+		font-size: 0.78rem;
+		font-weight: 600;
+	}
+
+	.board-more::after {
+		content: " ▾";
+	}
+
+	.board-card[open] .board-more::after {
+		content: " ▴";
+	}
+
+	.board-details {
+		margin: 0;
+		padding: 12px 16px 4px;
+		border-top: 1px solid var(--color-sage);
+		font-size: 0.85rem;
+	}
+
+	.board-details div {
+		margin-bottom: 8px;
+	}
+
+	.board-details dt {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		opacity: 0.6;
+	}
+
+	.board-details dd {
+		margin: 2px 0 0;
+		overflow-wrap: anywhere;
+	}
+
+	.board-details a,
+	.board-profile-link {
+		color: var(--color-green);
+		font-weight: 600;
+	}
+
+	.board-profile-link {
+		display: block;
+		padding: 0 16px 16px;
+		font-size: 0.85rem;
+		text-decoration: none;
+	}
+
+	@media (max-width: 700px) {
+		.board-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 12px;
+		}
+
+		.board-card summary {
+			padding: 16px 10px 12px;
+		}
+
+		.board-avatar {
+			width: 56px;
+			height: 56px;
+			font-size: 1rem;
+		}
+
+		.board-fact {
+			font-size: 0.8rem;
+		}
+
+		.board-details {
+			padding: 10px 12px 2px;
+			font-size: 0.8rem;
+		}
+
+		.board-profile-link {
+			padding: 0 12px 14px;
+			font-size: 0.8rem;
+		}
+	}
+</style>

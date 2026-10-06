@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import T from "../components/T.astro";
+import BoardSection from "../components/BoardSection.astro";
 import aboutImage from "../assets/about.jpg";
 
 const features = [
@@ -93,6 +94,8 @@ const features = [
 				</li>
 			</ul>
 		</section>
+
+		<BoardSection />
 
 		<section class="content-section" aria-labelledby="who-should-join-title">
 			<h2 id="who-should-join-title"><T en="Who Should Join" ko="이런 분을 찾아요" /></h2>
