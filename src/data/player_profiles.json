@@ -11,6 +11,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T3",
         "team_history": [],
@@ -82,6 +108,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Target Man",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T1",
@@ -242,6 +294,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T3",
         "team_history": [
@@ -319,6 +397,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Engine",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T3",
         "team_history": [],
@@ -383,6 +487,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T2",
@@ -452,6 +582,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T2",
         "team_history": [],
@@ -513,6 +669,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T1",
@@ -583,6 +765,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Engine",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T2",
         "team_history": [],
@@ -650,6 +858,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Engine",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T1",
         "team_history": [],
@@ -714,6 +948,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T3",
@@ -782,6 +1042,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T2",
@@ -855,6 +1141,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Target Man",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T2",
         "team_history": [],
@@ -911,6 +1223,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T3",
@@ -980,6 +1318,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T1",
         "team_history": [],
@@ -1046,6 +1410,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Engine",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T1",
@@ -1114,6 +1504,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T2",
@@ -1248,6 +1664,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Target Man",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T1",
         "team_history": [],
@@ -1317,6 +1759,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T3",
         "team_history": [],
@@ -1378,6 +1846,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Target Man",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T2",
@@ -1446,6 +1940,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Target Man",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T1",
@@ -1605,6 +2125,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T1",
         "team_history": [],
@@ -1674,6 +2220,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T1",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 1,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T2",
         "team_history": [
@@ -1728,6 +2300,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Target Man",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T1",
@@ -1789,6 +2387,32 @@
     "status": "active",
     "leagues": [
       {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Target Man",
+        "badges": [
+          "squad_member"
+        ]
+      },
+      {
         "league": "FA26-L1",
         "current_team_id": "T3",
         "team_history": [],
@@ -1839,6 +2463,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Rock",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T3",
@@ -1902,6 +2552,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T3",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Target Man",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T3",
@@ -1978,6 +2654,32 @@
     ],
     "status": "active",
     "leagues": [
+      {
+        "league": "FA26-L2",
+        "current_team_id": "T2",
+        "team_history": [],
+        "season_totals": {
+          "goals": 0,
+          "assists": 0,
+          "attacking_points": 0,
+          "weeks_attended": 0,
+          "weeks_played": 3
+        },
+        "weekly_stats": [
+          {
+            "week": 2,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          }
+        ],
+        "personal_best_week": null,
+        "play_style_tag": "Engine",
+        "badges": [
+          "squad_member"
+        ]
+      },
       {
         "league": "FA26-L1",
         "current_team_id": "T2",
