@@ -8,13 +8,13 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import T from "../../components/T.astro";
 import perks from "../../data/perks.json";
 import profiles from "../../data/player_profiles.json";
-import extraMembers from "../../data/benefit-members.json";
+import board from "../../data/board.json";
 
 // Players on the roster (not inactive) plus staff who don't play, e.g.
-// managers (hand-edited src/data/benefit-members.json, ids like "M001").
+// managers (board members in hand-edited src/data/board.json with a "member_id" like "M001").
 const members = [
 	...profiles.filter((p) => p.status !== "inactive").map((p) => ({ player_id: p.player_id, name: p.name })),
-	...(extraMembers as { member_id: string; name: string }[]).map((m) => ({ player_id: m.member_id, name: m.name })),
+	...(board as { member_id?: string; name: string }[]).filter((m): m is { member_id: string; name: string } => Boolean(m.member_id)).map((m) => ({ player_id: m.member_id, name: m.name })),
 ].sort((a, b) => a.name.localeCompare(b.name, "ko"));
 ---
 

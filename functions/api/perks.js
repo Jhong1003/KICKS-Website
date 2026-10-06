@@ -12,14 +12,17 @@
 // Stored per use: perk, player_id and time only. No IP, device or name.
 import perks from '../../src/data/perks.json' with { type: 'json' };
 import profiles from '../../src/data/player_profiles.json' with { type: 'json' };
-import extraMembers from '../../src/data/benefit-members.json' with { type: 'json' };
+import board from '../../src/data/board.json' with { type: 'json' };
+
+/** Board members who aren't players (they have a member_id instead of a player_id). */
+const extraMembers = board.filter((m) => m.member_id);
 import { chicagoDate } from './visits.js';
 
 /** Opening the coupon again within this window reuses the same log row. */
 export const REPEAT_WINDOW_MS = 30 * 60 * 1000;
 
 // Everyone on the current roster (not inactive), plus club staff who don't
-// play — managers etc. — listed by hand in src/data/benefit-members.json.
+// play — managers etc. — from the board list in src/data/board.json.
 export const memberIds = new Set([
   ...profiles.filter((p) => p.status !== 'inactive').map((p) => p.player_id),
   ...extraMembers.map((m) => m.member_id),

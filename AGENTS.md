@@ -33,8 +33,10 @@ site reads.
   hand-edit the generated files** — regenerate them instead (see pipeline
   below). Six files in this folder are the hand-edited exception, never
   touched by the pipeline: [perks.json](src/data/perks.json) (member perks,
-  see "Member perks" below), [benefit-members.json](src/data/benefit-members.json)
-  (staff who can use member perks without being players), [schedule.json](src/data/schedule.json) (season
+  see "Member perks" below), [board.json](src/data/board.json)
+  (the club board: role, major, favorite player, fun fact, Instagram; each
+  has a `player_id` if they play or a `member_id` like `M001` if not — the
+  latter is what lets non-playing staff use member perks), [schedule.json](src/data/schedule.json) (season
   calendar, see below), [league-config.json](src/data/league-config.json)
   (per-league rules, see "Leagues" below),
   [player-photos.json](src/data/player-photos.json) (optional real player

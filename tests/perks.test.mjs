@@ -58,12 +58,17 @@ test('inactive players are not members', () => {
   for (const p of profiles) assert.equal(memberIds.has(p.player_id), p.status !== 'inactive');
 });
 
-test('staff in benefit-members.json are members, with unique non-player ids', () => {
+test('non-player board members are members, with unique non-player ids', () => {
   const read = (file) => JSON.parse(readFileSync(new URL(`../src/data/${file}`, import.meta.url), 'utf8'));
   const playerIds = new Set(read('player_profiles.json').map((p) => p.player_id));
-  const extra = read('benefit-members.json');
+  const board = read('board.json');
+  const extra = board.filter((m) => m.member_id);
+  for (const m of board) {
+    assert.ok(Boolean(m.player_id) !== Boolean(m.member_id), `${m.name}: needs exactly one of player_id / member_id`);
+    if (m.player_id) assert.ok(playerIds.has(m.player_id), `${m.name}: unknown player_id ${m.player_id}`);
+  }
   const ids = extra.map((m) => m.member_id);
-  assert.equal(new Set(ids).size, ids.length, 'duplicate member_id in benefit-members.json');
+  assert.equal(new Set(ids).size, ids.length, 'duplicate member_id in board.json');
   for (const m of extra) {
     assert.ok(m.member_id && m.name, 'every entry needs member_id and name');
     assert.ok(!playerIds.has(m.member_id), `${m.member_id} clashes with a player_id`);

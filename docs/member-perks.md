@@ -29,9 +29,10 @@ old code and asks for the new one (the name stays selected).
   "Coming soon / 준비 중" and the API refuses it.
 - **Members** — everyone in `player_profiles.json` whose `status` isn't
   `inactive`, plus club staff who don't play (managers etc.) listed by hand
-  in [src/data/benefit-members.json](../src/data/benefit-members.json) as
-  `{"member_id": "M001", "name": "..."}` — ids start with `M` so they never
-  clash with a player's `P001`. Same list on the page, in the API and in the
+  as board members in [src/data/board.json](../src/data/board.json) with a
+  `member_id` (`"M001"`, ...) instead of a `player_id` — `M` ids never
+  clash with a player's `P001`. Board members who play use their
+  `player_id` and are already members as players. Same list on the page, in the API and in the
   staff log. A new player who hasn't played a league week yet isn't in it
   until the next data regeneration.
 - **API** — [functions/api/perks.js](../functions/api/perks.js), routed by

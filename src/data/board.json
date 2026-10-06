@@ -1,0 +1,68 @@
+[
+	{
+		"name": "홍지환",
+		"name_en": "Jihwan Hong",
+		"role": "President",
+		"player_id": "P024",
+		"major": "Statistics",
+		"positions": "ST, CF, CAM",
+		"favorite_player": "James Rodríguez",
+		"fun_fact": "노숙자한테 차 도난 당함..ㅠ",
+		"instagram": "j.hong_ethan"
+	},
+	{
+		"name": "노윤오",
+		"name_en": "Yoonoh Noh",
+		"role": "Vice President",
+		"player_id": "P022",
+		"major": "System Engineering",
+		"positions": "CB",
+		"favorite_player": "Trent Alexander-Arnold",
+		"fun_fact": "보드 타다가 공익됨 ㅋ",
+		"instagram": "yknw_yuno"
+	},
+	{
+		"name": "이지수",
+		"name_en": "Jisoo Lee",
+		"role": "Operations Manager",
+		"player_id": "P005",
+		"major": "Chemical Engineering",
+		"positions": "CB",
+		"favorite_player": "Thomas Müller",
+		"fun_fact": "고양이 6마리 집사냐옹^_^",
+		"instagram": "hulio._.leee"
+	},
+	{
+		"name": "이희준",
+		"name_en": "Heejoon Lee",
+		"role": "Treasurer",
+		"player_id": "P012",
+		"major": "Economics",
+		"positions": "CM / CDM / CAM",
+		"favorite_player": "Declan Rice",
+		"fun_fact": "수면시간 최소 11시간 요구 zz",
+		"instagram": "haiososo"
+	},
+	{
+		"name": "박수인",
+		"name_en": "Sooin Park",
+		"role": "Club Manager",
+		"member_id": "M001",
+		"major": "Aerospace Engineering",
+		"positions": "Cheerleader / Benchwarmer",
+		"favorite_player": "Erling Haaland",
+		"fun_fact": "하키선수였는데 스케이트 못탐",
+		"instagram": "s._.in07"
+	},
+	{
+		"name": "김주미",
+		"name_en": "Joomi Kim",
+		"role": "Event Manager",
+		"member_id": "M002",
+		"major": "Human Development and Family Studies",
+		"positions": "Cheerleader / Benchwarmer",
+		"favorite_player": "Hee-chan Hwang",
+		"fun_fact": "기숙사에서 전자레인지로 꽈배기 데우다가 태움",
+		"instagram": "duru.joomi"
+	}
+]
