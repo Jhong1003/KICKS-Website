@@ -36,7 +36,7 @@ site reads.
   see "Member perks" below), [board.json](src/data/board.json)
   (the club board: role, major, favorite player, fun fact, Instagram; each
   has a `player_id` if they play or a `member_id` like `M001` if not — the
-  latter is what lets non-playing staff use member perks), [schedule.json](src/data/schedule.json) (season
+  latter is what lets non-playing staff use member perks; also shown on the About page's "Meet the Board" cards, `BoardSection.astro`, with optional `fun_fact_en` and `photo`), [schedule.json](src/data/schedule.json) (season
   calendar, see below), [league-config.json](src/data/league-config.json)
   (per-league rules, see "Leagues" below),
   [player-photos.json](src/data/player-photos.json) (optional real player
