@@ -51,6 +51,33 @@ export function isLeagueFinished(leagueId: string): boolean {
 	return matches.length > 0 && matches.every((match) => match.home_score !== null && match.away_score !== null);
 }
 
+interface MatchWeekRow extends MatchRow {
+	week: number;
+}
+
+interface ProfileForVisibility {
+	status: string;
+	leagues: { league: string; weekly_stats: { week: number }[] }[];
+}
+
+/**
+ * Whether a player is listed for a league on /players and in that league's
+ * Player Stats. Active (and new) players always are. A player marked
+ * inactive (left the club) is still listed in a *finished* league they
+ * played through to its last week — they were part of that league until the
+ * end — but not in a league they walked out of mid-way, nor in an unfinished
+ * one.
+ */
+export function isShownInLeague(player: ProfileForVisibility, leagueId: string): boolean {
+	const section = player.leagues.find((entry) => entry.league === leagueId);
+	if (!section) return false;
+	if (player.status !== "inactive") return true;
+	if (!isLeagueFinished(leagueId)) return false;
+	const weeks = (matchesData as MatchWeekRow[]).filter((match) => match.league === leagueId).map((match) => match.week);
+	const lastWeek = Math.max(...weeks);
+	return section.weekly_stats.some((stat) => stat.week === lastWeek);
+}
+
 export function getLeagueFinale(league: League): LeagueFinale | null {
 	if (!isLeagueFinished(league.id)) return null;
 

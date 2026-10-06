@@ -6,6 +6,7 @@ import profilesData from "../data/player_profiles.json";
 import playerPhotosData from "../data/player-photos.json";
 import leagueTable from "../data/league_table.json";
 import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from "../lib/players";
+import { isShownInLeague } from "../lib/finale";
 import { leagues, latestLeague, getTeamColor, getTeamName, type League } from "../lib/leagues";
 
 // One roster per league (players with a section in it), switchable with the
@@ -46,7 +47,7 @@ const positionOrder = (entry: PlayerInLeague) => {
 function buildViews(league: League) {
 	const roster = (profilesData as PlayerProfile[]).flatMap((player): PlayerInLeague[] => {
 		const section = getSection(player, league.id);
-		return section && player.status !== "inactive" ? [{ player, section }] : [];
+		return section && isShownInLeague(player, league.id) ? [{ player, section }] : [];
 	});
 	const players = sortPlayers(roster, "name", league);
 

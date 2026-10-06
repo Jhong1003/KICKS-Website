@@ -315,7 +315,11 @@ three values:
 - **`inactive`** — a player who **left the club**. Don't delete their
   `players` row or their past `player_stats` rows; just change `status`.
   They drop off every roster, and are hidden from the site's leaderboard
-  and `/players` grid — their `/players/[id]` page still exists.
+  and `/players` grid — their `/players/[id]` page still exists. One
+  exception (`isShownInLeague` in [src/lib/finale.ts](src/lib/finale.ts)):
+  in a *finished* league they played through to its last week, they stay
+  listed on `/players` and that league's Player Stats, since they were
+  part of it until the end. Someone who left mid-league stays hidden.
 
 **Sitting out a league is not `inactive`.** A league's roster is derived
 from that league's `player_stats` rows, so a player who skips a whole
