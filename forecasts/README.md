@@ -30,3 +30,15 @@ simulation (blank for the exact week-1 baseline). Same append-only rule. Title f
 recorded and described after the league, not used as a headline score (§8.1).
 
 FA26-L2 week 1 is the baseline: 1/3 per team.
+
+## Making a week's forecasts
+
+From week 2 the rows are made by `scripts/make_forecasts.mjs` (see AGENTS.md "Weekly
+forecasts"), normally automatically by the **Publish Forecasts** workflow on Thursday and Friday
+evenings. By hand:
+
+```sh
+node scripts/make_forecasts.mjs --league FA26-L2 --week 2 --dry-run   # look first
+node scripts/make_forecasts.mjs --league FA26-L2 --week 2             # append
+git add forecasts && git commit -m "Publish FA26-L2 week 2 forecasts" && git push
+```

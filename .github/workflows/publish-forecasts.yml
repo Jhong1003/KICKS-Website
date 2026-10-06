@@ -1,0 +1,56 @@
+# Publishes the next league week's forecasts (docs/forecast-protocol-v2.md):
+# runs scripts/make_forecasts.mjs --next and commits forecasts/*.csv to main.
+# That commit, made before the Friday 23:59 Chicago deadline, is the
+# publication record.
+#
+# The script is safe to run repeatedly: it skips anything already published,
+# refuses after the deadline, and fails if the previous week's results aren't
+# all in yet (GitHub then emails the failure — enter the results and re-run
+# from the Actions tab).
+name: Publish Forecasts
+
+on:
+  schedule:
+    # Thursday and Friday evenings, Chicago. UTC is 5 hours ahead during
+    # daylight time (FA26-L2 runs Oct 10-31, all in CDT):
+    #   Thu 20:00 CDT = Fri 01:00 UTC,  Fri 20:00 CDT = Sat 01:00 UTC,
+    #   Fri 22:30 CDT = Sat 03:30 UTC (last try before 23:59).
+    - cron: "0 1 * * 5"
+    - cron: "0 1 * * 6"
+    - cron: "30 3 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-forecasts
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Make the next week's forecasts
+        run: node scripts/make_forecasts.mjs --next
+
+      - name: Commit and push if anything was added
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add forecasts/forecasts.csv forecasts/title_forecasts.csv
+          if git diff --cached --quiet; then
+            echo "Nothing new — this week's forecasts are already published."
+          else
+            git commit -m "Publish forecasts (automatic)"
+            git pull --rebase origin main
+            git push
+          fi

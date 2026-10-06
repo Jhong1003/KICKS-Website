@@ -769,6 +769,29 @@ the publication record under [docs/forecast-protocol-v2.md](docs/forecast-protoc
 append-only, committed before each Friday 23:59 deadline — the site never
 writes to it.
 
+### Weekly forecasts (protocol v2)
+
+[scripts/make_forecasts.mjs](scripts/make_forecasts.mjs) makes one league
+week's published forecasts and appends them to `forecasts/forecasts.csv`
+(match: `baseline` + `poisson-v1` from week 2) and
+`forecasts/title_forecasts.csv` (title: week-1 `baseline` 1/n, then
+`poisson-v1-title`, 100,000 runs, seed derived from league+week and stored).
+It reads the committed `src/data/*.json` (so the Sheet's results must have
+gone through the data update first), uses the same
+[src/lib/poisson-model.ts](src/lib/poisson-model.ts) and simulator as the
+site, freezes participation from `standings_history.json` at week N−1,
+refuses after the Friday 23:59 Chicago deadline, refuses if week N−1 isn't
+fully scored, and never re-publishes a (league, week, model).
+[.github/workflows/publish-forecasts.yml](.github/workflows/publish-forecasts.yml)
+runs it with `--next` on Thursday and Friday evenings (Chicago) and commits
+the CSVs; a failure email means results are missing — enter them and re-run
+it from the Actions tab. Try it on a finished league with
+`--dry-run --replay`. `tests/forecasts.test.mjs` checks the CSV invariants.
+
+`TitleChanceHistory.astro` (under Title Chances) draws the published title
+chances per week from `title_forecasts.csv` once a league has two published
+weeks: frozen numbers, no scores — scoring and interpretation stay on GitHub.
+
 ### League sections and Title Race UI
 
 League pages keep their existing paths and offer OVERVIEW / PLAYER STATS

@@ -3,6 +3,7 @@
 // committed before each week's deadline. The site only reads it.
 
 import forecastsCsv from "../../forecasts/forecasts.csv?raw";
+import titleForecastsCsv from "../../forecasts/title_forecasts.csv?raw";
 
 export type ForecastModel = "baseline" | "poisson-v1";
 
@@ -80,3 +81,38 @@ export function latestForecastWeek(leagueId: string): { week: number; pairings: 
 
 /** Rounded for display only (the CSV keeps full precision). */
 export const percent = (p: number) => `${Math.round(p * 100)}%`;
+
+export interface TitleForecast {
+	league: string;
+	week: number;
+	team: string;
+	model: string;
+	pTitle: number;
+}
+
+function parseTitle(csv: string): TitleForecast[] {
+	const [header, ...lines] = csv.trim().split(/\r?\n/);
+	const columns = header.split(",");
+	return lines
+		.filter((line) => line.trim() !== "")
+		.map((line) => Object.fromEntries(line.split(",").map((value, index) => [columns[index], value])))
+		.filter((row) => row.status === "published")
+		.map((row) => ({ league: row.league, week: Number(row.week), team: row.team, model: row.model, pTitle: Number(row.p_title) }));
+}
+
+export const titleForecasts: TitleForecast[] = parseTitle(titleForecastsCsv);
+
+/**
+ * Published title chances per week for a league: week -> team -> p. Each
+ * week uses its own published model (baseline in week 1, Poisson from week
+ * 2); a later row for the same week/team/model (a correction) wins.
+ */
+export function titleHistory(leagueId: string): { week: number; chances: Record<string, number> }[] {
+	const byWeek = new Map<number, Record<string, number>>();
+	for (const row of titleForecasts.filter((r) => r.league === leagueId)) {
+		const chances = byWeek.get(row.week) ?? {};
+		chances[row.team] = row.pTitle;
+		byWeek.set(row.week, chances);
+	}
+	return [...byWeek.entries()].sort((a, b) => a[0] - b[0]).map(([week, chances]) => ({ week, chances }));
+}
