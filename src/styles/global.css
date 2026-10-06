@@ -888,7 +888,16 @@ h1 {
 
 }
 
-.league-switcher-link[aria-current="page"] {
+button.league-switcher-link {
+
+	background: none;
+	cursor: pointer;
+	font-family: inherit;
+
+}
+
+.league-switcher-link[aria-current="page"],
+.league-switcher-link[aria-pressed="true"] {
 
 	border-color: var(--color-green);
 	background-color: var(--color-green);

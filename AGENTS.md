@@ -354,8 +354,10 @@ has at least one row in `player_stats` one profile with a `leagues` array —
 tag and badges are all computed per league and never combined. There is no
 top-level copy of "the current league's" values: a page picks its league
 explicitly (`getSection(player, leagueId)` in
-[src/lib/players.ts](src/lib/players.ts)). `/players` shows the latest
-league's roster (players with a section in it), viewable by name, or
+[src/lib/players.ts](src/lib/players.ts)). `/players` has one roster per
+league (players with a section in it), switched with league buttons at the
+top (`?league=<id>` opens one); it opens on the newest league that has any
+players, even before that league's first game. Each roster is viewable by name, or
 grouped per team (buttons, league leader first; players forwards to
 goalkeeper) or per primary position (never by a stat). Only the name view is
 alphabetical: team/position views shuffle within a position on every visit;

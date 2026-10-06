@@ -254,8 +254,8 @@ ever.** (Player *stats* are shown, but never a comparison or rank.)
 
 Each player who has recorded stats gets, from `build_player_profiles` in
 `scripts/update_data.py`, **one section per league they played in** (newest
-first on their profile page; the `/players` grid shows the latest league's
-roster). Stats, tag and badges are per league and never combined. Each section
+first on their profile page; the `/players` grid has a roster per league with
+league buttons at the top, opening on the newest league that has players). Stats, tag and badges are per league and never combined. Each section
 has:
 
 - League totals, that league's team + team history (if they changed teams),
