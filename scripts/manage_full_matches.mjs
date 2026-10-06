@@ -18,6 +18,8 @@
  * Each video belongs to a league (e.g. FA26-L2) and a week within it —
  * weeks restart at 1 in every league. Videos saved before leagues existed
  * have no league; the script offers to label them when it finds any.
+ * One-off events (friendlies, 11v11 event matches) are saved as
+ * { type: "event", date, title, titleKo?, driveUrl } — no league or week.
  *
  * Password prompts show "*" for each character typed instead of the real
  * characters.
@@ -173,7 +175,7 @@ async function main() {
 		}
 	}
 
-	const unlabeled = videos.filter((v) => !v.league);
+	const unlabeled = videos.filter((v) => !v.league && v.type !== "event");
 	if (unlabeled.length > 0) {
 		const league = await prompt(
 			`\n${unlabeled.length} existing video(s) have no league yet. League to label them with (e.g. FA26-L1, blank to skip): `,
@@ -186,28 +188,50 @@ async function main() {
 
 	if (videos.length > 0) {
 		console.log(`\nCurrent videos (${videos.length}):`);
-		for (const v of [...videos].sort((a, b) => b.date.localeCompare(a.date) || b.week - a.week)) {
-			console.log(`  ${v.league ? `${v.league} · ` : ""}Week ${v.week} · ${v.date} — ${v.title}`);
+		for (const v of [...videos].sort((a, b) => b.date.localeCompare(a.date) || (b.week ?? 0) - (a.week ?? 0))) {
+			console.log(
+				v.type === "event"
+					? `  Event · ${v.date} — ${v.title}`
+					: `  ${v.league ? `${v.league} · ` : ""}Week ${v.week} · ${v.date} — ${v.title}`,
+			);
 		}
 	}
 
 	const addAnswer = (await prompt("\nAdd a new video? (Y/n): ")).toLowerCase();
 	if (addAnswer !== "n") {
-		// Default to the league of the newest video, since that's usually where the next one goes.
-		const latestLeague = [...videos].sort((a, b) => b.date.localeCompare(a.date)).find((v) => v.league)?.league;
-		const leagueAnswer = await prompt(`League${latestLeague ? ` [${latestLeague}]` : ""}: `);
-		const league = leagueAnswer || latestLeague;
-		const week = Number(await prompt("Week number (within that league): "));
-		const date = await prompt("Date (YYYY-MM-DD): ");
-		const title = (await prompt("Title [Full Match]: ")) || "Full Match";
-		const driveUrl = await prompt("Google Drive link: ");
+		// League weeks and one-off events (friendlies, 11v11 event matches) are
+		// stored differently: an event has no league/week, just its own title.
+		const kindAnswer = (await prompt("League match or event? (L/e): ")).toLowerCase();
+		if (kindAnswer === "e") {
+			const date = await prompt("Date (YYYY-MM-DD): ");
+			const title = await prompt("Title in English (e.g. Friendly vs JSA): ");
+			const titleKo = await prompt("Title in Korean (blank = same as English): ");
+			const driveUrl = await prompt("Google Drive link: ");
 
-		if (!league || !week || !date || !driveUrl) {
-			console.error("\nLeague, week, date, and Drive link are all required — nothing was added.");
+			if (!date || !title || !driveUrl) {
+				console.error("\nDate, title, and Drive link are all required — nothing was added.");
+			} else {
+				videos = videos.filter((v) => !(v.type === "event" && v.date === date && v.title === title));
+				videos.push({ type: "event", date, title, ...(titleKo ? { titleKo } : {}), driveUrl });
+				console.log("Added.");
+			}
 		} else {
-			videos = videos.filter((v) => !(v.league === league && v.week === week));
-			videos.push({ league, week, date, title, driveUrl });
-			console.log("Added.");
+			// Default to the league of the newest video, since that's usually where the next one goes.
+			const latestLeague = [...videos].sort((a, b) => b.date.localeCompare(a.date)).find((v) => v.league)?.league;
+			const leagueAnswer = await prompt(`League${latestLeague ? ` [${latestLeague}]` : ""}: `);
+			const league = leagueAnswer || latestLeague;
+			const week = Number(await prompt("Week number (within that league): "));
+			const date = await prompt("Date (YYYY-MM-DD): ");
+			const title = (await prompt("Title [Full Match]: ")) || "Full Match";
+			const driveUrl = await prompt("Google Drive link: ");
+
+			if (!league || !week || !date || !driveUrl) {
+				console.error("\nLeague, week, date, and Drive link are all required — nothing was added.");
+			} else {
+				videos = videos.filter((v) => !(v.type !== "event" && v.league === league && v.week === week));
+				videos.push({ league, week, date, title, driveUrl });
+				console.log("Added.");
+			}
 		}
 	}
 

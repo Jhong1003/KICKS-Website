@@ -603,8 +603,12 @@ To add a new week's video, or change the club password, run locally
 node scripts/manage_full_matches.mjs
 ```
 
-Each video has a `league` and a `week` within it (weeks restart at 1 per
-league); the page sorts by date and shows the league on each card.
+Each league video has a `league` and a `week` within it (weeks restart at 1 per
+league); the page sorts by date and shows the league on each card. One-off
+events (friendlies, 11v11 event matches) are saved as
+`{ type: "event", date, title, titleKo?, driveUrl }` — no league or week —
+and their card shows "Event Match" and the entry's own title (the script
+asks "League match or event?").
 Videos saved before leagues existed have no `league` — the script offers
 to label them (once per run) when it finds any. It prompts for the current
 password to decrypt the existing list, walks

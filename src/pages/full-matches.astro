@@ -96,13 +96,36 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 	}
 
 	interface VideoEntry {
-		// Weeks restart at 1 in every league. Videos saved before leagues
-		// existed have no league yet (see scripts/manage_full_matches.mjs).
+		// League videos: weeks restart at 1 in every league. Videos saved
+		// before leagues existed have no league yet. Event videos
+		// (type "event": friendlies, 11v11 event matches) have no league or
+		// week — just their own title (see scripts/manage_full_matches.mjs).
+		type?: "event";
 		league?: string;
-		week: number;
+		week?: number;
 		date: string;
 		title: string;
+		titleKo?: string;
 		driveUrl: string;
+	}
+
+	function cardText(video: VideoEntry) {
+		if (video.type === "event") {
+			return {
+				metaEn: `Event Match · ${formatShortDate(video.date, "en")}`,
+				metaKo: `이벤트 매치 · ${formatShortDate(video.date, "ko")}`,
+				titleEn: video.title,
+				titleKo: video.titleKo || video.title,
+			};
+		}
+		const league = video.league ? `${video.league} · ` : "";
+		const week = video.week ?? 0;
+		return {
+			metaEn: `${league}${weekLabel(week, "en")} · ${formatShortDate(video.date, "en")}`,
+			metaKo: `${league}${weekLabel(week, "ko")} · ${formatShortDate(video.date, "ko")}`,
+			titleEn: `${weekLabel(week, "en")} Full Match`,
+			titleKo: `${weekLabel(week, "ko")} 풀영상`,
+		};
 	}
 
 	// We cache the PASSWORD (not the decrypted videos) so every page load
@@ -161,25 +184,20 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 
 	function renderVideos(videos: VideoEntry[]) {
 		// Newest first by date — week numbers alone are ambiguous across leagues.
-		const sorted = [...videos].sort((a, b) => b.date.localeCompare(a.date) || b.week - a.week);
+		const sorted = [...videos].sort((a, b) => b.date.localeCompare(a.date) || (b.week ?? 0) - (a.week ?? 0));
 		videoListEl.innerHTML = sorted
-			.map(
-				(video) => `
+			.map((video) => {
+				const text = cardText(video);
+				return `
 					<div class="video-card">
-						<div class="video-card-meta">${bilingualHtml(
-							`${video.league ? `${video.league} · ` : ""}${weekLabel(video.week, "en")} · ${formatShortDate(video.date, "en")}`,
-							`${video.league ? `${video.league} · ` : ""}${weekLabel(video.week, "ko")} · ${formatShortDate(video.date, "ko")}`,
-						)}</div>
-						<h3 class="video-card-title">${bilingualHtml(
-							`${weekLabel(video.week, "en")} Full Match`,
-							`${weekLabel(video.week, "ko")} 풀영상`,
-						)}</h3>
+						<div class="video-card-meta">${bilingualHtml(text.metaEn, text.metaKo)}</div>
+						<h3 class="video-card-title">${bilingualHtml(text.titleEn, text.titleKo)}</h3>
 						<a class="button-primary" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">
 							${bilingualHtml("Watch on Google Drive", "구글 드라이브에서 보기")}
 						</a>
 					</div>
-				`
-			)
+				`;
+			})
 			.join("");
 	}
 

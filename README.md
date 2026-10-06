@@ -359,8 +359,11 @@ this repo — `src/data/full-matches.enc.json` holds only an AES-GCM encrypted
 blob, decrypted in the visitor's browser after they type the correct
 password (Web Crypto API, key derived from the password via PBKDF2).
 
-Each video has a league (e.g. `FA26-L2`) and a week within it (weeks restart at
-1 per league). The page sorts by date and shows the league on each card. Videos
+Each league video has a league (e.g. `FA26-L2`) and a week within it (weeks restart at
+1 per league). The page sorts by date and shows the league on each card.
+Friendlies and event matches are added as an **event** instead (answer `e`
+to "League match or event?"): just a date, an English title, an optional
+Korean title and the link — their card reads "Event Match" with that title. Videos
 saved before leagues existed have no league — the script asks which league to
 label them with the first time it finds any.
 
