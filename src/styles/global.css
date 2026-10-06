@@ -733,6 +733,14 @@ h1 {
 
 }
 
+.league-table-note {
+
+	margin: 10px 0 0;
+	font-size: 0.85rem;
+	opacity: 0.7;
+
+}
+
 /* Team names link to the team page (/league/<league>/team/<id>). */
 .standings-table .team-link,
 .player-team-link {

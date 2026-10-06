@@ -81,6 +81,23 @@ const leaderboard = inLeague(leaderboardData)
 		team: teamName(row.team_id),
 	}));
 
+// Shown before the league's first result: each team at zero, no rank yet.
+const placeholderStandings = league.teams.map((team) => ({
+	rank: 0,
+	team_id: team.team_id,
+	team: team.name,
+	played: 0,
+	wins: 0,
+	draws: 0,
+	losses: 0,
+	goals_for: 0,
+	goals_against: 0,
+	goal_difference: 0,
+	points: 0,
+	participation_rate: 0,
+	href: `/league/${league.id}/team/${team.team_id}`,
+}));
+
 // The points-chart popup only exists once the league has a week of standings.
 const hasRaceHistory = historyData.some((row) => row.league === league.id);
 
@@ -142,12 +159,17 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			standings.length > 0 ? (
 				<StandingsTable rows={standings} finished={finished} />
 			) : (
-				<T
-					as="p"
-					class="about-description"
-					en="The table appears once the first match has been played."
-					ko="첫 경기가 끝나면 순위표가 나타나요."
-				/>
+				<>
+					{/* Before the first result: every team at zero, in teams-tab order, no ranks.
+					    Built here for display only — league_table.json stays as generated. */}
+					<StandingsTable rows={placeholderStandings} placeholder />
+					<T
+						as="p"
+						class="league-table-note"
+						en="Rankings start once the first match has been played."
+						ko="첫 경기가 끝나면 순위가 매겨져요."
+					/>
+				</>
 			)
 		}
 		{/* How points and ties work, straight from this league's rules (league-config.json). */}

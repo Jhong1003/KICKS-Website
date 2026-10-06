@@ -21,9 +21,11 @@ interface Props {
 	rows: StandingsRow[];
 	/** Every fixture has a score: rank 1 is then the champion (co-champions on a full tie). */
 	finished?: boolean;
+	/** Before the first result: show every team at zero without ranks or participation. */
+	placeholder?: boolean;
 }
 
-const { rows, finished = false } = Astro.props;
+const { rows, finished = false, placeholder = false } = Astro.props;
 
 const columns = [
 	["Rank", "순위"],
@@ -58,7 +60,9 @@ const columns = [
 				rows.map((row) => (
 					<tr class:list={{ "standings-champion": finished && row.rank === 1 }}>
 						<td>
-							{rows.filter((other) => other.rank === row.rank).length > 1 ? (
+							{placeholder ? (
+								"–"
+							) : rows.filter((other) => other.rank === row.rank).length > 1 ? (
 								<T en={`T-${row.rank}`} ko={`공동 ${row.rank}`} />
 							) : (
 								row.rank
@@ -86,7 +90,7 @@ const columns = [
 						<td>{row.goals_against}</td>
 						<td>{row.goal_difference}</td>
 						<td class="points">{row.points}</td>
-						<td>{(row.participation_rate * 100).toFixed(1)}%</td>
+						<td>{placeholder ? "–" : `${(row.participation_rate * 100).toFixed(1)}%`}</td>
 					</tr>
 				))
 			}
