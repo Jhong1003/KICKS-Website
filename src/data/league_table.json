@@ -11,7 +11,7 @@
     "goals_against": 15,
     "points": 38,
     "goal_difference": 20,
-    "participation_rate": 0.8
+    "participation_rate": 0.833
   },
   {
     "league": "FA26-L1",
@@ -25,7 +25,7 @@
     "goals_against": 28,
     "points": 25,
     "goal_difference": -4,
-    "participation_rate": 0.775
+    "participation_rate": 0.806
   },
   {
     "league": "FA26-L1",
@@ -39,6 +39,6 @@
     "goals_against": 34,
     "points": 16,
     "goal_difference": -16,
-    "participation_rate": 0.825
+    "participation_rate": 0.806
   }
 ]

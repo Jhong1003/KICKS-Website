@@ -177,7 +177,7 @@
       "MF",
       "FW"
     ],
-    "status": "active",
+    "status": "inactive",
     "leagues": [
       {
         "league": "FA26-L1",
@@ -1588,7 +1588,7 @@
     "positions": [
       "FW"
     ],
-    "status": "active",
+    "status": "inactive",
     "leagues": [
       {
         "league": "FA26-L1",
@@ -2030,7 +2030,7 @@
     "positions": [
       "GK"
     ],
-    "status": "active",
+    "status": "inactive",
     "leagues": [
       {
         "league": "FA26-L1",
