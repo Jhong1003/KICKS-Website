@@ -8,11 +8,14 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import T from "../../components/T.astro";
 import perks from "../../data/perks.json";
 import profiles from "../../data/player_profiles.json";
+import extraMembers from "../../data/benefit-members.json";
 
-const members = profiles
-	.filter((p) => p.status !== "inactive")
-	.map((p) => ({ player_id: p.player_id, name: p.name }))
-	.sort((a, b) => a.name.localeCompare(b.name, "ko"));
+// Players on the roster (not inactive) plus staff who don't play, e.g.
+// managers (hand-edited src/data/benefit-members.json, ids like "M001").
+const members = [
+	...profiles.filter((p) => p.status !== "inactive").map((p) => ({ player_id: p.player_id, name: p.name })),
+	...(extraMembers as { member_id: string; name: string }[]).map((m) => ({ player_id: m.member_id, name: m.name })),
+].sort((a, b) => a.name.localeCompare(b.name, "ko"));
 ---
 
 <BaseLayout

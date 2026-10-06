@@ -5,8 +5,12 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import T from "../../components/T.astro";
 import perks from "../../data/perks.json";
 import profiles from "../../data/player_profiles.json";
+import extraMembers from "../../data/benefit-members.json";
 
-const names = Object.fromEntries(profiles.map((p) => [p.player_id, p.name]));
+const names = Object.fromEntries([
+	...profiles.map((p) => [p.player_id, p.name]),
+	...(extraMembers as { member_id: string; name: string }[]).map((m) => [m.member_id, m.name]),
+]);
 const partners = Object.fromEntries(perks.map((p) => [p.perk_id, p.name]));
 ---
 

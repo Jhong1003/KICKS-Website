@@ -31,9 +31,10 @@ site reads.
   `player_leaderboard.json`, `player_profiles.json`, `leagues.json`,
   `partners.json`, plus the encrypted `full-matches.enc.json`). **Never
   hand-edit the generated files** — regenerate them instead (see pipeline
-  below). Five files in this folder are the hand-edited exception, never
+  below). Six files in this folder are the hand-edited exception, never
   touched by the pipeline: [perks.json](src/data/perks.json) (member perks,
-  see "Member perks" below), [schedule.json](src/data/schedule.json) (season
+  see "Member perks" below), [benefit-members.json](src/data/benefit-members.json)
+  (staff who can use member perks without being players), [schedule.json](src/data/schedule.json) (season
   calendar, see below), [league-config.json](src/data/league-config.json)
   (per-league rules, see "Leagues" below),
   [player-photos.json](src/data/player-photos.json) (optional real player

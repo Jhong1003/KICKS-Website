@@ -28,8 +28,12 @@ old code and asks for the new one (the name stays selected).
   Chicago date) and `active`. `active: false` shows the card as
   "Coming soon / 준비 중" and the API refuses it.
 - **Members** — everyone in `player_profiles.json` whose `status` isn't
-  `inactive` (same list on the page and in the API). A new member who hasn't
-  played a league week yet isn't in it until the next data regeneration.
+  `inactive`, plus club staff who don't play (managers etc.) listed by hand
+  in [src/data/benefit-members.json](../src/data/benefit-members.json) as
+  `{"member_id": "M001", "name": "..."}` — ids start with `M` so they never
+  clash with a player's `P001`. Same list on the page, in the API and in the
+  staff log. A new player who hasn't played a league week yet isn't in it
+  until the next data regeneration.
 - **API** — [functions/api/perks.js](../functions/api/perks.js), routed by
   [worker/index.js](../worker/index.js) (`/api/perks/*` is Worker-first in
   `wrangler.jsonc`):

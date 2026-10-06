@@ -58,6 +58,19 @@ test('inactive players are not members', () => {
   for (const p of profiles) assert.equal(memberIds.has(p.player_id), p.status !== 'inactive');
 });
 
+test('staff in benefit-members.json are members, with unique non-player ids', () => {
+  const read = (file) => JSON.parse(readFileSync(new URL(`../src/data/${file}`, import.meta.url), 'utf8'));
+  const playerIds = new Set(read('player_profiles.json').map((p) => p.player_id));
+  const extra = read('benefit-members.json');
+  const ids = extra.map((m) => m.member_id);
+  assert.equal(new Set(ids).size, ids.length, 'duplicate member_id in benefit-members.json');
+  for (const m of extra) {
+    assert.ok(m.member_id && m.name, 'every entry needs member_id and name');
+    assert.ok(!playerIds.has(m.member_id), `${m.member_id} clashes with a player_id`);
+    assert.ok(memberIds.has(m.member_id));
+  }
+});
+
 test('verify: right code + member only, same-origin POST only, never logs', async () => {
   const { db, env } = setup();
   const ok = await onRequest({ request: post('/api/perks/verify', { code: 'kicks-2026', player_id: member }), env });
