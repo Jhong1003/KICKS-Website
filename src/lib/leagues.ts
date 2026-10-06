@@ -3,6 +3,7 @@
 // (e.g. FA26-L1) has its own teams, colors and rules, and restarts at week 1;
 // nothing here (or anywhere else on the site) combines stats across leagues.
 
+import profilesData from "../data/player_profiles.json";
 import leaguesData from "../data/leagues.json";
 
 export interface LeagueTeam {
@@ -38,6 +39,18 @@ export interface League {
 export const leagues = leaguesData as League[];
 
 export const latestLeague: League = leagues.find((league) => league.latest) ?? leagues[leagues.length - 1];
+
+/**
+ * The league the League menu (/league) and /players open on: the newest
+ * league on the teams tab that already has players entered — so a new
+ * league's page is the default as soon as its rosters are on the Sheet,
+ * before its first game. Everything else that's about results (homepage
+ * standings, finale banner, "latest" in the data) still uses latestLeague,
+ * which only moves once the new league has a completed match.
+ */
+export const currentLeague: League =
+	[...leagues].reverse().find((league) => profilesData.some((player) => player.leagues.some((section) => section.league === league.id))) ??
+	latestLeague;
 
 export function getLeague(id: string): League | undefined {
 	return leagues.find((league) => league.id === id);

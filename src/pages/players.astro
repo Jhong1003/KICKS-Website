@@ -7,7 +7,7 @@ import playerPhotosData from "../data/player-photos.json";
 import leagueTable from "../data/league_table.json";
 import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from "../lib/players";
 import { isShownInLeague } from "../lib/finale";
-import { leagues, latestLeague, getTeamColor, getTeamName, type League } from "../lib/leagues";
+import { currentLeague, leagues, latestLeague, getTeamColor, getTeamName, type League } from "../lib/leagues";
 
 // One roster per league (players with a section in it), switchable with the
 // league buttons at the top. A league's roster can be entered before its
@@ -96,7 +96,7 @@ function buildViews(league: League) {
 }
 
 const rosters = leagues.map(buildViews).filter((entry) => entry.count > 0);
-const defaultLeagueId = rosters[rosters.length - 1]?.league.id ?? latestLeague.id;
+const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeague.id) ? currentLeague.id : (rosters[rosters.length - 1]?.league.id ?? latestLeague.id);
 ---
 
 <BaseLayout

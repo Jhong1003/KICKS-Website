@@ -172,7 +172,7 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 				{finale ? <T en="Final Standings" ko="최종 순위" /> : <T en="Current League" ko="현재 리그" />}
 			</h2>
 			<StandingsTable rows={standings} />
-			<a class="section-link" href="/league"><T en="View full league page →" ko="리그 페이지 전체 보기 →" /></a>
+			<a class="section-link" href={`/league/${latestLeague.id}`}><T en="View full league page →" ko="리그 페이지 전체 보기 →" /></a>
 		</section>
 	</main>
 </BaseLayout>

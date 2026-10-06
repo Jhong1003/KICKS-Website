@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import LeagueView from "../components/LeagueView.astro";
-import { latestLeague } from "../lib/leagues";
+import { currentLeague } from "../lib/leagues";
 ---
 
 <BaseLayout title="League | KICKS" description="KICKS league standings, match results, and player stats.">
-	<LeagueView league={latestLeague} />
+	<LeagueView league={currentLeague} />
 </BaseLayout>

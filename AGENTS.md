@@ -257,7 +257,11 @@ and why it must stay the only one.
   completed match** — so the site keeps showing the current league until
   the next one's first game is actually scored, even if its teams and
   fixtures are entered early.
-- **Routes**: `/league` shows the latest league; `/league/<id>` (e.g.
+- **Routes**: `/league` (the League menu) and `/players` open on
+  `currentLeague` (src/lib/leagues.ts) — the newest league that already has
+  players entered, so a new league becomes the default as soon as its
+  rosters are on the Sheet. The homepage standings and finale banner keep
+  using `latest` and link to `/league/<that id>`. `/league/<id>` (e.g.
   `/league/FA26-L1`) is a shareable page for any league on the teams tab,
   with a switcher between them. Both render
   [LeagueView.astro](src/components/LeagueView.astro). A league that

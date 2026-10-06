@@ -27,7 +27,7 @@ const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: st
 		<div class="finale-banner-list">
 			{
 				finale.championTeamIds.map((teamId) => (
-					<a class="finale-chip finale-chip--champion" href="/league">
+					<a class="finale-chip finale-chip--champion" href={`/league/${league.id}`}>
 						<span aria-hidden="true">🏆</span>
 						<span class="finale-chip-title"><T en="Champion" ko="우승" /></span>
 						<span class="finale-chip-name" style={`color: ${getReadableAccentColor(getTeamColor(teamId, league))}`}>
