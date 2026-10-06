@@ -14,9 +14,10 @@ import perks from '../../src/data/perks.json' with { type: 'json' };
 import profiles from '../../src/data/player_profiles.json' with { type: 'json' };
 import board from '../../src/data/board.json' with { type: 'json' };
 
+import { chicagoDate } from './visits.js';
+
 /** Board members who aren't players (they have a member_id instead of a player_id). */
 const extraMembers = board.filter((m) => m.member_id);
-import { chicagoDate } from './visits.js';
 
 /** Opening the coupon again within this window reuses the same log row. */
 export const REPEAT_WINDOW_MS = 30 * 60 * 1000;
