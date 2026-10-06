@@ -47,7 +47,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
+            src/data/leagues.json \
             src/data/league_table.json \
+            src/data/standings_history.json \
             src/data/matches.json \
             src/data/week_summaries.json \
             src/data/player_leaderboard.json \
