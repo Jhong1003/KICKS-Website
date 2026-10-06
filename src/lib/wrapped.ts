@@ -17,7 +17,7 @@ import leaderboardData from "../data/player_leaderboard.json";
 import leagueTableData from "../data/league_table.json";
 import matchesData from "../data/matches.json";
 import profilesData from "../data/player_profiles.json";
-import { isLeagueFinished } from "./finale";
+import { isLeagueFinished, isRowShown, isShownInLeague } from "./finale";
 import { getTeamName, type League } from "./leagues";
 import { getSection, type PlayerLeagueSection, type PlayerPosition, type PlayerProfile } from "./players";
 
@@ -127,12 +127,12 @@ const pointsOf = (row: { goals: number; assists: number }) => row.goals + row.as
 /** Competition rank (1 + how many are strictly better); ties share a rank. */
 const rankOf = (value: number, values: number[]) => 1 + values.filter((other) => other > value).length;
 
-/** Players that get a Wrapped page in this league: finished league, played in it, not inactive. */
+/** Players that get a Wrapped page in this league: finished league, listed in it (isShownInLeague). */
 export function wrappedPlayers(league: League): { player: PlayerProfile; section: PlayerLeagueSection }[] {
 	if (!isLeagueFinished(league.id)) return [];
 	return profiles.flatMap((player) => {
 		const section = getSection(player, league.id);
-		return section && player.status !== "inactive" ? [{ player, section }] : [];
+		return section && isShownInLeague(player, league.id) ? [{ player, section }] : [];
 	});
 }
 
@@ -142,10 +142,10 @@ export function buildWrapped(player: PlayerProfile, section: PlayerLeagueSection
 	);
 	const active = profiles.flatMap((other) => {
 		const otherSection = getSection(other, league.id);
-		return otherSection && other.status !== "inactive" ? [{ player: other, section: otherSection }] : [];
+		return otherSection && isShownInLeague(other, league.id) ? [{ player: other, section: otherSection }] : [];
 	});
 	const leaderboard = (leaderboardData as LeaderboardRow[]).filter(
-		(row) => row.league === league.id && row.status !== "inactive",
+		(row) => row.league === league.id && isRowShown(row, league.id),
 	);
 	const weeks = section.weekly_stats;
 	const attended = weeks.filter((week) => week.games > 0);

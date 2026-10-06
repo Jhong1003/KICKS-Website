@@ -5,7 +5,7 @@
 // (co-winners on a tie, inactive players left out).
 import T from "./T.astro";
 import profilesData from "../data/player_profiles.json";
-import { getLeagueFinale } from "../lib/finale";
+import { getLeagueFinale, isShownInLeague } from "../lib/finale";
 import { getTeamColor, getTeamName, type League } from "../lib/leagues";
 import { getReadableAccentColor, getSection, type PlayerProfile } from "../lib/players";
 
@@ -22,7 +22,7 @@ const champions = (finale?.championTeamIds ?? []).map((teamId) => ({
 	name: getTeamName(teamId, league),
 	color: getReadableAccentColor(getTeamColor(teamId, league)),
 	roster: profiles
-		.filter((player) => player.status !== "inactive" && getSection(player, league.id)?.current_team_id === teamId)
+		.filter((player) => isShownInLeague(player, league.id) && getSection(player, league.id)?.current_team_id === teamId)
 		.map((player) => ({ id: player.id, name: player.name }))
 		.sort((a, b) => a.name.localeCompare(b.name, "ko")),
 }));

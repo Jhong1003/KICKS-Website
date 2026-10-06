@@ -13,7 +13,7 @@ import profilesData from "../data/player_profiles.json";
 import historyData from "../data/standings_history.json";
 import { leagues, getTeamName, type League } from "../lib/leagues";
 import { pointsRaceDialogId } from "../lib/points-race";
-import { isShownInLeague } from "../lib/finale";
+import { isRowShown } from "../lib/finale";
 
 interface Props {
 	league: League;
@@ -65,12 +65,8 @@ const finished = matches.length > 0 && matches.every((match) => match.home_score
 const weekSummaries = inLeague(weekSummariesData).map((row) => ({ ...row, team: teamName(row.team_id) }));
 // Inactive players stay listed in a finished league they played through to
 // the end (isShownInLeague); ranks are renumbered over the visible rows.
-const profilesById = new Map(profilesData.map((profile) => [profile.player_id, profile]));
 const leaderboard = inLeague(leaderboardData)
-	.filter((row) => {
-		const profile = profilesById.get(row.player_id);
-		return profile ? isShownInLeague(profile, league.id) : row.status !== "inactive";
-	})
+	.filter((row) => isRowShown(row, league.id))
 	.map((row, index) => ({
 		...row,
 		// Rank only visible players, preserving the pipeline's ranking order.

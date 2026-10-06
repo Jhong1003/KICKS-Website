@@ -12,6 +12,7 @@
 // player_profiles.json, same as the rest of the page.
 import T from "./T.astro";
 import profilesData from "../data/player_profiles.json";
+import { isShownInLeague } from "../lib/finale";
 import {
 	BADGES,
 	BADGE_TIER_LABELS,
@@ -38,7 +39,7 @@ const earnedAnywhere = new Set(profiles.flatMap((player) => player.leagues.flatM
 
 const holdersIn = (key: BadgeKey) =>
 	profiles
-		.filter((player) => player.status !== "inactive" && holdsBadge(getSection(player, league)?.badges ?? [], key))
+		.filter((player) => isShownInLeague(player, league) && holdsBadge(getSection(player, league)?.badges ?? [], key))
 		.map((player) => ({ id: player.id, name: player.name }))
 		.sort((a, b) => a.name.localeCompare(b.name, "ko"));
 

@@ -4,7 +4,8 @@
 // first result, because that league then becomes the latest and isn't finished.
 //
 // Ties share the award (co-winners), for goals and assists alike. Players
-// marked inactive are left out, same as the leaderboard on /league. Nothing
+// marked inactive are left out unless they played the league through to its
+// end (isShownInLeague), same as the leaderboard on /league. Nothing
 // here is hand-edited: it all comes from the generated JSON.
 
 import leaderboardData from "../data/player_leaderboard.json";
@@ -78,6 +79,16 @@ export function isShownInLeague(player: ProfileForVisibility, leagueId: string):
 	return section.weekly_stats.some((stat) => stat.week === lastWeek);
 }
 
+const profilesByPlayerId = new Map(
+	profilesData.map((profile) => [profile.player_id, profile as unknown as ProfileForVisibility]),
+);
+
+/** isShownInLeague for a leaderboard row (rows carry player_id, not the profile). */
+export function isRowShown(row: { player_id: string; status?: string }, leagueId: string): boolean {
+	const profile = profilesByPlayerId.get(row.player_id);
+	return profile ? isShownInLeague(profile, leagueId) : row.status !== "inactive";
+}
+
 export function getLeagueFinale(league: League): LeagueFinale | null {
 	if (!isLeagueFinished(league.id)) return null;
 
@@ -87,7 +98,7 @@ export function getLeagueFinale(league: League): LeagueFinale | null {
 
 	const names = new Map(profilesData.map((profile) => [profile.player_id, profile.name]));
 	const rows = (leaderboardData as LeaderboardRow[]).filter(
-		(row) => row.league === league.id && row.status !== "inactive",
+		(row) => row.league === league.id && isRowShown(row, league.id),
 	);
 
 	const award = (stat: "goals" | "assists"): LeagueAward | null => {

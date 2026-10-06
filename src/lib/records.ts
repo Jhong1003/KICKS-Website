@@ -8,6 +8,7 @@
 
 import matchesData from "../data/matches.json";
 import profilesData from "../data/player_profiles.json";
+import { isShownInLeague } from "./finale";
 import { getLeague, getTeamName } from "./leagues";
 import type { PlayerProfile } from "./players";
 import type { Text } from "./wrapped";
@@ -50,14 +51,18 @@ function best<T>(items: T[], value: (item: T) => number): { value: number; items
 }
 
 export function buildClubRecords(): ClubRecord[] {
-	const players = (profilesData as PlayerProfile[]).filter((player) => player.status !== "inactive");
+	// A player's league counts if they're listed in it (isShownInLeague):
+	// inactive players keep the leagues they played through to the end.
+	const players = profilesData as PlayerProfile[];
+	const shownSections = (player: PlayerProfile) =>
+		player.leagues.filter((section) => isShownInLeague(player, section.league));
 	const weeks = players.flatMap((player) =>
-		player.leagues.flatMap((section) =>
+		shownSections(player).flatMap((section) =>
 			section.weekly_stats.map((week) => ({ player, league: section.league, ...week })),
 		),
 	);
 	const seasons = players.flatMap((player) =>
-		player.leagues.map((section) => ({ player, league: section.league, ...section.season_totals })),
+		shownSections(player).map((section) => ({ player, league: section.league, ...section.season_totals })),
 	);
 	const matches = (matchesData as MatchRow[]).filter((match) => match.home_score !== null && match.away_score !== null);
 	const records: ClubRecord[] = [];
