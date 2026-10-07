@@ -1541,6 +1541,9 @@ button.league-switcher-link {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 16px;
+	/* On wide screens the cards (and their white logo area) grew huge; cap
+	   the grid so three cards stay about 350px wide. */
+	max-width: 1100px;
 	margin-top: 24px;
 
 }
