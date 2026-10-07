@@ -52,6 +52,13 @@ export const currentLeague: League =
 	[...leagues].reverse().find((league) => profilesData.some((player) => player.leagues.some((section) => section.league === league.id))) ??
 	latestLeague;
 
+/**
+ * The season shown in the header and on the Schedule page, e.g. "FA26": the
+ * part of the current league's id before the first "-" (FA26-L2 -> FA26), so
+ * it moves to SP27 by itself once SP27's first league is on the Sheet.
+ */
+export const currentSeason: string = currentLeague.id.split("-")[0];
+
 export function getLeague(id: string): League | undefined {
 	return leagues.find((league) => league.id === id);
 }

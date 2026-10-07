@@ -110,8 +110,15 @@ export function eventHref(event: ScheduleEvent): string | null {
 	return null;
 }
 
+/**
+ * The visitor's own calendar date as "YYYY-MM-DD". Built from local date
+ * parts, not toISOString(): that converts to UTC first, which for anyone
+ * east of UTC (e.g. family checking from Korea) turns local midnight into
+ * the previous day and shifts "today" back by one.
+ */
 function startOfDayIso(date: Date): string {
-	return new Date(date.getFullYear(), date.getMonth(), date.getDate()).toISOString().slice(0, 10);
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 /**

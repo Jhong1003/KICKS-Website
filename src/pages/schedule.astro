@@ -4,14 +4,15 @@ import ScheduleTimeline from "../components/ScheduleTimeline.astro";
 import T from "../components/T.astro";
 import type { ScheduleEvent } from "../lib/schedule";
 import scheduleData from "../data/schedule.json";
+import { currentSeason } from "../lib/leagues";
 
 const events = scheduleData as ScheduleEvent[];
 ---
 
-<BaseLayout title="Schedule | KICKS" description="KICKS FA26 season schedule: league days, events, friendlies, and the awards ceremony.">
+<BaseLayout title="Schedule | KICKS" description={`KICKS ${currentSeason} season schedule: league days, events, friendlies, and the awards ceremony.`}>
 	<main>
 		<section class="content-section" aria-labelledby="schedule-title">
-			<p class="section-label"><T en="FA26 SEASON" ko="FA26 시즌" /></p>
+			<p class="section-label"><T en={`${currentSeason} SEASON`} ko={`${currentSeason} 시즌`} /></p>
 			<h1 id="schedule-title"><T en="Schedule" ko="일정" /></h1>
 			<T
 				as="p"

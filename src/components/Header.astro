@@ -1,5 +1,6 @@
 ---
 import T from "./T.astro";
+import { currentSeason } from "../lib/leagues";
 
 interface Props {
 	variant?: "hero" | "default";
@@ -55,7 +56,7 @@ const currentPath = Astro.url.pathname;
 		<span class="lang-toggle-option" data-lang-option="ko">한</span>
 	</button>
 
-	<span class="season-label"><T en="FA26 SEASON" ko="FA26 시즌" /></span>
+	<span class="season-label"><T en={`${currentSeason} SEASON`} ko={`${currentSeason} 시즌`} /></span>
 
 	<button
 		class="nav-toggle"

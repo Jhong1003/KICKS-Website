@@ -94,9 +94,15 @@ const members = [
 									)}
 								</div>
 								{perk.active ? (
-									<button type="button" class="button-primary perk-use" data-perk-id={perk.perk_id}>
-										<T en="Use now" ko="지금 사용하기" />
-									</button>
+									<>
+										<button type="button" class="button-primary perk-use" data-perk-id={perk.perk_id}>
+											<T en="Use now" ko="지금 사용하기" />
+										</button>
+										{/* Shown instead of the button once valid_until has passed (script below). */}
+										<span class="perk-soon perk-expired" hidden>
+											<T en="Expired" ko="기간 종료" />
+										</span>
+									</>
 								) : (
 									<span class="perk-soon">
 										<T en="Coming soon" ko="준비 중" />
@@ -154,6 +160,16 @@ const members = [
 	const STORAGE_KEY = "kicks-perks-member";
 	const COUPON_MS = 10 * 60 * 1000;
 	const TZ = "America/Chicago";
+
+	// After valid_until (Chicago date), swap "Use now" for "Expired". The
+	// server refuses expired perks anyway (functions/api/perks.js); this just
+	// keeps the page from offering a button that can only fail.
+	const todayChicago = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
+	document.querySelectorAll<HTMLElement>(".perk-card[data-valid-until]").forEach((card) => {
+		if ((card.dataset.validUntil ?? "") >= todayChicago) return;
+		card.querySelector<HTMLElement>(".perk-use")?.setAttribute("hidden", "");
+		card.querySelector<HTMLElement>(".perk-expired")?.removeAttribute("hidden");
+	});
 
 	const data = JSON.parse(document.getElementById("perks-data")!.textContent || "{}") as {
 		perks: Perk[];
@@ -397,6 +413,12 @@ const members = [
 		margin: 12px 0 0;
 		font-size: 0.8rem;
 		opacity: 0.7;
+	}
+
+	/* .button-primary sets display, which would beat the hidden attribute. */
+	.perk-use[hidden],
+	.perk-expired[hidden] {
+		display: none;
 	}
 
 	.perk-soon {
