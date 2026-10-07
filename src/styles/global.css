@@ -198,6 +198,29 @@ html[lang="ko"] [data-lang-option="ko"] {
 
 }
 
+.eyebrow-part {
+
+	white-space: nowrap;
+
+}
+
+/* Phones: two clean lines (community / UIUC) instead of an orphaned "· UIUC". */
+@media (max-width: 480px) {
+
+	.eyebrow-sep {
+
+		display: none;
+
+	}
+
+	.eyebrow-part {
+
+		display: block;
+
+	}
+
+}
+
 .eyebrow {
 
 	margin: 0 0 24px;
