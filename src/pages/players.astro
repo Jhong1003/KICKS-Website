@@ -85,6 +85,11 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 									{team.name}
 								</a>
 							))}
+							<a class="dream-team-link players-dream-team" href="/dream-team">
+								<span aria-hidden="true">⭐</span>
+								<T en="Build My Dream Team" ko="나만의 드림팀 만들기" />
+								<span aria-hidden="true">→</span>
+							</a>
 						</nav>
 
 						<div class="player-grid">
@@ -103,11 +108,6 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 				))
 			}
 
-			<a class="dream-team-link players-dream-team" href="/dream-team">
-				<span aria-hidden="true">⭐</span>
-				<T en="Build My Dream Team" ko="나만의 드림팀 만들기" />
-				<span aria-hidden="true">→</span>
-			</a>
 		</section>
 	</main>
 </BaseLayout>
@@ -188,7 +188,14 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 		border-color: var(--color-green);
 	}
 
+	/* Same row as the team chips, pushed to the right; wraps under them on phones. */
 	.players-dream-team {
-		margin-top: 40px;
+		margin: 0 0 0 auto;
+	}
+
+	@media (max-width: 700px) {
+		.players-dream-team {
+			margin: 4px 0 0;
+		}
 	}
 </style>

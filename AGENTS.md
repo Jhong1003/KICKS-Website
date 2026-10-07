@@ -387,7 +387,7 @@ top (`?league=<id>` opens one); it opens on the newest league that has any
 players, even before that league's first game. Each roster is one grid in name
 order (never by a stat); "By team" chips at the top (league leader first) link to
 that league's team pages instead of grouping here, so /players and the team
-pages don't show the same thing twice. The Dream Team link sits at the bottom.
+pages don't show the same thing twice. The Dream Team link sits on the same row as the team chips.
 `/players/[id]` shows one
 section at a time with league buttons (newest first, opened by default);
 `?league=<id>` opens a specific one, and every link from a league-specific
