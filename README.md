@@ -1,31 +1,69 @@
-# Astro Starter Kit: Minimal
+# KICKS — UIUC Futsal Community
 
-```sh
-npm create astro@latest -- --template minimal
+The official website of **KICKS** (Korean-Inspired Community for Kicking Sports),
+a student-run futsal community at the University of Illinois Urbana-Champaign:
+**[kicksuiuc.com](https://kicksuiuc.com)**
+
+The club runs a weekly league (three teams, re-drawn every league) and records
+everything in a Google Sheet. This repository turns that sheet into the site:
+standings, results, player profiles and badges, published forecasts, and an
+archive that keeps every past league.
+
+## What's on the site
+
+- **League** — standings, results by week, a points-race chart, match
+  forecasts published before each week, and title chances from a Monte Carlo
+  simulation (same Poisson model as the forecasts).
+- **Teams & players** — per-league team pages and player profiles with
+  week-by-week stats, a play-style tag and badges. Profiles never rank or rate
+  players against each other.
+- **Archive** — Hall of Fame, club records, KICKS Wrapped (a per-player recap
+  of each finished league), gallery albums, and password-protected full-match
+  videos.
+- **Club** — schedule, board members, partners, and a member benefits page.
+- Bilingual (English / 한국어), static, and mobile-first.
+
+## How it works
+
+```
+Google Sheet ──► scripts/validate_data.py ──► scripts/update_data.py ──► src/data/*.json ──► Astro build ──► Cloudflare
+(published CSV)   (checks the sheet;           (standings, profiles,                         (static site)
+                   bad data never ships)        badges, history)
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+- **GitHub Actions** runs the pipeline on a schedule (more often on match
+  nights) and commits the JSON only if it changed; the push deploys the site.
+- **Forecasts** (`scripts/make_forecasts.mjs`, `forecasts/`) are appended to
+  CSV files and committed before each week's deadline, so the record of what
+  was predicted, and when, is the git history. Protocol:
+  [docs/forecast-protocol-v2.md](docs/forecast-protocol-v2.md).
+- **Tests** (`tests/`) cover the ranking rules (shared Python/JS cases), the
+  simulator, the forecast model and CSV invariants, team stats, and the
+  member-benefits API.
 
-## 🚀 Project Structure
+## Tech stack
 
-Inside of your Astro project, you'll see the following folders and files:
+Astro (static, plain `.astro` components) · plain CSS · Python + pandas for
+the data pipeline · Node for forecasts and tests · Cloudflare Workers + D1 for
+the member-benefits API · GitHub Actions.
+
+## Project structure
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+src/pages/        one route per file (league, players, teams, gallery, ...)
+src/components/   Astro components
+src/lib/          shared logic (standings, simulator, Poisson model, badges, ...)
+src/data/         generated JSON + a few hand-edited files (see AGENTS.md)
+scripts/          Google Sheet → JSON pipeline, validation, forecasts
+forecasts/        published forecast records (append-only CSV)
+functions/, worker/   member-benefits API (Cloudflare)
+tests/            Python and Node tests
+docs/             forecast protocol, member benefits
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Full developer notes (data rules, ids, leagues, badges): [AGENTS.md](AGENTS.md).
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
+## Commands
 
 All commands are run from the root of the project, from a terminal:
 
@@ -37,6 +75,12 @@ All commands are run from the root of the project, from a terminal:
 | `npm run preview`         | Preview your build locally, before deploying     |
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
+
+---
+
+# 운영 가이드 (Operations)
+
+아래는 동아리 운영진이 시트와 사이트를 관리할 때 보는 문서예요.
 
 ## Updating League Data
 
@@ -389,11 +433,6 @@ If a newly added video doesn't show up on `/full-matches` after a refresh:
   (`astro dev stop` then `astro dev --background`). This project lives in
   iCloud Drive, which can occasionally delay the dev server noticing a file
   changed outside the editor (e.g. from this script).
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
 
 ## Championship simulator
 
