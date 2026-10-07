@@ -24,8 +24,8 @@ const RECORD_URL = "https://github.com/Jhong1003/KICKS-Website/commits/main/fore
 			<T
 				as="p"
 				class="about-description"
-				en={`Week ${latest.week} · Win / draw / loss chances for one match of each pairing, published before kickoff.`}
-				ko={`${latest.week}주차 경기 전에 미리 공개한 예측이에요. 두 팀이 한 경기를 하면 누가 이길지 확률로 보여줘요.`}
+				en={`Win / draw / loss forecasts for week ${latest.week}.`}
+				ko={`${latest.week}주차 경기의 승·무·패 예측 확률입니다.`}
 			/>
 			<div class="forecast-list">
 				{latest.pairings.map((pairing) => {
@@ -72,14 +72,14 @@ const RECORD_URL = "https://github.com/Jhong1003/KICKS-Website/commits/main/fore
 					<T
 						as="p"
 						class="forecast-note"
-						en="No results from this league yet, so every pairing gets the same baseline: the previous league's draw rate, with the rest split evenly. From week 2 a model also uses this league's scores."
-						ko="아직 이번 리그 경기 결과가 없어서 모든 대진의 예측이 똑같아요. 지난 리그에서 무승부가 나온 비율을 그대로 쓰고, 남은 확률은 두 팀이 똑같이 나눠 가졌어요. 2주차부터는 이번 리그 경기 결과를 반영한 예측도 함께 나와요."
+						en="No results from this league yet, so every pairing has the same forecast. From week 2, this league's results are included."
+						ko="아직 이번 리그 경기 결과가 없어서 모든 대진의 예측이 같아요. 2주차부터는 이번 리그 경기 결과를 반영합니다."
 					/>
 				)
 			}
 			<p class="forecast-links">
-				<a href={PROTOCOL_URL} target="_blank" rel="noopener noreferrer"><T en="How the forecasts work" ko="예측은 어떻게 하나요" /> ↗</a>
-				<a href={RECORD_URL} target="_blank" rel="noopener noreferrer"><T en="Publication record" ko="지금까지 공개한 예측" /> ↗</a>
+				<a href={PROTOCOL_URL} target="_blank" rel="noopener noreferrer"><T en="Forecast method" ko="예측 방법" /> ↗</a>
+				<a href={RECORD_URL} target="_blank" rel="noopener noreferrer"><T en="Publication record" ko="공개 기록" /> ↗</a>
 			</p>
 		</section>
 	)

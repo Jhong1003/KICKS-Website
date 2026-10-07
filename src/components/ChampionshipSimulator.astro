@@ -33,7 +33,7 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 		<p class="title-race-meta" data-simulator-meta>
 			<T en={`${model.remaining.length} matches remaining`} ko={`남은 경기 ${model.remaining.length}경기`} />
 		</p>
-		<p class="title-race-model"><T en="Team strength from this league's goals · Poisson model (same as Match Forecasts)" ko="이번 리그 득실점으로 팀 전력을 계산해요 · 경기 예측과 같은 포아송 모델" /></p>
+		<p class="title-race-model"><T en="Team strength is calculated from this league's goals scored and conceded (Poisson model)" ko="이번 리그 득실점으로 팀 전력을 계산합니다 (포아송 모델)" /></p>
 		<p class="title-race-status" data-simulator-status role="status" aria-live="polite"><T en="Calculating…" ko="계산하는 중…" /></p>
 		<noscript><p><T en="Turn on JavaScript to see the results." ko="결과를 보려면 JavaScript를 켜 주세요." /></p></noscript>
 
@@ -68,7 +68,7 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 				const remaining = model.remaining.length;
 				meta.innerHTML = bilingualHtml(
 					`${result.exact ? "Exact result" : `${trials} simulations`} · ${remaining} matches remaining`,
-					`${result.exact ? "정확히 계산한 결과" : `${trials}번 시뮬레이션`} · 남은 경기 ${remaining}경기`,
+					`${result.exact ? "정확한 계산" : `시뮬레이션 ${trials}회`} · 남은 경기 ${remaining}경기`,
 				);
 				status.textContent = "";
 			} catch (error) {
