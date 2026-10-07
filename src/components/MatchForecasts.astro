@@ -13,8 +13,6 @@ interface Props {
 
 const { league } = Astro.props;
 const latest = latestForecastWeek(league.id);
-const PROTOCOL_URL = "https://github.com/Jhong1003/KICKS-Website/blob/main/docs/forecast-protocol-v2.md";
-const RECORD_URL = "https://github.com/Jhong1003/KICKS-Website/commits/main/forecasts/forecasts.csv";
 ---
 
 {
@@ -77,10 +75,6 @@ const RECORD_URL = "https://github.com/Jhong1003/KICKS-Website/commits/main/fore
 					/>
 				)
 			}
-			<p class="forecast-links">
-				<a href={PROTOCOL_URL} target="_blank" rel="noopener noreferrer"><T en="Forecast method" ko="예측 방법" /> ↗</a>
-				<a href={RECORD_URL} target="_blank" rel="noopener noreferrer"><T en="Publication record" ko="공개 기록" /> ↗</a>
-			</p>
 		</section>
 	)
 }
@@ -99,6 +93,4 @@ const RECORD_URL = "https://github.com/Jhong1003/KICKS-Website/commits/main/fore
 	.forecast-numbers span:nth-child(2) { text-align: center; }
 	.forecast-numbers span:last-child { text-align: right; }
 	.forecast-note { max-width: 700px; margin: 1rem 0 0; font-size: .8rem; opacity: .75; }
-	.forecast-links { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; margin: 1rem 0 0; font-size: .85rem; }
-	.forecast-links a { color: var(--color-green); font-weight: 600; }
 </style>
