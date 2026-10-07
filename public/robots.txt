@@ -1,0 +1,7 @@
+# kicksuiuc.com — everything public is open to search engines.
+# Member benefits pages are link-only (shared in the group chat).
+User-agent: *
+Allow: /
+Disallow: /benefits/
+
+Sitemap: https://kicksuiuc.com/sitemap.xml

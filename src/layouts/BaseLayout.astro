@@ -21,7 +21,10 @@ const {
 // Astro.site (set in astro.config.mjs) makes these absolute regardless of
 // how deep the current route is (e.g. /players/[id]).
 const ogImage = new URL("/og-image.png", Astro.site).toString();
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
+// Built pages are served as /path/ (directory format), so the canonical URL
+// always ends in "/" — otherwise Google sees a redirect instead of the page.
+const canonicalPath = /\/$|\.[a-z0-9]+$/i.test(Astro.url.pathname) ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonicalUrl = new URL(canonicalPath, Astro.site).toString();
 ---
 
 <html lang="en">
@@ -84,7 +87,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content={description} />
 		<title>{title}</title>
-		{noindex && <meta name="robots" content="noindex, nofollow" />}
+		{noindex ? <meta name="robots" content="noindex, nofollow" /> : <link rel="canonical" href={canonicalUrl} />}
 
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="alternate icon" href="/favicon.ico" />

@@ -44,11 +44,27 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 ---
 
 <BaseLayout
-	title="KICKS | UIUC Futsal Community"
-	description="UIUC Korean-inspired futsal community · 리그 순위, 선수 기록, 경기 일정"
+	title="KICKS | UIUC Korean-Inspired Futsal Community"
+	description="KICKS is a student-run, Korean-inspired futsal community at the University of Illinois Urbana-Champaign (UIUC) — weekly league, standings, player stats, and events. UIUC 한인 풋살 동아리."
 	header="custom"
 >
 	<WelcomePopup />
+	{/* Tells search engines what KICKS is (shown in Google's results/knowledge panel). */}
+	<script
+		type="application/ld+json"
+		set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "SportsOrganization",
+			name: "KICKS",
+			alternateName: ["Korean-Inspired Community for Kicking Sports", "KICKS UIUC"],
+			description: "A student-run, Korean-inspired futsal community at the University of Illinois Urbana-Champaign.",
+			url: "https://kicksuiuc.com/",
+			logo: "https://kicksuiuc.com/apple-touch-icon.png",
+			sport: "Futsal",
+			sameAs: ["https://www.instagram.com/kicks.uiuc"],
+			location: { "@type": "Place", name: "University of Illinois Urbana-Champaign", address: "Champaign, IL" },
+		})}
+	/>
 	<main>
 		{finale && <LeagueFinaleBanner league={latestLeague} finale={finale} />}
 		{

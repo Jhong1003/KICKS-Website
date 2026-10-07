@@ -79,6 +79,12 @@ site reads.
   regenerated JSON if it changed.
 - [public/](public/) — static assets served as-is (favicon, logos, partner
   logos).
+- Search: [src/pages/sitemap.xml.ts](src/pages/sitemap.xml.ts) builds `/sitemap.xml`
+  from the same data as the pages (leagues, team pages, player profiles, gallery
+  albums); [public/robots.txt](public/robots.txt) points to it and keeps
+  `/benefits/` out. Every indexable page gets a trailing-slash `<link rel="canonical">`
+  (BaseLayout); the homepage carries SportsOrganization JSON-LD. The site is
+  registered in Google Search Console (verified through Google Analytics).
 
 ### Season schedule
 
