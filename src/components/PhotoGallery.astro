@@ -1,38 +1,18 @@
 ---
-// Photos: drop any .jpg/.jpeg/.png/.webp file (upper- or lowercase extension)
-// into src/assets/gallery/ and it appears here automatically on the next
-// dev reload or build. Prefix filenames with 01-, 02-, ... to control display
-// order, or just use plain numbers (1.jpg, 2.jpg, ...) — those sort naturally
-// (1, 2, ... 10, 11) rather than as text (1, 10, 11, 2, ...).
-// Descriptive filenames (e.g. team-huddle-matchday3.jpg) become the alt text;
-// filenames that are just a number (e.g. 7.jpg) become "KICKS futsal photo 7".
-import { Image } from "astro:assets";
+// One album's photos: a grid of thumbnails and a lightbox. The page passes
+// the album's images (see src/lib/gallery.ts for where they come from).
+// Thumbnails are 480px wide; the lightbox opens a 1600px version instead of
+// stretching the thumbnail.
+import { Image, getImage } from "astro:assets";
 import T from "./T.astro";
-import heroImage from "../assets/hero.jpg";
-import aboutImage from "../assets/about.jpg";
+import type { GalleryImage } from "../lib/gallery";
 
-const galleryModules = import.meta.glob<{ default: ImageMetadata }>(
-	"/src/assets/gallery/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}",
-	{ eager: true }
-);
+interface Props {
+	images: GalleryImage[];
+}
 
-const numberedImages = Object.entries(galleryModules)
-	.sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
-	.map(([path, mod]) => {
-		const baseName = path.split("/").pop()!.replace(/\.[^.]+$/, "");
-		const alt = /^\d+$/.test(baseName) ? `KICKS futsal photo ${baseName}` : baseName.replace(/[-_]/g, " ");
-
-		return { src: mod.default, alt };
-	});
-
-// The homepage hero and About page photos, reused here (not copied into
-// src/assets/gallery/) so there's only ever one file on disk for each.
-// Appended after the numbered set.
-const images = [
-	...numberedImages,
-	{ src: heroImage, alt: "KICKS players in action" },
-	{ src: aboutImage, alt: "KICKS club members playing futsal" },
-];
+const { images } = Astro.props;
+const fullSize = await Promise.all(images.map((image) => getImage({ src: image.src, width: 1600 })));
 ---
 
 {
@@ -40,14 +20,14 @@ const images = [
 		<T
 			as="p"
 			class="gallery-empty"
-			en="No photos yet — add files to src/assets/gallery/ to fill this gallery."
-			ko="아직 사진이 없어요 — src/assets/gallery/ 폴더에 사진을 넣으면 여기에 나타나요."
+			en="No photos yet."
+			ko="아직 사진이 없어요."
 		/>
 	) : (
 		<div class="gallery-grid">
 			{images.map((image, index) => (
-				<button class="gallery-item" type="button" data-index={index} aria-label={`View photo: ${image.alt}`}>
-					<Image src={image.src} alt={image.alt} width={480} />
+				<button class="gallery-item" type="button" data-index={index} data-full={fullSize[index].src} aria-label={`View photo: ${image.alt}`}>
+					<Image src={image.src} alt={image.alt} width={480} loading="lazy" />
 				</button>
 			))}
 		</div>
@@ -69,9 +49,10 @@ const images = [
 
 	function openLightbox(index: number) {
 		currentIndex = index;
-		const img = items[currentIndex]?.querySelector("img");
+		const item = items[currentIndex];
+		const img = item?.querySelector("img");
 		if (!img || !lightboxImage || !lightbox) return;
-		lightboxImage.src = img.src;
+		lightboxImage.src = item.dataset.full ?? img.src;
 		lightboxImage.alt = img.alt;
 		lightbox.hidden = false;
 	}

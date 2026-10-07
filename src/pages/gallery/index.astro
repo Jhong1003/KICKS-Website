@@ -1,0 +1,51 @@
+---
+// Gallery: one card per album, newest first (src/lib/gallery.ts). Each card
+// opens /gallery/<album-id>, which has the photo grid and lightbox.
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+import { albums } from "../../lib/gallery";
+
+const monthLabel = (iso: string, lang: "en" | "ko") => {
+	const [year, month] = iso.split("-").map(Number);
+	return lang === "ko" ? `${year}년 ${month}월` : new Date(year, month - 1, 1).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+};
+---
+
+<BaseLayout title="Gallery | KICKS" description="Photos from KICKS matches and events.">
+	<main>
+		<section class="content-section" aria-labelledby="gallery-title">
+			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>
+			<h1 id="gallery-title"><T en="Moments from the pitch." ko="KICKS의 순간들" /></h1>
+			{
+				albums.length === 0 ? (
+					<T as="p" class="gallery-empty" en="No photos yet." ko="아직 사진이 없어요." />
+				) : (
+					<div class="album-grid">
+						{albums.map((album) => (
+							<a class="album-card" href={`/gallery/${album.id}`}>
+								<span class="album-cover">
+									<Image src={album.cover.src} alt="" width={640} loading="lazy" />
+								</span>
+								<span class="album-info">
+									<span class="album-title">
+										<T en={album.title} ko={album.titleKo} />
+									</span>
+									<span class="album-meta">
+										{album.date && (
+											<>
+												<T en={monthLabel(album.date, "en")} ko={monthLabel(album.date, "ko")} />
+												<span aria-hidden="true"> · </span>
+											</>
+										)}
+										<T en={`${album.images.length} photos`} ko={`사진 ${album.images.length}장`} />
+									</span>
+								</span>
+							</a>
+						))}
+					</div>
+				)
+			}
+		</section>
+	</main>
+</BaseLayout>

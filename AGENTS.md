@@ -19,7 +19,10 @@ site reads.
 
 - [src/pages/](src/pages/) — one route per file (`index`, `about`,
   `league`, `league/[league]`, `players`, `players/[id]`, `schedule`, `join`, `partners`,
-  `gallery`, `full-matches`, `benefits` + `benefits/admin` (member benefits, linked from Partners),
+  `gallery` (album cards) + `gallery/[album]` (one album: photo grid + lightbox; photos in
+  `src/assets/gallery/<album-id>/`, titles/dates in the hand-edited `src/data/gallery-albums.json`,
+  loaded by `src/lib/gallery.ts` — a folder not in the JSON still shows, titled by its name),
+  `full-matches`, `benefits` + `benefits/admin` (member benefits, linked from Partners),
   `league/[league]/team/[team]` — one team's page within one league (record, squad
   forwards→GK by name, never by a stat, results week by week); linked from team names in
   the standings tables, the /players team view and the player page; numbers in
@@ -35,7 +38,7 @@ site reads.
   `player_leaderboard.json`, `player_profiles.json`, `leagues.json`,
   `partners.json`, plus the encrypted `full-matches.enc.json`). **Never
   hand-edit the generated files** — regenerate them instead (see pipeline
-  below). Seven files in this folder are the hand-edited exception, never
+  below). Eight files in this folder are the hand-edited exception, never
   touched by the pipeline: [perks.json](src/data/perks.json) (member perks,
   see "Member perks" below), [board.json](src/data/board.json)
   (the club board: role, major, favorite player, fun fact, Instagram; each
@@ -46,7 +49,8 @@ site reads.
   [player-photos.json](src/data/player-photos.json) (optional real player
   photos, see "Player profiles" below),
   [transfer-news.json](src/data/transfer-news.json) (homepage transfer
-  banner, see below), and [team-info.json](src/data/team-info.json)
+  banner, see below), [gallery-albums.json](src/data/gallery-albums.json)
+  (gallery album titles/dates/cover), and [team-info.json](src/data/team-info.json)
   (per league → team_id: optional `captain` (exact player name), `motto` /
   `motto_en`, `photo` (a path under public/) for the team pages).
 - [src/lib/schedule.ts](src/lib/schedule.ts) — shared helpers (date

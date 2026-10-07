@@ -1,0 +1,28 @@
+---
+// One album: /gallery/<album-id>. Same grid + lightbox the gallery always had.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PhotoGallery from "../../components/PhotoGallery.astro";
+import T from "../../components/T.astro";
+import { albums, type GalleryAlbum } from "../../lib/gallery";
+
+export function getStaticPaths() {
+	return albums.map((album) => ({ params: { album: album.id }, props: { album } }));
+}
+
+interface Props {
+	album: GalleryAlbum;
+}
+
+const { album } = Astro.props;
+---
+
+<BaseLayout title={`${album.title} | KICKS Gallery`} description={`Photos from ${album.title} at KICKS.`}>
+	<main>
+		<section class="content-section" aria-labelledby="album-title">
+			<a class="album-back" href="/gallery">← <T en="All albums" ko="전체 앨범" /></a>
+			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>
+			<h1 id="album-title"><T en={album.title} ko={album.titleKo} /></h1>
+			<PhotoGallery images={album.images} />
+		</section>
+	</main>
+</BaseLayout>
