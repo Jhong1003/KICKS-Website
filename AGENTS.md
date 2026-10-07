@@ -384,10 +384,10 @@ explicitly (`getSection(player, leagueId)` in
 [src/lib/players.ts](src/lib/players.ts)). `/players` has one roster per
 league (players with a section in it), switched with league buttons at the
 top (`?league=<id>` opens one); it opens on the newest league that has any
-players, even before that league's first game. Each roster is viewable by name, or
-grouped per team (buttons, league leader first; players forwards to
-goalkeeper) or per primary position (never by a stat). Only the name view is
-alphabetical: team/position views shuffle within a position on every visit;
+players, even before that league's first game. Each roster is one grid in name
+order (never by a stat); "By team" chips at the top (league leader first) link to
+that league's team pages instead of grouping here, so /players and the team
+pages don't show the same thing twice. The Dream Team link sits at the bottom.
 `/players/[id]` shows one
 section at a time with league buttons (newest first, opened by default);
 `?league=<id>` opens a specific one, and every link from a league-specific

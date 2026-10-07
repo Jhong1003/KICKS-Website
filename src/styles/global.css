@@ -783,15 +783,6 @@ h1 {
 
 }
 
-.player-group-team-link {
-
-	margin-left: auto;
-	color: var(--color-green);
-	font-size: 0.85rem;
-	font-weight: 600;
-	text-decoration: none;
-
-}
 
 .standings-table .points {
 
@@ -2406,14 +2397,6 @@ a.schedule-item-link:hover {
 
 }
 
-.player-sort-label {
-
-	font-size: 0.8rem;
-	font-weight: 600;
-	color: var(--color-dark);
-	opacity: 0.65;
-
-}
 
 .player-sort-button {
 
@@ -2456,14 +2439,6 @@ a.schedule-item-link:hover {
 
 /* 선수 목록: 팀별 / 포지션별 묶음 제목 */
 
-.player-subfilter {
-
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	margin-top: 12px;
-
-}
 
 .player-team-button {
 
@@ -2474,29 +2449,8 @@ a.schedule-item-link:hover {
 }
 
 /* 팀 하나만 골랐을 때 숨겨진 묶음 뒤에 남는 여백이 생기지 않게 */
-.player-group[hidden] {
 
-	display: none;
 
-}
-
-.player-group:not([hidden]) ~ .player-group:not([hidden]) {
-
-	margin-top: 44px;
-
-}
-
-.player-group-title {
-
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	margin: 28px 0 0;
-	padding-bottom: 10px;
-	border-bottom: 1px solid var(--color-sage);
-	font-size: 1.15rem;
-
-}
 
 .player-group-dot {
 
@@ -2506,13 +2460,6 @@ a.schedule-item-link:hover {
 
 }
 
-.player-group-count {
-
-	font-size: 0.85rem;
-	font-weight: 600;
-	opacity: 0.5;
-
-}
 
 /* 선수 카드 자체 (FIFA 스타일 카드, 팀 색상은 --team-color로 주입) */
 

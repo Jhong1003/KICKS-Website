@@ -9,93 +9,30 @@ import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from
 import { isShownInLeague } from "../lib/finale";
 import { currentLeague, leagues, latestLeague, getTeamColor, getTeamName, type League } from "../lib/leagues";
 
-// One roster per league (players with a section in it), switchable with the
-// league buttons at the top. A league's roster can be entered before its
-// first game, so the newest league that has any players is shown first —
-// earlier leagues stay one tap away.
+// Everyone in one league, by name: a plain roster, not a second set of team
+// pages. Teams have their own pages (/league/<id>/team/<team_id>), linked
+// from the "By team" chips at the top, so this page doesn't group by team.
+// Never grouped or ordered by any stat (see AGENTS.md's "Player profiles").
+// League buttons switch between leagues' rosters; the newest league that has
+// any players opens first, even before its first game.
 const playerPhotos = playerPhotosData as Record<string, string>;
 
-// Three ways to view the same roster: one alphabetical grid, or grouped
-// under a heading per team / per primary position. Each group keeps name
-// order. Deliberately never grouped or ordered by any stat (see AGENTS.md's
-// "Player profiles" section) - this page celebrates everyone equally.
-interface PlayerGroup {
-	key: string;
-	en?: string;
-	ko?: string;
-	color?: string;
-	players: PlayerInLeague[];
-}
-
-// Front to back, like a team sheet. The team view lists each team in this
-// order too; the script below shuffles within a position (and within each
-// position group) on every visit, so nobody is always last just because of
-// their name. Only the "Name" view is alphabetical.
-const POSITION_GROUPS = [
-	{ key: "FW", en: "Forwards", ko: "공격수" },
-	{ key: "MF", en: "Midfielders", ko: "미드필더" },
-	{ key: "DF", en: "Defenders", ko: "수비수" },
-	{ key: "GK", en: "Goalkeepers", ko: "골키퍼" },
-];
-
-const primaryPosition = (entry: PlayerInLeague) => entry.player.positions[0] ?? null;
-const positionOrder = (entry: PlayerInLeague) => {
-	const index = POSITION_GROUPS.findIndex((group) => group.key === primaryPosition(entry));
-	return index === -1 ? POSITION_GROUPS.length : index;
-};
-
-function buildViews(league: League) {
+function buildRoster(league: League) {
 	const roster = (profilesData as PlayerProfile[]).flatMap((player): PlayerInLeague[] => {
 		const section = getSection(player, league.id);
 		return section && isShownInLeague(player, league.id) ? [{ player, section }] : [];
 	});
-	const players = sortPlayers(roster, "name", league);
-
-	// Teams in current standings order (league leader first). The generated
-	// table is already in official order, ties included; a league with no
-	// results yet keeps its teams-tab order.
+	// Team chips in current standings order (league leader first); a league
+	// with no results yet keeps its teams-tab order.
 	const standingsOrder = leagueTable.filter((row) => row.league === league.id).map((row) => row.team_id);
-	const teamsByStanding = [...league.teams].sort((a, b) => {
+	const teams = [...league.teams].sort((a, b) => {
 		const rank = (id: string) => (standingsOrder.includes(id) ? standingsOrder.indexOf(id) : standingsOrder.length);
 		return rank(a.team_id) - rank(b.team_id);
 	});
-
-	const views: { key: string; groups: PlayerGroup[] }[] = [
-		{ key: "name", groups: [{ key: "all", players }] },
-		{
-			key: "team",
-			groups: teamsByStanding
-				.map((team) => ({
-					key: team.team_id,
-					en: team.name,
-					ko: team.name,
-					color: getTeamColor(team.team_id, league),
-					players: players
-						.filter(({ section }) => section.current_team_id === team.team_id)
-						.sort((a, b) => positionOrder(a) - positionOrder(b)),
-				}))
-				.filter((group) => group.players.length > 0),
-		},
-		{
-			key: "position",
-			groups: [
-				...POSITION_GROUPS.map((group) => ({
-					...group,
-					players: players.filter((entry) => primaryPosition(entry) === group.key),
-				})),
-				{
-					key: "none",
-					en: "Position TBD",
-					ko: "포지션 미정",
-					players: players.filter((entry) => !POSITION_GROUPS.some((group) => group.key === primaryPosition(entry))),
-				},
-			].filter((group) => group.players.length > 0),
-		},
-	];
-	return { league, count: players.length, views };
+	return { league, players: sortPlayers(roster, "name", league), teams };
 }
 
-const rosters = leagues.map(buildViews).filter((entry) => entry.count > 0);
+const rosters = leagues.map(buildRoster).filter((entry) => entry.players.length > 0);
 const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeague.id) ? currentLeague.id : (rosters[rosters.length - 1]?.league.id ?? latestLeague.id);
 ---
 
@@ -112,107 +49,65 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 					</p>
 				))
 			}
-			<h1 id="players-title"><T en="Players" ko="선수" /></h1>
+			<div class="players-head">
+				<h1 id="players-title"><T en="Players" ko="선수" /></h1>
+				{
+					rosters.length > 1 && (
+						<div class="league-switcher players-league-switcher" role="group" aria-label="Choose a league">
+							{rosters.map(({ league }) => (
+								<button
+									class="league-switcher-link"
+									type="button"
+									data-league-button={league.id}
+									aria-pressed={league.id === defaultLeagueId ? "true" : "false"}
+								>
+									{league.id}
+									{!league.started && (
+										<span class="league-switcher-note">
+											<T en="upcoming" ko="예정" />
+										</span>
+									)}
+								</button>
+							))}
+						</div>
+					)
+				}
+			</div>
+
 			{
-				rosters.length > 1 && (
-					<div class="league-switcher" role="group" aria-label="Choose a league">
-						{rosters.map(({ league }) => (
-							<button
-								class="league-switcher-link"
-								type="button"
-								data-league-button={league.id}
-								aria-pressed={league.id === defaultLeagueId ? "true" : "false"}
-							>
-								{league.id}
-								{!league.started && (
-									<span class="league-switcher-note">
-										<T en="upcoming" ko="예정" />
-									</span>
-								)}
-							</button>
-						))}
+				rosters.map(({ league, players, teams }) => (
+					<div class="player-league-panel" data-league-panel={league.id} hidden={league.id !== defaultLeagueId}>
+						<nav class="players-teams" aria-label={`${league.id} teams`}>
+							<span class="players-teams-label"><T en="By team →" ko="팀별로 보기 →" /></span>
+							{teams.map((team) => (
+								<a class="players-team-chip" href={`/league/${league.id}/team/${team.team_id}`}>
+									<span class="player-group-dot" style={`background-color: ${getTeamColor(team.team_id, league)}`} aria-hidden="true" />
+									{team.name}
+								</a>
+							))}
+						</nav>
+
+						<div class="player-grid">
+							{players.map(({ player, section }) => (
+								<PlayerCard
+									player={player}
+									section={section}
+									teamName={getTeamName(section.current_team_id, league)}
+									teamColor={getTeamColor(section.current_team_id, league)}
+									href={`/players/${player.id}?league=${league.id}`}
+									avatarPhoto={playerPhotos[player.id]}
+								/>
+							))}
+						</div>
 					</div>
-				)
+				))
 			}
-			<a class="dream-team-link" href="/dream-team">
+
+			<a class="dream-team-link players-dream-team" href="/dream-team">
 				<span aria-hidden="true">⭐</span>
 				<T en="Build My Dream Team" ko="나만의 드림팀 만들기" />
 				<span aria-hidden="true">→</span>
 			</a>
-
-			{
-				rosters.map(({ league, views }) => (
-					<div class="player-league-panel" data-league-panel={league.id} hidden={league.id !== defaultLeagueId}>
-						<T
-							as="p"
-							class="about-description"
-							en={`Get to know the ${league.id} roster. Tap a player to see their stats, play style, and badges.`}
-							ko={`${league.id} 선수들을 만나보세요. 선수를 누르면 기록, 플레이 스타일, 배지를 볼 수 있어요.`}
-						/>
-
-						<div class="player-sort" role="group" aria-label="View players by">
-							<span class="player-sort-label"><T en="View by" ko="보기" /></span>
-							<button class="player-sort-button" type="button" data-view-button="name" aria-pressed="true">
-								<T en="Name" ko="이름" />
-							</button>
-							<button class="player-sort-button" type="button" data-view-button="team" aria-pressed="false">
-								<T en="Team" ko="팀" />
-							</button>
-							<button class="player-sort-button" type="button" data-view-button="position" aria-pressed="false">
-								<T en="Position" ko="포지션" />
-							</button>
-						</div>
-
-						{views.map((view) => (
-							<div class="player-view" data-view={view.key} hidden={view.key !== "name"}>
-								{view.key === "team" && (
-									<div class="player-subfilter" role="group" aria-label="Choose a team">
-										{view.groups.map((group, index) => (
-											<button
-												class="player-sort-button player-team-button"
-												type="button"
-												data-team-filter={group.key}
-												aria-pressed={index === 0 ? "true" : "false"}
-											>
-												<span class="player-group-dot" style={`background-color: ${group.color}`} />
-												{group.en}
-											</button>
-										))}
-									</div>
-								)}
-								{view.groups.map((group, index) => (
-									<div class="player-group" data-group={group.key} hidden={view.key === "team" && index > 0}>
-										{group.en && (
-											<h3 class="player-group-title">
-												{group.color && <span class="player-group-dot" style={`background-color: ${group.color}`} />}
-												<T en={group.en} ko={group.ko ?? group.en} />
-												<span class="player-group-count">{group.players.length}</span>
-												{view.key === "team" && (
-													<a class="player-group-team-link" href={`/league/${league.id}/team/${group.key}`}>
-														<T en="Team page →" ko="팀 페이지 →" />
-													</a>
-												)}
-											</h3>
-										)}
-										<div class="player-grid">
-											{group.players.map(({ player, section }) => (
-												<PlayerCard
-													player={player}
-													section={section}
-													teamName={getTeamName(section.current_team_id, league)}
-													teamColor={getTeamColor(section.current_team_id, league)}
-													href={`/players/${player.id}?league=${league.id}`}
-													avatarPhoto={playerPhotos[player.id]}
-												/>
-											))}
-										</div>
-									</div>
-								))}
-							</div>
-						))}
-					</div>
-				))
-			}
 		</section>
 	</main>
 </BaseLayout>
@@ -246,54 +141,54 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 	});
 	const requestedLeague = new URLSearchParams(window.location.search).get("league");
 	if (requestedLeague) showLeague(requestedLeague, false);
-
-	// Team and position views: shuffle on every visit so no one is always at
-	// the end. The team view keeps its forwards-to-goalkeeper order and only
-	// shuffles players who share a position.
-	const POSITION_ORDER = ["FW", "MF", "DF", "GK"];
-	const positionRank = (card: HTMLElement) => {
-		const index = POSITION_ORDER.indexOf(card.dataset.position ?? "");
-		return index === -1 ? POSITION_ORDER.length : index;
-	};
-
-	// Each league panel has its own view buttons (by name / team / position)
-	// and team filter, wired up separately so they never affect each other.
-	leaguePanels.forEach((panel) => {
-		const buttons = Array.from(panel.querySelectorAll<HTMLButtonElement>("[data-view-button]"));
-		const views = Array.from(panel.querySelectorAll<HTMLElement>("[data-view]"));
-
-		buttons.forEach((button) => {
-			button.addEventListener("click", () => {
-				const selected = button.dataset.viewButton;
-				buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
-				views.forEach((view) => {
-					view.hidden = view.dataset.view !== selected;
-				});
-			});
-		});
-
-		for (const view of ["team", "position"]) {
-			panel.querySelectorAll<HTMLElement>(`[data-view="${view}"] .player-grid`).forEach((grid) => {
-				const shuffled = (Array.from(grid.children) as HTMLElement[])
-					.map((card) => ({ card, key: Math.random() }))
-					.sort((a, b) => (view === "team" ? positionRank(a.card) - positionRank(b.card) : 0) || a.key - b.key)
-					.map(({ card }) => card);
-				shuffled.forEach((card) => grid.appendChild(card));
-			});
-		}
-
-		// Team view: one team at a time, starting with the league leader.
-		const teamButtons = Array.from(panel.querySelectorAll<HTMLButtonElement>("[data-team-filter]"));
-		const teamGroups = Array.from(panel.querySelectorAll<HTMLElement>('[data-view="team"] [data-group]'));
-
-		teamButtons.forEach((button) => {
-			button.addEventListener("click", () => {
-				const team = button.dataset.teamFilter;
-				teamButtons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
-				teamGroups.forEach((group) => {
-					group.hidden = group.dataset.group !== team;
-				});
-			});
-		});
-	});
 </script>
+
+<style>
+	.players-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px 24px;
+	}
+
+	.players-league-switcher {
+		margin: 0;
+	}
+
+	.players-teams {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px 10px;
+		margin-top: 24px;
+	}
+
+	.players-teams-label {
+		margin-right: 4px;
+		font-size: 0.85rem;
+		font-weight: 600;
+		opacity: 0.7;
+	}
+
+	.players-team-chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 16px;
+		border: 1px solid var(--color-sage);
+		border-radius: 999px;
+		background-color: #fff;
+		color: var(--color-dark);
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+
+	.players-team-chip:hover {
+		border-color: var(--color-green);
+	}
+
+	.players-dream-team {
+		margin-top: 40px;
+	}
+</style>
