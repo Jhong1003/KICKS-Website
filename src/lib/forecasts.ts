@@ -23,7 +23,7 @@ export interface Forecast {
 
 export const MODEL_LABELS: Record<ForecastModel, { en: string; ko: string }> = {
 	"poisson-v1": { en: "Poisson model", ko: "포아송 모델" },
-	baseline: { en: "Baseline", ko: "기준선" },
+	baseline: { en: "Baseline", ko: "기본 예측" },
 };
 
 // Poisson first: from week 2 it's the forecast that uses this league's results.

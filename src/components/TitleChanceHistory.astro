@@ -55,7 +55,7 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 				as="p"
 				class="about-description"
 				en="The title chances published before each week, as they were — never updated afterwards."
-				ko="매주 경기 전에 공개한 우승 확률이에요. 공개한 뒤에는 바꾸지 않아요."
+				ko="매주 경기 전에 미리 공개한 우승 확률이에요. 한 번 공개한 숫자는 바꾸지 않아요."
 			/>
 			<div class="title-history-chart">
 				<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="title-history-title">
@@ -93,7 +93,7 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 				</svg>
 			</div>
 			<table class="title-history-table">
-				<caption><T en="Published title chances before each week" ko="주차별 경기 전 공개 우승 확률" /></caption>
+				<caption><T en="Published title chances before each week" ko="매주 경기 전에 공개한 우승 확률" /></caption>
 				<thead>
 					<tr>
 						<th scope="col"><T en="Team" ko="팀" /></th>
