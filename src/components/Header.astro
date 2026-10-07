@@ -8,7 +8,7 @@ interface Props {
 
 const { variant = "default" } = Astro.props;
 
-// Full Matches (members only) isn't its own menu item: "Gallery" (사진·영상)
+// Full Matches (members only) isn't its own menu item: "Moments" (사진·영상, /gallery)
 // covers both, with Photos | Full Matches tabs on top (MediaTabs.astro).
 // `also` lists other paths that light up the same item.
 const navLinks: { href: string; label: string; labelKo: string; locked?: boolean; cta?: boolean; also?: string[] }[] = [
@@ -16,7 +16,7 @@ const navLinks: { href: string; label: string; labelKo: string; locked?: boolean
 	{ href: "/league", label: "League", labelKo: "리그" },
 	{ href: "/players", label: "Players", labelKo: "선수" },
 	{ href: "/schedule", label: "Schedule", labelKo: "일정" },
-	{ href: "/gallery", label: "Gallery", labelKo: "사진·영상", also: ["/full-matches"] },
+	{ href: "/gallery", label: "Moments", labelKo: "사진·영상", also: ["/full-matches"] },
 	{ href: "/hall-of-fame", label: "Hall of Fame", labelKo: "명예의 전당" },
 	{ href: "/partners", label: "Partners", labelKo: "파트너" },
 	{ href: "/join", label: "Join", labelKo: "가입하기", cta: true },
