@@ -1,0 +1,35 @@
+---
+// "Photos | Full Matches 🔒" switch at the top of the Gallery and Full Matches
+// pages. Full Matches isn't in the top menu (the menu item is "Gallery" /
+// "사진·영상"), so this is how people get from one to the other.
+import T from "./T.astro";
+
+interface Props {
+	current: "photos" | "videos";
+}
+
+const { current } = Astro.props;
+---
+
+<nav class="league-switcher media-tabs" aria-label="Photos or videos">
+	<a class="league-switcher-link" href="/gallery" aria-current={current === "photos" ? "page" : undefined}>
+		<span aria-hidden="true">📷</span>
+		<T en="Photos" ko="사진" />
+	</a>
+	<a class="league-switcher-link" href="/full-matches" aria-current={current === "videos" ? "page" : undefined}>
+		<span aria-hidden="true">🎬</span>
+		<T en="Full Matches" ko="풀영상" />
+		<span aria-hidden="true">🔒</span>
+	</a>
+</nav>
+
+<style>
+	.media-tabs {
+		margin-top: 24px;
+	}
+
+	.media-tabs .league-switcher-link {
+		padding: 12px 22px;
+		font-size: 0.95rem;
+	}
+</style>

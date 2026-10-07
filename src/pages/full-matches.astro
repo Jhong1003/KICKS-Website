@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import MediaTabs from "../components/MediaTabs.astro";
 import T from "../components/T.astro";
 
 // The encrypted data file only exists once someone has run
@@ -20,6 +21,7 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		<section class="content-section" aria-labelledby="full-matches-title">
 			<p class="section-label"><T en="MEMBERS ONLY" ko="멤버 전용" /></p>
 			<h1 id="full-matches-title"><T en="Full Matches" ko="풀영상" /></h1>
+			<MediaTabs current="videos" />
 
 			<div id="lock-screen" class="lock-screen">
 				<svg class="lock-screen-icon" viewBox="0 0 24 24" aria-hidden="true">

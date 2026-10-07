@@ -8,14 +8,15 @@ interface Props {
 
 const { variant = "default" } = Astro.props;
 
-// Full Matches (members only) left the top menu to keep it on one line;
-// it's linked from the footer and the Gallery page instead.
-const navLinks: { href: string; label: string; labelKo: string; locked?: boolean; cta?: boolean }[] = [
+// Full Matches (members only) isn't its own menu item: "Gallery" (사진·영상)
+// covers both, with Photos | Full Matches tabs on top (MediaTabs.astro).
+// `also` lists other paths that light up the same item.
+const navLinks: { href: string; label: string; labelKo: string; locked?: boolean; cta?: boolean; also?: string[] }[] = [
 	{ href: "/about", label: "About", labelKo: "소개" },
 	{ href: "/league", label: "League", labelKo: "리그" },
 	{ href: "/players", label: "Players", labelKo: "선수" },
 	{ href: "/schedule", label: "Schedule", labelKo: "일정" },
-	{ href: "/gallery", label: "Gallery", labelKo: "갤러리" },
+	{ href: "/gallery", label: "Gallery", labelKo: "사진·영상", also: ["/full-matches"] },
 	{ href: "/hall-of-fame", label: "Hall of Fame", labelKo: "명예의 전당" },
 	{ href: "/partners", label: "Partners", labelKo: "파트너" },
 	{ href: "/join", label: "Join", labelKo: "가입하기", cta: true },
@@ -35,7 +36,7 @@ const currentPath = Astro.url.pathname;
 				<a
 						href={link.href}
 						class={link.cta ? "nav-cta" : undefined}
-						aria-current={currentPath === link.href || currentPath.startsWith(`${link.href}/`) ? "page" : undefined}
+						aria-current={[link.href, ...(link.also ?? [])].some((path) => currentPath === path || currentPath.startsWith(`${path}/`)) ? "page" : undefined}
 					>
 					<T en={link.label} ko={link.labelKo} />
 					{link.locked && (

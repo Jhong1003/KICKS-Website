@@ -1298,17 +1298,6 @@ button.league-switcher-link {
 
 /* 갤러리 */
 
-.gallery-videos-link {
-
-	display: inline-block;
-	margin-top: 12px;
-	color: var(--color-green);
-	font-size: 0.9rem;
-	font-weight: 600;
-	text-decoration: none;
-
-}
-
 /* Album cards on /gallery (src/pages/gallery/index.astro). */
 .album-grid {
 

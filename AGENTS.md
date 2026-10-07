@@ -623,9 +623,9 @@ while the total is 0.
 
 ### Full Matches encryption
 
-The `/full-matches` page is locked behind a club password. It isn't in the
-top menu (members get the link, and it kept the menu on one line); the
-footer and the Gallery page link to it. **The Google
+The `/full-matches` page is locked behind a club password. It isn't its own
+top-menu item: the "Gallery" item (사진·영상 in Korean) covers it, and both
+pages start with Photos | Full Matches tabs (`MediaTabs.astro`). **The Google
 Drive links and the password itself must never be stored in plain text
 anywhere in this repo.** `src/data/full-matches.enc.json` holds only an
 AES-GCM encrypted blob (PBKDF2-derived key, 250,000 iterations), decrypted
