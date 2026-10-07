@@ -8,13 +8,14 @@ interface Props {
 
 const { variant = "default" } = Astro.props;
 
-const navLinks = [
+// Full Matches (members only) left the top menu to keep it on one line;
+// it's linked from the footer and the Gallery page instead.
+const navLinks: { href: string; label: string; labelKo: string; locked?: boolean; cta?: boolean }[] = [
 	{ href: "/about", label: "About", labelKo: "소개" },
 	{ href: "/league", label: "League", labelKo: "리그" },
 	{ href: "/players", label: "Players", labelKo: "선수" },
 	{ href: "/schedule", label: "Schedule", labelKo: "일정" },
 	{ href: "/gallery", label: "Gallery", labelKo: "갤러리" },
-	{ href: "/full-matches", label: "Full Matches", labelKo: "풀영상", locked: true },
 	{ href: "/hall-of-fame", label: "Hall of Fame", labelKo: "명예의 전당" },
 	{ href: "/partners", label: "Partners", labelKo: "파트너" },
 	{ href: "/join", label: "Join", labelKo: "가입하기", cta: true },

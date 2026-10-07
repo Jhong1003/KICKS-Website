@@ -17,6 +17,7 @@ const monthLabel = (iso: string, lang: "en" | "ko") => {
 		<section class="content-section" aria-labelledby="gallery-title">
 			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>
 			<h1 id="gallery-title"><T en="Moments from the pitch." ko="KICKS의 순간들" /></h1>
+			<a class="gallery-videos-link" href="/full-matches">🔒 <T en="Full match videos (members) →" ko="풀경기 영상 보기 (멤버 전용) →" /></a>
 			{
 				albums.length === 0 ? (
 					<T as="p" class="gallery-empty" en="No photos yet." ko="아직 사진이 없어요." />

@@ -387,6 +387,7 @@ h1 {
 
 .nav-list a {
 
+	white-space: nowrap;
 	font-size: 0.85rem;
 	font-weight: 600;
 	letter-spacing: 0.04em;
@@ -400,6 +401,16 @@ h1 {
 	opacity: 1;
 	text-decoration: underline;
 	text-underline-offset: 6px;
+
+}
+
+@media (min-width: 1201px) and (max-width: 1399px) {
+
+	.nav-list {
+
+		gap: 20px;
+
+	}
 
 }
 
@@ -608,16 +619,6 @@ h1 {
 	font-size: clamp(1.8rem, 4vw, 3rem);
 	line-height: 1.15;
 	letter-spacing: -0.03em;
-
-}
-
-.about-list {
-
-	max-width: 680px;
-	margin: 28px 0 0;
-	padding-left: 20px;
-	font-size: 1.1rem;
-	line-height: 1.9;
 
 }
 
@@ -1274,6 +1275,17 @@ button.league-switcher-link {
 
 /* 갤러리 */
 
+.gallery-videos-link {
+
+	display: inline-block;
+	margin-top: 12px;
+	color: var(--color-green);
+	font-size: 0.9rem;
+	font-weight: 600;
+	text-decoration: none;
+
+}
+
 /* Album cards on /gallery (src/pages/gallery/index.astro). */
 .album-grid {
 
@@ -1693,9 +1705,12 @@ button.league-switcher-link {
 
 }
 
-/* 태블릿 이하에서는 메뉴가 햄버거로 바뀜 */
+/* 태블릿 이하에서는 메뉴가 햄버거로 바뀜. 1200px is where the 8 menu items,
+   EN | 한 and the season label still fit on one line in English (the longer
+   language) with the tighter gap below; measured, not guessed — re-check if
+   a menu item is added. */
 
-@media (max-width: 1260px) {
+@media (max-width: 1200px) {
 
 	.nav-list {
 
