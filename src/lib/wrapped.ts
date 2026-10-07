@@ -84,7 +84,7 @@ const STAT_TEXT: Record<Stat, Text> = {
 
 const AWARD_TEXT: Partial<Record<Stat, Text>> = {
 	goals: { en: "Golden Boot", ko: "득점왕" },
-	assists: { en: "Top Assists", ko: "도움왕" },
+	assists: { en: "Playmaker Award", ko: "도움왕" },
 };
 
 const STAT_UNIT: Record<Stat, (n: number) => Text> = {

@@ -28,7 +28,7 @@ const seasons = seasonsWithAwards(seasonOrder).map((season) => ({ season, awards
 				ko="KICKS 리그의 우승팀과 수상자, 그리고 역대 클럽 기록을 모아 두는 곳이에요."
 			/>
 			{
-				finishedLeagues.length === 0 && (
+				finishedLeagues.length === 0 && seasons.length === 0 && (
 					<T
 						as="p"
 						class="about-description"

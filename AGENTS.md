@@ -1,6 +1,6 @@
 ## Project Context
 
-KICKS is a UIUC Korean futsal club. This repo is the club's public site plus
+KICKS (Korean-Inspired Community for Kicking Sports) is a UIUC futsal community. This repo is the club's public site plus
 the offline pipeline that turns the club's Google Sheet into the data the
 site reads.
 
@@ -623,7 +623,9 @@ while the total is 0.
 
 ### Full Matches encryption
 
-The `/full-matches` page is locked behind a club password. **The Google
+The `/full-matches` page is locked behind a club password. It isn't in the
+top menu (members get the link, and it kept the menu on one line); the
+footer and the Gallery page link to it. **The Google
 Drive links and the password itself must never be stored in plain text
 anywhere in this repo.** `src/data/full-matches.enc.json` holds only an
 AES-GCM encrypted blob (PBKDF2-derived key, 250,000 iterations), decrypted
@@ -686,7 +688,7 @@ re-renders anything. Pieces:
   translated attributes from `data-i18n-attrs`. No JavaScript = English.
 
 **Stays English in both languages, on purpose**: the hero slogan and brand
-labels (logo, "KOREAN FUTSAL CLUB · UIUC", hero footer), badge and
+labels (logo, "KOREAN-INSPIRED FUTSAL COMMUNITY · UIUC", hero footer), badge and
 play-style tag names (except Brace → 멀티골), and hand-edited JSON content
 (partner names, video titles). The transfer banner has `heading` (Korean)
 and `heading_en` in transfer-news.json. Schedule titles

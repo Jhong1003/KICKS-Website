@@ -55,7 +55,10 @@ const slugByName = new Map(profilesData.map((player) => [player.name, player.id]
 /** Hand-entered awards for a league id or a season, in display order. */
 export function manualAwards(scope: string): ManualAward[] {
 	return entries
+		// A league id has a "-" (FA26-L1); a season doesn't (FA26). Each award
+		// only shows at its own level, so a typo'd scope doesn't misplace it.
 		.filter((entry) => entry.scope === scope && !AWARDS[entry.award].computed)
+		.filter((entry) => AWARDS[entry.award].level === (scope.includes("-") ? "league" : "season"))
 		.sort((a, b) => MANUAL_ORDER.indexOf(a.award) - MANUAL_ORDER.indexOf(b.award))
 		.map((entry) => ({
 			key: entry.award,
