@@ -4,6 +4,8 @@
 // this stays for good, so every past league keeps its honours. Awards reuse src/lib/finale.ts
 // (co-winners on a tie, inactive players left out).
 import T from "./T.astro";
+import AwardCard from "./AwardCard.astro";
+import { AWARDS, awardPhoto, manualAwards } from "../lib/awards";
 import profilesData from "../data/player_profiles.json";
 import { getLeagueFinale, isShownInLeague } from "../lib/finale";
 import { getTeamColor, getTeamName, type League } from "../lib/leagues";
@@ -29,10 +31,15 @@ const champions = (finale?.championTeamIds ?? []).map((teamId) => ({
 
 const awards = finale
 	? [
-			{ icon: "👟", en: "Golden Boot", ko: "득점왕", unitEn: "goals", unitKo: "골", award: finale.goldenBoot },
-			{ icon: "🎯", en: "Top Assists", ko: "도움왕", unitEn: "assists", unitKo: "어시스트", award: finale.topAssists },
+			{ key: "golden_boot" as const, unitEn: "goals", unitKo: "골", award: finale.goldenBoot },
+			{ key: "playmaker" as const, unitEn: "assists", unitKo: "어시스트", award: finale.topAssists },
 		]
 	: [];
+
+// Board-chosen awards (Best Defender, OG Award) and trophy photos come from
+// the hand-edited src/data/awards.json (src/lib/awards.ts).
+const championPhoto = awardPhoto(league.id, "champion");
+const chosen = manualAwards(league.id);
 ---
 
 {
@@ -43,7 +50,8 @@ const awards = finale
 
 			<div class="honours-grid">
 				{champions.map((team) => (
-					<div class="honours-card honours-card--champion">
+					<div class:list={["honours-card", "honours-card--champion", { "honours-card--photo": championPhoto }]}>
+						{championPhoto && <img class="honours-photo honours-photo--champion" src={championPhoto} alt={`${league.id} championship trophy`} loading="lazy" />}
 						<p class="honours-card-label">
 							<span aria-hidden="true">🏆</span> <T en="Champions" ko="우승" />
 						</p>
@@ -56,24 +64,32 @@ const awards = finale
 					</div>
 				))}
 
-				{awards.map(({ icon, en, ko, unitEn, unitKo, award }) =>
+				{awards.map(({ key, unitEn, unitKo, award }) =>
 					award ? (
-						<div class="honours-card">
-							<p class="honours-card-label">
-								<span aria-hidden="true">{icon}</span> <T en={en} ko={ko} />
-							</p>
-							<p class="honours-card-winner">
-								{award.winners.map((winner, index) => (
-									<>
-										{index > 0 && <span class="honours-sep"> · </span>}
-										<a href={`/players/${winner.id}?league=${league.id}`}>{winner.name}</a>
-									</>
-								))}
-							</p>
-							<T as="p" class="honours-card-count" en={`${award.count} ${unitEn}`} ko={`${award.count}${unitKo}`} />
-						</div>
+						<AwardCard
+							icon={AWARDS[key].icon}
+							en={AWARDS[key].en}
+							ko={AWARDS[key].ko}
+							winners={award.winners}
+							photo={awardPhoto(league.id, key)}
+							leagueId={league.id}
+							detailEn={`${award.count} ${unitEn}`}
+							detailKo={`${award.count}${unitKo}`}
+						/>
 					) : null,
 				)}
+
+				{chosen.map((entry) => (
+					<AwardCard
+						icon={AWARDS[entry.key].icon}
+						en={AWARDS[entry.key].en}
+						ko={AWARDS[entry.key].ko}
+						winners={entry.winners}
+						photo={entry.photo}
+						leagueId={league.id}
+						detailEn={entry.note}
+					/>
+				))}
 			</div>
 		</section>
 	)

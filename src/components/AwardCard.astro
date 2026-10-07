@@ -1,0 +1,40 @@
+---
+// One award on the Hall of Fame page: optional trophy photo, label, winners
+// (linked to their profile in `leagueId` when they match a player), and an
+// optional line underneath (e.g. "8 goals" or a hand-written note).
+import T from "./T.astro";
+import type { AwardWinner } from "../lib/awards";
+
+interface Props {
+	icon: string;
+	en: string;
+	ko: string;
+	winners: AwardWinner[];
+	photo?: string;
+	/** League id for profile links (?league=); omitted for season awards. */
+	leagueId?: string;
+	detailEn?: string;
+	detailKo?: string;
+}
+
+const { icon, en, ko, winners, photo, leagueId, detailEn, detailKo } = Astro.props;
+const profileHref = (id: string) => (leagueId ? `/players/${id}?league=${leagueId}` : `/players/${id}`);
+---
+
+<div class:list={["honours-card", { "honours-card--photo": photo }]}>
+	{photo && <img class="honours-photo" src={photo} alt={`${en} trophy`} loading="lazy" />}
+	<p class="honours-card-label">
+		<span aria-hidden="true">{icon}</span> <T en={en} ko={ko} />
+	</p>
+	<p class="honours-card-winner">
+		{
+			winners.map((winner, index) => (
+				<>
+					{index > 0 && <span class="honours-sep"> · </span>}
+					{winner.id ? <a href={profileHref(winner.id)}>{winner.name}</a> : winner.name}
+				</>
+			))
+		}
+	</p>
+	{detailEn && <T as="p" class="honours-card-count" en={detailEn} ko={detailKo ?? detailEn} />}
+</div>

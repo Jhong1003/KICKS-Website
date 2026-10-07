@@ -38,7 +38,7 @@ site reads.
   `player_leaderboard.json`, `player_profiles.json`, `leagues.json`,
   `partners.json`, plus the encrypted `full-matches.enc.json`). **Never
   hand-edit the generated files** — regenerate them instead (see pipeline
-  below). Eight files in this folder are the hand-edited exception, never
+  below). Nine files in this folder are the hand-edited exception, never
   touched by the pipeline: [perks.json](src/data/perks.json) (member perks,
   see "Member perks" below), [board.json](src/data/board.json)
   (the club board: role, major, favorite player, fun fact, Instagram; each
@@ -50,7 +50,10 @@ site reads.
   photos, see "Player profiles" below),
   [transfer-news.json](src/data/transfer-news.json) (homepage transfer
   banner, see below), [gallery-albums.json](src/data/gallery-albums.json)
-  (gallery album titles/dates/cover), and [team-info.json](src/data/team-info.json)
+  (gallery album titles/dates/cover), [awards.json](src/data/awards.json)
+  (board-chosen awards — Best Defender, OG Award, Ballon d'Or, Puskás — and
+  trophy photos for any award, read by `src/lib/awards.ts` for the Hall of
+  Fame; photos go in `public/trophies/`), and [team-info.json](src/data/team-info.json)
   (per league → team_id: optional `captain` (exact player name), `motto` /
   `motto_en`, `photo` (a path under public/) for the team pages).
 - [src/lib/schedule.ts](src/lib/schedule.ts) — shared helpers (date
@@ -473,9 +476,11 @@ because teams are re-drawn every league, which made "first week"/"just
 joined" meaningless. The old week-based `brace`/`hat_trick` became
 `on_fire`, and the Iron Man tag became the `iron_man` badge.)
 
-**Hall of Fame** (`/hall-of-fame`, in the main menu): one `LeagueHonours.astro`
+**Hall of Fame** (`/hall-of-fame`, in the main menu): season award blocks
+(Ballon d'Or, Puskás from `src/data/awards.json`), then one `LeagueHonours.astro`
 block per finished league, newest first — champion team with its (non-inactive)
-roster, Golden Boot and Top Assists (shared on a tie; same logic as the
+roster, Golden Boot and Playmaker Award (most assists), plus any board-chosen
+league awards and trophy photos from `awards.json` (shared on a tie; same logic as the
 homepage finale banner, `src/lib/finale.ts`), kept for good. Below them is
 `ClubRecords.astro`, the club's
 all-time bests from [src/lib/records.ts](src/lib/records.ts): most goals /

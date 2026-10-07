@@ -1,0 +1,4 @@
+{
+	"_readme": "Hand-edited. One entry per award given. scope = a league id (\"FA26-L1\") for league awards, or a season (\"FA26\") for season awards. award = one of the keys in src/lib/awards.ts (best_defender, og_award, ballon_dor, puskas; champion / golden_boot / playmaker are computed from the data, so for those only add a photo). winners = exact player names as on the players tab. photo (optional) = a trophy/ceremony photo under public/trophies/, resized to about 1200px. Example: {\"scope\": \"FA26-L1\", \"award\": \"best_defender\", \"winners\": [\"홍길동\"], \"photo\": \"/trophies/fa26-l1-best-defender.jpg\"}",
+	"awards": []
+}

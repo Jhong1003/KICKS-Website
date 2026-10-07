@@ -3444,6 +3444,7 @@ main > .content-section:last-of-type {
 .honours-grid {
 
 	display: grid;
+	align-items: start;
 	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 	gap: 16px;
 	margin-top: 28px;
@@ -3465,6 +3466,40 @@ main > .content-section:last-of-type {
 	border-color: #c9a227;
 	background: linear-gradient(135deg, #f6e7b8, #fbf3da 60%, var(--color-background));
 	box-shadow: 0 0 18px rgba(233, 190, 60, 0.25);
+
+}
+
+.honours-photo {
+
+	display: block;
+	width: calc(100% + 44px);
+	height: 200px;
+	margin: -20px -22px 16px;
+	border-radius: 11px 11px 0 0;
+	background-color: #fff;
+	object-fit: contain;
+
+}
+
+.honours-photo--champion {
+
+	height: 280px;
+
+}
+
+@media (max-width: 700px) {
+
+	.honours-photo {
+
+		height: 180px;
+
+	}
+
+	.honours-photo--champion {
+
+		height: 220px;
+
+	}
 
 }
 

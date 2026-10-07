@@ -7,8 +7,13 @@ import LeagueHonours from "../components/LeagueHonours.astro";
 import T from "../components/T.astro";
 import { isLeagueFinished } from "../lib/finale";
 import { leagues } from "../lib/leagues";
+import AwardCard from "../components/AwardCard.astro";
+import { AWARDS, manualAwards, seasonsWithAwards } from "../lib/awards";
 
 const finishedLeagues = leagues.filter((league) => isLeagueFinished(league.id)).reverse();
+// Season awards (Ballon d'Or, Puskás) from src/data/awards.json, newest season first.
+const seasonOrder = [...new Set(leagues.map((league) => league.id.split("-")[0]))];
+const seasons = seasonsWithAwards(seasonOrder).map((season) => ({ season, awards: manualAwards(season) }));
 ---
 
 <BaseLayout title="Hall of Fame | KICKS" description="KICKS league champions, award winners, and club records.">
@@ -33,6 +38,27 @@ const finishedLeagues = leagues.filter((league) => isLeagueFinished(league.id)).
 				)
 			}
 		</section>
+
+		{
+			seasons.map(({ season, awards }) => (
+				<section class="content-section honours" aria-labelledby={`season-honours-${season}`}>
+					<p class="section-label"><T en="SEASON AWARDS" ko="시즌 시상" /></p>
+					<h2 id={`season-honours-${season}`}>{season}</h2>
+					<div class="honours-grid">
+						{awards.map((entry) => (
+							<AwardCard
+								icon={AWARDS[entry.key].icon}
+								en={AWARDS[entry.key].en}
+								ko={AWARDS[entry.key].ko}
+								winners={entry.winners}
+								photo={entry.photo}
+								detailEn={entry.note}
+							/>
+						))}
+					</div>
+				</section>
+			))
+		}
 
 		{finishedLeagues.map((league) => <LeagueHonours league={league} />)}
 
