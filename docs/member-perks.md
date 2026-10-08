@@ -12,7 +12,9 @@ Partners page links to it ("Member Benefits"), and both pages are
 2. First time on a phone: pick your name and enter the **member code** from
    the group chat. The phone remembers both (localStorage
    `kicks-perks-member`).
-3. At the counter: tap the restaurant → a full-screen coupon with the
+3. At the counter: tap "Use now" → a confirm box ("Open the coupon? Each
+   open is recorded as a use") → "Use it" logs the use and opens a
+   full-screen coupon with the
    restaurant, the offer, the member's name, a **live ticking clock** and a
    pulsing dot. Staff just check the clock is moving (a screenshot can't).
    The screen closes itself after 10 minutes.
