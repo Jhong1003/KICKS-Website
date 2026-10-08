@@ -713,6 +713,17 @@ text, add both versions.
 CSS framework, restyle components, or change the color palette
 (`src/styles/global.css`) unless explicitly asked to.
 
+## Commits
+
+Commit as **Jihwan Hong <330735776+Jhong1003@users.noreply.github.com>**
+(the owner's account) with Claude only as a `Co-Authored-By` trailer — never
+as the author. Make commits **unsigned** (`git config --local
+commit.gpgsign false` before the first commit): a signing key that isn't on
+the Jhong1003 account makes GitHub label every commit "Unverified", while
+unsigned commits show no label at all. Don't rewrite or force-push already
+pushed history to change authors or signatures — `forecasts/*.csv` relies on
+commit history as its publication record.
+
 ## Development
 
 When starting the dev server, use background mode:
