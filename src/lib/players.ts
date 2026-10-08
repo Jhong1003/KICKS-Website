@@ -67,6 +67,8 @@ export type BadgeKey =
 	| "the_wall"
 	| "giant_killer"
 	| "champion"
+	| "golden_boot"
+	| "playmaker_award"
 	| "brace"
 	| "game_changer"
 	| "crack"
@@ -236,6 +238,21 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		description: "Won the league.",
 		descriptionKo: "리그 우승!",
 		icon: "🏆",
+		tier: "legendary",
+	},
+	// League awards — same winners as the finale banner and Hall of Fame (finale.ts)
+	golden_boot: {
+		label: "Golden Boot",
+		description: "Top scorer of the league (shared on a tie).",
+		descriptionKo: "리그 득점왕! (동점이면 공동 수상)",
+		icon: "👟",
+		tier: "legendary",
+	},
+	playmaker_award: {
+		label: "Playmaker Award",
+		description: "Most assists in the league (shared on a tie).",
+		descriptionKo: "리그 도움왕! (동점이면 공동 수상)",
+		icon: "🪄",
 		tier: "legendary",
 	},
 	brace: {

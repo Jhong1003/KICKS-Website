@@ -447,7 +447,11 @@ they joined, so late joiners aren't penalised.
   with a goal or assist), `brace` (2 goals in one match).
 - Legendary: `champion` (on the rank-1 team of a *finished* league — every
   fixture scored; shown first among Legendary with its own gold look),
-  `game_changer` (2+ goals and 2+ assists in one week), `crack`
+  `golden_boot` (most goals) and `playmaker_award` (most assists) in a
+  *finished* league — same winners as the finale banner and Hall of Fame
+  (`_league_award_winners` mirrors `getLeagueFinale` in `src/lib/finale.ts`:
+  ties share, 0 never wins, inactive players only if they played the last
+  week), `game_changer` (2+ goals and 2+ assists in one week), `crack`
   (2+ goals + assists in each of two consecutive attended weeks — once
   earned it stays), `fox_in_the_box` (5+ league goals), `maestro` (3+
   assists in one week), `delivery_service` (5+ league assists), `hat_trick`

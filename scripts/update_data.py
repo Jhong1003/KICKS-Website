@@ -715,6 +715,7 @@ def _badges(
     champion_teams: set[str],
     champion: bool,
     top_scorer: bool,
+    league_awards: set[str],
     weeks_played: int,
     moved_teams: bool,
 ) -> list[str]:
@@ -729,7 +730,9 @@ def _badges(
     `rows` is the player's player_stats rows for this league — one per week
     from the week they joined (absent weeks are rows with games = 0).
     `top_scorer` = first in the league's attacking-points ranking (see
-    _top_attackers); `weeks_played` = weeks the league has had so far.
+    _top_attackers); `league_awards` = the end-of-league awards this player
+    won ("golden_boot" / "playmaker_award", see _league_award_winners);
+    `weeks_played` = weeks the league has had so far.
     `team_weeks` is _team_weeks for this league and `champion_teams` the
     league's champion(s) (empty until it finishes) — both feed the defender
     badges (see _defender_badges).
@@ -763,7 +766,8 @@ def _badges(
         badges.append("champion")
     if max_match_goals >= BRACE_GOALS:
         badges.append("brace")
-    # Legendary
+    # Legendary — the league awards first, right after Champion on the site
+    badges.extend(badge for badge in ("golden_boot", "playmaker_award") if badge in league_awards)
     if ((attended["goals"] >= GAME_CHANGER_GOALS) & (attended["assists"] >= GAME_CHANGER_ASSISTS)).any():
         badges.append("game_changer")
     if _has_crack_streak(rows):
@@ -858,22 +862,60 @@ def _defender_badges(
     return badges
 
 
+def _finished_leagues(matches: pd.DataFrame) -> set[str]:
+    """Leagues where every fixture has a score (same rule as isLeagueFinished
+    in src/lib/finale.ts)."""
+    return {
+        league
+        for league, league_matches in matches.groupby("league")
+        if league_matches[["home_score", "away_score"]].notna().all().all()
+    }
+
+
 def _champions(matches: pd.DataFrame, league_table: list[dict]) -> dict[str, set[str]]:
     """Champion team_id(s) per *finished* league — every fixture has a score.
 
     Co-champions are possible in principle (a full tie on every ranking
     criterion shares rank 1). A league still in progress has no champion.
     """
-    finished = {
-        league
-        for league, league_matches in matches.groupby("league")
-        if league_matches[["home_score", "away_score"]].notna().all().all()
-    }
+    finished = _finished_leagues(matches)
     champions: dict[str, set[str]] = {}
     for row in league_table:
         if row["league"] in finished and row["rank"] == 1:
             champions.setdefault(row["league"], set()).add(row["team_id"])
     return champions
+
+
+def _league_award_winners(
+    player_stats: pd.DataFrame, matches: pd.DataFrame, statuses: pd.Series
+) -> dict[str, dict[str, set[str]]]:
+    """Golden Boot (most goals) and Playmaker Award (most assists) winners per
+    *finished* league: {league: {"golden_boot": {...}, "playmaker_award": {...}}}.
+
+    Mirrors getLeagueFinale in src/lib/finale.ts, so the badge always goes to
+    the same people the homepage banner and Hall of Fame name: ties share the
+    award, nobody wins with 0, and a player marked inactive only counts if
+    they have a row in the league's last week (isShownInLeague).
+    """
+    finished = _finished_leagues(matches)
+    awards: dict[str, dict[str, set[str]]] = {}
+    for league, league_stats in player_stats.groupby("league", sort=False):
+        if league not in finished:
+            continue
+        last_week = league_stats["week"].max()
+        finished_last_week = set(league_stats.loc[league_stats["week"] == last_week, "player_id"])
+        totals = league_stats.groupby("player_id")[["goals", "assists"]].sum()
+        shown = [
+            player_id
+            for player_id in totals.index
+            if statuses.get(player_id, "active") != "inactive" or player_id in finished_last_week
+        ]
+        totals = totals.loc[shown]
+        awards[league] = {}
+        for badge, stat in (("golden_boot", "goals"), ("playmaker_award", "assists")):
+            best = totals[stat].max() if not totals.empty else 0
+            awards[league][badge] = set(totals.index[totals[stat] == best]) if best > 0 else set()
+    return awards
 
 
 def _top_attackers(player_stats: pd.DataFrame) -> dict[str, set[str]]:
@@ -924,6 +966,7 @@ def _league_section(
     team_weeks: dict[tuple[int, str], list[tuple[int, int, str]]],
     champion_teams: set[str],
     top_scorer: bool,
+    league_awards: set[str],
 ) -> dict:
     """One player's profile for a single league (stats, tag, badges)."""
     rows = rows.sort_values("week")
@@ -965,6 +1008,7 @@ def _league_section(
             champion_teams=champion_teams,
             champion=current_team_id in champion_teams,
             top_scorer=top_scorer,
+            league_awards=league_awards,
             weeks_played=weeks_played,
             moved_teams=len(segments) > 1,
         ),
@@ -993,7 +1037,8 @@ def build_player_profiles(
     get one automatically once their first week of stats is entered.
 
     `matches` and `league_table` feed the team-based badges (the defender
-    badges, Champion, Treble); `goal_events` (still name-based) feeds the per-match
+    badges, Champion, Treble) and tell which leagues are finished (Golden
+    Boot, Playmaker Award); `goal_events` (still name-based) feeds the per-match
     ones (Brace, Hat-trick, Poker). Back-to-Back is the one badge that
     looks across leagues: champion of two leagues in a row (consecutive in
     `league_order`), awarded in the second one.
@@ -1008,6 +1053,7 @@ def build_player_profiles(
     team_weeks = _team_weeks(matches)
     champions = _champions(matches, league_table)
     top_attackers = _top_attackers(player_stats)
+    award_winners = _league_award_winners(player_stats, matches, statuses)
     max_match_goals = _max_match_goals(goal_events, dict(zip(players["player"], players["player_id"])))
 
     profiles = []
@@ -1025,6 +1071,9 @@ def build_player_profiles(
                 team_weeks=team_weeks.get(league, {}),
                 champion_teams=champions.get(league, set()),
                 top_scorer=player_id in top_attackers.get(league, set()),
+                league_awards={
+                    badge for badge, winners in award_winners.get(league, {}).items() if player_id in winners
+                },
             )
             for league, rows in player_rows.groupby("league", sort=False)
         ]
