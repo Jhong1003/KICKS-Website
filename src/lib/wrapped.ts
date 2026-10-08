@@ -395,7 +395,7 @@ export function buildWrapped(player: PlayerProfile, section: PlayerLeagueSection
 	if (firstAssistWeek) {
 		highlights.push({
 			kind: "first-assist",
-			icon: "🎯",
+			icon: "🅰️",
 			title: { en: `First assist in week ${firstAssistWeek.week}`, ko: `${firstAssistWeek.week}주차에 리그 첫 어시스트` },
 			sub: { en: `${totals.assists} in total`, ko: `리그 통틀어 ${totals.assists}어시스트` },
 			score: 29,

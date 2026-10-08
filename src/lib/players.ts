@@ -172,7 +172,7 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		label: "Assist!",
 		description: "Set up a teammate's goal in this league.",
 		descriptionKo: "이번 리그에서 동료의 골을 도왔어요.",
-		icon: "🎯",
+		icon: "🅰️",
 		tier: "common",
 	},
 	iron_man: {
@@ -252,7 +252,7 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		label: "Playmaker Award",
 		description: "Most assists in the league (shared on a tie).",
 		descriptionKo: "리그 도움왕! (동점이면 공동 수상)",
-		icon: "🪄",
+		icon: "🎯",
 		tier: "legendary",
 	},
 	brace: {
