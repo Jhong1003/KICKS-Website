@@ -715,14 +715,25 @@ CSS framework, restyle components, or change the color palette
 
 ## Commits
 
-Commit as **Jihwan Hong <330735776+Jhong1003@users.noreply.github.com>**
-(the owner's account) with Claude only as a `Co-Authored-By` trailer — never
-as the author. Make commits **unsigned** (`git config --local
-commit.gpgsign false` before the first commit): a signing key that isn't on
-the Jhong1003 account makes GitHub label every commit "Unverified", while
-unsigned commits show no label at all. Don't rewrite or force-push already
-pushed history to change authors or signatures — `forecasts/*.csv` relies on
-commit history as its publication record.
+Everything that lands on `main` must show as **Verified** on GitHub under
+Jhong1003. Never push straight to `main`; instead:
+
+1. Commit on a branch as **Jihwan Hong
+   <330735776+Jhong1003@users.noreply.github.com>** with Claude only as a
+   `Co-Authored-By` trailer — never as the author. Branch commits are
+   **unsigned** (`git config --local commit.gpgsign false` first): a signing
+   key that isn't on the Jhong1003 account would make GitHub label them
+   "Unverified".
+2. Open a pull request and **squash-merge** it (REST API
+   `PUT /repos/Jhong1003/KICKS-Website/pulls/<n>/merge` with
+   `merge_method: squash`, or the owner clicks "Squash and merge"). GitHub
+   signs the squash commit itself, so `main` gets one Verified commit
+   merged by Jhong1003. Delete the branch afterwards.
+
+The data workflows (`update-data.yml`, `publish-forecasts.yml`) still push
+their own bot commits to `main` — those are fine as they are. Don't rewrite or
+force-push already pushed history to change authors or signatures —
+`forecasts/*.csv` relies on commit history as its publication record.
 
 ## Development
 
