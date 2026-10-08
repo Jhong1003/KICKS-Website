@@ -122,6 +122,25 @@ const members = [
 			</div>
 		</section>
 
+		{/* Asked before opening a coupon, since every open is logged as a use. */}
+		<dialog id="perks-confirm" class="perk-confirm" aria-labelledby="perk-confirm-title">
+			<h2 id="perk-confirm-title" class="perk-confirm-title"></h2>
+			<T
+				as="p"
+				class="perk-confirm-text"
+				en="Open it at the counter to show the staff. Each open is recorded as a use."
+				ko="계산할 때 직원에게 보여줄 화면이에요. 열면 사용 기록이 남아요."
+			/>
+			<div class="perk-confirm-actions">
+				<button type="button" id="perk-confirm-cancel" class="perk-confirm-cancel">
+					<T en="Not now" ko="취소" />
+				</button>
+				<button type="button" id="perk-confirm-ok" class="button-primary perk-confirm-ok">
+					<T en="Use it" ko="사용하기" />
+				</button>
+			</div>
+		</dialog>
+
 		<div id="perks-coupon" class="perk-coupon" role="dialog" aria-modal="true" aria-labelledby="perk-coupon-partner" hidden>
 			<div class="perk-coupon-card">
 				<p class="perk-coupon-brand">KICKS MEMBER</p>
@@ -296,14 +315,40 @@ const members = [
 		$("perk-coupon-close").focus();
 	}
 
-	home.addEventListener("click", async (event) => {
+	// "Use now" asks first; only "Use it" calls /api/perks/redeem (which logs).
+	const confirmDialog = $<HTMLDialogElement>("perks-confirm");
+	let pending: { perk: Perk; button: HTMLButtonElement } | null = null;
+
+	home.addEventListener("click", (event) => {
 		const button = (event.target as HTMLElement).closest<HTMLButtonElement>(".perk-use");
 		if (!button) return;
-		const saved = load();
 		const perk = data.perks.find((p) => p.perk_id === button.dataset.perkId);
-		if (!saved) return showUnlock();
+		if (!load()) return showUnlock();
 		if (!perk) return;
 		homeError.hidden = true;
+		pending = { perk, button };
+		$("perk-confirm-title").innerHTML = bilingualHtml(`Open the ${perk.name} coupon?`, `${perk.name} 쿠폰을 열까요?`);
+		confirmDialog.showModal();
+		$("perk-confirm-cancel").focus();
+	});
+
+	$("perk-confirm-cancel").addEventListener("click", () => confirmDialog.close());
+	// Tapping the dimmed area outside the box also cancels.
+	confirmDialog.addEventListener("click", (event) => {
+		if (event.target === confirmDialog) confirmDialog.close();
+	});
+	$("perk-confirm-ok").addEventListener("click", () => {
+		const choice = pending;
+		confirmDialog.close();
+		if (choice) redeem(choice.perk, choice.button);
+	});
+	confirmDialog.addEventListener("close", () => {
+		pending = null;
+	});
+
+	async function redeem(perk: Perk, button: HTMLButtonElement) {
+		const saved = load();
+		if (!saved) return showUnlock();
 		button.disabled = true;
 		try {
 			const { status, json } = await call("/api/perks/redeem", { ...saved, perk_id: perk.perk_id });
@@ -319,7 +364,7 @@ const members = [
 		} finally {
 			button.disabled = false;
 		}
-	});
+	}
 
 	$("perk-coupon-close").addEventListener("click", closeCoupon);
 	document.addEventListener("keydown", (event) => {
@@ -428,6 +473,63 @@ const members = [
 		color: var(--color-green);
 		font-size: 0.85rem;
 		font-weight: 600;
+	}
+
+	.perk-confirm {
+		width: calc(100% - 32px);
+		max-width: 360px;
+		padding: 24px 20px 20px;
+		border: 0;
+		border-radius: 16px;
+		background-color: var(--color-background);
+		color: var(--color-dark);
+		text-align: center;
+	}
+
+	.perk-confirm::backdrop {
+		background-color: rgba(0, 0, 0, 0.45);
+	}
+
+	.perk-confirm-title {
+		margin: 0;
+		max-width: none;
+		font-size: 1.2rem;
+		line-height: 1.35;
+	}
+
+	.perk-confirm-text {
+		margin: 10px 0 0;
+		text-wrap: balance;
+		font-size: 0.9rem;
+		line-height: 1.6;
+	}
+
+	.perk-confirm-actions {
+		display: flex;
+		gap: 10px;
+		margin-top: 20px;
+	}
+
+	.perk-confirm-actions button {
+		flex: 1;
+		justify-content: center;
+		margin: 0;
+		padding: 12px 16px;
+		border-radius: 6px;
+		font: inherit;
+		font-size: 0.95rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.perk-confirm-ok {
+		border: 1px solid var(--color-green);
+	}
+
+	.perk-confirm-cancel {
+		border: 1px solid var(--color-green);
+		background-color: transparent;
+		color: var(--color-green);
 	}
 
 	.perk-coupon {
