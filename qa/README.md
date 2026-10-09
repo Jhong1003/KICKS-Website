@@ -156,6 +156,48 @@ the leaderboard earlier.
   the risk is, which is what per-goal recording (`goal_events`, from
   FA26-L2) is meant to address.
 
+## Data-driven FMEA: what to protect next
+
+An FMEA ranks failure modes by RPN = Severity × Occurrence × Detection.
+Usually all three are scored by gut feel in a meeting. Here only severity
+is a judgement, made once per *effect* by the league organiser; the other
+two come from the measurements above ([`fmea.py`](fmea.py) →
+[`results/fmea.csv`](results/fmea.csv)).
+
+- **S** (organiser, 2026-10-09): wrong match scores (standings, champion)
+  = 9; goals/assists on the wrong player (records, Golden Boot, badges) = 9;
+  attendance only (participation rate, a points-tie tiebreaker) = 2.
+- **O**: escaped defects of that type in FA26-L1 (0 → 2, 1 → 5, 2+ → 7).
+- **D**: measured detection after the new rules (≥99% → 1, ≥90% → 3,
+  ≥50% → 5, ≥20% → 7, below → 9).
+
+| RPN | S·O·D | Failure mode | Detected |
+|---:|---|---|---:|
+| 162 | 9·2·9 | Goal credited to a teammate | 13% |
+| 162 | 9·2·9 | Assist credited to a teammate | 13% |
+| 126 | 9·2·7 | Assist count typo | 31% |
+| 70 | 2·5·7 | Attendance flipped (I004) | 49% |
+| 54 | 9·2·3 | Home/away scores swapped | 93% |
+| 54 | 9·2·3 | Goal credited to an opponent | 97% |
+| 45 | 9·5·1 | Goal booked in the wrong week (I001) | 100% |
+| 42 | 2·7·3 | Row missing, no goals (I002) | 92% |
+| ≤18 | | the other ten modes | ≥98% |
+
+**Reading it.** The defects that actually happened (I001, I002, I004) are
+now either well detected or low severity. The top of the list is something
+the history never showed: goals and assists credited to the wrong teammate.
+That is not reassurance. These are the modes no Sheet rule can see, so if
+one had happened, nothing in the published history would show it either —
+"never observed" is exactly what an undetectable defect looks like. O = 2
+for them is a floor, not an estimate.
+
+**Next control.** Since no rule can catch them, the only inspector is the
+person whose record it is. The weekly results post already shows every
+player's goals and assists; making it an explicit check ("tell us if your
+record is wrong") and logging each report in the issues tab with
+`how_found` = member report turns the players into the detection step for
+the top three modes, and makes that step measurable next league.
+
 ## Limits
 
 - One league of data. Rates describe this dataset's structure; a different
