@@ -41,7 +41,7 @@ const revealKey = `kicks-team-reveal-${league.id}`;
 					</svg>
 				</button>
 				<p class="reveal-brand">KICKS · {league.id}</p>
-				<h2 id="team-reveal-title">
+				<h2 id="team-reveal-title" tabindex="-1" autofocus>
 					<T en="The teams are in." ko="팀이 공개됐어요." />
 				</h2>
 				<T as="p" class="reveal-subtitle" en={`Meet the ${teams.length} teams of ${league.id}. Find yours!`} ko={`${league.id}의 ${teams.length}팀을 소개합니다. 내 팀을 찾아보세요!`} />
@@ -50,7 +50,7 @@ const revealKey = `kicks-team-reveal-${league.id}`;
 						<a class="reveal-card" href={`/league/${league.id}/team/${team.team_id}`} style={`--team-color: ${team.color}; --team-text: ${team.text}`}>
 							<span class="reveal-card-head">
 								<span class="reveal-card-name">{team.name}</span>
-								<span class="reveal-card-count"><T en={`${team.squad.length} players`} ko={`${team.squad.length}명`} /></span>
+								<span class="reveal-card-count"><T en={`${team.squad.length} players`} ko={`${team.squad.length}명`} /><span class="reveal-card-chevron" aria-hidden="true"> ›</span></span>
 							</span>
 							<span class="reveal-card-body">
 								{team.captain && (
@@ -108,7 +108,7 @@ const revealKey = `kicks-team-reveal-${league.id}`;
 	dialog::backdrop { background: rgba(20, 29, 14, 0.45); }
 	.reveal-panel { position: relative; padding: clamp(24px, 5vw, 36px); }
 	.reveal-brand { margin: 0 48px 20px 0; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; }
-	h2 { margin: 0; font-size: clamp(2rem, 6vw, 3rem); line-height: 1; letter-spacing: -0.03em; }
+	h2 { outline: none; margin: 0; font-size: clamp(2rem, 6vw, 3rem); line-height: 1; letter-spacing: -0.03em; }
 	.reveal-subtitle { margin: 12px 0 24px; color: var(--color-dark); font-size: 0.95rem; }
 	.reveal-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 	.reveal-card {
@@ -176,9 +176,26 @@ const revealKey = `kicks-team-reveal-${league.id}`;
 	}
 	.reveal-close:hover { background: var(--color-sage); }
 	.reveal-close:focus-visible, .reveal-done:focus-visible, .reveal-card:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
+	.reveal-card-chevron { display: none; }
+	/* Phones: everything on one screen (checked at 375×667) — tighter type and
+	   spacing, cards as compact rows, and the whole card is the team page link. */
 	@media (max-width: 640px) {
-		.reveal-cards { grid-template-columns: minmax(0, 1fr); }
-		.reveal-card-head { flex-direction: row; align-items: baseline; justify-content: space-between; padding: 12px 14px; }
+		dialog { width: calc(100% - 24px); max-height: calc(100dvh - 24px); }
+		.reveal-panel { padding: 18px 16px 16px; }
+		.reveal-brand { margin-bottom: 8px; font-size: 0.62rem; }
+		h2 { font-size: 1.7rem; }
+		.reveal-subtitle { margin: 6px 0 14px; font-size: 0.82rem; }
+		.reveal-cards { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+		.reveal-card-head { flex-direction: row; align-items: baseline; justify-content: space-between; padding: 8px 12px; }
+		.reveal-card-name { font-size: 1.05rem; }
+		.reveal-card-chevron { display: inline; }
+		.reveal-card-body { gap: 4px; padding: 8px 12px 10px; }
+		.reveal-captain { font-size: 0.82rem; }
+		.reveal-captain-mark { width: 16px; height: 16px; font-size: 0.6rem; }
+		.reveal-squad { font-size: 0.74rem; line-height: 1.45; }
+		.reveal-card-link { display: none; }
+		.reveal-done { margin-top: 14px; padding: 8px 24px; font-size: 0.9rem; }
+		.reveal-close { top: 8px; right: 8px; width: 40px; height: 40px; }
 	}
 	@media (prefers-reduced-motion: no-preference) {
 		dialog[open] { animation: reveal-in 200ms ease-out; }
