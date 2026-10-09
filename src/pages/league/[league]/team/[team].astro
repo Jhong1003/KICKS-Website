@@ -25,6 +25,8 @@ import { formatShortDate, weekLabel } from "../../../../lib/i18n";
 import { titleHistory } from "../../../../lib/forecasts";
 import { headToHead, recentForm, teamLeaders, teamRecords, teamResults } from "../../../../lib/team-stats";
 import teamInfoData from "../../../../data/team-info.json";
+import TeamRadar from "../../../../components/TeamRadar.astro";
+import { averageProfile, teamProfile, MIN_MATCHES, type TeamProfile } from "../../../../lib/team-profile";
 
 export function getStaticPaths() {
 	return leagues.flatMap((league) => league.teams.map((team) => ({ params: { league: league.id, team: team.team_id }, props: { league, team } })));
@@ -136,6 +138,18 @@ const titleChances = titleHistory(league.id)
 	.map((entry) => ({ week: entry.week, p: entry.chances[team.team_id] }));
 const pct = (p: number) => (p < 0.001 ? "<0.1%" : p > 0.999 ? ">99.9%" : `${(p * 100).toFixed(p < 0.1 ? 1 : 0)}%`);
 
+// Team style hexagon (src/lib/team-profile.ts): this team + the league average.
+// Everyone who played in this league counts (also players who later left),
+// since their goals are in the team's numbers.
+const leaguePlayers = (profilesData as PlayerProfile[]).flatMap((player) => {
+	const section = getSection(player, league.id);
+	return section ? [{ weekly: section.weekly_stats }] : [];
+});
+const profileOf = (teamId: string) =>
+	teamProfile(league.id, teamId, matchesData as MatchRecord[], leaguePlayers, table.find((entry) => entry.team_id === teamId)?.participation_rate ?? null);
+const styleProfile = profileOf(team.team_id);
+const leagueAverage = averageProfile(league.teams.map((entry) => profileOf(entry.team_id)).filter((p): p is TeamProfile => p !== null));
+
 // Hand-edited extras (src/data/team-info.json): captain (exact name), motto, photo.
 interface TeamInfo {
 	captain?: string;
@@ -215,6 +229,24 @@ const captainId = captain?.player_id;
 							<dd>{(row.participation_rate * 100).toFixed(1)}%</dd>
 						</div>
 					</dl>
+				</section>
+			)
+		}
+
+		{
+			row && row.played > 0 && (
+				<section class="content-section" aria-labelledby="team-style-title">
+					<h2 id="team-style-title"><T en="Team Style" ko="팀 스타일" /></h2>
+					{styleProfile ? (
+						<TeamRadar profile={styleProfile} average={leagueAverage} color={color} teamName={team.name} />
+					) : (
+						<T
+							as="p"
+							class="about-description"
+							en={`The team's shape appears after ${MIN_MATCHES} matches (two weeks).`}
+							ko={`${MIN_MATCHES}경기(2주차)가 지나면 팀 스타일이 나타나요.`}
+						/>
+					)}
 				</section>
 			)
 		}

@@ -26,7 +26,10 @@ site reads.
   `league/[league]/team/[team]` — one team's page within one league (record, squad
   forwards→GK by name, never by a stat, results week by week); linked from team names in
   the standings tables, the /players team view and the player page; numbers in
-  `src/lib/team-stats.ts`, tested by `tests/team-stats.test.mjs`).
+  `src/lib/team-stats.ts`, tested by `tests/team-stats.test.mjs`; plus a "Team Style" hexagon,
+  `TeamRadar.astro` over `src/lib/team-profile.ts` (tested by `tests/team-profile.test.mjs`):
+  attack, link-up, one team, attendance, defense, late goals on FIXED scales with the league
+  average dashed behind, shown from 12 matches; late goals stay empty until goal minutes are read).
 - [src/components/](src/components/) — Astro components used by the pages
   (e.g. `LeagueView`, `StandingsTable`, `PlayerStatsTable`, `WeeklyResults`,
   `ScheduleTimeline`, `PlayerCard`, `WeeklyStatsChart`, `PhotoGallery`,
