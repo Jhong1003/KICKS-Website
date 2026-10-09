@@ -1,0 +1,187 @@
+---
+// "Team reveal" popup on the homepage: the newest league's teams as cards
+// (team color, name, captain, squad) with a link to each team page. Shown
+// once per league per browser (localStorage), only while that league isn't
+// finished. On the visit it shows, the welcome popup steps aside
+// (WelcomePopup.astro checks #team-reveal first), so nobody gets two
+// popups at once; a first-time visitor simply sees the welcome next visit.
+import T from "./T.astro";
+import profilesData from "../data/player_profiles.json";
+import teamInfoData from "../data/team-info.json";
+import { getTeamColor, type League } from "../lib/leagues";
+import { getContrastingTextColor, getSection, type PlayerProfile } from "../lib/players";
+import { isLeagueFinished } from "../lib/finale";
+
+interface Props {
+	league: League;
+}
+
+const { league } = Astro.props;
+const info = (teamInfoData as Record<string, Record<string, { captain?: string }>>)[league.id] ?? {};
+const collator = new Intl.Collator("ko");
+const teams = league.teams.map((team) => {
+	const captain = info[team.team_id]?.captain;
+	const squad = (profilesData as PlayerProfile[])
+		.filter((player) => player.status !== "inactive" && getSection(player, league.id)?.current_team_id === team.team_id)
+		.sort((a, b) => Number(b.name === captain) - Number(a.name === captain) || collator.compare(a.name, b.name));
+	const color = getTeamColor(team.team_id, league);
+	return { ...team, color, text: getContrastingTextColor(color), captain, squad };
+});
+const show = !isLeagueFinished(league.id) && teams.every((team) => team.squad.length > 0);
+const revealKey = `kicks-team-reveal-${league.id}`;
+---
+
+{
+	show && (
+		<dialog id="team-reveal" data-reveal-key={revealKey} aria-labelledby="team-reveal-title">
+			<div class="reveal-panel">
+				<button class="reveal-close" type="button" data-reveal-close aria-label="Close" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close", ko: "닫기" } })}>
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+						<path d="m6 6 12 12M18 6 6 18" />
+					</svg>
+				</button>
+				<p class="reveal-brand">KICKS · {league.id}</p>
+				<h2 id="team-reveal-title">
+					<T en="The teams are in." ko="팀이 공개됐어요." />
+				</h2>
+				<T as="p" class="reveal-subtitle" en={`Meet the ${teams.length} teams of ${league.id}. Find yours!`} ko={`${league.id}의 ${teams.length}팀을 소개합니다. 내 팀을 찾아보세요!`} />
+				<div class="reveal-cards">
+					{teams.map((team) => (
+						<a class="reveal-card" href={`/league/${league.id}/team/${team.team_id}`} style={`--team-color: ${team.color}; --team-text: ${team.text}`}>
+							<span class="reveal-card-head">
+								<span class="reveal-card-name">{team.name}</span>
+								<span class="reveal-card-count"><T en={`${team.squad.length} players`} ko={`${team.squad.length}명`} /></span>
+							</span>
+							<span class="reveal-card-body">
+								{team.captain && (
+									<span class="reveal-captain">
+										<span class="reveal-captain-mark" aria-hidden="true">C</span>
+										{team.captain}
+									</span>
+								)}
+								<span class="reveal-squad">
+									{team.squad.filter((player) => player.name !== team.captain).map((player) => player.name).join(" · ")}
+								</span>
+								<span class="reveal-card-link"><T en="Team page →" ko="팀 페이지 →" /></span>
+							</span>
+						</a>
+					))}
+				</div>
+				<button class="reveal-done" type="button" data-reveal-close><T en="Got it" ko="확인" /></button>
+			</div>
+		</dialog>
+	)
+}
+
+<script>
+	const dialog = document.querySelector<HTMLDialogElement>("#team-reveal");
+	if (dialog) {
+		const key = dialog.dataset.revealKey ?? "kicks-team-reveal";
+		let seen = false;
+		try { seen = localStorage.getItem(key) === "1"; } catch { /* Storage disabled: show it, once per page load. */ }
+		if (!seen) {
+			const markSeen = () => { try { localStorage.setItem(key, "1"); } catch { /* Fine without storage. */ } };
+			const close = () => { markSeen(); dialog.close(); };
+			dialog.querySelectorAll("[data-reveal-close]").forEach((button) => button.addEventListener("click", close));
+			dialog.querySelectorAll("a").forEach((link) => link.addEventListener("click", markSeen));
+			dialog.addEventListener("cancel", markSeen);
+			// Clicking the dimmed area outside the panel closes it.
+			dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
+			dialog.showModal();
+		}
+	}
+</script>
+
+<style>
+	dialog {
+		width: min(720px, calc(100% - 32px));
+		max-width: none;
+		max-height: calc(100dvh - 32px);
+		margin: auto;
+		padding: 0;
+		border: 1px solid rgba(63, 81, 40, 0.25);
+		border-radius: 8px;
+		color: var(--color-green);
+		background: var(--color-background);
+		overscroll-behavior: contain;
+	}
+	dialog::backdrop { background: rgba(20, 29, 14, 0.45); }
+	.reveal-panel { position: relative; padding: clamp(24px, 5vw, 36px); }
+	.reveal-brand { margin: 0 48px 20px 0; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; }
+	h2 { margin: 0; font-size: clamp(2rem, 6vw, 3rem); line-height: 1; letter-spacing: -0.03em; }
+	.reveal-subtitle { margin: 12px 0 24px; color: var(--color-dark); font-size: 0.95rem; }
+	.reveal-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+	.reveal-card {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		border: 1px solid rgba(41, 41, 41, 0.12);
+		border-radius: 10px;
+		background: #fff;
+		color: var(--color-dark);
+		text-decoration: none;
+		transition: transform 0.15s ease, box-shadow 0.15s ease;
+	}
+	.reveal-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(20, 29, 14, 0.12); }
+	.reveal-card-head {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: 16px 14px 14px;
+		background: var(--team-color);
+		color: var(--team-text);
+	}
+	.reveal-card-name { font-size: 1.25rem; font-weight: 800; line-height: 1.15; }
+	.reveal-card-count { font-size: 0.75rem; font-weight: 600; opacity: 0.85; }
+	.reveal-card-body { display: flex; flex: 1; flex-direction: column; gap: 8px; padding: 12px 14px 14px; }
+	.reveal-captain { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 700; }
+	.reveal-captain-mark {
+		display: inline-grid;
+		place-items: center;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: var(--team-color);
+		color: var(--team-text);
+		font-size: 0.65rem;
+		font-weight: 800;
+	}
+	.reveal-squad { font-size: 0.8rem; line-height: 1.55; opacity: 0.8; }
+	.reveal-card-link { margin-top: auto; color: var(--color-green); font-size: 0.78rem; font-weight: 700; }
+	.reveal-done {
+		display: block;
+		margin: 22px auto 0;
+		padding: 10px 28px;
+		border: none;
+		border-radius: 999px;
+		background: var(--color-green);
+		color: var(--color-background);
+		font: inherit;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.reveal-close {
+		position: absolute;
+		top: 14px;
+		right: 14px;
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		border: none;
+		border-radius: 6px;
+		color: inherit;
+		background: transparent;
+		cursor: pointer;
+	}
+	.reveal-close:hover { background: var(--color-sage); }
+	.reveal-close:focus-visible, .reveal-done:focus-visible, .reveal-card:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
+	@media (max-width: 640px) {
+		.reveal-cards { grid-template-columns: minmax(0, 1fr); }
+		.reveal-card-head { flex-direction: row; align-items: baseline; justify-content: space-between; padding: 12px 14px; }
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		dialog[open] { animation: reveal-in 200ms ease-out; }
+		@keyframes reveal-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+	}
+</style>

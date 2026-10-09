@@ -636,6 +636,23 @@ card: the build-time render is the fallback, and `index.astro`'s script
 re-runs `isCelebratingMilestone` against today's date. The line is hidden
 while the total is 0.
 
+### Homepage league strip and team reveal
+
+The strip above the homepage hero follows the newest league (`currentLeague`) by
+itself — `bannerMode` in [src/lib/league-banner.ts](src/lib/league-banner.ts)
+(tests: `tests/league-banner.test.mjs`): **kickoff** (rosters in, no score yet:
+"FA26-L2 kickoff D-n" + team chips, `LeagueStatusBanner.astro`), **week** (latest
+scored week: leader(s) + that week's top scorer(s), ties shared, inactive left out;
+during the `HALLOWEEN_BANNER_DAYS` before a Halloween final it swaps client-side to
+"Halloween Final D-n" with the published title favourite), **finale** (every fixture
+scored: the gold `LeagueFinaleBanner`). D-n uses the visitor's date. Closing hides it
+for the visit (sessionStorage, per league/mode/week).
+
+`TeamRevealPopup.astro` shows the newest league's teams (color, captain from
+team-info.json, squad, team page link) once per league per browser (localStorage
+`kicks-team-reveal-<league>`), only while that league isn't finished. On the visit it
+shows, `WelcomePopup.astro` steps aside so there's never two popups.
+
 ### Season themes
 
 [src/lib/season-theme.ts](src/lib/season-theme.ts) lists date windows

@@ -4677,3 +4677,116 @@ html[data-season] .hero-season-note--past {
 	line-height: 1;
 
 }
+
+/* Homepage league strip (LeagueStatusBanner.astro): same layout as the gold
+   finale banner, in the club's green while a league is running. */
+
+.league-banner-wrap[hidden],
+.league-banner[hidden] {
+
+	display: none;
+
+}
+
+.league-banner {
+
+	background: linear-gradient(90deg, #e3e9d8, #f1f3ea);
+	border-bottom: 1px solid rgba(63, 81, 40, 0.25);
+
+}
+
+.league-banner .finale-banner-label {
+
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	color: var(--color-green);
+	text-transform: none;
+	letter-spacing: 0.02em;
+	font-size: 0.85rem;
+
+}
+
+.league-banner .finale-chip {
+
+	border-color: rgba(63, 81, 40, 0.3);
+
+}
+
+.league-banner .finale-chip-title {
+
+	color: var(--color-green);
+
+}
+
+.league-chip--link {
+
+	color: var(--color-green);
+	font-weight: 700;
+
+}
+
+.league-chip--link:hover {
+
+	background-color: #fff;
+
+}
+
+.league-chip-dot {
+
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+
+}
+
+.league-banner-dday {
+
+	padding: 2px 8px;
+	border-radius: 999px;
+	background-color: var(--color-green);
+	color: var(--color-background);
+	font-size: 0.7rem;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+
+}
+
+.league-banner--halloween {
+
+	background: linear-gradient(100deg, #ffe6cc, #efe2fb);
+	border-bottom-color: rgba(142, 91, 214, 0.35);
+
+}
+
+.league-banner--halloween .finale-banner-label,
+.league-banner--halloween .finale-chip-title,
+.league-banner--halloween .league-chip--link {
+
+	color: #6b3fae;
+
+}
+
+.league-banner--halloween .finale-chip {
+
+	border-color: rgba(255, 143, 46, 0.55);
+
+}
+
+.league-banner--halloween .league-banner-dday {
+
+	background-color: #ff8f2e;
+	color: #2b1a06;
+
+}
+
+@media (max-width: 700px) {
+
+	/* The finale banner hides its label on phones; here the label is the message. */
+	.league-banner .finale-banner-label {
+		display: inline-flex;
+		font-size: 0.78rem;
+		white-space: nowrap;
+	}
+
+}
