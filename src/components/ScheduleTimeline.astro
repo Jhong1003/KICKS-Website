@@ -66,6 +66,12 @@ const pastCount = view.filter((event) => event.isPast).length;
 									<p class="schedule-item-title">
 										<T en={eventTitle(event, "en")} ko={eventTitle(event, "ko")} />
 									</p>
+									{event.location && (
+										<p class="schedule-item-location">
+											<span aria-hidden="true">📍 </span>
+											{event.location}
+										</p>
+									)}
 								</div>
 							</>
 						);

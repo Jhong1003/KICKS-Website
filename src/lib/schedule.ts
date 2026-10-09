@@ -18,6 +18,8 @@ export interface ScheduleEvent {
 	week?: number;
 	/** Has a tentative date that still needs to be confirmed. */
 	tbd?: boolean;
+	/** Optional place, shown as written in both languages (e.g. "Noyes Laboratory, Room 217"). */
+	location?: string;
 }
 
 export interface ScheduleEventView extends ScheduleEvent {

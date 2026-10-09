@@ -105,7 +105,8 @@ two things:
   cadence (see League rules below).
 
 Each entry has a `date` (`"YYYY-MM-DD"`, or `null` for fully TBD), a
-`title`, a `type` (`league` / `event` / `friendly` / `ceremony`), and for
+`title`, an optional `location` (shown as "📍 …" on the Schedule page, as written in
+both languages), a `type` (`league` / `event` / `friendly` / `ceremony`), and for
 `league` entries a `league` id (e.g. `"FA26-L2"`) and a `week` number
 *within that league* (weeks restart at 1 in every league). A `league`-type
 entry's `date` is what `update_data.py` uses for that league week — add or
