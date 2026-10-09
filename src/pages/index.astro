@@ -16,7 +16,8 @@ import matchesData from "../data/matches.json";
 import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";
 import { formatShortDate } from "../lib/i18n";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
-import { latestLeague, getTeamName } from "../lib/leagues";
+import { latestLeague, currentLeague, getTeamName } from "../lib/leagues";
+import { halloweenFinal } from "../lib/season-theme";
 import { getLeagueFinale } from "../lib/finale";
 import { buildGoalCountdown, isCelebratingMilestone, type MatchScore } from "../lib/goals";
 
@@ -41,6 +42,9 @@ const showTransferBanner =
 // build time here; the script below re-checks it against the visitor's date.
 const goalCountdown = buildGoalCountdown(matchesData as MatchScore[]);
 const celebratingMilestone = isCelebratingMilestone(goalCountdown);
+// Seasonal (src/lib/season-theme.ts): rendered always, shown only while
+// <html data-season="halloween"> is set for the visitor's date.
+const halloweenFinalWeek = halloweenFinal(currentLeague, scheduleData as ScheduleEvent[]);
 ---
 
 <BaseLayout
@@ -79,6 +83,9 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 		}
 
 		<div class="hero">
+			<div class="season-deco season-deco--bats" aria-hidden="true">
+				<span>🦇</span><span>🦇</span><span>🦇</span>
+			</div>
 			<Header variant="hero" />
 			<section class="hero-content" aria-labelledby="hero-title">
 				<div class="hero-text">
@@ -167,6 +174,20 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 									</span>
 								</span>
 							</p>
+						)
+					}
+					{
+						halloweenFinalWeek && (
+							<a
+								class="season-only season-only--halloween hero-season-note"
+								href={`/league/${currentLeague.id}?week=${currentLeague.rules.final_week}#results`}
+							>
+								<span class="hero-season-note-icon" aria-hidden="true">🎃</span>
+								<T
+									en={`Halloween Final · ${formatShortDate(halloweenFinalWeek.date!, "en")} · ${currentLeague.rules.final_win_points} pts per win`}
+									ko={`할로윈 파이널 · ${formatShortDate(halloweenFinalWeek.date!, "ko")} · 승리 시 ${currentLeague.rules.final_win_points}점`}
+								/>
+							</a>
 						)
 					}
 				</div>

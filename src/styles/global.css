@@ -4453,3 +4453,141 @@ a.finale-chip-name:hover,
 		padding-top: 40px;
 	}
 }
+
+/* Season themes (src/lib/season-theme.ts): BaseLayout sets <html data-season="<id>">
+   from the visitor's date. Everything below is hidden unless that theme is on. */
+
+.season-deco,
+.season-only {
+
+	display: none !important;
+
+}
+
+html[data-season="halloween"] .season-only--halloween {
+
+	display: inline-flex !important;
+
+}
+
+html[data-season="halloween"] {
+
+	--color-halloween: #ff8f2e;
+
+}
+
+/* 🎃 tucked onto the corner of the logo, on every page */
+html[data-season="halloween"] .brand {
+
+	position: relative;
+
+}
+
+html[data-season="halloween"] .brand::after {
+
+	content: "🎃";
+	position: absolute;
+	top: -0.4em;
+	right: -0.75em;
+	font-size: 1.2rem;
+	line-height: 1;
+	transform: rotate(14deg);
+	pointer-events: none;
+
+}
+
+html[data-season="halloween"] .season-label {
+
+	border-color: rgba(255, 143, 46, 0.7);
+
+}
+
+html[data-season="halloween"] .hero-next-up-dot {
+
+	background-color: var(--color-halloween);
+	box-shadow: 0 0 8px rgba(255, 143, 46, 0.8);
+
+}
+
+/* A few bats in the empty band between the header and the hero text */
+html[data-season="halloween"] .hero {
+
+	position: relative;
+
+}
+
+html[data-season="halloween"] .season-deco--bats {
+
+	display: block !important;
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+
+}
+
+/* Pale, ghostly silhouettes: the emoji turned solid cream so they read on the green */
+.season-deco--bats span {
+
+	position: absolute;
+	font-size: 1.7rem;
+	opacity: 0.4;
+	filter: brightness(0) invert(0.95);
+
+}
+
+.season-deco--bats span:nth-child(1) { top: 17%; left: 46%; }
+.season-deco--bats span:nth-child(2) { top: 13%; left: 54%; font-size: 1.25rem; opacity: 0.32; }
+.season-deco--bats span:nth-child(3) { top: 21%; left: 60%; font-size: 1rem; opacity: 0.26; }
+
+@media (prefers-reduced-motion: no-preference) {
+	.season-deco--bats span {
+		animation: season-bat-float 5s ease-in-out infinite;
+	}
+	.season-deco--bats span:nth-child(2) { animation-delay: -1.7s; }
+	.season-deco--bats span:nth-child(3) { animation-delay: -3.2s; }
+}
+
+@keyframes season-bat-float {
+
+	0%, 100% { transform: translate(0, 0) rotate(-6deg); }
+	50% { transform: translate(6px, -8px) rotate(6deg); }
+
+}
+
+/* On narrow screens the text fills the top, so the bats move to the empty
+   corner above the hero footer instead */
+@media (max-width: 860px) {
+	.season-deco--bats span:nth-child(1) { top: auto; bottom: 5.5%; left: auto; right: 10%; }
+	.season-deco--bats span:nth-child(2) { top: auto; bottom: 8%; left: auto; right: 22%; }
+	.season-deco--bats span:nth-child(3) { top: auto; bottom: 4.5%; left: auto; right: 30%; }
+}
+
+/* "Halloween Final" line under Next up on the homepage */
+.hero-season-note {
+
+	align-items: baseline;
+	gap: 9px;
+	width: fit-content;
+	margin-top: 12px;
+	padding: 6px 12px;
+	border: 1px solid rgba(255, 143, 46, 0.55);
+	border-radius: 999px;
+	background-color: rgba(255, 143, 46, 0.12);
+	color: var(--color-background);
+	font-size: 0.9rem;
+	line-height: 1.5;
+
+}
+
+.hero-season-note:hover {
+
+	background-color: rgba(255, 143, 46, 0.22);
+
+}
+
+.hero-season-note-icon {
+
+	font-size: 0.85rem;
+	line-height: 1;
+
+}
