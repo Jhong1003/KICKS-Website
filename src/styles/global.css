@@ -4562,6 +4562,86 @@ html[data-season="halloween"] .season-deco--bats {
 	.season-deco--bats span:nth-child(3) { top: auto; bottom: 4.5%; left: auto; right: 30%; }
 }
 
+html[data-season="halloween"] .season-hide-halloween {
+
+	display: none;
+
+}
+
+/* Bunting across the very top of the hero (and of the green header bar on
+   other pages): orange / purple / cream flags on a sagging string, drawn as
+   one repeating SVG tile. */
+html[data-season="halloween"] .hero::before,
+html[data-season="halloween"] .site-header--bar::before {
+
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 26px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='26' viewBox='0 0 96 26'%3E%3Cpath d='M0 2 Q48 9 96 2' fill='none' stroke='%23f7f6f2' stroke-opacity='.55' stroke-width='1.2'/%3E%3Cpath d='M6 3.6 L26 5.4 L15.5 21 Z' fill='%23ff8f2e'/%3E%3Cpath d='M38 5.6 L58 5.6 L48 22 Z' fill='%238e5bd6'/%3E%3Cpath d='M70 5.4 L90 3.6 L80.5 21 Z' fill='%23f7f6f2' fill-opacity='.92'/%3E%3Ccircle cx='48' cy='12' r='2.2' fill='%23ff8f2e'/%3E%3C/svg%3E");
+	background-repeat: repeat-x;
+	background-size: 96px 26px;
+	pointer-events: none;
+
+}
+
+html[data-season="halloween"] .site-header--bar::before {
+
+	height: 18px;
+	background-size: 66px 18px;
+
+}
+
+/* A little ghost peeking out from behind the top of the hero photo */
+html[data-season="halloween"] .split-photo--hero {
+
+	position: relative;
+	z-index: 0;
+
+}
+
+html[data-season="halloween"] .split-photo--hero::before {
+
+	content: "👻";
+	position: absolute;
+	z-index: -1;
+	top: -1.55rem;
+	right: 12%;
+	font-size: 2.4rem;
+	line-height: 1;
+	transform: rotate(-8deg);
+	pointer-events: none;
+
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html[data-season="halloween"] .split-photo--hero::before {
+		animation: season-ghost-peek 4.5s ease-in-out infinite;
+	}
+	html[data-season="halloween"] .brand::after {
+		animation: season-pumpkin-wiggle 3.2s ease-in-out infinite;
+	}
+}
+
+@keyframes season-ghost-peek {
+
+	0%, 30% { transform: translateY(1.3rem) rotate(-8deg); }
+	45%, 80% { transform: translateY(0) rotate(-8deg); }
+	62% { transform: translateY(0) rotate(6deg); }
+	100% { transform: translateY(1.3rem) rotate(-8deg); }
+
+}
+
+@keyframes season-pumpkin-wiggle {
+
+	0%, 80%, 100% { transform: rotate(14deg); }
+	86% { transform: rotate(-4deg) scale(1.12); }
+	92% { transform: rotate(22deg) scale(1.08); }
+
+}
+
 /* "Halloween Final" line under Next up on the homepage */
 .hero-season-note {
 
@@ -4570,9 +4650,9 @@ html[data-season="halloween"] .season-deco--bats {
 	width: fit-content;
 	margin-top: 12px;
 	padding: 6px 12px;
-	border: 1px solid rgba(255, 143, 46, 0.55);
+	border: 1px solid rgba(255, 143, 46, 0.6);
 	border-radius: 999px;
-	background-color: rgba(255, 143, 46, 0.12);
+	background-image: linear-gradient(100deg, rgba(255, 143, 46, 0.24), rgba(142, 91, 214, 0.28));
 	color: var(--color-background);
 	font-size: 0.9rem;
 	line-height: 1.5;
@@ -4587,7 +4667,7 @@ html[data-season] .hero-season-note--past {
 
 .hero-season-note:hover {
 
-	background-color: rgba(255, 143, 46, 0.22);
+	background-image: linear-gradient(100deg, rgba(255, 143, 46, 0.36), rgba(142, 91, 214, 0.4));
 
 }
 

@@ -75,7 +75,9 @@ const currentPath = Astro.url.pathname;
 
 <div class="easter-egg-overlay" id="logo-easter-egg" role="status" hidden>
 	<div class="easter-egg">
-		<span data-lang="en">Welcome to KICKS, the best futsal club at UIUC&nbsp;</span><span data-lang="ko" lang="ko">UIUC 최고의 풋살 동아리, KICKS에 오신 걸 환영합니다&nbsp;</span><span class="easter-egg-ball" aria-hidden="true">⚽</span>
+		<span class="season-hide-halloween"><span data-lang="en">Welcome to KICKS, the best futsal club at UIUC&nbsp;</span><span data-lang="ko" lang="ko">UIUC 최고의 풋살 동아리, KICKS에 오신 걸 환영합니다&nbsp;</span><span class="easter-egg-ball" aria-hidden="true">⚽</span></span>
+		{/* During the Halloween theme (src/lib/season-theme.ts) the egg says this instead */}
+		<span class="season-only season-only--halloween"><span><span data-lang="en">Happy Halloween from KICKS, the spookiest futsal club at UIUC&nbsp;</span><span data-lang="ko" lang="ko">UIUC에서 제일 으스스한 풋살 동아리 KICKS가 해피 할로윈을 외칩니다&nbsp;</span><span class="easter-egg-ball" aria-hidden="true">🎃</span></span></span>
 	</div>
 </div>
 
