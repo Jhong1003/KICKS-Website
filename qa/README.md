@@ -114,6 +114,48 @@ defect types needing that control.
 The remaining M13 misses are a player's *last* recorded week: without a
 recorded leaving date, a deleted final row looks the same as leaving.
 
+## Real escaped defects: what actually reached the site
+
+Fault injection says what the validator *could* catch. Git history says
+what actually got through. Every data commit is a snapshot of what
+kicksuiuc.com showed (Cloudflare redeploys on each push), so
+[`published_history.py`](published_history.py) replays all of them,
+normalises the schema changes along the way (team names → ids, one season
+→ leagues), and lists every change to a week that was already finished
+when it went public.
+
+```sh
+python qa/published_history.py --out qa/results/published-history.json
+```
+
+FA26-L1 had **4 escaped defects**, all in `player_stats`, none in match
+scores:
+
+| Defect | On the site for | Logged in issues tab | Today's validator |
+|---|---:|---|---|
+| Week 3 row missing (new member) | 1.2 days | **no** | caught (missing-row check) |
+| Week 2 own goal published as a week 1 goal (I001) | 1.9 days† | I001 | caught (weekly goal sums) |
+| Week 3 row missing (goalkeeper) (I002) | 1.2 days | I002 | caught (missing-row check, incl. after the player went inactive) |
+| Week 2 attendance 0 published as 6 (I004) | 3.7 days | I004 | **passes** (M15: no internal check can see it) |
+
+† Counted from when player pages first existed; the inflated total was in
+the leaderboard earlier.
+
+- **All four were found by a person, not by validation.** Validation at
+  the time checked weekly goal totals only.
+- **3 of 4 would now be stopped before publishing.** The fourth is exactly
+  the class fault injection predicted no rule can catch, which is the
+  independent confirmation that the defect catalog and the measured gaps
+  reflect reality, not just the catalog's design.
+- **The issues tab captured 3 of 4.** The unlogged one was fixed by hand
+  in the Sheet and never recorded. A defect log that misses a quarter of
+  defects would understate the defect rate by the same quarter, so the
+  published history is the more complete source.
+- 4 of the 113 player-week rows (3.5%) were wrong when first published;
+  0 of 36 match rows. Weekly totals per player, typed by hand, are where
+  the risk is, which is what per-goal recording (`goal_events`, from
+  FA26-L2) is meant to address.
+
 ## Limits
 
 - One league of data. Rates describe this dataset's structure; a different
