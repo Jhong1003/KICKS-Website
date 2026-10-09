@@ -180,6 +180,8 @@ const halloweenFinalWeek = halloweenFinal(currentLeague, scheduleData as Schedul
 						halloweenFinalWeek && (
 							<a
 								class="season-only season-only--halloween hero-season-note"
+								id="hero-season-note"
+								data-date={halloweenFinalWeek.date}
 								href={`/league/${currentLeague.id}?week=${currentLeague.rules.final_week}#results`}
 							>
 								<span class="hero-season-note-icon" aria-hidden="true">🎃</span>
@@ -217,6 +219,17 @@ const halloweenFinalWeek = halloweenFinal(currentLeague, scheduleData as Schedul
 		</section>
 	</main>
 </BaseLayout>
+
+<script>
+	// The Halloween Final line is only an invitation: once its day is over
+	// (visitor's date), hide it even though the theme runs a few days longer.
+	const seasonNote = document.getElementById("hero-season-note");
+	if (seasonNote) {
+		const now = new Date();
+		const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+		if (today > (seasonNote.dataset.date ?? "")) seasonNote.classList.add("hero-season-note--past");
+	}
+</script>
 
 <script>
 	import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";

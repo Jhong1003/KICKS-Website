@@ -4579,6 +4579,12 @@ html[data-season="halloween"] .season-deco--bats {
 
 }
 
+html[data-season] .hero-season-note--past {
+
+	display: none !important;
+
+}
+
 .hero-season-note:hover {
 
 	background-color: rgba(255, 143, 46, 0.22);
