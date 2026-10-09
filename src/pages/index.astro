@@ -5,6 +5,8 @@ import Header from "../components/Header.astro";
 import StandingsTable from "../components/StandingsTable.astro";
 import T from "../components/T.astro";
 import LeagueFinaleBanner from "../components/LeagueFinaleBanner.astro";
+import LeagueStatusBanner from "../components/LeagueStatusBanner.astro";
+import TeamRevealPopup from "../components/TeamRevealPopup.astro";
 import TransferBanner from "../components/TransferBanner.astro";
 import WelcomePopup from "../components/WelcomePopup.astro";
 import leagueTable from "../data/league_table.json";
@@ -18,6 +20,8 @@ import { formatShortDate } from "../lib/i18n";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
 import { latestLeague, currentLeague, getTeamName } from "../lib/leagues";
 import { halloweenFinal } from "../lib/season-theme";
+import { bannerMode, weekSummary, type BannerMatch, type BannerProfile } from "../lib/league-banner";
+import { titleHistory } from "../lib/forecasts";
 import { getLeagueFinale } from "../lib/finale";
 import { buildGoalCountdown, isCelebratingMilestone, type MatchScore } from "../lib/goals";
 
@@ -45,6 +49,21 @@ const celebratingMilestone = isCelebratingMilestone(goalCountdown);
 // Seasonal (src/lib/season-theme.ts): rendered always, shown only while
 // <html data-season="halloween"> is set for the visitor's date.
 const halloweenFinalWeek = halloweenFinal(currentLeague, scheduleData as ScheduleEvent[]);
+
+// Top strip (src/lib/league-banner.ts): follows the newest league — kickoff,
+// then weekly results (Halloween Final in the days before it), then the gold
+// finale banner once it's finished.
+const leagueBannerMode = bannerMode(currentLeague.id, matchesData as BannerMatch[]);
+const currentFinale = leagueBannerMode === "finale" ? getLeagueFinale(currentLeague) : null;
+const kickoffDate =
+	(scheduleData as ScheduleEvent[]).find((event) => event.type === "league" && event.league === currentLeague.id && event.week === 1)?.date ?? null;
+const leagueWeekSummary = weekSummary(currentLeague.id, matchesData as BannerMatch[], leagueTable, profilesData as BannerProfile[]);
+const latestTitle = titleHistory(currentLeague.id).at(-1);
+const titleFavourite = latestTitle
+	? Object.entries(latestTitle.chances)
+			.map(([teamId, p]) => ({ teamId, p }))
+			.sort((a, b) => b.p - a.p)[0] ?? null
+	: null;
 ---
 
 <BaseLayout
@@ -52,6 +71,7 @@ const halloweenFinalWeek = halloweenFinal(currentLeague, scheduleData as Schedul
 	description="KICKS is a student-run, Korean-inspired futsal community at the University of Illinois Urbana-Champaign (UIUC) — weekly league, standings, player stats, and events. UIUC 한인 풋살 동아리."
 	header="custom"
 >
+	<TeamRevealPopup league={currentLeague} />
 	<WelcomePopup />
 	{/* Tells search engines what KICKS is (shown in Google's results/knowledge panel). */}
 	<script
@@ -70,7 +90,19 @@ const halloweenFinalWeek = halloweenFinal(currentLeague, scheduleData as Schedul
 		})}
 	/>
 	<main>
-		{finale && <LeagueFinaleBanner league={latestLeague} finale={finale} />}
+		{
+			leagueBannerMode === "finale"
+				? currentFinale && <LeagueFinaleBanner league={currentLeague} finale={currentFinale} />
+				: (
+						<LeagueStatusBanner
+							league={currentLeague}
+							mode={leagueBannerMode}
+							kickoffDate={kickoffDate}
+							summary={leagueWeekSummary}
+							halloween={halloweenFinalWeek ? { date: halloweenFinalWeek.date!, favourite: titleFavourite } : null}
+						/>
+					)
+		}
 		{
 			showTransferBanner && (
 				<TransferBanner

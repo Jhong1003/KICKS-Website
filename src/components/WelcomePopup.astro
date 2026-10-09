@@ -32,6 +32,14 @@ import T from "./T.astro";
 
 	try { dismissed ||= sessionStorage.getItem(sessionKey) === "1"; } catch { /* Storage may be disabled. */ }
 
+	// The team reveal popup (TeamRevealPopup.astro) takes this visit if it hasn't been seen yet.
+	const reveal = document.querySelector<HTMLDialogElement>("#team-reveal");
+	if (reveal) {
+		let revealSeen = false;
+		try { revealSeen = localStorage.getItem(reveal.dataset.revealKey ?? "") === "1"; } catch { /* Storage disabled. */ }
+		if (!revealSeen) dismissed = true;
+	}
+
 	if (dialog && !dismissed) {
 		const body = document.body;
 		const scrollX = window.scrollX;

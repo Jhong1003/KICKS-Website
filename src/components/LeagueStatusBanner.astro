@@ -1,0 +1,178 @@
+---
+// Homepage strip while a league is about to start or under way (see
+// src/lib/league-banner.ts): "kickoff" with the teams, or "week" with the
+// latest week's leader and top scorer — swapped client-side for a
+// "Halloween Final D-n" strip in the days before a Halloween final. Once the
+// league is finished the gold LeagueFinaleBanner takes over instead.
+// Reuses the finale banner's layout classes; colors come from .league-banner.
+import T from "./T.astro";
+import { getTeamColor, getTeamName, type League } from "../lib/leagues";
+import { getReadableAccentColor } from "../lib/players";
+import type { BannerMode, WeekSummary } from "../lib/league-banner";
+
+interface Props {
+	league: League;
+	mode: Exclude<BannerMode, "finale">;
+	kickoffDate: string | null;
+	summary: WeekSummary | null;
+	halloween: { date: string; favourite: { teamId: string; p: number } | null } | null;
+}
+
+const { league, mode, kickoffDate, summary, halloween } = Astro.props;
+const teamHref = (teamId: string) => `/league/${league.id}/team/${teamId}`;
+const accent = (teamId: string) => getReadableAccentColor(getTeamColor(teamId, league));
+const pct = (p: number) => (p > 0.999 ? ">99.9%" : p < 0.001 ? "<0.1%" : `${Math.round(p * 100)}%`);
+const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 0}`;
+---
+
+<div class="league-banner-wrap" id="league-banner-wrap" data-dismiss-key={dismissKey}>
+	<div class:list={["finale-banner", "league-banner", `league-banner--${mode}`]} data-banner-main>
+		<div class="finale-banner-inner">
+			{
+				mode === "kickoff" ? (
+					<>
+						<span class="finale-banner-label">
+							<span aria-hidden="true">🆕 </span>
+							<T en={`${league.id} kickoff`} ko={`${league.id} 킥오프`} />
+							{kickoffDate && <span class="league-banner-dday" data-dday-date={kickoffDate} hidden />}
+						</span>
+						<div class="finale-banner-list">
+							{league.teams.map((team) => (
+								<a class="finale-chip league-chip" href={teamHref(team.team_id)}>
+									<span class="league-chip-dot" style={`background-color: ${getTeamColor(team.team_id, league)}`} aria-hidden="true" />
+									<span class="finale-chip-name">{team.name}</span>
+								</a>
+							))}
+							<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}`}>
+								<T en="Fixtures →" ko="경기 일정 보기 →" />
+							</a>
+						</div>
+					</>
+				) : (
+					summary && (
+						<>
+							<span class="finale-banner-label">
+								<span aria-hidden="true">📊 </span>
+								<T en={`Week ${summary.week} results`} ko={`${summary.week}주차 결과`} />
+							</span>
+							<div class="finale-banner-list">
+								{summary.leaders.length > 0 && (
+									<div class="finale-chip league-chip">
+										<span aria-hidden="true">🥇</span>
+										<span class="finale-chip-title">
+											<T en={summary.leaders.length > 1 ? "Joint 1st" : "1st"} ko={summary.leaders.length > 1 ? "공동 1위" : "1위"} />
+										</span>
+										{summary.leaders.map((leader, index) => (
+											<>
+												{index > 0 && <span class="finale-chip-sep">·</span>}
+												<a class="finale-chip-name" href={teamHref(leader.teamId)} style={`color: ${accent(leader.teamId)}`}>
+													{getTeamName(leader.teamId, league)}
+												</a>
+											</>
+										))}
+										<span class="finale-chip-count">
+											<T en={`${summary.leaders[0].points} pts`} ko={`승점 ${summary.leaders[0].points}`} />
+										</span>
+									</div>
+								)}
+								{summary.topScorers && (
+									<div class="finale-chip league-chip">
+										<span aria-hidden="true">⚽</span>
+										<span class="finale-chip-title"><T en="Top scorer this week" ko="이번 주 최다골" /></span>
+										{summary.topScorers.players.map((player, index) => (
+											<>
+												{index > 0 && <span class="finale-chip-sep">·</span>}
+												<a class="finale-chip-name" href={`/players/${player.id}?league=${league.id}`}>{player.name}</a>
+											</>
+										))}
+										<span class="finale-chip-count">
+											<T en={`${summary.topScorers.goals} goals`} ko={`${summary.topScorers.goals}골`} />
+										</span>
+									</div>
+								)}
+								<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}?week=${summary.week}#results`}>
+									<T en="Full results →" ko="전체 결과 보기 →" />
+								</a>
+							</div>
+						</>
+					)
+				)
+			}
+			<button class="finale-banner-close" type="button" data-banner-close aria-label="Dismiss" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Dismiss", ko: "닫기" } })}>✕</button>
+		</div>
+	</div>
+
+	{
+		mode === "week" && halloween && (
+			<div class="finale-banner league-banner league-banner--halloween" data-banner-halloween data-final-date={halloween.date} hidden>
+				<div class="finale-banner-inner">
+					<span class="finale-banner-label">
+						<span aria-hidden="true">🎃 </span>
+						<T en="Halloween Final" ko="할로윈 파이널" />
+						<span class="league-banner-dday" data-dday-date={halloween.date} hidden />
+					</span>
+					<div class="finale-banner-list">
+						<div class="finale-chip league-chip">
+							<span aria-hidden="true">🏆</span>
+							<T en={`Wins are worth ${league.rules.final_win_points} points!`} ko={`승리하면 승점 ${league.rules.final_win_points}점!`} />
+						</div>
+						{halloween.favourite && (
+							<a class="finale-chip league-chip" href={`/league/${league.id}#title-race`}>
+								<span class="finale-chip-title"><T en="Title favourite" ko="우승 확률 1위" /></span>
+								<span class="finale-chip-name" style={`color: ${accent(halloween.favourite.teamId)}`}>
+									{getTeamName(halloween.favourite.teamId, league)}
+								</span>
+								<span class="finale-chip-count">{pct(halloween.favourite.p)}</span>
+							</a>
+						)}
+						<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}`}>
+							<T en="League page →" ko="리그 페이지 →" />
+						</a>
+					</div>
+					<button class="finale-banner-close" type="button" data-banner-close aria-label="Dismiss" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Dismiss", ko: "닫기" } })}>✕</button>
+				</div>
+			</div>
+		)
+	}
+</div>
+
+<script>
+	import { dDayLabel, daysUntil, HALLOWEEN_BANNER_DAYS } from "../lib/league-banner";
+
+	const wrap = document.getElementById("league-banner-wrap");
+	if (wrap) {
+		const now = new Date();
+		const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+		// D-n badges, against the visitor's own date.
+		wrap.querySelectorAll<HTMLElement>("[data-dday-date]").forEach((el) => {
+			const label = dDayLabel(el.dataset.ddayDate ?? "", today);
+			el.textContent = label ?? "";
+			el.hidden = label === null;
+		});
+
+		// The days before a Halloween final: show that strip instead.
+		const main = wrap.querySelector<HTMLElement>("[data-banner-main]");
+		const halloween = wrap.querySelector<HTMLElement>("[data-banner-halloween]");
+		const finalDate = halloween?.dataset.finalDate;
+		if (main && halloween && finalDate) {
+			const days = daysUntil(finalDate, today);
+			if (days >= 0 && days <= HALLOWEEN_BANNER_DAYS) {
+				halloween.hidden = false;
+				main.hidden = true;
+			}
+		}
+
+		// Closing hides it for the rest of this visit (same as the finale banner).
+		const key = wrap.dataset.dismissKey ?? "kicks-league-banner";
+		try {
+			if (sessionStorage.getItem(key) === "1") wrap.hidden = true;
+		} catch { /* Storage may be disabled. */ }
+		wrap.querySelectorAll("[data-banner-close]").forEach((button) =>
+			button.addEventListener("click", () => {
+				wrap.hidden = true;
+				try { sessionStorage.setItem(key, "1"); } catch { /* Closing still works. */ }
+			}),
+		);
+	}
+</script>
