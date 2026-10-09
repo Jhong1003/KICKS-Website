@@ -6,13 +6,20 @@ import T from "./T.astro";
 import { getTeamColor, getTeamName, type League } from "../lib/leagues";
 import { MODEL_LABELS, latestForecastWeek, percent } from "../lib/forecasts";
 import { getReadableAccentColor } from "../lib/players";
+import { orderLikeFixtures, type Fixture } from "../lib/forecast-order";
+import matchesData from "../data/matches.json";
 
 interface Props {
 	league: League;
 }
 
 const { league } = Astro.props;
-const latest = latestForecastWeek(league.id);
+const forecastWeek = latestForecastWeek(league.id);
+// Same order and home/away as that week's fixtures on the Sheet (display only).
+const latest = forecastWeek && {
+	...forecastWeek,
+	pairings: orderLikeFixtures(forecastWeek.pairings, matchesData as Fixture[], league.id, forecastWeek.week),
+};
 ---
 
 {
