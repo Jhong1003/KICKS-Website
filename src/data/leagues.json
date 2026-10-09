@@ -58,18 +58,18 @@
     "teams": [
       {
         "team_id": "T1",
-        "name": "A",
+        "name": "영보이즈",
         "color": "#e03131"
       },
       {
         "team_id": "T2",
-        "name": "B",
-        "color": "#1c7ed6"
+        "name": "Mad Maize",
+        "color": "#b8860b"
       },
       {
         "team_id": "T3",
-        "name": "C",
-        "color": "#b8860b"
+        "name": "하극상",
+        "color": "#1c7ed6"
       }
     ]
   }
