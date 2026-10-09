@@ -5,5 +5,12 @@
 		"title_ko": "FA26 프리시즌",
 		"date": "2026-08-26",
 		"site_photos": true
+	},
+	{
+		"id": "fa26-gm1",
+		"title": "General Meeting #1",
+		"title_ko": "GM 1 · 제너럴 미팅",
+		"date": "2026-09-02",
+		"cover": "15.jpg"
 	}
 ]
