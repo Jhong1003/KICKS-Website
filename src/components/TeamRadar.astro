@@ -1,0 +1,249 @@
+---
+// Team style hexagon (src/lib/team-profile.ts): this team's shape in its team
+// color over the league average as a dashed gray outline. Fixed scales, so
+// the shape is an honest picture of the raw numbers listed beside it (the
+// list doubles as the chart's table view). A corner without data (late goals
+// until goal times are wired in) is drawn as a dashed spoke and skipped by
+// the shapes rather than pulled to the center.
+import T from "./T.astro";
+import { AXES, type TeamProfile } from "../lib/team-profile";
+
+interface Props {
+	profile: TeamProfile;
+	average: (number | null)[];
+	color: string;
+	teamName: string;
+}
+
+const { profile, average, color, teamName } = Astro.props;
+
+const CX = 180;
+const CY = 160;
+const R = 104;
+const LABEL_R = 130;
+const angle = (index: number) => -Math.PI / 2 + (index * 2 * Math.PI) / AXES.length;
+const point = (index: number, r: number) => [CX + r * Math.cos(angle(index)), CY + r * Math.sin(angle(index))] as const;
+const fmt = (n: number) => n.toFixed(1);
+const polygon = (values: (number | null)[]) =>
+	values
+		.map((value, index) => (value === null ? null : point(index, R * value)))
+		.filter((p): p is readonly [number, number] => p !== null)
+		.map(([x, y]) => `${fmt(x)},${fmt(y)}`)
+		.join(" ");
+
+const rings = [0.25, 0.5, 0.75, 1].map((step) => AXES.map((_, index) => point(index, R * step).map(fmt).join(",")).join(" "));
+const teamValues = profile.axes.map((axis) => axis.value);
+const anchor = (index: number) => {
+	const x = Math.cos(angle(index));
+	return Math.abs(x) < 0.2 ? "middle" : x > 0 ? "start" : "end";
+};
+---
+
+<div class="team-radar" style={`--team-color: ${color}`}>
+	<figure class="team-radar-figure">
+		<svg viewBox="0 0 360 320" role="img" aria-labelledby="team-radar-desc">
+			<desc id="team-radar-desc">{teamName} team style compared with the league average. The values are listed next to the chart.</desc>
+			<g class="team-radar-grid">
+				{rings.map((points) => <polygon points={points} />)}
+				{
+					AXES.map((axis, index) => {
+						const [x, y] = point(index, R);
+						return <line x1={CX} y1={CY} x2={fmt(x)} y2={fmt(y)} class:list={{ "team-radar-spoke--empty": teamValues[index] === null }} />;
+					})
+				}
+			</g>
+			<polygon class="team-radar-average" points={polygon(average)} />
+			<polygon class="team-radar-shape" points={polygon(teamValues)} />
+			{
+				profile.axes.map((axis, index) => {
+					if (axis.value === null) return null;
+					const [x, y] = point(index, R * axis.value);
+					return (
+						<circle class="team-radar-dot" cx={fmt(x)} cy={fmt(y)} r="4.5">
+							<title>{`${AXES[index].en}: ${axis.raw.en}`}</title>
+						</circle>
+					);
+				})
+			}
+			{
+				AXES.map((axis, index) => {
+					const [x, y] = point(index, LABEL_R);
+					return (
+						<text
+							x={fmt(x)}
+							y={fmt(y + 4)}
+							text-anchor={anchor(index)}
+							class:list={["team-radar-label", { "team-radar-label--empty": teamValues[index] === null }]}
+						>
+							<tspan aria-hidden="true">{axis.icon} </tspan>
+							<tspan data-lang="en">{axis.en}</tspan>
+							<tspan data-lang="ko">{axis.ko}</tspan>
+						</text>
+					);
+				})
+			}
+		</svg>
+		<figcaption class="team-radar-legend">
+			<span><span class="team-radar-key team-radar-key--team" aria-hidden="true"></span>{teamName}</span>
+			<span><span class="team-radar-key team-radar-key--average" aria-hidden="true"></span><T en="League average" ko="리그 평균" /></span>
+		</figcaption>
+	</figure>
+
+	<dl class="team-radar-values">
+		{
+			profile.axes.map((axis, index) => (
+				<div class:list={{ "team-radar-value--empty": axis.value === null }}>
+					<dt>
+						<span aria-hidden="true">{AXES[index].icon} </span>
+						<T en={AXES[index].en} ko={AXES[index].ko} />
+					</dt>
+					<dd>
+						<strong><T en={axis.raw.en} ko={axis.raw.ko} /></strong>
+						<T as="span" class="team-radar-note" en={AXES[index].noteEn} ko={AXES[index].noteKo} />
+					</dd>
+				</div>
+			))
+		}
+	</dl>
+</div>
+
+<style>
+	.team-radar {
+		display: grid;
+		grid-template-columns: minmax(260px, 400px) minmax(0, 1fr);
+		align-items: center;
+		gap: 24px 40px;
+		margin-top: 20px;
+		padding: 20px;
+		border: 1px solid var(--color-sage);
+		border-radius: 8px;
+		background-color: #fff;
+	}
+
+	.team-radar-figure {
+		margin: 0;
+	}
+
+	.team-radar-figure svg {
+		display: block;
+		width: 100%;
+		height: auto;
+		overflow: visible;
+	}
+
+	.team-radar-grid polygon,
+	.team-radar-grid line {
+		fill: none;
+		stroke: rgba(41, 41, 41, 0.12);
+		stroke-width: 1;
+	}
+
+	.team-radar-grid .team-radar-spoke--empty {
+		stroke: rgba(41, 41, 41, 0.25);
+		stroke-dasharray: 3 4;
+	}
+
+	.team-radar-average {
+		fill: none;
+		stroke: rgba(41, 41, 41, 0.45);
+		stroke-width: 1.5;
+		stroke-dasharray: 5 4;
+	}
+
+	.team-radar-shape {
+		fill: var(--team-color);
+		fill-opacity: 0.22;
+		stroke: var(--team-color);
+		stroke-width: 2;
+		stroke-linejoin: round;
+	}
+
+	.team-radar-dot {
+		fill: var(--team-color);
+		stroke: #fff;
+		stroke-width: 2;
+	}
+
+	.team-radar-label {
+		fill: var(--color-dark);
+		font-size: 12px;
+		font-weight: 700;
+	}
+
+	.team-radar-label--empty {
+		fill: rgba(41, 41, 41, 0.45);
+	}
+
+	.team-radar-legend {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 6px 18px;
+		margin-top: 4px;
+		font-size: 0.8rem;
+		color: rgba(41, 41, 41, 0.75);
+	}
+
+	.team-radar-legend > span {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+	.team-radar-key {
+		display: inline-block;
+		width: 18px;
+		height: 0;
+		border-top: 2px solid var(--team-color);
+	}
+
+	.team-radar-key--average {
+		border-top: 2px dashed rgba(41, 41, 41, 0.45);
+	}
+
+	.team-radar-values {
+		display: grid;
+		gap: 12px;
+		margin: 0;
+	}
+
+	.team-radar-values dt {
+		font-size: 0.75rem;
+		font-weight: 700;
+		opacity: 0.6;
+	}
+
+	.team-radar-values dd {
+		display: flex;
+		flex-direction: column;
+		margin: 2px 0 0;
+		font-size: 0.95rem;
+	}
+
+	.team-radar-values :global(.team-radar-note) {
+		font-size: 0.75rem;
+		opacity: 0.55;
+	}
+
+	.team-radar-value--empty dd strong {
+		font-weight: 500;
+		opacity: 0.55;
+	}
+
+	@media (max-width: 760px) {
+		.team-radar {
+			grid-template-columns: minmax(0, 1fr);
+			padding: 16px 12px;
+		}
+
+		.team-radar-figure {
+			max-width: 380px;
+			margin: 0 auto;
+		}
+
+		.team-radar-values {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 14px 16px;
+		}
+	}
+</style>
