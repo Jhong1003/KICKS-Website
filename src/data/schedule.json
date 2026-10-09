@@ -1,4 +1,5 @@
 [
+  { "date": "2026-09-02", "title": "General Meeting #1 (GM1)", "title_ko": "GM 1 · 제너럴 미팅", "type": "event", "location": "Noyes Laboratory, Room 217" },
   { "date": "2026-09-06", "title": "FA26-L1 · Week 1", "type": "league", "league": "FA26-L1", "week": 1 },
   { "date": "2026-09-13", "title": "FA26-L1 · Week 2", "type": "league", "league": "FA26-L1", "week": 2 },
   { "date": "2026-09-20", "title": "FA26-L1 · Week 3", "type": "league", "league": "FA26-L1", "week": 3 },
