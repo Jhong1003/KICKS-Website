@@ -172,6 +172,10 @@ the numbers live in `src/data/league-config.json`, not in code):
    됩니다 (아래 D 참고). `joined_week`는 그 선수의 *첫 리그* 안에서의 주차이고,
    그 이후 리그에서는 신경 쓰지 않아도 됩니다.
 
+6-1. **팀 페이지 주장·구호 (선택)** — `src/data/team-info.json`에 리그 id 아래
+   `team_id`별로 `{ "captain": "이름" }`(players 탭과 똑같은 이름), 원하면 `motto`/`motto_en`,
+   팀 사진 `photo`(public/ 아래 경로)를 넣습니다. 비워 둬도 팀 페이지는 정상으로 나옵니다.
+
 **B. 이적 배너**
 
 7. **`src/data/transfer-news.json`의 `league` 정리** — 새 리그가 시작되면 배너는
