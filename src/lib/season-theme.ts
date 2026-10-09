@@ -15,17 +15,21 @@ import type { ScheduleEvent } from "./schedule";
 
 export interface SeasonTheme {
 	id: string;
-	/** First and last day, "MM-DD", in the visitor's local time (inclusive). */
+	/**
+	 * First and last day, "MM-DD", in the visitor's local time (inclusive).
+	 * A window can run into the next month but not past Dec 31.
+	 */
 	from: string;
 	to: string;
 }
 
-export const SEASON_THEMES: SeasonTheme[] = [{ id: "halloween", from: "10-01", to: "10-31" }];
+export const SEASON_THEMES: SeasonTheme[] = [{ id: "halloween", from: "10-01", to: "11-03" }];
 
 /**
  * The current league's final week when it falls on Halloween (Oct 31) —
- * the homepage then calls it the "Halloween Final". Null otherwise, so a
- * future season with a different calendar just doesn't show the line.
+ * the homepage then calls it the "Halloween Final" (until that day has passed;
+ * the theme itself runs a few days longer). Null otherwise, so a future season
+ * with a different calendar just doesn't show the line.
  */
 export function halloweenFinal(league: League, schedule: ScheduleEvent[]): ScheduleEvent | null {
 	const final = schedule.find(

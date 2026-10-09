@@ -636,14 +636,14 @@ while the total is 0.
 ### Season themes
 
 [src/lib/season-theme.ts](src/lib/season-theme.ts) lists date windows
-(`SEASON_THEMES`, "MM-DD" inclusive; Halloween = Oct 1–31). An inline script
+(`SEASON_THEMES`, "MM-DD" inclusive; Halloween = Oct 1 – Nov 3). An inline script
 in `BaseLayout.astro` checks the **visitor's** date before first paint and
 sets `<html data-season="<id>">`; every decoration is CSS keyed off that
 attribute ("Season themes" at the end of `global.css`), so it switches on and
 off by itself with no redeploy. Halloween adds a 🎃 on the logo, an orange
 Next-up dot and season pill, a few bats in the homepage hero, and a "Halloween
 Final" line when the current league's final week falls on Oct 31
-(`halloweenFinal`). Preview any time with `?theme=halloween` (sticks for the
+(`halloweenFinal`), hidden once that day has passed. Preview any time with `?theme=halloween` (sticks for the
 tab; `?theme=none` turns it off). Without JavaScript nothing is themed.
 
 ### Full Matches encryption
