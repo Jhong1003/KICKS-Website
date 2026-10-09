@@ -1,0 +1,11 @@
+{
+  "_comment": "Approved mid-league team changes, hand-edited and read only by scripts/validate_data.py (the 'team change' rule). Every time a player's team in player_stats differs from their team the week before in the same league, there must be a matching entry here: player (exactly as typed in the Sheet), week (the first week they play for the new team) and to (the new team name, exactly as on the teams tab). Unlike transfer-news.json (the homepage banner, rewritten every league), this is the permanent record, so never delete past leagues' entries. Moving teams between leagues needs no entry: each league's teams are new.",
+  "FA26-L1": [
+    { "player": "김하주", "week": 3, "to": "오늘밤 샴페인" },
+    { "player": "홍지환", "week": 3, "to": "오늘밤 샴페인" },
+    { "player": "박경태", "week": 3, "to": "이지선다" },
+    { "player": "이재민", "week": 3, "to": "문전박대" },
+    { "player": "진홍주", "week": 4, "to": "문전박대" }
+  ],
+  "FA26-L2": []
+}

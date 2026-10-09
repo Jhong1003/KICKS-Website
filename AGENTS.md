@@ -38,7 +38,7 @@ site reads.
   `player_leaderboard.json`, `player_profiles.json`, `leagues.json`,
   `partners.json`, plus the encrypted `full-matches.enc.json`). **Never
   hand-edit the generated files** — regenerate them instead (see pipeline
-  below). Nine files in this folder are the hand-edited exception, never
+  below). Ten files in this folder are the hand-edited exception, never
   touched by the pipeline: [perks.json](src/data/perks.json) (member perks,
   see "Member perks" below), [board.json](src/data/board.json)
   (the club board: role, major, favorite player, fun fact, Instagram; each
@@ -49,7 +49,9 @@ site reads.
   [player-photos.json](src/data/player-photos.json) (optional real player
   photos, see "Player profiles" below),
   [transfer-news.json](src/data/transfer-news.json) (homepage transfer
-  banner, see below), [gallery-albums.json](src/data/gallery-albums.json)
+  banner, see below), [transfers.json](src/data/transfers.json) (the permanent
+  record of approved mid-league team moves, read only by `scripts/validate_data.py` —
+  unlike the banner it is never reset between leagues), [gallery-albums.json](src/data/gallery-albums.json)
   (gallery album titles/dates/cover), [awards.json](src/data/awards.json)
   (board-chosen awards — Best Defender, OG Award, Ballon d'Or, Puskás — and
   trophy photos for any award, read by `src/lib/awards.ts` for the Hall of

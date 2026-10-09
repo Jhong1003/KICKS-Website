@@ -27,6 +27,7 @@ VALIDATE_STRICT=1 or VALIDATE_STRICT=0.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import sys
@@ -404,6 +405,14 @@ def check_active_players_missing_weeks(
     An active player with rows but no joined_week is skipped with a
     warning rather than assumed to have been here since week 1 — guessing
     would reintroduce exactly the false alarms this is meant to remove.
+
+    A player who isn't `active` any more is still checked, between their
+    first and last recorded week of each league: a missing week *inside*
+    that span is a deleted row, not a departure. (This used to skip
+    non-active players entirely, so marking someone inactive quietly
+    turned off the check for their past weeks too — a fault-injection run
+    found that the I002 row itself, 정경섭 week 3, could be deleted again
+    without failing once he was marked inactive. See qa/README.md.)
     """
     errors, warnings = [], []
     rank = {league: index for index, league in enumerate(league_order)}
@@ -416,6 +425,24 @@ def check_active_players_missing_weeks(
     have_row = set(zip(player_stats["league"], player_stats["player"], player_stats["week"]))
     leagues_of = player_stats.groupby("player")["league"].agg(lambda s: sorted(set(s), key=rank.__getitem__))
     active_players = players[players["status"] == "active"]
+
+    for _, player_row in players[players["status"] != "active"].iterrows():
+        name = player_row["player"]
+        if name not in leagues_of.index:
+            continue
+        for league in leagues_of[name]:
+            weeks = player_stats[(player_stats["league"] == league) & (player_stats["player"] == name)]["week"]
+            first, last = int(weeks.min()), int(weeks.max())
+            joined = player_row.get("joined_week")
+            if league == leagues_of[name][0] and not pd.isna(joined):
+                first = min(first, int(joined))
+            for week in sorted(finished.get(league, [])):
+                if first <= week < last and (league, name, week) not in have_row:
+                    errors.append(
+                        f"[{league}] player_stats: '{name}'의 {week}주차 행이 없습니다 — 합류(또는 첫 기록)부터 "
+                        f"마지막 기록({last}주차)까지는 {player_row['status']} 상태라도 모든 주차가 있어야 합니다. "
+                        "결석했다면 games 0으로 한 줄 추가해주세요"
+                    )
 
     for _, player_row in active_players.iterrows():
         name = player_row["player"]
@@ -439,6 +466,89 @@ def check_active_players_missing_weeks(
                         f"({since}, active 상태) — 결석했다면 games 0으로 한 줄 추가해주세요"
                     )
     return errors, warnings
+
+
+def check_duplicate_player_weeks(player_stats: pd.DataFrame) -> CheckResult:
+    """Rule: one player_stats row per (league, week, player). A copy-pasted
+    row with no goals balances every goal sum, but it double-counts the
+    player's attendance (team participation rate = a standings tiebreaker)."""
+    errors = []
+    keys = player_stats.dropna(subset=["league", "week", "player"])
+    for (league, week, player), group in keys.groupby(["league", "week", "player"]):
+        if len(group) > 1:
+            rows = ", ".join(str(_sheet_row(idx)) for idx in group.index)
+            errors.append(f"[{league}] player_stats: {week}주차 '{player}' 행이 {len(group)}개입니다 ({rows}행) — 한 줄만 남겨주세요")
+    return errors, []
+
+
+def check_absent_with_stats(player_stats: pd.DataFrame) -> CheckResult:
+    """Rule: a player recorded as absent all week (games 0) can't have goals,
+    assists or own goals that week — one of the two values is wrong."""
+    errors = []
+    for idx, row in player_stats.iterrows():
+        if pd.isna(row["games"]) or row["games"] != 0:
+            continue
+        stats = {col: row.get(col) for col in ("goals", "assists", "own_goals")}
+        nonzero = {col: int(value) for col, value in stats.items() if not pd.isna(value) and value != 0}
+        if nonzero:
+            detail = ", ".join(f"{col} {value}" for col, value in nonzero.items())
+            errors.append(
+                f"player_stats {_sheet_row(idx)}행 ({row['league']} {row['week']}주차, {row['player']}): "
+                f"games가 0(결석)인데 {detail} — 출석이나 기록 중 하나가 잘못됐습니다"
+            )
+    return errors, []
+
+
+def check_assists_within_goals(player_stats: pd.DataFrame) -> CheckResult:
+    """Rule: for each (week, team), the team's assists can't outnumber the
+    team's goals. Every assist belongs to a goal scored by a teammate (own
+    goals never carry an assist), so more assists than goals is always a
+    typo. One-directional by nature: a goal without an assist is normal."""
+    errors = []
+    stats = player_stats.fillna({"goals": 0, "assists": 0})
+    totals = stats.groupby(["week", "team"])[["goals", "assists"]].sum()
+    for (week, team), row in totals.iterrows():
+        if row["assists"] > row["goals"]:
+            errors.append(
+                f"{week}주차 {team}: 어시스트 합({int(row['assists'])})이 골 합({int(row['goals'])})보다 많습니다 — "
+                "어시스트는 팀 동료의 골에만 붙으므로 골 수를 넘을 수 없습니다"
+            )
+    return errors, []
+
+
+TRANSFERS_PATH = Path(__file__).resolve().parent.parent / "src" / "data" / "transfers.json"
+
+
+def load_transfers() -> dict[str, list[dict]]:
+    data = json.loads(TRANSFERS_PATH.read_text(encoding="utf-8"))
+    return {league: moves for league, moves in data.items() if not league.startswith("_")}
+
+
+def check_team_changes(player_stats: pd.DataFrame, approved: list[dict]) -> CheckResult:
+    """Rule: within a league, a player's team can only differ from their
+    team in their previous recorded week if src/data/transfers.json lists
+    that move (player, week of the first match for the new team, to).
+
+    A row typed under the wrong team still balances every goal check when
+    the player didn't score — but it moves their attendance to another
+    team's participation rate. Unannounced but real moves are expected to
+    be rare, so this fails on purpose: confirm the move, add it to
+    transfers.json, and re-run."""
+    errors = []
+    allowed = {(move["player"], int(move["week"]), move["to"]) for move in approved}
+    rows = player_stats.dropna(subset=["week", "player", "team"]).sort_values("week")
+    for player, group in rows.groupby("player"):
+        previous = None
+        for _, row in group.iterrows():
+            if previous is not None and row["team"] != previous["team"]:
+                if (player, int(row["week"]), row["team"]) not in allowed:
+                    errors.append(
+                        f"player_stats: '{player}'이(가) {int(previous['week'])}주차 {previous['team']} → "
+                        f"{int(row['week'])}주차 {row['team']}로 팀이 바뀌었는데 src/data/transfers.json에 없는 이동입니다 — "
+                        "실제 이적이면 transfers.json에 추가하고, 아니면 시트의 team을 고쳐주세요"
+                    )
+            previous = row
+    return errors, []
 
 
 def check_goal_events(
@@ -599,24 +709,24 @@ def _report(errors: list[str], warnings: list[str]) -> None:
     print("✅ 검증 통과 — 오류 없음.")
 
 
-def main() -> None:
-    sheets = load_sheets()
+def run_all_checks(sheets: dict[str, pd.DataFrame], strict: bool) -> CheckResult:
+    """Every rule, in order, on already-loaded sheets. main() and the
+    fault-injection harness (qa/fault_injection.py) both call this, so what
+    gets measured is exactly what runs in the pipeline."""
     matches, player_stats, players = sheets["matches"], sheets["player_stats"], sheets["players"]
     goal_events, teams = sheets["goal_events"], sheets["teams"]
-    strict = _is_strict()
-
-    print(f"검증 모드: {'엄격 (수동 실행/로컬)' if strict else '완화 (자동 스케줄 실행)'}\n")
 
     # Everything below groups by league, so a broken league structure has to
     # be reported on its own first rather than crashing the other checks.
     structure_errors, structure_warnings = check_leagues(teams, matches, player_stats)
     if structure_errors:
-        _report(structure_errors, structure_warnings)
+        return structure_errors, structure_warnings
 
     league_order = list(dict.fromkeys(teams["league"]))
     used = set(matches["league"]) | set(player_stats["league"])
     leagues = [league for league in league_order if league in used]
     teams_of = teams.groupby("league")["team_name"].apply(set).to_dict()
+    transfers = load_transfers()
 
     def scoped(df: pd.DataFrame, league: str) -> pd.DataFrame:
         return df[df["league"] == league]
@@ -639,13 +749,23 @@ def main() -> None:
             ),
         ),
         check_active_players_missing_weeks(matches, player_stats, players, league_order),
+        check_duplicate_player_weeks(player_stats),
+        check_absent_with_stats(player_stats),
+        _per_league(leagues, lambda l: check_assists_within_goals(scoped(player_stats, l))),
+        _per_league(leagues, lambda l: check_team_changes(scoped(player_stats, l), transfers.get(l, []))),
         check_goal_events(matches, player_stats, goal_events),
     ]
-
-    _report(
+    return (
         [message for errors, _ in checks for message in errors],
         [message for _, warnings in checks for message in warnings],
     )
+
+
+def main() -> None:
+    sheets = load_sheets()
+    strict = _is_strict()
+    print(f"검증 모드: {'엄격 (수동 실행/로컬)' if strict else '완화 (자동 스케줄 실행)'}\n")
+    _report(*run_all_checks(sheets, strict))
 
 
 if __name__ == "__main__":
