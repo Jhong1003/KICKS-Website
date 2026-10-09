@@ -164,8 +164,12 @@ def _merge_goal_events(player_stats: pd.DataFrame, goal_events: pd.DataFrame) ->
 
 def load_sheets() -> dict[str, pd.DataFrame]:
     """Download the published sheet tabs as DataFrames."""
-    sheets = {name: pd.read_csv(url) for name, url in SHEET_URLS.items()}
+    return prepare_sheets({name: pd.read_csv(url) for name, url in SHEET_URLS.items()})
 
+
+def prepare_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    """The clean-up every loaded copy of the sheet gets, wherever it came
+    from (the published CSVs above, or an .xlsx export in qa/)."""
     # Drop the all-blank rows a wide dropdown range leaves in the CSV export.
     sheets["goal_events"] = sheets["goal_events"].dropna(how="all")
 
