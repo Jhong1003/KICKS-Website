@@ -1,7 +1,3 @@
 {
-  "_comment": "Optional real photos for player cards, keyed by player id (the \"id\" field in the generated player_profiles.json — find a player's id there, not their name, since that file regenerates from the sheet). Value: \"/players/<file>.jpg\" (square photo for the avatar circle), or {\"card\": \"/players/<file>.jpg\", \"portrait\": \"/players/<file>-portrait.jpg\"} to also show a tall 4:5 photo big on that player's own page. Images go in public/players/. Read by src/lib/player-photos.ts. Hand-edited, never touched by scripts/update_data.py.",
-  "88c25e9d": {
-    "card": "/players/jihwan.jpg",
-    "portrait": "/players/jihwan-portrait.jpg"
-  }
+  "_comment": "Optional real photos for player cards, keyed by player id (the \"id\" field in the generated player_profiles.json — find a player's id there, not their name, since that file regenerates from the sheet). Value: \"/players/<file>.jpg\" (square photo for the avatar circle), or {\"card\": \"/players/<file>.jpg\", \"portrait\": \"/players/<file>-portrait.jpg\"} to also show a tall 4:5 photo big on that player's own page. Images go in public/players/. Read by src/lib/player-photos.ts. Hand-edited, never touched by scripts/update_data.py."
 }
