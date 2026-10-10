@@ -5,7 +5,7 @@ import BadgeGuide from "../../components/BadgeGuide.astro";
 import T from "../../components/T.astro";
 import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
-import playerPhotosData from "../../data/player-photos.json";
+import { getPlayerPhotos } from "../../lib/player-photos";
 import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 import { isLeagueFinished, isShownInLeague } from "../../lib/finale";
@@ -23,7 +23,6 @@ interface Props {
 }
 
 const { player } = Astro.props;
-const playerPhotos = playerPhotosData as Record<string, string>;
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 ---
@@ -99,7 +98,8 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 										teamName={teamName}
 										teamColor={teamColor}
 										size="large"
-										avatarPhoto={playerPhotos[player.id]}
+										avatarPhoto={getPlayerPhotos(player.id).card}
+										portraitPhoto={getPlayerPhotos(player.id).portrait}
 									/>
 								</div>
 								<div class="about-intro-text">

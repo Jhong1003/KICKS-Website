@@ -545,7 +545,11 @@ specific player instead, add it to
 never touched by `update_data.py`) keyed by that player's `id` (the URL
 slug, not the Sheet's `P001`-style `player_id`) — e.g.
 `{"6c36530d": "/players/jongho.jpg"}` — with the image placed under
-`public/players/`.
+`public/players/`. The value can also be `{"card": "/players/x.jpg",
+"portrait": "/players/x-portrait.jpg"}`: `card` is the small square photo in the
+team-color circle (any page), `portrait` a tall 4:5 photo shown big in place of
+the circle on that player's own page (`portraitPhoto` on `PlayerCard`). Read
+through `getPlayerPhotos` in [src/lib/player-photos.ts](src/lib/player-photos.ts).
 
 **Player id vs URL slug**: `player_profiles.json` and
 `player_leaderboard.json` both carry `player_id` (the Sheet's `P001`, the

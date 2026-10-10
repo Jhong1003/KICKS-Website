@@ -2683,6 +2683,29 @@ a.player-card:hover {
 
 }
 
+/* 상세 페이지의 세로 사진 (player-photos.json "portrait") — 동그라미 대신 크게 */
+
+.player-card-portrait {
+
+	width: 100%;
+	aspect-ratio: 4 / 5;
+	margin: 4px 0;
+	overflow: hidden;
+	border-radius: 8px;
+	border-bottom: 4px solid var(--team-color, var(--color-green));
+	background-color: var(--team-color, var(--color-green));
+
+}
+
+.player-card-portrait img {
+
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+
+}
+
 .player-card--large .player-card-name {
 
 	font-size: 1.4rem;
