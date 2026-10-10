@@ -20,9 +20,11 @@ interface Props {
 	size?: "default" | "large";
 	href?: string;
 	avatarPhoto?: string;
+	/** Tall 4:5 photo (player-photos.json "portrait"), shown big instead of the circle — used on the player's own page. */
+	portraitPhoto?: string;
 }
 
-const { player, section, teamName, teamColor, size = "default", href, avatarPhoto } = Astro.props;
+const { player, section, teamName, teamColor, size = "default", href, avatarPhoto, portraitPhoto } = Astro.props;
 const Tag = href ? "a" : "div";
 const avatarTextColor = getContrastingTextColor(teamColor);
 const labelColor = getReadableAccentColor(teamColor);
@@ -42,9 +44,17 @@ const cardStyle = `--team-color: ${teamColor}; --team-avatar-text: ${avatarTextC
 		<span class="player-card-team">{teamName}</span>
 	</div>
 
-	<div class="player-card-avatar">
-		{avatarPhoto ? <img src={avatarPhoto} alt="" /> : <span aria-hidden="true">{player.avatar_initials}</span>}
-	</div>
+	{
+		portraitPhoto ? (
+			<div class="player-card-portrait">
+				<img src={portraitPhoto} alt={player.name} />
+			</div>
+		) : (
+			<div class="player-card-avatar">
+				{avatarPhoto ? <img src={avatarPhoto} alt="" /> : <span aria-hidden="true">{player.avatar_initials}</span>}
+			</div>
+		)
+	}
 
 	<p class="player-card-name">{player.name}</p>
 

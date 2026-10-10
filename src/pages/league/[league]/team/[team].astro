@@ -17,7 +17,7 @@ import T from "../../../../components/T.astro";
 import leagueTableData from "../../../../data/league_table.json";
 import matchesData from "../../../../data/matches.json";
 import profilesData from "../../../../data/player_profiles.json";
-import playerPhotosData from "../../../../data/player-photos.json";
+import { getPlayerPhotos } from "../../../../lib/player-photos";
 import { leagues, getTeamColor, getTeamName, type League, type LeagueTeam } from "../../../../lib/leagues";
 import { getSection, getContrastingTextColor, type PlayerInLeague, type PlayerProfile } from "../../../../lib/players";
 import { isLeagueFinished, isShownInLeague } from "../../../../lib/finale";
@@ -53,7 +53,6 @@ interface MatchRecord {
 const { league, team } = Astro.props;
 const color = getTeamColor(team.team_id, league);
 const headerText = getContrastingTextColor(color);
-const playerPhotos = playerPhotosData as Record<string, string>;
 const finished = isLeagueFinished(league.id);
 
 // --- Record -----------------------------------------------------------------
@@ -411,7 +410,7 @@ const captainId = captain?.player_id;
 								teamName={team.name}
 								teamColor={color}
 								href={`/players/${player.id}?league=${league.id}`}
-								avatarPhoto={playerPhotos[player.id]}
+								avatarPhoto={getPlayerPhotos(player.id).card}
 							/>
 							</div>
 						))}

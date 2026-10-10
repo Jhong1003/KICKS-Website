@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PlayerCard from "../components/PlayerCard.astro";
 import T from "../components/T.astro";
 import profilesData from "../data/player_profiles.json";
-import playerPhotosData from "../data/player-photos.json";
+import { getPlayerPhotos } from "../lib/player-photos";
 import leagueTable from "../data/league_table.json";
 import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from "../lib/players";
 import { isShownInLeague } from "../lib/finale";
@@ -15,7 +15,6 @@ import { currentLeague, leagues, latestLeague, getTeamColor, getTeamName, type L
 // Never grouped or ordered by any stat (see AGENTS.md's "Player profiles").
 // League buttons switch between leagues' rosters; the newest league that has
 // any players opens first, even before its first game.
-const playerPhotos = playerPhotosData as Record<string, string>;
 
 function buildRoster(league: League) {
 	const roster = (profilesData as PlayerProfile[]).flatMap((player): PlayerInLeague[] => {
@@ -100,7 +99,7 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 									teamName={getTeamName(section.current_team_id, league)}
 									teamColor={getTeamColor(section.current_team_id, league)}
 									href={`/players/${player.id}?league=${league.id}`}
-									avatarPhoto={playerPhotos[player.id]}
+									avatarPhoto={getPlayerPhotos(player.id).card}
 								/>
 							))}
 						</div>
