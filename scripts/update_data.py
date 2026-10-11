@@ -173,6 +173,12 @@ def prepare_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
     # Drop the all-blank rows a wide dropdown range leaves in the CSV export.
     sheets["goal_events"] = sheets["goal_events"].dropna(how="all")
 
+    # `minute` is a newer goal_events column (FA26-L2 onward). Default it in
+    # here so a sheet exported before it existed still loads; a blank minute
+    # on a week that has them is caught by validate_data.py, not silently kept.
+    if "minute" not in sheets["goal_events"].columns:
+        sheets["goal_events"]["minute"] = pd.NA
+
     # own_goals is a newer player_stats column (blank/absent means 0) -
     # default it in here, once, so every caller (this script and
     # validate_data.py) can just assume the column exists.
@@ -472,6 +478,84 @@ def build_matches(matches: pd.DataFrame) -> list[dict]:
     matches["home_score"] = matches["home_score"].astype("Int64")
     matches["away_score"] = matches["away_score"].astype("Int64")
     return matches.to_dict(orient="records")
+
+
+def build_goal_events(
+    goal_events: pd.DataFrame,
+    player_stats: pd.DataFrame,
+    matches: pd.DataFrame,
+    players: pd.DataFrame,
+) -> list[dict]:
+    """One row per goal, in match then minute order, with ids instead of names.
+
+    This is the only generated file with *per-goal* detail. Weeks recorded
+    as weekly totals (all of FA26-L1) simply have no rows here, and a league
+    that started before minutes were written down has `minute: null` - any
+    reader has to cope with both.
+
+    `team_id` is the team whose score the goal put up, which for an own goal
+    is the *other* team: `scorer_team_id` is always the team the scorer
+    actually played for that week (from their player_stats row), so the two
+    differ exactly when `own_goal` is true. Keeping both means nothing
+    downstream has to re-derive the own-goal rule.
+    """
+    events = goal_events.dropna(subset=["match_id", "scorer"]).copy()
+    if events.empty:
+        return []
+    keys = events["match_id"].apply(_event_key)
+    events = events[keys.notna()].copy()
+    if events.empty:
+        return []
+    keys = keys[keys.notna()]
+    events["league"] = keys.apply(lambda key: key[0])
+    events["week"] = keys.apply(lambda key: key[1])
+
+    player_ids = dict(zip(players["player"], players["player_id"]))
+    # (league, week, player_id) -> the team they played for that week.
+    weekly_team = {
+        (league, int(week), player_id): team_id
+        for league, week, player_id, team_id in zip(
+            player_stats["league"], player_stats["week"], player_stats["player_id"], player_stats["team_id"]
+        )
+    }
+    sides = {
+        match_id: (home, away)
+        for match_id, home, away in zip(matches["match_id"], matches["home_team_id"], matches["away_team_id"])
+    }
+
+    rows = []
+    for _, event in events.iterrows():
+        league, week = event["league"], int(event["week"])
+        scorer_id = player_ids.get(event["scorer"])
+        if scorer_id is None:
+            # resolve_ids already fails the run on an unknown name in
+            # matches/player_stats; goal_events is checked by validate_data.py.
+            continue
+        own_goal = str(event["own_goal"]).strip().upper() == "Y"
+        scorer_team_id = weekly_team.get((league, week, scorer_id))
+        credited = scorer_team_id
+        if own_goal:
+            home, away = sides.get(event["match_id"], (None, None))
+            credited = away if scorer_team_id == home else home if scorer_team_id == away else None
+        assist = event.get("assist")
+        minute = event.get("minute")
+        rows.append(
+            {
+                "league": league,
+                "week": week,
+                "match_id": event["match_id"],
+                "minute": None if pd.isna(minute) else int(minute),
+                "scorer_id": scorer_id,
+                "assist_id": None if pd.isna(assist) else player_ids.get(assist),
+                "own_goal": own_goal,
+                "team_id": credited,
+                "scorer_team_id": scorer_team_id,
+            }
+        )
+    # Match order, then minute - an unrecorded minute sorts to the end of its
+    # match rather than to the front, so a half-filled match still reads right.
+    rows.sort(key=lambda row: (row["league"], row["week"], row["match_id"], row["minute"] is None, row["minute"] or 0))
+    return rows
 
 
 def build_week_summaries(matches: pd.DataFrame) -> list[dict]:
@@ -1238,6 +1322,7 @@ def main() -> None:
     write_json("standings_history.json", standings_history)
     write_json("matches.json", build_matches(matches))
     write_json("week_summaries.json", build_week_summaries(matches))
+    write_json("goal_events.json", build_goal_events(sheets["goal_events"], player_stats, matches, players))
     write_json("player_leaderboard.json", build_leaderboard(player_stats, players))
     write_json(
         "player_profiles.json",

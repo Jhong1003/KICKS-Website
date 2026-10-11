@@ -27,6 +27,14 @@ export interface ProfilePlayer {
 	weekly: ProfileWeek[];
 }
 
+/** One goal from goal_events.json, as the late-goals corner reads it. */
+export interface ProfileGoal {
+	league: string;
+	team_id: string | null;
+	minute: number | null;
+	own_goal: boolean;
+}
+
 export type AxisKey = "attack" | "linkup" | "oneteam" | "attendance" | "defense" | "late";
 
 export interface AxisValue {
@@ -62,6 +70,16 @@ export const GOALS_PER_MATCH_FULL = 2.5;
 /** Two weeks of matches (6 a week) before a team's shape means anything. */
 export const MIN_MATCHES = 12;
 
+// Late goals. A match is 12 minutes with no half-time, so minutes 9-12 are
+// the closing third: a third of the clock, which is what an evenly-scoring
+// team would land on. The corner is full at twice that, 2/3 - the same kind
+// of fixed, pre-chosen scale as GOALS_PER_MATCH_FULL, never rescaled against
+// the other teams. Below LATE_MIN_GOALS the share is too jumpy to draw (one
+// goal would swing it by double digits), so the corner stays empty instead.
+export const LATE_FROM_MINUTE = 9;
+export const LATE_SHARE_FULL = 2 / 3;
+export const LATE_MIN_GOALS = 8;
+
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 
@@ -74,14 +92,48 @@ export interface TeamProfile {
  * One team's six corners in one league, or null before MIN_MATCHES scored
  * matches. `players` are everyone's weekly rows in this league (only weeks
  * on this team count); `participationRate` is the league table's value.
- * Late goals need goal minutes, which aren't wired in yet: always null.
+ *
+ * `goals` are this league's rows from goal_events.json. Leagues recorded as
+ * weekly totals have none, and a league from before minutes were written
+ * down has them without a `minute` - either way the late-goals corner comes
+ * back null and the other five are unaffected. It defaults to empty so a
+ * caller that has no per-goal data simply gets that corner blank.
  */
+/**
+ * The late-goals corner: what share of a team's own goals came in minutes
+ * LATE_FROM_MINUTE..end. Own goals are left out of both halves of the
+ * fraction — an opponent putting one in says nothing about this team's
+ * closing strength, and it would otherwise count as one of "their" goals.
+ */
+function lateAxis(leagueId: string, teamId: string, goals: ProfileGoal[]): AxisValue {
+	const ours = goals.filter((goal) => goal.league === leagueId && goal.team_id === teamId && !goal.own_goal);
+	const timed = ours.filter((goal) => goal.minute !== null);
+	if (timed.length < LATE_MIN_GOALS) {
+		return {
+			key: "late",
+			value: null,
+			raw: { en: "Shown once there are enough timed goals", ko: "시간이 기록된 골이 쌓이면 표시돼요" },
+		};
+	}
+	const late = timed.filter((goal) => (goal.minute as number) >= LATE_FROM_MINUTE).length;
+	const share = late / timed.length;
+	return {
+		key: "late",
+		value: clamp01(share / LATE_SHARE_FULL),
+		raw: {
+			en: `${late} of ${timed.length} goals (${pct(share)})`,
+			ko: `${timed.length}골 중 ${late}골 (${pct(share)})`,
+		},
+	};
+}
+
 export function teamProfile(
 	leagueId: string,
 	teamId: string,
 	matches: ProfileMatch[],
 	players: ProfilePlayer[],
 	participationRate: number | null,
+	goals: ProfileGoal[] = [],
 ): TeamProfile | null {
 	let played = 0;
 	let scored = 0;
@@ -149,11 +201,7 @@ export function teamProfile(
 			value: clamp01(1 - conceded / played / GOALS_PER_MATCH_FULL),
 			raw: { en: `${perMatch(conceded)} conceded per match`, ko: `경기당 ${perMatch(conceded)}실점` },
 		},
-		{
-			key: "late",
-			value: null,
-			raw: { en: "Shown once goal times are recorded", ko: "골 시간이 기록되면 표시돼요" },
-		},
+		lateAxis(leagueId, teamId, goals),
 	];
 	return { matches: played, axes };
 }
