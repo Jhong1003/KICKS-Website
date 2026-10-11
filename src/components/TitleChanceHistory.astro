@@ -6,13 +6,16 @@
 // No scores or interpretation here — that lives on GitHub.
 // Shown once a league has at least two published weeks.
 //
-// Rendered *inside* ChampionshipSimulator's "Title Chances" section (a div
-// with an h3, not a section of its own), so the page has one Title Chances
-// block: where things stand now, then how that number has moved week by week.
+// In a popup under Title Chances, opened by a link beside the percentages —
+// the same pattern as the points-race chart under Match Results, so the page
+// has one way of saying "there is a weekly chart behind this". It also means
+// the percentages keep the block to themselves and nothing has to be lined up
+// in two columns.
 //
 // Identity is never color alone: each team also gets a marker shape and a
 // direct label, like the points-race chart.
 import T from "./T.astro";
+import ChartDialog from "./ChartDialog.astro";
 import { getTeamColor, getTeamName, type League } from "../lib/leagues";
 import { titleHistory } from "../lib/forecasts";
 
@@ -22,6 +25,7 @@ interface Props {
 
 const { league } = Astro.props;
 const history = titleHistory(league.id);
+const dialogId = `title-history-${league.id}`;
 const SHAPES = ["circle", "square", "diamond"] as const;
 const teams = league.teams.map((team, index) => ({
 	id: team.team_id,
@@ -62,6 +66,11 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 
 {
 	history.length >= 2 && (
+		<>
+		<button class="week-race-link title-history-open" type="button" aria-haspopup="dialog" data-race-open={dialogId}>
+			<span aria-hidden="true">📈</span> <T en="Title chances by week" ko="주차별 변화 그래프 보기" /> →
+		</button>
+		<ChartDialog id={dialogId} label="Title chances by week" labelKo="주차별 우승 확률">
 		<div class="title-history" aria-labelledby="title-history-title">
 			<h4 id="title-history-title"><T en="By week" ko="주차별 변화" /></h4>
 			<div class="title-history-chart">
@@ -117,20 +126,15 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 				</tbody>
 			</table>
 		</div>
+		</ChartDialog>
+		</>
 	)
 }
 
 <style>
-	/* Sits beside Title Chances in that block's grid, so no top margin of its
-	   own; it drops below on a narrow screen, where the grid's row gap spaces it. */
+	/* On its own inside the popup, so no alignment to anything beside it. */
 	.title-history { min-width: 0; }
-
-	/* CHART_LIFT: side by side, the block starts above the heading next to it by
-	   half of what the plot grew, which keeps the 50% gridline on the middle
-	   team's row. Stacked, it sits where it falls. */
-	@media (min-width: 760px) {
-		.title-history { margin-top: -30px; }
-	}
+	.title-history-open { margin-top: 1rem; }
 	/* Same line box as the Title Chances heading it sits beside (global.css). */
 	.title-history h4 { margin: 0 0 .9rem; font-size: .85rem; line-height: 1.5rem; font-weight: 700; opacity: .7; }
 	.title-history-chart { max-width: 560px; }

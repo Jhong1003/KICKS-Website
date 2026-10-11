@@ -1003,12 +1003,16 @@ at 2/3 and stays empty below `LATE_MIN_GOALS` timed goals). Per-match badges
 `title_forecasts.csv` once a league has two published weeks: frozen numbers, no
 scores (its table repeats the chart's numbers, so it is kept for screen
 readers and taken off the page) — scoring and interpretation stay on GitHub. It renders **inside** the
-Title Chances block (`ChampionshipSimulator.astro`) as a `div` with an `h4`,
-**beside** the live percentages in that block's `.title-race-grid` (auto-fit,
-so it drops underneath on a narrow screen and the percentages fill the row
-on their own before two weeks are published) — not a section of its own, so
-the page has one Title Chances block rather than two headings showing the
-same figures.
+Title Chances block (`ChampionshipSimulator.astro`) **in a popup**, opened by
+a "주차별 변화 그래프 보기" link under the percentages — the same pattern as
+the points race under Match Results, so the page has one way of saying
+"there's a weekly chart behind this". Both popups are
+[ChartDialog.astro](src/components/ChartDialog.astro), which holds the dialog
+markup, behaviour (opened by any `[data-race-open="<id>"]`, focus returned on
+close) and styling once; `PointsRaceDialog.astro` is a thin wrapper over it.
+The chart was tried inline under the percentages and then beside them in two
+columns; both made a tall block that had to be aligned by hand against a
+column of rows, and the popup is what the page already does elsewhere.
 Deliberately **wordless**: just "주차별 변화" and the chart. There is no sentence
 explaining that these were published before kickoff (the table's caption says so
 for screen readers only, visually hidden) — the members' page shows the numbers,
