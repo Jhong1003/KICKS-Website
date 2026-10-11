@@ -31,10 +31,11 @@ const teams = league.teams.map((team, index) => ({
 }));
 
 const W = 440;
-// Shorter than it was (220): no team has ever been near the top of this axis,
-// so the upper half was empty, and the shallower plot brings the 50% line up
-// level with the middle team's row in the column beside it.
-const H = 150;
+// Tall enough that two teams a few points apart don't draw on top of each
+// other. The block is pulled up by the same amount it grows (CHART_LIFT below),
+// so the 50% line stays level with the middle team's row in the column beside
+// it and the heading rises instead.
+const H = 210;
 const plot = { left: 38, right: 72, top: 12, bottom: 28 };
 const innerW = W - plot.left - plot.right;
 const innerH = H - plot.top - plot.bottom;
@@ -123,6 +124,13 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 	/* Sits beside Title Chances in that block's grid, so no top margin of its
 	   own; it drops below on a narrow screen, where the grid's row gap spaces it. */
 	.title-history { min-width: 0; }
+
+	/* CHART_LIFT: side by side, the block starts above the heading next to it by
+	   half of what the plot grew, which keeps the 50% gridline on the middle
+	   team's row. Stacked, it sits where it falls. */
+	@media (min-width: 760px) {
+		.title-history { margin-top: -30px; }
+	}
 	/* Same line box as the Title Chances heading it sits beside (global.css). */
 	.title-history h4 { margin: 0 0 .9rem; font-size: .85rem; line-height: 1.5rem; font-weight: 700; opacity: .7; }
 	.title-history-chart { max-width: 560px; }
