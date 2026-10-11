@@ -2132,11 +2132,12 @@ button.league-switcher-link {
 
 /* Full Matches: 영상 목록 */
 
+/* One block per league plus one for the one-off events (see the grouping in
+   full-matches.astro): the list itself just stacks the blocks, and the grid of
+   cards lives inside each one. */
+
 .video-list {
 
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-	gap: 20px;
 	margin-top: 32px;
 
 }
@@ -2144,6 +2145,30 @@ button.league-switcher-link {
 .video-list[hidden] {
 
 	display: none;
+
+}
+
+.video-group + .video-group {
+
+	margin-top: 40px;
+
+}
+
+.video-group-title {
+
+	margin: 0 0 16px;
+	font-size: 1rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-green);
+
+}
+
+.video-grid {
+
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 20px;
 
 }
 
