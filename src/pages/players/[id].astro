@@ -5,9 +5,10 @@ import BadgeGuide from "../../components/BadgeGuide.astro";
 import T from "../../components/T.astro";
 import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
+import goalEventsData from "../../data/goal_events.json";
 import { getPlayerPhotos } from "../../lib/player-photos";
 import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
-import { GOAL_ROLE_LABELS, hasGoalRoles, listGoalRoles } from "../../lib/goal-roles";
+import { GOAL_ROLE_LABELS, keyGoals, type RoleGoal } from "../../lib/goal-roles";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 import { isLeagueFinished, isShownInLeague } from "../../lib/finale";
 
@@ -116,23 +117,23 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 										</div>
 									)}
 
-									{hasGoalRoles(section.goal_roles) && (
+									{keyGoals(goalEventsData as RoleGoal[], section.league, player.player_id).length > 0 && (
 										<div class="player-detail-meta">
 											<p class="section-label"><T en="GOALS THAT MATTERED" ko="결정적인 골" /></p>
 											<ul class="goal-role-list">
-												{listGoalRoles(section.goal_roles).map(({ key, count }) => (
+												{keyGoals(goalEventsData as RoleGoal[], section.league, player.player_id).map((goal) => (
 													<li>
-														<span class="goal-role-count">{count}</span>
 														<T
-															class="goal-role-label"
-															en={GOAL_ROLE_LABELS[key].en}
-															ko={GOAL_ROLE_LABELS[key].ko}
+															class="goal-role-when"
+															en={`W${goal.week}`}
+															ko={`${goal.week}주차`}
 														/>
-														<T
-															class="goal-role-note"
-															en={GOAL_ROLE_LABELS[key].title}
-															ko={GOAL_ROLE_LABELS[key].titleKo}
-														/>
+														<span class="goal-role-minute">{goal.minute}'</span>
+														<span class="goal-role-labels">
+															{goal.roles.map((key) => (
+																<T en={GOAL_ROLE_LABELS[key].en} ko={GOAL_ROLE_LABELS[key].ko} />
+															))}
+														</span>
 													</li>
 												))}
 											</ul>

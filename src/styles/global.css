@@ -2947,8 +2947,8 @@ a.player-card:hover {
 }
 
 /* "Goals that mattered" on a player page (src/lib/goal-roles.ts): one line per
-   role the player has, count first. Never a rank or a comparison - the player
-   pages stay a celebration, not a second leaderboard. */
+   goal, when it was scored and what it did. Never a rank or a comparison - the
+   player pages stay a celebration, not a second leaderboard. */
 
 .goal-role-list {
 
@@ -2980,23 +2980,9 @@ a.player-card:hover {
 
 }
 
-.goal-role-count {
+.goal-role-when {
 
-	min-width: 1.4em;
-
-	font-weight: 700;
-
-	font-variant-numeric: tabular-nums;
-
-}
-
-.goal-role-label {
-
-	font-weight: 600;
-
-}
-
-.goal-role-note {
+	min-width: 3.4em;
 
 	font-size: 0.8rem;
 
@@ -3004,13 +2990,31 @@ a.player-card:hover {
 
 }
 
-@media (max-width: 480px) {
+.goal-role-minute {
 
-	.goal-role-note {
+	min-width: 2.4em;
 
-		display: none;
+	font-variant-numeric: tabular-nums;
 
-	}
+	opacity: 0.6;
+
+}
+
+/* A goal can have done two things; they read as one phrase, separated. */
+
+.goal-role-labels {
+
+	font-weight: 600;
+
+}
+
+.goal-role-labels > :not(:first-child)::before {
+
+	content: " · ";
+
+	font-weight: 400;
+
+	opacity: 0.45;
 
 }
 

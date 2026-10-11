@@ -1,59 +1,62 @@
-// What a goal did to the score. The counts are computed once in the pipeline
-// (`_tag_goal_roles` / `_goal_role_counts` in scripts/update_data.py) and land
-// on each profile section as `goal_roles`; this file only decides how to say
-// them.
+// What a player's goals did to the score, for the "Goals that mattered" block
+// on a player page. The roles are worked out once in the pipeline
+// (`_tag_goal_roles` in scripts/update_data.py) and travel on each row of
+// goal_events.json; this file only picks out one player's and says them.
 //
-// **One role per goal.** A goal can hold several — a 1-0 match's only goal is
-// both the opener and the winner — and counting each of them made a player who
-// scored twice read as three goals on their own profile, which is exactly how
-// it was reported. The pipeline picks the most consequential role each goal
-// held (ROLE_PRIORITY: winner, comeback, equalizer, opener) and counts it once,
-// so these never add up to more goals than the player scored. They can add up
-// to fewer: a goal that only extends a lead did nothing to the score and is
-// counted under none of them.
-//
-// They exist only where a league has per-goal records with minutes (FA26-L2
-// onward). A league without them has every count at 0, which `hasGoalRoles`
-// treats as "nothing to show" rather than printing a row of noughts.
-
-import type { GoalRoles } from "./players";
+// **One line per goal, never a count per role.** A goal can hold two roles — a
+// 1-0 match's only goal is both the opener and the winner. Counting every role
+// made a player who scored twice read as three goals; counting one role per
+// goal then hid that another player's three goals were all openers. Both were
+// shipped and both were spotted from the site within the hour. A goal per line
+// with its roles beside it has neither problem: the lines count the goals, and
+// nothing is dropped.
 
 export const GOAL_ROLE_KEYS = ["opener", "equalizer", "comeback", "winner"] as const;
 export type GoalRoleKey = (typeof GOAL_ROLE_KEYS)[number];
 
-export const GOAL_ROLE_LABELS: Record<GoalRoleKey, { en: string; ko: string; title: string; titleKo: string }> = {
-	opener: {
-		en: "Opening goal",
-		ko: "선제골",
-		title: "The first goal of a match",
-		titleKo: "경기의 첫 골",
-	},
-	equalizer: {
-		en: "Equalizer",
-		ko: "동점골",
-		title: "Levelled the score after falling behind",
-		titleKo: "지고 있다가 동점을 만든 골",
-	},
-	comeback: {
-		en: "Comeback goal",
-		ko: "역전골",
-		title: "Put the team in front after trailing",
-		titleKo: "지고 있던 팀을 앞서게 만든 골",
-	},
-	winner: {
-		en: "Winning goal",
-		ko: "결승골",
-		title: "The goal the winning team was never caught after",
-		titleKo: "이긴 팀이 다시 따라잡히지 않은 골",
-	},
+export const GOAL_ROLE_LABELS: Record<GoalRoleKey, { en: string; ko: string }> = {
+	opener: { en: "Opening goal", ko: "선제골" },
+	equalizer: { en: "Equalizer", ko: "동점골" },
+	comeback: { en: "Comeback goal", ko: "역전골" },
+	winner: { en: "Winning goal", ko: "결승골" },
 };
 
-/** Whether this player has anything worth printing (any role above zero). */
-export function hasGoalRoles(roles: GoalRoles | undefined): roles is GoalRoles {
-	return !!roles && GOAL_ROLE_KEYS.some((key) => (roles[key] ?? 0) > 0);
+/** One row of goal_events.json, as this block needs it. */
+export interface RoleGoal {
+	league: string;
+	week: number;
+	minute: number | null;
+	scorer_id: string;
+	own_goal: boolean;
+	roles: string[];
 }
 
-/** The roles this player actually has, in GOAL_ROLE_KEYS order, zeros dropped. */
-export function listGoalRoles(roles: GoalRoles): { key: GoalRoleKey; count: number }[] {
-	return GOAL_ROLE_KEYS.filter((key) => (roles[key] ?? 0) > 0).map((key) => ({ key, count: roles[key] }));
+export interface KeyGoal {
+	week: number;
+	minute: number | null;
+	roles: GoalRoleKey[];
+}
+
+/**
+ * One player's goals in one league that did something to the score, oldest
+ * first. A goal that only extended a lead did nothing and is left out, so this
+ * is usually shorter than their goal total and never longer. Own goals never
+ * appear: they move the score, but not for the player who put one in.
+ *
+ * Empty for a league recorded without per-goal minutes (all of FA26-L1), which
+ * is how the page knows to leave the block out rather than print a heading
+ * over nothing.
+ */
+export function keyGoals(goals: RoleGoal[], leagueId: string, playerId: string): KeyGoal[] {
+	return goals
+		.filter((goal) => goal.league === leagueId && goal.scorer_id === playerId && !goal.own_goal)
+		.map((goal) => ({
+			week: goal.week,
+			minute: goal.minute,
+			// GOAL_ROLE_KEYS order, so a goal that was both always reads the
+			// same way round.
+			roles: GOAL_ROLE_KEYS.filter((key) => goal.roles.includes(key)),
+		}))
+		.filter((goal) => goal.roles.length > 0)
+		.sort((a, b) => a.week - b.week || (a.minute ?? 0) - (b.minute ?? 0));
 }

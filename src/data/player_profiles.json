@@ -21,12 +21,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -60,12 +54,6 @@
           "attacking_points": 11,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -140,12 +128,6 @@
           "weeks_attended": 0,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -171,12 +153,6 @@
           "attacking_points": 1,
           "weeks_attended": 1,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -222,12 +198,6 @@
           "attacking_points": 1,
           "weeks_attended": 3,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -291,12 +261,6 @@
           "weeks_attended": 1,
           "weeks_played": 4
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -349,12 +313,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -387,12 +345,6 @@
           "attacking_points": 4,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -465,12 +417,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 1,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 2
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -504,12 +450,6 @@
           "attacking_points": 3,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -577,12 +517,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -609,12 +543,6 @@
           "attacking_points": 1,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -684,12 +612,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -716,12 +638,6 @@
           "attacking_points": 0,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -785,12 +701,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -823,12 +733,6 @@
           "attacking_points": 0,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -893,12 +797,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 1
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -931,12 +829,6 @@
           "attacking_points": 5,
           "weeks_attended": 3,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1005,12 +897,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1036,12 +922,6 @@
           "attacking_points": 1,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1109,12 +989,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1141,12 +1015,6 @@
           "attacking_points": 1,
           "weeks_attended": 3,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1216,12 +1084,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1255,12 +1117,6 @@
           "attacking_points": 12,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1334,12 +1190,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1372,12 +1222,6 @@
           "attacking_points": 10,
           "weeks_attended": 2,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1436,12 +1280,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1468,12 +1306,6 @@
           "attacking_points": 2,
           "weeks_attended": 2,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1543,12 +1375,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1582,12 +1408,6 @@
           "attacking_points": 2,
           "weeks_attended": 2,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1656,12 +1476,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 2,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1695,12 +1509,6 @@
           "attacking_points": 8,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1770,12 +1578,6 @@
           "weeks_attended": 0,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1801,12 +1603,6 @@
           "attacking_points": 0,
           "weeks_attended": 2,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1873,12 +1669,6 @@
           "attacking_points": 3,
           "weeks_attended": 3,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -1947,12 +1737,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 1,
-          "equalizer": 1,
-          "comeback": 0,
-          "winner": 1
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -1985,12 +1769,6 @@
           "attacking_points": 19,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2061,12 +1839,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -2093,12 +1865,6 @@
           "attacking_points": 0,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2162,12 +1928,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -2199,12 +1959,6 @@
           "attacking_points": 7,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2274,12 +2028,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -2305,12 +2053,6 @@
           "attacking_points": 1,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2378,12 +2120,6 @@
           "weeks_attended": 2,
           "weeks_played": 4
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 3,
@@ -2429,12 +2165,6 @@
           "attacking_points": 0,
           "weeks_attended": 2,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2482,12 +2212,6 @@
           "weeks_attended": 0,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -2513,12 +2237,6 @@
           "attacking_points": 5,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2589,12 +2307,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -2627,12 +2339,6 @@
           "attacking_points": 0,
           "weeks_attended": 2,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2683,12 +2389,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 1,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -2720,12 +2420,6 @@
           "attacking_points": 0,
           "weeks_attended": 2,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2787,12 +2481,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -2818,12 +2506,6 @@
           "attacking_points": 2,
           "weeks_attended": 1,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2876,12 +2558,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -2908,12 +2584,6 @@
           "attacking_points": 0,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -2978,12 +2648,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 1,
-          "comeback": 0,
-          "winner": 1
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -3023,12 +2687,6 @@
           "attacking_points": 20,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {
@@ -3101,12 +2759,6 @@
           "weeks_attended": 1,
           "weeks_played": 1
         },
-        "goal_roles": {
-          "opener": 1,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
-        },
         "weekly_stats": [
           {
             "week": 1,
@@ -3138,12 +2790,6 @@
           "attacking_points": 8,
           "weeks_attended": 4,
           "weeks_played": 4
-        },
-        "goal_roles": {
-          "opener": 0,
-          "equalizer": 0,
-          "comeback": 0,
-          "winner": 0
         },
         "weekly_stats": [
           {

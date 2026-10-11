@@ -953,24 +953,26 @@ the score has to move — **but never counted for the scorer**
 (`_goal_role_counts` skips them), the same rule that keeps own goals out of a
 player's `goals`.
 
-Because a goal can hold two roles, `_goal_role_counts` keeps **two tallies**:
-every role each goal held (what the badges read — "scored a comeback goal" is
-true whether or not it was also the winner), and `primary_<role>`, one per goal,
-the first of `ROLE_PRIORITY` (winner, comeback, equalizer, opener) it held.
-**Profiles show the primary tally**, because the other one makes a player who
-scored twice read as three goals — a 1-0 match's only goal being both the opener
-and the winner — which is how it was first shipped and reported. The primary
-tally sums to at most the player's goals, and to fewer when a goal only
-extended a lead.
+**A player page lists these goals; it never counts them per role.** The
+player-page block ("Goals that mattered", `keyGoals` in
+[src/lib/goal-roles.ts](src/lib/goal-roles.ts)) reads `goal_events.json`
+directly and prints one line per goal — week, minute, and the roles that goal
+held — oldest first, leaving out goals that did nothing to the score. Lines
+therefore count the player's goals and can only be fewer, never more.
 
-Per-player counts land on each profile section as `goal_roles`, rendered by
-the player page's "Goals that mattered" block through
-[src/lib/goal-roles.ts](src/lib/goal-roles.ts) (labels only — the counting is
-all done in the pipeline, so there's no second implementation to keep in
-step). The block hides itself when every count is 0, which is any league
-without per-goal minutes. Two badges come from the same counts and so, like
-Brace, start in FA26-L2: `comeback_king` (a comeback goal) and `late_winner`
-(a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on).
+Counting was tried twice and both ways were wrong, so **don't put a count
+back**. Counting every role a player's goals held made a two-goal player read
+as three, because a 1-0 match's only goal is both the opener and the winner.
+Counting one role per goal instead (most consequential first) fixed the total
+but then hid that another player's three goals had all been openers. Both
+shipped, both were spotted from the site, and a goal per line has neither
+problem.
+
+`_goal_role_counts` still exists for the two badges, which ask whether a
+player ever scored such a goal rather than how many: `comeback_king` (a
+comeback goal) and `late_winner` (a winning goal from
+`LATE_WINNER_FROM_MINUTE`, 10, on). Like Brace, they start in FA26-L2. No
+count of these reaches a profile.
 
 The goals are drawn under each result by
 [src/lib/match-timeline.ts](src/lib/match-timeline.ts)

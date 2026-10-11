@@ -24,17 +24,6 @@ export interface SeasonTotals {
 	weeks_played: number;
 }
 
-/** How many of a player's goals did each thing to the score (src/lib/goal-roles.ts).
- *  One role per goal, the most consequential it held, so these never sum to more
- *  goals than they scored — they sum to fewer when a goal only extended a lead.
- *  All zero in a league recorded without per-goal minutes. */
-export interface GoalRoles {
-	opener: number;
-	equalizer: number;
-	comeback: number;
-	winner: number;
-}
-
 export interface WeeklyStat {
 	week: number;
 	team_id: string;
@@ -102,7 +91,6 @@ export interface PlayerLeagueSection {
 	current_team_id: string;
 	team_history: TeamSegment[];
 	season_totals: SeasonTotals;
-	goal_roles?: GoalRoles;
 	weekly_stats: WeeklyStat[];
 	personal_best_week: PersonalBestWeek | null;
 	play_style_tag: PlayStyleTag;
