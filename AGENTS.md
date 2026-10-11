@@ -973,7 +973,14 @@ Brace, start in FA26-L2: `comeback_king` (a comeback goal) and `late_winner`
   empty list, so "not in the map" means "no timeline to draw". Only one role
   is marked per goal, winner first; **opener is deliberately never marked**,
   since the first goal is obvious from its position and most goals in this
-  league are openers.
+  league are openers. **Folded behind a "⚽ 2 골 기록" toggle** (a plain
+  `<details>`, no JavaScript, no remembered state): nine open timelines turned
+  a week of results into a wall, so the card is a scoreboard first and the
+  detail is there for whoever wants it. Two alternatives were built and
+  rejected before this — stripping the rows down to "4' 홍지환 (손영보)" lost
+  the column of coloured dots that let you count a match's goals at a glance,
+  and a FotMob-style scorer summary either side of a ⚽ read worse here than
+  the timeline it replaced. Don't re-try either without a reason.
 - **Goal Clock** (`GoalClock.astro`, last section of the League page) — one
   bar per minute of the match showing when the league's goals went in, with
   the busiest minute(s) highlighted and the count printed above each bar, so

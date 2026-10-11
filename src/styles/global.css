@@ -1162,7 +1162,71 @@ button.league-switcher-link {
 
 /* Goals under a result (src/lib/match-timeline.ts): a 12-minute bar with a dot
    per goal in the scoring team's color, then the same goals as text. Only
-   drawn for matches whose goals were recorded with minutes. */
+   drawn for matches whose goals were recorded with minutes, and folded behind
+   a "⚽ 2 골 기록" toggle so a week of results still reads as a scoreboard. */
+
+.match-goals {
+
+	margin-top: 8px;
+
+}
+
+.match-goals-toggle {
+
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 2px 8px 2px 6px;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	color: var(--color-green);
+	background-color: rgba(41, 41, 41, 0.04);
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
+
+}
+
+.match-goals-toggle::-webkit-details-marker {
+
+	display: none;
+
+}
+
+.match-goals-toggle:hover {
+
+	background-color: rgba(41, 41, 41, 0.08);
+
+}
+
+.match-goals-toggle:focus-visible {
+
+	outline: 2px solid var(--color-green);
+	outline-offset: 2px;
+
+}
+
+.match-goals-count {
+
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+
+}
+
+.match-goals-toggle::after {
+
+	content: "▾";
+	font-size: 0.7em;
+	opacity: 0.7;
+	transition: transform 0.15s ease;
+
+}
+
+.match-goals[open] > .match-goals-toggle::after {
+
+	transform: rotate(180deg);
+
+}
 
 .match-timeline {
 
