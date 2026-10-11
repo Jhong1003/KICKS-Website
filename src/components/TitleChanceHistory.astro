@@ -56,12 +56,6 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 	history.length >= 2 && (
 		<div class="title-history" aria-labelledby="title-history-title">
 			<h3 id="title-history-title"><T en="By week" ko="주차별 변화" /></h3>
-			<T
-				as="p"
-				class="about-description"
-				en="Title chances published before each week's matches."
-				ko="매주 경기 전에 미리 공개한 우승 확률이에요."
-			/>
 			<div class="title-history-chart">
 				<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="title-history-title">
 					<g class="title-history-grid" aria-hidden="true">
@@ -129,7 +123,9 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 	.title-history-marker { stroke: var(--color-background); stroke-width: 2; }
 	.title-history-label { font-size: 12px; font-weight: 700; fill: var(--color-dark); }
 	.title-history-table { max-width: 700px; width: 100%; margin-top: 1rem; border-collapse: collapse; font-size: .85rem; font-variant-numeric: tabular-nums; }
-	.title-history-table caption { text-align: left; font-size: .75rem; opacity: .65; padding-bottom: .4rem; }
+	/* Kept for screen readers (a table needs a caption) but off the page: the
+	   section says nothing in words about what these numbers are. */
+	.title-history-table caption { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
 	.title-history-table th, .title-history-table td { padding: .35rem .5rem; border-bottom: 1px solid var(--color-sage); text-align: right; }
 	.title-history-table th:first-child { text-align: left; }
 </style>

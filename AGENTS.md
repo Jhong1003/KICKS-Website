@@ -901,6 +901,10 @@ scores — scoring and interpretation stay on GitHub. It renders **inside** the
 Title Chances section (`ChampionshipSimulator.astro`, after the model and
 caution lines) as a `div` with an `h3` — not a section of its own, so the page
 has one Title Chances block rather than two headings showing the same figures.
+Deliberately **wordless**: just "주차별 변화" and the chart. There is no sentence
+explaining that these were published before kickoff (the table's caption says so
+for screen readers only, visually hidden) — the members' page shows the numbers,
+and what they mean belongs in the repo. Don't add explanatory copy back here.
 They match while a week's forecast is published but unplayed, and part company
 as soon as results land: the live numbers above move with the data, the ones
 below stay frozen at what was committed before kickoff. That contrast is the
