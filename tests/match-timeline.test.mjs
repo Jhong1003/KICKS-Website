@@ -46,14 +46,14 @@ test("timeline: one role mark per goal, winner first, opener never marked", () =
 	const timelines = matchTimelines(
 		[
 			goal({ minute: 1, roles: ["opener"] }),
-			goal({ minute: 2, roles: ["equaliser"] }),
+			goal({ minute: 2, roles: ["equalizer"] }),
 			goal({ minute: 3, roles: ["comeback", "winner"] }),
 		],
 		"L",
 		12,
 		name,
 	);
-	assert.deepEqual(timelines.get("M1").map((entry) => entry.role), [null, "equaliser", "winner"]);
+	assert.deepEqual(timelines.get("M1").map((entry) => entry.role), [null, "equalizer", "winner"]);
 });
 
 test("timeline: an assist is carried through, an own goal has none", () => {

@@ -11,30 +11,30 @@
 
 import type { GoalRoles } from "./players";
 
-export const GOAL_ROLE_KEYS = ["opener", "equaliser", "comeback", "winner"] as const;
+export const GOAL_ROLE_KEYS = ["opener", "equalizer", "comeback", "winner"] as const;
 export type GoalRoleKey = (typeof GOAL_ROLE_KEYS)[number];
 
 export const GOAL_ROLE_LABELS: Record<GoalRoleKey, { en: string; ko: string; title: string; titleKo: string }> = {
 	opener: {
-		en: "Opener",
+		en: "Opening goal",
 		ko: "선제골",
 		title: "The first goal of a match",
 		titleKo: "경기의 첫 골",
 	},
-	equaliser: {
-		en: "Equaliser",
+	equalizer: {
+		en: "Equalizer",
 		ko: "동점골",
 		title: "Levelled the score after falling behind",
 		titleKo: "지고 있다가 동점을 만든 골",
 	},
 	comeback: {
-		en: "Comeback",
+		en: "Comeback goal",
 		ko: "역전골",
 		title: "Put the team in front after trailing",
 		titleKo: "지고 있던 팀을 앞서게 만든 골",
 	},
 	winner: {
-		en: "Winner",
+		en: "Winning goal",
 		ko: "결승골",
 		title: "The goal the winning team was never caught after",
 		titleKo: "이긴 팀이 다시 따라잡히지 않은 골",

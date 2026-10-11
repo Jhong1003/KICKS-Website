@@ -567,7 +567,7 @@ def _tag_goal_roles(rows: list[dict], matches: pd.DataFrame) -> None:
     winner):
 
     - `opener`    the first goal of the match
-    - `equaliser` levelled the score for a team that was behind
+    - `equalizer` levelled the score for a team that was behind
     - `comeback`  put a team that was behind in front
     - `winner`    the goal the winning team was never caught after - the
                   (loser's final score + 1)-th goal they scored. It needs the
@@ -616,7 +616,7 @@ def _tag_goal_roles(rows: list[dict], matches: pd.DataFrame) -> None:
             if before == 0 and against == 0:
                 roles.append("opener")
             elif before < against and after == against:
-                roles.append("equaliser")
+                roles.append("equalizer")
             elif after > against and team in trailed:
                 roles.append("comeback")
             if team == winning_team and after == winning_index:
@@ -1126,7 +1126,7 @@ def _max_match_goals(goal_events: pd.DataFrame, player_ids: dict[str, str]) -> d
 # A winning goal from this minute on is a "late winner" badge.
 LATE_WINNER_FROM_MINUTE = 10
 
-GOAL_ROLES = ("opener", "equaliser", "comeback", "winner")
+GOAL_ROLES = ("opener", "equalizer", "comeback", "winner")
 
 
 def _goal_role_counts(goal_rows: list[dict]) -> dict[tuple[str, str], dict[str, int]]:

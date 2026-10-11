@@ -29,7 +29,7 @@ export interface SeasonTotals {
  *  league recorded without per-goal minutes. */
 export interface GoalRoles {
 	opener: number;
-	equaliser: number;
+	equalizer: number;
 	comeback: number;
 	winner: number;
 }
