@@ -852,13 +852,15 @@ Verification (offline):
 ### Match Forecasts
 
 `MatchForecasts.astro` (League page Overview, between Match Results and Title
-Chances) shows a league's most recent published forecast week from
+Chances) shows the forecasts for a league's earliest week with a fixture not
+yet completed (its last week once every fixture is done) from
 [forecasts/forecasts.csv](forecasts/forecasts.csv), read at build time by
 [src/lib/forecasts.ts](src/lib/forecasts.ts) (`?raw` import). One stacked
 bar per pairing and model (team colors, gray for the draw), percentages
 rounded for display only. Pairings appear in the same order and home/away way round
 as that week's fixtures (`orderLikeFixtures`, src/lib/forecast-order.ts, display only — the
-CSV keeps id order). Hidden for a league with no forecasts. The CSV is
+CSV keeps id order). Hidden while that week's forecasts aren't published yet;
+the "every pairing has the same forecast" note shows only for week 1. The CSV is
 the publication record under [docs/forecast-protocol-v2.md](docs/forecast-protocol-v2.md):
 append-only, committed before each Friday 23:59 deadline — the site never
 writes to it.
@@ -879,7 +881,10 @@ fully scored, and never re-publishes a (league, week, model).
 [.github/workflows/publish-forecasts.yml](.github/workflows/publish-forecasts.yml)
 runs it with `--next` on Thursday and Friday evenings (Chicago) and commits
 the CSVs; a failure email means results are missing — enter them and re-run
-it from the Actions tab. Try it on a finished league with
+it from the Actions tab. It also runs after every successful "Update League
+Data" run with `--auto`: the newest league's earliest week with no score yet,
+published only if nothing for that (league, week) is in either CSV; mid-week,
+already published or past the deadline exits quietly without writing. Try it on a finished league with
 `--dry-run --replay`. `tests/forecasts.test.mjs` checks the CSV invariants.
 
 `TitleChanceHistory.astro` (under Title Chances) draws the published title

@@ -7,6 +7,12 @@
 # refuses after the deadline, and fails if the previous week's results aren't
 # all in yet (GitHub then emails the failure — enter the results and re-run
 # from the Actions tab).
+#
+# It also runs right after every successful "Update League Data" run, with
+# --auto: it publishes the newest league's earliest unplayed week only if
+# nothing is published for it yet, and otherwise exits quietly (mid-week,
+# already published, past the deadline), so match-night updates don't fail.
+# The Thursday/Friday runs stay as the safety net.
 name: Publish Forecasts
 
 on:
@@ -19,6 +25,9 @@ on:
     - cron: "0 1 * * 6"
     - cron: "30 3 * * 6"
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Update League Data"]
+    types: [completed]
 
 permissions:
   contents: write
@@ -29,6 +38,7 @@ concurrency:
 
 jobs:
   publish:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -40,7 +50,12 @@ jobs:
           node-version: "22"
 
       - name: Make the next week's forecasts
-        run: node scripts/make_forecasts.mjs --next
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            node scripts/make_forecasts.mjs --auto
+          else
+            node scripts/make_forecasts.mjs --next
+          fi
 
       - name: Commit and push if anything was added
         run: |
