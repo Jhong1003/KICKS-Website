@@ -31,7 +31,10 @@ const teams = league.teams.map((team, index) => ({
 }));
 
 const W = 440;
-const H = 220;
+// Shorter than it was (220): no team has ever been near the top of this axis,
+// so the upper half was empty, and the shallower plot brings the 50% line up
+// level with the middle team's row in the column beside it.
+const H = 150;
 const plot = { left: 38, right: 72, top: 12, bottom: 28 };
 const innerW = W - plot.left - plot.right;
 const innerH = H - plot.top - plot.bottom;
