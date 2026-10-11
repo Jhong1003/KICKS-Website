@@ -11,6 +11,7 @@
       "draw_points": 1,
       "matches_per_week": 9,
       "matches_per_pair_per_week": 3,
+      "match_minutes": 12,
       "ranking_criteria": [
         "points",
         "participation_rate",
@@ -48,6 +49,7 @@
       "draw_points": 1,
       "matches_per_week": 9,
       "matches_per_pair_per_week": 3,
+      "match_minutes": 12,
       "ranking_criteria": [
         "points",
         "participation_rate",
