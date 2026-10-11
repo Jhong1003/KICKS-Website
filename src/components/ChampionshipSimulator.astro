@@ -24,7 +24,8 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 ---
 <div id="title-race" class="forecast-block championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
 	<h3 id="simulator-title"><T en="Title Chances" ko="우승 확률" /></h3>
-	{error ? <p role="alert"><T en="Couldn't calculate: " ko="계산하지 못했어요: " />{error}</p> : model && <>
+	<div class="title-race-grid">
+	{error ? <p role="alert"><T en="Couldn't calculate: " ko="계산하지 못했어요: " />{error}</p> : model && <div class="title-race-now">
 		<div class="title-race-results" data-simulator-results>
 			{orderedTeams.map((team) => <div class="simulator-team" data-team-id={team.team_id}>
 				<strong>{team.name}</strong><span data-credit>—</span>
@@ -37,10 +38,12 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 		<p class="title-race-status" data-simulator-status role="status" aria-live="polite"><T en="Calculating…" ko="계산하는 중…" /></p>
 		<noscript><p><T en="Turn on JavaScript to see the results." ko="결과를 보려면 JavaScript를 켜 주세요." /></p></noscript>
 
-	</>}
-	{/* Same section on purpose: the live percentages above, then the frozen
-	    ones published before each week. Shows itself from two published weeks. */}
+	</div>}
+	{/* Beside the live percentages, not under them: same block on purpose, so
+	    the number now and how it got there read as one thing. Shows itself
+	    from two published weeks, and the grid is one column until then. */}
 	<TitleChanceHistory league={league} />
+	</div>
 </div>
 
 <script>
@@ -92,6 +95,10 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 </script>
 
 <style>
+	/* Two columns where there's room: the percentages now on the left, how they
+	   have moved week by week on the right. auto-fit means a block on its own
+	   (no published history yet) simply fills the row. */
+	.title-race-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem 2.5rem; align-items: start; }
 	.title-race-results { max-width: 700px; margin-top: 1.75rem; }
 	.simulator-team { display: grid; grid-template-columns: minmax(0, 1.2fr) 6rem minmax(60px, 1fr); align-items: center; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--color-sage); }
 	.simulator-team strong { font-weight: 600; white-space: nowrap; }

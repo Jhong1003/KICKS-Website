@@ -55,7 +55,7 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 {
 	history.length >= 2 && (
 		<div class="title-history" aria-labelledby="title-history-title">
-			<h3 id="title-history-title"><T en="By week" ko="주차별 변화" /></h3>
+			<h4 id="title-history-title"><T en="By week" ko="주차별 변화" /></h4>
 			<div class="title-history-chart">
 				<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="title-history-title">
 					<g class="title-history-grid" aria-hidden="true">
@@ -113,9 +113,11 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 }
 
 <style>
-	.title-history { margin-top: 2.5rem; }
-	.title-history h3 { margin: 0 0 .3rem; font-size: 1.05rem; }
-	.title-history-chart { max-width: 560px; margin-top: 1.5rem; }
+	/* Sits beside Title Chances in that block's grid, so no top margin of its
+	   own; it drops below on a narrow screen, where the grid's row gap spaces it. */
+	.title-history { margin-top: 1.75rem; min-width: 0; }
+	.title-history h4 { margin: 0; font-size: .85rem; font-weight: 700; opacity: .7; }
+	.title-history-chart { max-width: 560px; margin-top: .5rem; }
 	.title-history-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 	.title-history-grid line { stroke: rgba(41, 41, 41, 0.1); stroke-width: 1; }
 	.title-history-grid text { fill: rgba(41, 41, 41, 0.6); font-size: 11px; }

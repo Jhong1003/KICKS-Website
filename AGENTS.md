@@ -871,7 +871,10 @@ the protocol's skill scores are measured against — but it ignores who is playi
 and would draw an identical bar under all three pairings, so model comparison
 stays in the repo (protocol doc + scorecard), the same split already used for
 scoring and interpretation. The "Forecast method" box describes only the model
-on screen, plus the before-kickoff publication rule. Pairings appear in the same
+on screen, plus the small-sample caution while it applies — nothing else.
+It is the one place the page explains itself, so it stays short: an entry
+about the before-kickoff publication rule was added and then cut as more
+than a member reading the bars needs. Pairings appear in the same
 order and home/away way round
 as that week's fixtures (`orderLikeFixtures`, src/lib/forecast-order.ts, display only — the
 CSV keeps id order). Hidden while that week's forecasts aren't published yet;
@@ -1000,9 +1003,12 @@ at 2/3 and stays empty below `LATE_MIN_GOALS` timed goals). Per-match badges
 `title_forecasts.csv` once a league has two published weeks: frozen numbers, no
 scores (its table repeats the chart's numbers, so it is kept for screen
 readers and taken off the page) — scoring and interpretation stay on GitHub. It renders **inside** the
-Title Chances section (`ChampionshipSimulator.astro`, after the model and
-caution lines) as a `div` with an `h3` — not a section of its own, so the page
-has one Title Chances block rather than two headings showing the same figures.
+Title Chances block (`ChampionshipSimulator.astro`) as a `div` with an `h4`,
+**beside** the live percentages in that block's `.title-race-grid` (auto-fit,
+so it drops underneath on a narrow screen and the percentages fill the row
+on their own before two weeks are published) — not a section of its own, so
+the page has one Title Chances block rather than two headings showing the
+same figures.
 Deliberately **wordless**: just "주차별 변화" and the chart. There is no sentence
 explaining that these were published before kickoff (the table's caption says so
 for screen readers only, visually hidden) — the members' page shows the numbers,
