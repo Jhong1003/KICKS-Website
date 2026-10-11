@@ -953,52 +953,25 @@ the score has to move — **but never counted for the scorer**
 (`_goal_role_counts` skips them), the same rule that keeps own goals out of a
 player's `goals`.
 
-**A player page lists these goals; it never counts them per role.** The
-player-page block ("Goals that mattered", `keyGoals` in
-[src/lib/goal-roles.ts](src/lib/goal-roles.ts)) reads `goal_events.json`
-directly and prints one line per goal — week, minute, and the roles that goal
-held — oldest first, leaving out goals that did nothing to the score. Lines
-therefore count the player's goals and can only be fewer, never more.
+**A player page shows one of these and nothing else: the winning-goal count**
+(`winningGoals` in [src/lib/goal-roles.ts](src/lib/goal-roles.ts), read
+straight off `goal_events.json`, hidden at 0). That is the stat the official
+leagues keep — GWG in MLS, 결승골 in K League — beside goals and assists, and
+it is one per decided match so it can't double-count.
 
-Counting was tried twice and both ways were wrong, so **don't put a count
-back**. Counting every role a player's goals held made a two-goal player read
-as three, because a 1-0 match's only goal is both the opener and the winner.
-Counting one role per goal instead (most consequential first) fixed the total
-but then hid that another player's three goals had all been openers. Both
-shipped, both were spotted from the site, and a goal per line has neither
-problem.
+The other three roles stay in the data and **must not be turned into profile
+counts again**. Two ways of counting them shipped and both were spotted from
+the site within the hour: counting every role a goal held made a two-goal
+player read as three, because a 1-0 match's only goal is both the opener and
+the winner; counting one role per goal (most consequential first) fixed the
+total and then hid that another player's three goals had all been openers.
+Listing a line per goal solves both and is still in the history, but the
+league-standard single number is what the page settled on.
 
-`_goal_role_counts` still exists for the two badges, which ask whether a
-player ever scored such a goal rather than how many: `comeback_king` (a
-comeback goal) and `late_winner` (a winning goal from
-`LATE_WINNER_FROM_MINUTE`, 10, on). Like Brace, they start in FA26-L2. No
-count of these reaches a profile.
-
-The goals are drawn under each result by
-[src/lib/match-timeline.ts](src/lib/match-timeline.ts)
-(tests: `tests/match-timeline.test.mjs`), per league:
-
-- **Match timelines** — under each completed result in Match Results
-  (`WeeklyResults.astro`): a bar the length of the match with a dot per goal
-  in the scoring team's color, then the same goals as text ("4' 홍지환 · 어시
-  손영보 · 결승골"). `matchTimelines` keys them by `match_id`, drops untimed
-  goals, and leaves a match out of the map entirely rather than returning an
-  empty list, so "not in the map" means "no timeline to draw". Only one role
-  is marked per goal, winner first; **opener is deliberately never marked**,
-  since the first goal is obvious from its position and most goals in this
-  league are openers. **Folded behind a "⚽ 2 골 기록" toggle** (a plain
-  `<details>`, no JavaScript, no remembered state): nine open timelines turned
-  a week of results into a wall, so the card is a scoreboard first and the
-  detail is there for whoever wants it. Two alternatives were built and
-  rejected before this — stripping the rows down to "4' 홍지환 (손영보)" lost
-  the column of coloured dots that let you count a match's goals at a glance,
-  and a FotMob-style scorer summary either side of a ⚽ read worse here than
-  the timeline it replaced. Don't re-try either without a reason.
-A **Goal Clock** — a bar per minute of the match showing when the league's
-goals went in — was built alongside this and then taken out. With one week of
-results, 14 goals across 12 buckets, the busiest minute is whatever randomness
-picked, and the chart stated it in words. Worth revisiting once a league has
-enough goals for the shape to mean something; it is in the git history.
+`_goal_role_counts` is for the two badges, which ask whether a player ever
+scored such a goal rather than how many: `comeback_king` (a comeback goal) and
+`late_winner` (a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on). Like
+Brace, they start in FA26-L2.
 
 Read so far by the team page's late-goals corner (`src/lib/team-profile.ts`,
 `lateAxis`: a team's share of goals from minute `LATE_FROM_MINUTE` on,

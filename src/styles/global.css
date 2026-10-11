@@ -2946,77 +2946,22 @@ a.player-card:hover {
 
 }
 
-/* "Goals that mattered" on a player page (src/lib/goal-roles.ts): one line per
-   goal, when it was scored and what it did. Never a rank or a comparison - the
-   player pages stay a celebration, not a second leaderboard. */
+/* The winning-goal count on a player page (src/lib/goal-roles.ts), kept the
+   way the official leagues keep GWG: one number, no rank and no comparison —
+   the player pages stay a celebration, not a second leaderboard. */
 
-.goal-role-list {
-
-	list-style: none;
+.player-detail-stat {
 
 	margin: 0;
 
-	padding: 0;
+	font-size: 1.4rem;
 
-}
-
-.goal-role-list li {
-
-	display: flex;
-
-	align-items: baseline;
-
-	gap: 8px;
-
-	padding: 6px 0;
-
-	border-bottom: 1px solid var(--color-sage);
-
-}
-
-.goal-role-list li:last-child {
-
-	border-bottom: 0;
-
-}
-
-.goal-role-when {
-
-	min-width: 3.4em;
-
-	font-size: 0.8rem;
-
-	opacity: 0.6;
-
-}
-
-.goal-role-minute {
-
-	min-width: 2.4em;
+	font-weight: 700;
 
 	font-variant-numeric: tabular-nums;
 
-	opacity: 0.6;
-
 }
 
-/* A goal can have done two things; they read as one phrase, separated. */
-
-.goal-role-labels {
-
-	font-weight: 600;
-
-}
-
-.goal-role-labels > :not(:first-child)::before {
-
-	content: " · ";
-
-	font-weight: 400;
-
-	opacity: 0.45;
-
-}
 
 .player-badge-list {
 

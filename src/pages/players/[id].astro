@@ -8,7 +8,7 @@ import profilesData from "../../data/player_profiles.json";
 import goalEventsData from "../../data/goal_events.json";
 import { getPlayerPhotos } from "../../lib/player-photos";
 import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
-import { GOAL_ROLE_LABELS, keyGoals, type RoleGoal } from "../../lib/goal-roles";
+import { winningGoals, type RoleGoal } from "../../lib/goal-roles";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 import { isLeagueFinished, isShownInLeague } from "../../lib/finale";
 
@@ -117,26 +117,12 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 										</div>
 									)}
 
-									{keyGoals(goalEventsData as RoleGoal[], section.league, player.player_id).length > 0 && (
+									{winningGoals(goalEventsData as RoleGoal[], section.league, player.player_id) > 0 && (
 										<div class="player-detail-meta">
-											<p class="section-label"><T en="GOALS THAT MATTERED" ko="결정적인 골" /></p>
-											<ul class="goal-role-list">
-												{keyGoals(goalEventsData as RoleGoal[], section.league, player.player_id).map((goal) => (
-													<li>
-														<T
-															class="goal-role-when"
-															en={`W${goal.week}`}
-															ko={`${goal.week}주차`}
-														/>
-														<span class="goal-role-minute">{goal.minute}'</span>
-														<span class="goal-role-labels">
-															{goal.roles.map((key) => (
-																<T en={GOAL_ROLE_LABELS[key].en} ko={GOAL_ROLE_LABELS[key].ko} />
-															))}
-														</span>
-													</li>
-												))}
-											</ul>
+											<p class="section-label"><T en="WINNING GOALS" ko="결승골" /></p>
+											<p class="player-detail-stat">
+												{winningGoals(goalEventsData as RoleGoal[], section.league, player.player_id)}
+											</p>
 										</div>
 									)}
 
