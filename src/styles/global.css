@@ -2150,25 +2150,32 @@ button.league-switcher-link {
 
 .video-group + .video-group {
 
-	margin-top: 40px;
+	margin-top: 32px;
 
 }
 
-.video-group-title {
+/* Scoped to .video-list on purpose: `.content-section h2` is a class plus an
+   element, so a lone class loses to it and this heading came out at the page
+   title's size. */
 
-	margin: 0 0 16px;
-	font-size: 1rem;
-	letter-spacing: 0.08em;
+.video-list .video-group-title {
+
+	margin: 0 0 12px;
+	font-size: 0.82rem;
+	font-weight: 700;
+	line-height: 1.3;
+	letter-spacing: 0.1em;
 	text-transform: uppercase;
 	color: var(--color-green);
+	opacity: 0.85;
 
 }
 
 .video-grid {
 
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-	gap: 20px;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 14px;
 
 }
 
@@ -2176,8 +2183,8 @@ button.league-switcher-link {
 
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
-	padding: 24px;
+	gap: 7px;
+	padding: 16px;
 	border: 1px solid var(--color-sage);
 	border-radius: 8px;
 	background-color: var(--color-background);
@@ -2195,7 +2202,7 @@ button.league-switcher-link {
 .video-card-meta {
 
 	color: var(--color-green);
-	font-size: 0.78rem;
+	font-size: 0.7rem;
 	font-weight: 700;
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
@@ -2205,7 +2212,7 @@ button.league-switcher-link {
 .video-card-title {
 
 	margin: 0;
-	font-size: 1.1rem;
+	font-size: 0.95rem;
 	font-weight: 700;
 
 }
@@ -2213,7 +2220,9 @@ button.league-switcher-link {
 .video-card .button-primary {
 
 	align-self: flex-start;
-	margin-top: 6px;
+	margin-top: 4px;
+	padding: 7px 14px;
+	font-size: 0.82rem;
 
 }
 
