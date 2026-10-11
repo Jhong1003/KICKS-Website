@@ -234,11 +234,16 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		}
 	</section>
 
-	<MatchForecasts league={league} />
-
-	<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
-
 	<GoalClock league={league} goals={leagueGoals} />
+
+	{/* One Forecasts section rather than three stacked ones: match forecasts,
+	    title chances and the week-by-week chart all come from the same model,
+	    and side by side as separate h2s they read as three of the same thing. */}
+	<section class="content-section league-forecasts" aria-labelledby="league-forecasts-title">
+		<h2 id="league-forecasts-title"><T en="Forecasts" ko="예측" /></h2>
+		<MatchForecasts league={league} />
+		<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
+	</section>
 
 	</div>
 	<div id="player-stats" data-league-panel>

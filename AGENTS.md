@@ -998,7 +998,8 @@ at 2/3 and stays empty below `LATE_MIN_GOALS` timed goals). Per-match badges
 
 `TitleChanceHistory.astro` draws the published title chances per week from
 `title_forecasts.csv` once a league has two published weeks: frozen numbers, no
-scores — scoring and interpretation stay on GitHub. It renders **inside** the
+scores (its table repeats the chart's numbers, so it is kept for screen
+readers and taken off the page) — scoring and interpretation stay on GitHub. It renders **inside** the
 Title Chances section (`ChampionshipSimulator.astro`, after the model and
 caution lines) as a `div` with an `h3` — not a section of its own, so the page
 has one Title Chances block rather than two headings showing the same figures.
@@ -1014,7 +1015,15 @@ point of showing them together.
 ### League sections and Title Race UI
 
 League pages keep their existing paths and offer OVERVIEW / PLAYER STATS
-sub-navigation. Overview contains League Table → Match Results → Title Race;
+sub-navigation. Overview reads **past then future**: League Table → Match
+Results → Goal Clock → **Forecasts**, the last being one section
+(`league-forecasts` in `LeagueView.astro`, `<h2>예측</h2>`) holding Match
+Forecasts, Title Chances and the week-by-week chart as `h3` blocks
+(`.forecast-block`). They were three stacked `h2` sections of bars and
+percentages and read as three of the same thing; they all come from the same
+model, so they are one. Each keeps its own id (`#forecasts`, `#title-race`),
+so existing anchors still work. The old wording below still describes the
+panels; Overview contains League Table → Match Results → Title Race;
 Player Stats contains the unchanged full leaderboard with consecutive ranks.
 `#player-stats` selects that panel; `#overview` or no hash selects Overview.
 The existing `#player-stats-title` anchor also selects Player Stats.
@@ -1039,12 +1048,14 @@ as ">99.9%", so 10,000 runs never display a misleading 0.0% or 100.0%.
 
 The site shows a read-only result, a simulations / remaining matches line,
 and a model line saying team strength comes from this league's goals (same
-model as Match Forecasts). While **fewer than half the league's matches are
-played** (`smallSample` in the component) a caution line follows it: the
-strengths come from a handful of matches, so one week can move the numbers a
-long way. It's rendered at build time from `model.completed` and disappears by
-itself as results come in — no disclaimer is left standing once the sample is
-big enough. The model itself is never softened to suit the output: k and every
+model as Match Forecasts). Those two lines were three: the model line and a
+small-sample caution moved into **Match Forecasts' "Forecast method" box**,
+which already explains the same model, and the caution now covers both views
+in one place (`smallSample` in `MatchForecasts.astro`, shown while fewer than
+half the league's matches are played and gone by itself after that). Three
+footnotes stacked under one short list of percentages was most of what made
+this part of the page feel heavy — keep new explanation in the method box.
+The model itself is never softened to suit the output: k and every
 other Poisson v1 parameter are fixed for the whole league by
 [docs/forecast-protocol-v2.md](docs/forecast-protocol-v2.md), and the k = 3/6/12
 sensitivity check is a post-season analysis. If these percentages ever look

@@ -27,14 +27,23 @@ const latest = forecastWeek && {
 		rows: displayRows(pairing.rows),
 	})),
 };
+// Early in a league the Poisson strengths come from a handful of matches, so
+// one week can move both these bars and the title chances below a long way.
+// Said once, here, while fewer than half the league's matches are played —
+// Title Chances runs the same model, and two copies of the warning next to
+// each other was most of what made this part of the page feel heavy.
+const leagueFixtures = (matchesData as Fixture[]).filter((fixture) => fixture.league === league.id);
+const played = leagueFixtures.filter((fixture) => fixture.status === "completed").length;
+const smallSample = played > 0 && played * 2 < leagueFixtures.length;
+
 // Week 1 has no Poisson forecast yet, so it shows the baseline instead.
 const showsPrimary = latest?.pairings.some((pairing) => pairing.rows.some((row) => row.model === PRIMARY_MODEL)) ?? false;
 ---
 
 {
 	latest && (
-		<section class="content-section match-forecasts" id="forecasts" aria-labelledby="forecasts-title">
-			<h2 id="forecasts-title"><T en="Match Forecasts" ko="경기 예측" /></h2>
+		<div class="forecast-block match-forecasts" id="forecasts" aria-labelledby="forecasts-title">
+			<h3 id="forecasts-title"><T en="Match Forecasts" ko="경기 예측" /></h3>
 			<T
 				as="p"
 				class="about-description"
@@ -100,11 +109,22 @@ const showsPrimary = latest?.pairings.some((pairing) => pairing.rows.some((row) 
 							<dd><T en="No results from this league yet, so: last league's draw rate, and the rest split evenly" ko="아직 이번 리그 결과가 없어서, 지난 리그 무승부 비율을 쓰고 나머지는 두 팀이 반씩" /></dd>
 						</>
 					)}
+					{smallSample && (
+						<>
+							<dt><T en="Early days" ko="아직 초반" /></dt>
+							<dd>
+								<T
+									en={`Only ${played} matches have been played, so these and the title chances below can move a lot in a single week.`}
+									ko={`아직 ${played}경기밖에 안 해서, 이 확률과 아래 우승 확률 모두 한 주 만에 크게 바뀔 수 있어요.`}
+								/>
+							</dd>
+						</>
+					)}
 					<dt><T en="Published before kickoff" ko="경기 전에 공개" /></dt>
 					<dd><T en="Every forecast is committed to the repo before Friday 23:59, and never edited afterwards" ko="모든 예측은 금요일 밤 11:59 전에 저장소에 기록되고, 그 뒤로는 수정하지 않아요" /></dd>
 				</dl>
 			</details>
-		</section>
+		</div>
 	)
 }
 
