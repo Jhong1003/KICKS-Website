@@ -594,6 +594,9 @@ def check_goal_events(
 
     scored = {}  # (match_id, team) -> goals counted from events
     event_weeks = set()  # (league, week)
+    minute_weeks = set()  # (league, week) with at least one minute written down
+    minute_missing: dict[tuple[str, int], list[str]] = {}
+    minute_slots: dict[tuple[str, int], list[str]] = {}  # (match_id, minute) -> rows
 
     for idx, row in events.iterrows():
         where = f"goal_events {_sheet_row(idx)}행"
@@ -611,6 +614,28 @@ def check_goal_events(
         week = int(match["week"])
         event_weeks.add((league, week))
         teams = (match["home_team"], match["away_team"])
+
+        # Goal minute: the elapsed minute of a match, not a wall-clock time.
+        # Entering 17:08 for a match that kicked off at 17:04 as "8" is the
+        # mistake this range check is here to catch.
+        minute = row.get("minute")
+        if pd.isna(minute):
+            minute_missing.setdefault((league, week), []).append(where)
+        else:
+            try:
+                value = int(minute)
+            except (TypeError, ValueError):
+                errors.append(f"{where}: minute '{minute}'이 숫자가 아닙니다")
+            else:
+                minute_weeks.add((league, week))
+                limit = league_rules(league)["match_minutes"]
+                if not 1 <= value <= limit:
+                    errors.append(
+                        f"{where}: minute {value}분은 경기 시간(1~{limit}분) 밖입니다 — "
+                        f"시계 시각이 아니라 경기 시작부터 몇 분인지를 적어주세요"
+                    )
+                else:
+                    minute_slots.setdefault((match_id, value), []).append(where)
 
         scorer_team = week_team.get((league, week, scorer))
         if scorer_team is None:
@@ -644,6 +669,23 @@ def check_goal_events(
                         f"{where}: 어시스트 '{assist}'({assist_team})가 득점자 "
                         f"'{scorer}'({scorer_team})와 다른 팀입니다"
                     )
+
+    # Minutes are all-or-nothing per week. FA26-L1 has no events at all and
+    # FA26-L2 records every minute; what this catches is the in-between —
+    # one row left blank in a week where every other goal has a minute, which
+    # would quietly skew anything computed from goal times.
+    for (league, week), rows in sorted(minute_missing.items()):
+        if (league, week) in minute_weeks:
+            errors.append(
+                f"{league} {week}주차: 같은 주차의 다른 골에는 minute이 있는데 "
+                f"{len(rows)}개 행에만 비어 있습니다 ({', '.join(rows)})"
+            )
+
+    # Two goals in the same minute of the same match is possible but rare, and
+    # a duplicated row looks exactly like this - worth a look, not a failure.
+    for (match_id, value), rows in sorted(minute_slots.items()):
+        if len(rows) > 1:
+            warnings.append(f"{match_id}: {value}분에 골이 {len(rows)}개 기록돼 있습니다 ({', '.join(rows)})")
 
     # Per-match totals must match the official score.
     for match_id, match in match_info.items():

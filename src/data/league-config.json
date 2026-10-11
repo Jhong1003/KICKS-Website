@@ -1,5 +1,5 @@
 {
-  "_comment": "Per-league rules, hand-edited (never touched by the pipeline) and read by scripts/update_data.py and scripts/validate_data.py. \"_default\" applies to every league; list a league id below only to override the values that differ for it. A league not listed at all just uses \"_default\". weeks = weeks in the league, final_week = the week wins are worth final_win_points (that week onward), matches_per_week = expected matches in a full week (3 teams round-robin, 3 rounds = 9).",
+  "_comment": "Per-league rules, hand-edited (never touched by the pipeline) and read by scripts/update_data.py and scripts/validate_data.py. \"_default\" applies to every league; list a league id below only to override the values that differ for it. A league not listed at all just uses \"_default\". weeks = weeks in the league, final_week = the week wins are worth final_win_points (that week onward), matches_per_week = expected matches in a full week (3 teams round-robin, 3 rounds = 9), match_minutes = how long one match runs, which is the range a goal_events minute has to fall in (one period, no half-time).",
   "_default": {
     "weeks": 4,
     "final_week": 4,
@@ -8,6 +8,7 @@
     "draw_points": 1,
     "matches_per_week": 9,
     "matches_per_pair_per_week": 3,
+    "match_minutes": 12,
     "ranking_criteria": [
       "points",
       "participation_rate",

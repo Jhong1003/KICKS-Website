@@ -16,6 +16,7 @@ import PlayerCard from "../../../../components/PlayerCard.astro";
 import T from "../../../../components/T.astro";
 import leagueTableData from "../../../../data/league_table.json";
 import matchesData from "../../../../data/matches.json";
+import goalEventsData from "../../../../data/goal_events.json";
 import profilesData from "../../../../data/player_profiles.json";
 import { getPlayerPhotos } from "../../../../lib/player-photos";
 import { leagues, getTeamColor, getTeamName, type League, type LeagueTeam } from "../../../../lib/leagues";
@@ -26,7 +27,7 @@ import { titleHistory } from "../../../../lib/forecasts";
 import { headToHead, recentForm, teamLeaders, teamRecords, teamResults } from "../../../../lib/team-stats";
 import teamInfoData from "../../../../data/team-info.json";
 import TeamRadar from "../../../../components/TeamRadar.astro";
-import { averageProfile, teamProfile, MIN_MATCHES, type TeamProfile } from "../../../../lib/team-profile";
+import { averageProfile, teamProfile, MIN_MATCHES, type ProfileGoal, type TeamProfile } from "../../../../lib/team-profile";
 
 export function getStaticPaths() {
 	return leagues.flatMap((league) => league.teams.map((team) => ({ params: { league: league.id, team: team.team_id }, props: { league, team } })));
@@ -145,7 +146,7 @@ const leaguePlayers = (profilesData as PlayerProfile[]).flatMap((player) => {
 	return section ? [{ weekly: section.weekly_stats }] : [];
 });
 const profileOf = (teamId: string) =>
-	teamProfile(league.id, teamId, matchesData as MatchRecord[], leaguePlayers, table.find((entry) => entry.team_id === teamId)?.participation_rate ?? null);
+	teamProfile(league.id, teamId, matchesData as MatchRecord[], leaguePlayers, table.find((entry) => entry.team_id === teamId)?.participation_rate ?? null, goalEventsData as ProfileGoal[]);
 const styleProfile = profileOf(team.team_id);
 const leagueAverage = averageProfile(league.teams.map((entry) => profileOf(entry.team_id)).filter((p): p is TeamProfile => p !== null));
 

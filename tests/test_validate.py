@@ -16,6 +16,7 @@ from validate_data import (  # noqa: E402
     check_active_players_missing_weeks,
     check_assists_within_goals,
     check_duplicate_player_weeks,
+    check_goal_events,
     check_team_changes,
 )
 
@@ -73,6 +74,55 @@ class NewRuleTests(unittest.TestCase):
         moved = stats(("L1", 1, "P", "A", 6, 0, 0, 0), ("L1", 2, "P", "B", 6, 0, 0, 0))
         self.assertEqual(len(check_team_changes(moved, [])[0]), 1)
         self.assertEqual(check_team_changes(moved, [{"player": "P", "week": 2, "to": "B"}])[0], [])
+
+
+class GoalMinuteTests(unittest.TestCase):
+    """goal_events' `minute` column (FA26-L2 onward): the elapsed minute of a
+    12-minute match, so a wall-clock time typed in by mistake has to fail."""
+
+    MATCHES = pd.DataFrame([
+        dict(league="FA26-L2", week=1, match_id="FA26-L2-W01-M01",
+             home_team="A", away_team="B", home_score=2, away_score=0),
+    ])
+    STATS = stats(
+        ("FA26-L2", 1, "P", "A", 6, 0, 0, 0),
+        ("FA26-L2", 1, "Q", "A", 6, 0, 0, 0),
+    )
+
+    def events(self, *minutes):
+        return pd.DataFrame([
+            dict(match_id="FA26-L2-W01-M01", scorer=scorer, assist=None, own_goal=None, minute=minute)
+            for scorer, minute in zip(("P", "Q"), minutes)
+        ])
+
+    def run_check(self, *minutes):
+        return check_goal_events(self.MATCHES, self.STATS, self.events(*minutes))
+
+    def test_minutes_within_the_match_pass(self):
+        self.assertEqual(self.run_check(3, 12), ([], []))
+
+    def test_wall_clock_time_is_rejected(self):
+        # 17:08 in a match that kicked off at 17:04 is minute 4, not 8 - and
+        # a full clock reading lands well outside 1..12.
+        errors, _ = self.run_check(3, 17)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("경기 시간", errors[0])
+        self.assertEqual(len(self.run_check(0, 3)[0]), 1)
+
+    def test_one_blank_minute_in_a_timed_week_fails(self):
+        errors, _ = self.run_check(3, None)
+        self.assertEqual(len(errors), 1)
+        self.assertIn("minute", errors[0])
+
+    def test_a_week_with_no_minutes_at_all_is_fine(self):
+        # FA26-L1 was recorded before minutes existed; nothing to complain about.
+        self.assertEqual(self.run_check(None, None), ([], []))
+
+    def test_two_goals_in_the_same_minute_warn_but_pass(self):
+        errors, warnings = self.run_check(5, 5)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("5분", warnings[0])
 
 
 if __name__ == "__main__":

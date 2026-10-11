@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { AXES, MIN_MATCHES, teamProfile, averageProfile } from "../src/lib/team-profile.ts";
+import { AXES, LATE_MIN_GOALS, MIN_MATCHES, teamProfile, averageProfile } from "../src/lib/team-profile.ts";
 
 const read = (name) => JSON.parse(readFileSync(new URL(`../src/data/${name}`, import.meta.url), "utf8"));
 const match = (home, away, hs, as) => ({ league: "X", home_team_id: home, away_team_id: away, home_score: hs, away_score: as });
@@ -28,6 +28,29 @@ test("fixed scales: attack/defense against 2.5 goals a match, clamped", () => {
 	assert.equal(axis(q, "defense").value, 0);
 	assert.equal(axis(q, "attendance").value, null);
 	assert.equal(axis(q, "late").value, null);
+});
+
+test("late goals: share from minute 9, full at 2/3, own goals excluded", () => {
+	const matches = Array.from({ length: 12 }, () => match("T1", "T2", 1, 1));
+	const goal = (team_id, minute, own_goal = false) => ({ league: "X", team_id, minute, own_goal });
+	// Eight timed goals is the minimum; below it the corner stays empty.
+	const early = Array.from({ length: LATE_MIN_GOALS }, () => goal("T1", 2));
+	assert.equal(axis(teamProfile("X", "T1", matches, [], 0.9, early.slice(1)), "late").value, null);
+	assert.equal(axis(teamProfile("X", "T1", matches, [], 0.9, early), "late").value, 0);
+
+	// 4 of 8 from minute 9 = 50%, which is 0.75 of the 2/3 full scale.
+	const half = [...Array.from({ length: 4 }, () => goal("T1", 2)), ...Array.from({ length: 4 }, () => goal("T1", 9))];
+	assert.equal(axis(teamProfile("X", "T1", matches, [], 0.9, half), "late").value, 0.75);
+	// Two thirds or more fills the corner, and it never goes past 1.
+	const mostly = [...Array.from({ length: 2 }, () => goal("T1", 2)), ...Array.from({ length: 6 }, () => goal("T1", 12))];
+	assert.equal(axis(teamProfile("X", "T1", matches, [], 0.9, mostly), "late").value, 1);
+
+	// Another team's goals, own goals and untimed goals are all left out:
+	// what remains here is the 8 early T1 goals, so the share is 0.
+	const noise = [...early, goal("T2", 11), goal("T1", 11, true), goal("T1", null)];
+	const p = teamProfile("X", "T1", matches, [], 0.9, noise);
+	assert.equal(axis(p, "late").value, 0);
+	assert.match(axis(p, "late").raw.en, /0 of 8 goals/);
 });
 
 test("link-up and one-team count only weeks on this team", () => {
