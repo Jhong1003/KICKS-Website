@@ -953,24 +953,19 @@ the score has to move — **but never counted for the scorer**
 (`_goal_role_counts` skips them), the same rule that keeps own goals out of a
 player's `goals`.
 
-**A player page shows one of these and nothing else: the winning-goal count**
-(`winningGoals` in [src/lib/goal-roles.ts](src/lib/goal-roles.ts), read
-straight off `goal_events.json`, hidden at 0). That is the stat the official
-leagues keep — GWG in MLS, 결승골 in K League — beside goals and assists, and
-it is one per decided match so it can't double-count.
+**None of this goes on a player page.** Three attempts shipped and each was
+spotted from the site within the hour: counting every role a goal held made a
+two-goal player read as three, because a 1-0 match's only goal is both the
+opener and the winner; counting one role per goal (most consequential first)
+fixed the total and then hid that another player's three goals had all been
+openers; listing a line per goal was right but long. A single winning-goal
+count, the stat the official leagues keep (GWG, 결승골), was correct and still
+earned its space no better than the Late Winner badge already does. The roles
+stay in the data; a profile says nothing about them.
 
-The other three roles stay in the data and **must not be turned into profile
-counts again**. Two ways of counting them shipped and both were spotted from
-the site within the hour: counting every role a goal held made a two-goal
-player read as three, because a 1-0 match's only goal is both the opener and
-the winner; counting one role per goal (most consequential first) fixed the
-total and then hid that another player's three goals had all been openers.
-Listing a line per goal solves both and is still in the history, but the
-league-standard single number is what the page settled on.
-
-`_goal_role_counts` is for the two badges, which ask whether a player ever
-scored such a goal rather than how many: `comeback_king` (a comeback goal) and
-`late_winner` (a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on). Like
+`_goal_role_counts` is read only by the two badges, which ask whether a player
+ever scored such a goal rather than how many: `comeback_king` (a comeback goal)
+and `late_winner` (a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on). Like
 Brace, they start in FA26-L2.
 
 Read so far by the team page's late-goals corner (`src/lib/team-profile.ts`,

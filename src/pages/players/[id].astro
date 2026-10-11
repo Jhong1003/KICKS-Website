@@ -5,10 +5,8 @@ import BadgeGuide from "../../components/BadgeGuide.astro";
 import T from "../../components/T.astro";
 import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
-import goalEventsData from "../../data/goal_events.json";
 import { getPlayerPhotos } from "../../lib/player-photos";
 import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
-import { winningGoals, type RoleGoal } from "../../lib/goal-roles";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 import { isLeagueFinished, isShownInLeague } from "../../lib/finale";
 
@@ -114,15 +112,6 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 												en={`Previously played for ${section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")} earlier in this league.`}
 												ko={`이번 리그 초반에는 ${section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")} 소속이었어요.`}
 											/>
-										</div>
-									)}
-
-									{winningGoals(goalEventsData as RoleGoal[], section.league, player.player_id) > 0 && (
-										<div class="player-detail-meta">
-											<p class="section-label"><T en="WINNING GOALS" ko="결승골" /></p>
-											<p class="player-detail-stat">
-												{winningGoals(goalEventsData as RoleGoal[], section.league, player.player_id)}
-											</p>
 										</div>
 									)}
 

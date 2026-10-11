@@ -2946,23 +2946,6 @@ a.player-card:hover {
 
 }
 
-/* The winning-goal count on a player page (src/lib/goal-roles.ts), kept the
-   way the official leagues keep GWG: one number, no rank and no comparison —
-   the player pages stay a celebration, not a second leaderboard. */
-
-.player-detail-stat {
-
-	margin: 0;
-
-	font-size: 1.4rem;
-
-	font-weight: 700;
-
-	font-variant-numeric: tabular-nums;
-
-}
-
-
 .player-badge-list {
 
 	display: flex;
