@@ -40,5 +40,47 @@
     "points": 16,
     "goal_difference": -16,
     "participation_rate": 0.806
+  },
+  {
+    "league": "FA26-L2",
+    "rank": 1,
+    "team_id": "T2",
+    "played": 6,
+    "wins": 2,
+    "draws": 3,
+    "losses": 1,
+    "goals_for": 5,
+    "goals_against": 4,
+    "points": 7,
+    "goal_difference": 1,
+    "participation_rate": 0.889
+  },
+  {
+    "league": "FA26-L2",
+    "rank": 2,
+    "team_id": "T1",
+    "played": 6,
+    "wins": 2,
+    "draws": 2,
+    "losses": 2,
+    "goals_for": 5,
+    "goals_against": 4,
+    "points": 6,
+    "goal_difference": 1,
+    "participation_rate": 1.0
+  },
+  {
+    "league": "FA26-L2",
+    "rank": 3,
+    "team_id": "T3",
+    "played": 6,
+    "wins": 1,
+    "draws": 3,
+    "losses": 2,
+    "goals_for": 4,
+    "goals_against": 6,
+    "points": 5,
+    "goal_difference": -2,
+    "participation_rate": 0.778
   }
 ]

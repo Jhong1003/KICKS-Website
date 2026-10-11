@@ -1,7 +1,7 @@
 [
   {
     "id": "FA26-L1",
-    "latest": true,
+    "latest": false,
     "started": true,
     "rules": {
       "weeks": 4,
@@ -38,8 +38,8 @@
   },
   {
     "id": "FA26-L2",
-    "latest": false,
-    "started": false,
+    "latest": true,
+    "started": true,
     "rules": {
       "weeks": 4,
       "final_week": 4,
