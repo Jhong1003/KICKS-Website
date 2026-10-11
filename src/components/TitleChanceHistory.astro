@@ -50,7 +50,11 @@ const labels = series
 	.filter((team) => team.points.length)
 	.map((team) => ({ name: team.name, color: team.color, x: team.points[team.points.length - 1].cx + 10, y: team.points[team.points.length - 1].cy }))
 	.sort((a, b) => a.y - b.y);
-for (let i = 1; i < labels.length; i++) if (labels[i].y - labels[i - 1].y < 14) labels[i].y = labels[i - 1].y + 14;
+// Minimum gap between two labels, a little over the font size below, so the
+// nudge only moves a label as far as it has to and each one stays near its line.
+const LABEL_GAP = 12;
+for (let i = 1; i < labels.length; i++)
+	if (labels[i].y - labels[i - 1].y < LABEL_GAP) labels[i].y = labels[i - 1].y + LABEL_GAP;
 const diamond = (cx: number, cy: number, s: number) => `${cx},${cy - s} ${cx + s},${cy} ${cx},${cy + s} ${cx - s},${cy}`;
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 ---
@@ -124,10 +128,10 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 	.title-history-chart { max-width: 560px; }
 	.title-history-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 	.title-history-grid line { stroke: rgba(41, 41, 41, 0.1); stroke-width: 1; }
-	.title-history-grid text { fill: rgba(41, 41, 41, 0.6); font-size: 11px; }
+	.title-history-grid text { fill: rgba(41, 41, 41, 0.55); font-size: 10px; }
 	.title-history-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 	.title-history-marker { stroke: var(--color-background); stroke-width: 2; }
-	.title-history-label { font-size: 12px; font-weight: 700; fill: var(--color-dark); }
+	.title-history-label { font-size: 10px; font-weight: 600; fill: var(--color-dark); }
 	/* The chart already shows these numbers; the table is the same data a second
 	   time, so it is kept for screen readers and taken off the page. */
 	.title-history-table { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
