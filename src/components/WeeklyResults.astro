@@ -151,6 +151,15 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 												<span class={teamClass(awayWins, homeWins)}>{match.away_team}</span>
 											</div>
 											{goalsOf(match).length > 0 && (
+												/* Folded away by default: the card is a scoreboard first, and a
+												   week of nine open timelines reads as a wall. A plain <details>,
+												   so it works with no JavaScript and each card remembers nothing. */
+												<details class="match-goals">
+													<summary class="match-goals-toggle">
+														<span aria-hidden="true">⚽</span>
+														<span class="match-goals-count">{goalsOf(match).length}</span>
+														<T class="match-goals-label" en="goals" ko="골 기록" />
+													</summary>
 												<div class="match-timeline">
 													<div
 														class="match-timeline-bar"
@@ -195,6 +204,7 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 														))}
 													</ul>
 												</div>
+												</details>
 											)}
 										</div>
 									);
