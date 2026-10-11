@@ -8,6 +8,10 @@
  *   node scripts/make_forecasts.mjs --league FA26-L1 --week 3 --dry-run --replay
  *   node scripts/make_forecasts.mjs --next      (the next league week in schedule.json;
  *                                                used by .github/workflows/publish-forecasts.yml)
+ *   node scripts/make_forecasts.mjs --auto      (after each data update: the newest league's
+ *                                                earliest week with no score yet, only if
+ *                                                nothing is published for it; otherwise it
+ *                                                exits quietly without writing)
  *
  * Week N uses results through week N-1 (data_through_week = N-1):
  *   match forecasts  - `baseline` (previous league's draw rate, wins split evenly)
@@ -43,6 +47,7 @@ function parseArgs(argv) {
 		else if (argv[i] === "--dry-run") args.dryRun = true;
 		else if (argv[i] === "--replay") args.replay = true;
 		else if (argv[i] === "--next") args.next = true;
+		else if (argv[i] === "--auto") args.auto = true;
 		else throw new Error(`Unknown argument: ${argv[i]}`);
 	}
 	if (args.next) {
@@ -55,11 +60,40 @@ function parseArgs(argv) {
 		args.league = upcoming.league;
 		args.week = upcoming.week;
 	}
+	if (args.auto) {
+		const target = autoTarget();
+		if (typeof target === "string") return { ...args, skip: target };
+		args.league = target.league;
+		args.week = target.week;
+	}
 	if (!args.league || !Number.isInteger(args.week) || args.week < 1) {
 		throw new Error("Usage: node scripts/make_forecasts.mjs --league FA26-L2 --week 2 [--dry-run]");
 	}
 	if (args.replay && !args.dryRun) throw new Error("--replay only works with --dry-run.");
 	return args;
+}
+
+/**
+ * --auto: the newest league with an unplayed fixture, and its earliest week
+ * with no completed match. Returns a reason string instead when there's
+ * nothing to publish, so a run after every data update stays quiet:
+ * mid-week (some scores in), already published (never re-made), or past the
+ * deadline.
+ */
+function autoTarget() {
+	const matches = readJson("src/data/matches.json");
+	const league = readJson("src/data/leagues.json")
+		.map((l) => l.id)
+		.reverse()
+		.find((id) => matches.some((m) => m.league === id && m.status !== "completed"));
+	if (!league) return "Every league is finished.";
+	const own = matches.filter((m) => m.league === league);
+	const week = Math.min(...own.filter((m) => m.status !== "completed").map((m) => m.week));
+	if (own.some((m) => m.week === week && m.status === "completed")) return `${league} week ${week} is being played (some scores are in).`;
+	const isPublished = (path) => readCsv(path).rows.some((r) => r.league === league && Number(r.week) === week && r.status === "published");
+	if (isPublished("forecasts/forecasts.csv") || isPublished("forecasts/title_forecasts.csv")) return `${league} week ${week} is already published.`;
+	if (chicagoNow() > deadlineFor(league, week)) return `${league} week ${week}: deadline passed.`;
+	return { league, week };
 }
 
 /** Deterministic 32-bit RNG (mulberry32), so a recorded seed reproduces the numbers. */
@@ -102,6 +136,7 @@ function readCsv(path) {
 
 function main() {
 	const args = parseArgs(process.argv.slice(2));
+	if (args.skip) return { args };
 	const { league: leagueId, week } = args;
 	const leagues = readJson("src/data/leagues.json");
 	const league = leagues.find((l) => l.id === leagueId);
@@ -171,6 +206,10 @@ function main() {
 
 async function run() {
 	const ctx = main();
+	if (ctx.args.skip) {
+		console.log(`Nothing to publish: ${ctx.args.skip}`);
+		return;
+	}
 	const { args, leagueId, week, model, teamIds, matchRows, titleRows, matchCsv, titleCsv, published, common } = ctx;
 
 	if (week === 1) {

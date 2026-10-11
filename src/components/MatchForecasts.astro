@@ -1,10 +1,12 @@
 ---
-// "Match Forecasts": this league's latest published win/draw/loss forecasts
-// (src/lib/forecasts.ts). Read-only — the published record is the CSV in the
-// repo, committed before each week's Friday-night deadline.
+// "Match Forecasts": this league's published win/draw/loss forecasts for the
+// earliest week still to be played (the last week once the league is done;
+// hidden if that week's forecasts aren't published yet — src/lib/forecasts.ts).
+// Read-only — the published record is the CSV in the repo, committed before
+// each week's Friday-night deadline.
 import T from "./T.astro";
 import { getTeamColor, getTeamName, type League } from "../lib/leagues";
-import { MODEL_LABELS, latestForecastWeek, percent } from "../lib/forecasts";
+import { MODEL_LABELS, forecastTargetWeek, forecastsForWeek, percent } from "../lib/forecasts";
 import { getReadableAccentColor } from "../lib/players";
 import { orderLikeFixtures, type Fixture } from "../lib/forecast-order";
 import matchesData from "../data/matches.json";
@@ -14,7 +16,8 @@ interface Props {
 }
 
 const { league } = Astro.props;
-const forecastWeek = latestForecastWeek(league.id);
+const targetWeek = forecastTargetWeek(league.id, matchesData);
+const forecastWeek = targetWeek !== null ? forecastsForWeek(league.id, targetWeek) : null;
 // Same order and home/away as that week's fixtures on the Sheet (display only).
 const latest = forecastWeek && {
 	...forecastWeek,
@@ -73,7 +76,7 @@ const latest = forecastWeek && {
 				})}
 			</div>
 			{
-				latest.pairings.every((pairing) => pairing.rows.every((row) => row.model === "baseline")) && (
+				latest.week === 1 && (
 					<T
 						as="p"
 						class="forecast-note"
