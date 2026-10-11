@@ -936,9 +936,7 @@ with ids rather than names.
   warns on two goals in the same minute of one match.
 
 **Each goal also carries `roles`** (`_tag_goal_roles`), what it did to the
-score, by replaying the match's goals in order. None of the four is exclusive,
-so they never sum to a goal total and nothing presents them as a breakdown of
-one:
+score, by replaying the match's goals in order. A goal can hold more than one:
 
 - `opener` — the first goal of the match.
 - `equalizer` — levelled the score for a team that was behind.
@@ -954,6 +952,16 @@ gets an empty list rather than a guessed order. **Own goals are tagged** —
 the score has to move — **but never counted for the scorer**
 (`_goal_role_counts` skips them), the same rule that keeps own goals out of a
 player's `goals`.
+
+Because a goal can hold two roles, `_goal_role_counts` keeps **two tallies**:
+every role each goal held (what the badges read — "scored a comeback goal" is
+true whether or not it was also the winner), and `primary_<role>`, one per goal,
+the first of `ROLE_PRIORITY` (winner, comeback, equalizer, opener) it held.
+**Profiles show the primary tally**, because the other one makes a player who
+scored twice read as three goals — a 1-0 match's only goal being both the opener
+and the winner — which is how it was first shipped and reported. The primary
+tally sums to at most the player's goals, and to fewer when a goal only
+extended a lead.
 
 Per-player counts land on each profile section as `goal_roles`, rendered by
 the player page's "Goals that mattered" block through

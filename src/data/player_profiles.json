@@ -466,7 +466,7 @@
           "weeks_played": 1
         },
         "goal_roles": {
-          "opener": 3,
+          "opener": 1,
           "equalizer": 0,
           "comeback": 0,
           "winner": 2
@@ -894,7 +894,7 @@
           "weeks_played": 1
         },
         "goal_roles": {
-          "opener": 1,
+          "opener": 0,
           "equalizer": 0,
           "comeback": 0,
           "winner": 1
@@ -1948,7 +1948,7 @@
           "weeks_played": 1
         },
         "goal_roles": {
-          "opener": 2,
+          "opener": 1,
           "equalizer": 1,
           "comeback": 0,
           "winner": 1
@@ -2979,7 +2979,7 @@
           "weeks_played": 1
         },
         "goal_roles": {
-          "opener": 1,
+          "opener": 0,
           "equalizer": 1,
           "comeback": 0,
           "winner": 1

@@ -1,9 +1,16 @@
 // What a goal did to the score. The counts are computed once in the pipeline
 // (`_tag_goal_roles` / `_goal_role_counts` in scripts/update_data.py) and land
 // on each profile section as `goal_roles`; this file only decides how to say
-// them. Roles aren't exclusive — a 1-0 match's only goal is both an opener and
-// the winner — so the numbers here deliberately don't add up to a player's
-// goal total, and nothing on the site presents them as a breakdown of it.
+// them.
+//
+// **One role per goal.** A goal can hold several — a 1-0 match's only goal is
+// both the opener and the winner — and counting each of them made a player who
+// scored twice read as three goals on their own profile, which is exactly how
+// it was reported. The pipeline picks the most consequential role each goal
+// held (ROLE_PRIORITY: winner, comeback, equalizer, opener) and counts it once,
+// so these never add up to more goals than the player scored. They can add up
+// to fewer: a goal that only extends a lead did nothing to the score and is
+// counted under none of them.
 //
 // They exist only where a league has per-goal records with minutes (FA26-L2
 // onward). A league without them has every count at 0, which `hasGoalRoles`

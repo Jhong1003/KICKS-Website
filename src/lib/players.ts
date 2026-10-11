@@ -25,8 +25,9 @@ export interface SeasonTotals {
 }
 
 /** How many of a player's goals did each thing to the score (src/lib/goal-roles.ts).
- *  Roles aren't exclusive, so these don't sum to their goal total. All zero in a
- *  league recorded without per-goal minutes. */
+ *  One role per goal, the most consequential it held, so these never sum to more
+ *  goals than they scored — they sum to fewer when a goal only extended a lead.
+ *  All zero in a league recorded without per-goal minutes. */
 export interface GoalRoles {
 	opener: number;
 	equalizer: number;

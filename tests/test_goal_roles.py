@@ -11,7 +11,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from update_data import _goal_role_counts, _tag_goal_roles  # noqa: E402
+from update_data import GOAL_ROLES, _goal_role_counts, _tag_goal_roles  # noqa: E402
 
 MATCH = "L-W01-M01"
 
@@ -105,9 +105,36 @@ class GoalRoleCountTests(unittest.TestCase):
         counts = _goal_role_counts(rows)
         self.assertEqual(counts[("L", "P0")]["opener"], 1)
         self.assertEqual(counts[("L", "P0")]["late_winner"], 0)
-        self.assertEqual(counts[("L", "P2")], {
-            "opener": 0, "equalizer": 0, "comeback": 1, "winner": 1, "late_winner": 1,
-        })
+        p2 = counts[("L", "P2")]
+        self.assertEqual(p2["comeback"], 1)
+        self.assertEqual(p2["winner"], 1)
+        self.assertEqual(p2["late_winner"], 1)
+
+    def test_one_goal_two_roles_counts_once_for_the_profile(self):
+        # A 1-0 match's only goal is both the opener and the winner. Counting
+        # every role makes a two-goal player read as three; the primary_ keys
+        # are the ones a profile shows, and they count the goal once.
+        rows = goals("A")
+        _tag_goal_roles(rows, match(1, 0))
+        tally = _goal_role_counts(rows)[("L", "P0")]
+        self.assertEqual((tally["opener"], tally["winner"]), (1, 1))
+        primary = {role: tally[f"primary_{role}"] for role in GOAL_ROLES}
+        self.assertEqual(sum(primary.values()), 1)
+        self.assertEqual(primary["winner"], 1)
+        self.assertEqual(primary["opener"], 0)
+
+    def test_primary_counts_never_exceed_the_goals_scored(self):
+        # 홍지환's real week 1: a 1-0 winner that was also the opener, then an
+        # equalizer. Two goals, so the profile must not show three.
+        first = goals("A", minutes=[4])
+        _tag_goal_roles(first, match(1, 0))
+        second = goals("A", "B", minutes=[7, 11])
+        _tag_goal_roles(second, match(1, 1))
+        second[1]["scorer_id"] = "P0"  # the same player got the equalizer
+        tally = _goal_role_counts(first + [second[1]])[("L", "P0")]
+        primary = {role: tally[f"primary_{role}"] for role in GOAL_ROLES}
+        self.assertEqual(sum(primary.values()), 2)
+        self.assertEqual(primary, {"opener": 0, "equalizer": 1, "comeback": 0, "winner": 1})
 
     def test_a_winner_before_the_last_three_minutes_is_not_a_late_winner(self):
         rows = goals("A", minutes=[9])
