@@ -1,9 +1,9 @@
-// Goals on the clock (src/lib/match-timeline.ts): the per-match timeline and
-// the league goal clock, plus the real FA26-L2 numbers.
+// The scorers shown under each result (src/lib/match-timeline.ts), plus the
+// real FA26-L2 numbers.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { GOAL_CLOCK_MIN_GOALS, goalClock, matchTimelines } from "../src/lib/match-timeline.ts";
+import { matchTimelines } from "../src/lib/match-timeline.ts";
 
 const read = (name) => JSON.parse(readFileSync(new URL(`../src/data/${name}`, import.meta.url), "utf8"));
 const name = (id) => `name:${id}`;
@@ -69,30 +69,6 @@ test("timeline: an assist is carried through, an own goal has none", () => {
 	assert.equal(own.assist, null);
 });
 
-test("goal clock: a bucket per minute, shared busiest minutes, own goals counted", () => {
-	// Own goals count here: this is about when goals happen, not about credit.
-	const goals = [
-		...Array.from({ length: 4 }, () => goal({ minute: 3 })),
-		...Array.from({ length: 4 }, () => goal({ minute: 7, own_goal: true })),
-		...Array.from({ length: 2 }, () => goal({ minute: 12 })),
-	];
-	const clock = goalClock(goals, "L", 12);
-	assert.equal(clock.total, 10);
-	assert.equal(clock.minutes.length, 12);
-	assert.equal(clock.peak, 4);
-	assert.deepEqual(clock.busiest, [3, 7]);
-	assert.equal(clock.minutes[0].goals, 0);
-});
-
-test("goal clock: nothing to draw below the minimum, or out of range", () => {
-	const few = Array.from({ length: GOAL_CLOCK_MIN_GOALS - 1 }, () => goal({}));
-	assert.equal(goalClock(few, "L", 12), null);
-	assert.notEqual(goalClock([...few, goal({})], "L", 12), null);
-	// A minute outside the match is dropped, not clamped into a bucket.
-	const withStray = [...few, goal({}), goal({ minute: 99 }), goal({ minute: 0 })];
-	assert.equal(goalClock(withStray, "L", 12).total, GOAL_CLOCK_MIN_GOALS);
-});
-
 test("real FA26-L2: every goal lands on a match and inside the clock", () => {
 	const goals = read("goal_events.json");
 	const matches = new Map(read("matches.json").map((match) => [match.match_id, match]));
@@ -104,11 +80,4 @@ test("real FA26-L2: every goal lands on a match and inside the clock", () => {
 			assert.ok(entry.at >= 0 && entry.at <= 1);
 		}
 	}
-	const clock = goalClock(goals, "FA26-L2", 12);
-	assert.equal(
-		clock.total,
-		goals.filter((g) => g.league === "FA26-L2" && g.minute !== null).length,
-	);
-	// Every goal is in exactly one bucket.
-	assert.equal(clock.minutes.reduce((sum, bucket) => sum + bucket.goals, 0), clock.total);
 });

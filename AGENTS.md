@@ -964,9 +964,9 @@ without per-goal minutes. Two badges come from the same counts and so, like
 Brace, start in FA26-L2: `comeback_king` (a comeback goal) and `late_winner`
 (a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on).
 
-**Two views draw the goals on the clock**, both over
+The goals are drawn under each result by
 [src/lib/match-timeline.ts](src/lib/match-timeline.ts)
-(tests: `tests/match-timeline.test.mjs`) and both per league:
+(tests: `tests/match-timeline.test.mjs`), per league:
 
 - **Match timelines** — under each completed result in Match Results
   (`WeeklyResults.astro`): a bar the length of the match with a dot per goal
@@ -984,13 +984,11 @@ Brace, start in FA26-L2: `comeback_king` (a comeback goal) and `late_winner`
   the column of coloured dots that let you count a match's goals at a glance,
   and a FotMob-style scorer summary either side of a ⚽ read worse here than
   the timeline it replaced. Don't re-try either without a reason.
-- **Goal Clock** (`GoalClock.astro`, last section of the League page) — one
-  bar per minute of the match showing when the league's goals went in, with
-  the busiest minute(s) highlighted and the count printed above each bar, so
-  nothing is read off height alone. Own goals **are** counted: nobody is
-  named or ranked, so this is about when goals happen, not about credit.
-  Hidden below `GOAL_CLOCK_MIN_GOALS` (10), which covers both a league with
-  no per-goal records and one that's only a week old.
+A **Goal Clock** — a bar per minute of the match showing when the league's
+goals went in — was built alongside this and then taken out. With one week of
+results, 14 goals across 12 buckets, the busiest minute is whatever randomness
+picked, and the chart stated it in words. Worth revisiting once a league has
+enough goals for the shape to mean something; it is in the git history.
 
 Read so far by the team page's late-goals corner (`src/lib/team-profile.ts`,
 `lateAxis`: a team's share of goals from minute `LATE_FROM_MINUTE` on,
@@ -1026,7 +1024,7 @@ point of showing them together.
 
 League pages keep their existing paths and offer OVERVIEW / PLAYER STATS
 sub-navigation. Overview reads **past then future**: League Table → Match
-Results → Goal Clock → **Forecasts**, the last being one section
+Results → **Forecasts**, the last being one section
 (`league-forecasts` in `LeagueView.astro`, `<h2>예측</h2>`) holding Match
 Forecasts, Title Chances and the week-by-week chart as `h3` blocks
 (`.forecast-block`). They were three stacked `h2` sections of bars and
