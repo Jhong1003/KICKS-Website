@@ -6,7 +6,7 @@
 // each week's Friday-night deadline.
 import T from "./T.astro";
 import { getTeamColor, getTeamName, type League } from "../lib/leagues";
-import { MODEL_LABELS, forecastTargetWeek, forecastsForWeek, percent } from "../lib/forecasts";
+import { PRIMARY_MODEL, displayRows, forecastTargetWeek, forecastsForWeek, percent } from "../lib/forecasts";
 import { getReadableAccentColor } from "../lib/players";
 import { orderLikeFixtures, type Fixture } from "../lib/forecast-order";
 import matchesData from "../data/matches.json";
@@ -18,11 +18,17 @@ interface Props {
 const { league } = Astro.props;
 const targetWeek = forecastTargetWeek(league.id, matchesData);
 const forecastWeek = targetWeek !== null ? forecastsForWeek(league.id, targetWeek) : null;
-// Same order and home/away as that week's fixtures on the Sheet (display only).
+// Same order and home/away as that week's fixtures on the Sheet (display only),
+// one model per pairing (displayRows: the Poisson forecast once it exists).
 const latest = forecastWeek && {
 	...forecastWeek,
-	pairings: orderLikeFixtures(forecastWeek.pairings, matchesData as Fixture[], league.id, forecastWeek.week),
+	pairings: orderLikeFixtures(forecastWeek.pairings, matchesData as Fixture[], league.id, forecastWeek.week).map((pairing) => ({
+		...pairing,
+		rows: displayRows(pairing.rows),
+	})),
 };
+// Week 1 has no Poisson forecast yet, so it shows the baseline instead.
+const showsPrimary = latest?.pairings.some((pairing) => pairing.rows.some((row) => row.model === PRIMARY_MODEL)) ?? false;
 ---
 
 {
@@ -50,11 +56,6 @@ const latest = forecastWeek && {
 							</p>
 							{pairing.rows.map((row) => (
 								<div class="forecast-row">
-									{pairing.rows.length > 1 && (
-										<p class="forecast-model">
-											<T en={MODEL_LABELS[row.model].en} ko={MODEL_LABELS[row.model].ko} />
-										</p>
-									)}
 									<div
 										class="forecast-bar"
 										role="img"
@@ -88,10 +89,19 @@ const latest = forecastWeek && {
 			<details class="forecast-method">
 				<summary><T en="Forecast method" ko="예측 방법" /></summary>
 				<dl>
-					<dt><T en="Baseline (week 1)" ko="기본 예측 (1주차)" /></dt>
-					<dd><T en="Last league's draw rate; the rest split evenly" ko="지난 리그 무승부 비율을 쓰고, 나머지는 두 팀이 반씩" /></dd>
-					<dt><T en="Poisson model (from week 2)" ko="포아송 모델 (2주차부터)" /></dt>
-					<dd><T en="Team strength from this league's goals → win / draw / loss chances" ko="이번 리그 득실점으로 팀 전력 계산 → 승·무·패 확률" /></dd>
+					{showsPrimary ? (
+						<>
+							<dt><T en="Poisson model" ko="포아송 모델" /></dt>
+							<dd><T en="Team strength from this league's goals → win / draw / loss chances" ko="이번 리그 득실점으로 팀 전력 계산 → 승·무·패 확률" /></dd>
+						</>
+					) : (
+						<>
+							<dt><T en="Baseline (week 1)" ko="기본 예측 (1주차)" /></dt>
+							<dd><T en="No results from this league yet, so: last league's draw rate, and the rest split evenly" ko="아직 이번 리그 결과가 없어서, 지난 리그 무승부 비율을 쓰고 나머지는 두 팀이 반씩" /></dd>
+						</>
+					)}
+					<dt><T en="Published before kickoff" ko="경기 전에 공개" /></dt>
+					<dd><T en="Every forecast is committed to the repo before Friday 23:59, and never edited afterwards" ko="모든 예측은 금요일 밤 11:59 전에 저장소에 기록되고, 그 뒤로는 수정하지 않아요" /></dd>
 				</dl>
 			</details>
 		</section>
@@ -104,7 +114,6 @@ const latest = forecastWeek && {
 	.forecast-teams { display: flex; align-items: baseline; gap: .6rem; margin: 0 0 .6rem; font-weight: 600; }
 	.forecast-vs { font-size: .75rem; font-weight: 500; opacity: .55; }
 	.forecast-row + .forecast-row { margin-top: .8rem; }
-	.forecast-model { margin: 0 0 .35rem; font-size: .75rem; opacity: .65; }
 	.forecast-bar { display: flex; height: .6rem; background: var(--color-sage); }
 	.forecast-bar span { display: block; height: 100%; }
 	.forecast-bar-draw { background-color: #b9b9b2; }

@@ -29,6 +29,24 @@ export const MODEL_LABELS: Record<ForecastModel, { en: string; ko: string }> = {
 // Poisson first: from week 2 it's the forecast that uses this league's results.
 const MODEL_ORDER: ForecastModel[] = ["poisson-v1", "baseline"];
 
+/** The model the site shows whenever it's published for that week. */
+export const PRIMARY_MODEL: ForecastModel = "poisson-v1";
+
+/**
+ * What the site shows for one pairing: the Poisson forecast alone once it's
+ * published, otherwise whatever that week has (week 1 is baseline-only).
+ *
+ * The baseline is still published and still scored — it's the comparison the
+ * protocol's skill scores are measured against — but it ignores who is playing,
+ * so on the league page it draws the same bar under every pairing. Scoring and
+ * model comparison live in the repo (docs/forecast-protocol-v2.md and the
+ * scorecard), not on the members' page.
+ */
+export function displayRows(rows: Forecast[]): Forecast[] {
+	const primary = rows.filter((row) => row.model === PRIMARY_MODEL);
+	return primary.length > 0 ? primary : rows;
+}
+
 function parse(csv: string): Forecast[] {
 	const [header, ...lines] = csv.trim().split(/\r?\n/);
 	const columns = header.split(",");

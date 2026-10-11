@@ -855,9 +855,17 @@ Verification (offline):
 Chances) shows the forecasts for a league's earliest week with a fixture not
 yet completed (its last week once every fixture is done) from
 [forecasts/forecasts.csv](forecasts/forecasts.csv), read at build time by
-[src/lib/forecasts.ts](src/lib/forecasts.ts) (`?raw` import). One stacked
-bar per pairing and model (team colors, gray for the draw), percentages
-rounded for display only. Pairings appear in the same order and home/away way round
+[src/lib/forecasts.ts](src/lib/forecasts.ts) (`?raw` import). **One stacked bar
+per pairing** (team colors, gray for the draw), percentages rounded for display
+only. One model is shown, never two: `displayRows` picks `poisson-v1` whenever
+that week has it, so week 1 shows the baseline and every week after it shows
+the Poisson forecast. The baseline keeps being published and scored — it's what
+the protocol's skill scores are measured against — but it ignores who is playing
+and would draw an identical bar under all three pairings, so model comparison
+stays in the repo (protocol doc + scorecard), the same split already used for
+scoring and interpretation. The "Forecast method" box describes only the model
+on screen, plus the before-kickoff publication rule. Pairings appear in the same
+order and home/away way round
 as that week's fixtures (`orderLikeFixtures`, src/lib/forecast-order.ts, display only — the
 CSV keeps id order). Hidden while that week's forecasts aren't published yet;
 the "every pairing has the same forecast" note shows only for week 1. The CSV is
