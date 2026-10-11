@@ -3,6 +3,7 @@ import T from "./T.astro";
 import type { League } from "../lib/leagues";
 import { buildSimulationModel, type MatchRecord, type SimulationModel } from "../lib/championship-simulator";
 import type { TeamStanding } from "../lib/standings";
+import TitleChanceHistory from "./TitleChanceHistory.astro";
 interface Props {
 	league: League;
 	matches: MatchRecord[];
@@ -51,6 +52,9 @@ const smallSample = model !== undefined && played > 0 && played * 2 < played + m
 		<noscript><p><T en="Turn on JavaScript to see the results." ko="결과를 보려면 JavaScript를 켜 주세요." /></p></noscript>
 
 	</>}
+	{/* Same section on purpose: the live percentages above, then the frozen
+	    ones published before each week. Shows itself from two published weeks. */}
+	<TitleChanceHistory league={league} />
 </section>
 
 <script>
