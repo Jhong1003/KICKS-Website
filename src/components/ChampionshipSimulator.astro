@@ -21,14 +21,9 @@ const orderedIds = [...new Set([
 	...league.teams.map((team) => team.team_id),
 ])];
 const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => team.team_id === id));
-// Early in a league the strengths come from a handful of matches, so one week's
-// results can move these numbers a long way. Say so while fewer than half the
-// league's matches are played — it stops being true on its own as results come in.
-const played = model?.completed ?? 0;
-const smallSample = model !== undefined && played > 0 && played * 2 < played + model.remaining.length;
 ---
-<section id="title-race" class="content-section championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
-	<h2 id="simulator-title"><T en="Title Chances" ko="우승 확률" /></h2>
+<div id="title-race" class="forecast-block championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
+	<h3 id="simulator-title"><T en="Title Chances" ko="우승 확률" /></h3>
 	{error ? <p role="alert"><T en="Couldn't calculate: " ko="계산하지 못했어요: " />{error}</p> : model && <>
 		<div class="title-race-results" data-simulator-results>
 			{orderedTeams.map((team) => <div class="simulator-team" data-team-id={team.team_id}>
@@ -39,23 +34,15 @@ const smallSample = model !== undefined && played > 0 && played * 2 < played + m
 		<p class="title-race-meta" data-simulator-meta>
 			<T en={`${model.remaining.length} matches remaining`} ko={`남은 경기 ${model.remaining.length}경기`} />
 		</p>
-		<p class="title-race-model"><T en="Team strength is calculated from this league's goals scored and conceded (Poisson model)" ko="이번 리그 득실점으로 팀 전력을 계산합니다 (포아송 모델)" /></p>
-		{smallSample && (
-			<p class="title-race-caution">
-				<T
-					en={`Based on just ${played} matches so far — these numbers can move a lot in a single week.`}
-					ko={`아직 ${played}경기 결과만 반영돼서, 이 확률은 한 주 만에 크게 바뀔 수 있어요.`}
-				/>
-			</p>
-		)}
 		<p class="title-race-status" data-simulator-status role="status" aria-live="polite"><T en="Calculating…" ko="계산하는 중…" /></p>
 		<noscript><p><T en="Turn on JavaScript to see the results." ko="결과를 보려면 JavaScript를 켜 주세요." /></p></noscript>
 
 	</>}
-	{/* Same section on purpose: the live percentages above, then the frozen
-	    ones published before each week. Shows itself from two published weeks. */}
+	{/* Not a chart of its own on the page: a link beside these percentages that
+	    opens the weekly history in a popup, the same way Match Results links to
+	    the points race. Shows itself from two published weeks. */}
 	<TitleChanceHistory league={league} />
-</section>
+</div>
 
 <script>
 	import { formatTitleChance, simulate, titleStatus, type SimulationModel } from "../lib/championship-simulator";
@@ -106,7 +93,7 @@ const smallSample = model !== undefined && played > 0 && played * 2 < played + m
 </script>
 
 <style>
-	.title-race-results { max-width: 700px; margin-top: 1.75rem; }
+	.title-race-results { max-width: 700px; }
 	.simulator-team { display: grid; grid-template-columns: minmax(0, 1.2fr) 6rem minmax(60px, 1fr); align-items: center; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--color-sage); }
 	.simulator-team strong { font-weight: 600; white-space: nowrap; }
 	[data-credit] { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -117,8 +104,6 @@ const smallSample = model !== undefined && played > 0 && played * 2 < played + m
 	meter::-webkit-meter-optimum-value { background: var(--color-green); }
 	meter::-moz-meter-bar { background: var(--color-green); }
 	.title-race-meta { font-size: .8rem; margin: 1rem 0; opacity: .75; font-variant-numeric: tabular-nums; }
-	.title-race-model { font-size: .75rem; margin: -.4rem 0 0; opacity: .6; }
-	.title-race-caution { font-size: .75rem; margin: .35rem 0 0; opacity: .6; }
 	.title-race-status { font-size: .85rem; }
 	.title-race-status:empty { display: none; }
 	@media (max-width: 480px) { .simulator-team { gap: .6rem; grid-template-columns: minmax(0, 1fr) 5.5rem minmax(50px, .7fr); font-size: .9rem; } }

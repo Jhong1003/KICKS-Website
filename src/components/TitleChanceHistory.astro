@@ -6,13 +6,16 @@
 // No scores or interpretation here — that lives on GitHub.
 // Shown once a league has at least two published weeks.
 //
-// Rendered *inside* ChampionshipSimulator's "Title Chances" section (a div
-// with an h3, not a section of its own), so the page has one Title Chances
-// block: where things stand now, then how that number has moved week by week.
+// In a popup under Title Chances, opened by a link beside the percentages —
+// the same pattern as the points-race chart under Match Results, so the page
+// has one way of saying "there is a weekly chart behind this". It also means
+// the percentages keep the block to themselves and nothing has to be lined up
+// in two columns.
 //
 // Identity is never color alone: each team also gets a marker shape and a
 // direct label, like the points-race chart.
 import T from "./T.astro";
+import ChartDialog from "./ChartDialog.astro";
 import { getTeamColor, getTeamName, type League } from "../lib/leagues";
 import { titleHistory } from "../lib/forecasts";
 
@@ -22,6 +25,7 @@ interface Props {
 
 const { league } = Astro.props;
 const history = titleHistory(league.id);
+const dialogId = `title-history-${league.id}`;
 const SHAPES = ["circle", "square", "diamond"] as const;
 const teams = league.teams.map((team, index) => ({
 	id: team.team_id,
@@ -31,7 +35,11 @@ const teams = league.teams.map((team, index) => ({
 }));
 
 const W = 440;
-const H = 220;
+// Tall enough that two teams a few points apart don't draw on top of each
+// other. The block is pulled up by the same amount it grows (CHART_LIFT below),
+// so the 50% line stays level with the middle team's row in the column beside
+// it and the heading rises instead.
+const H = 210;
 const plot = { left: 38, right: 72, top: 12, bottom: 28 };
 const innerW = W - plot.left - plot.right;
 const innerH = H - plot.top - plot.bottom;
@@ -47,15 +55,24 @@ const labels = series
 	.filter((team) => team.points.length)
 	.map((team) => ({ name: team.name, color: team.color, x: team.points[team.points.length - 1].cx + 10, y: team.points[team.points.length - 1].cy }))
 	.sort((a, b) => a.y - b.y);
-for (let i = 1; i < labels.length; i++) if (labels[i].y - labels[i - 1].y < 14) labels[i].y = labels[i - 1].y + 14;
+// Minimum gap between two labels, a little over the font size below, so the
+// nudge only moves a label as far as it has to and each one stays near its line.
+const LABEL_GAP = 12;
+for (let i = 1; i < labels.length; i++)
+	if (labels[i].y - labels[i - 1].y < LABEL_GAP) labels[i].y = labels[i - 1].y + LABEL_GAP;
 const diamond = (cx: number, cy: number, s: number) => `${cx},${cy - s} ${cx + s},${cy} ${cx},${cy + s} ${cx - s},${cy}`;
 const pct = (p: number) => `${Math.round(p * 100)}%`;
 ---
 
 {
 	history.length >= 2 && (
+		<>
+		<button class="week-race-link title-history-open" type="button" aria-haspopup="dialog" data-race-open={dialogId}>
+			<span aria-hidden="true">📈</span> <T en="Title chances by week" ko="주차별 변화 그래프 보기" /> →
+		</button>
+		<ChartDialog id={dialogId} label="Title chances by week" labelKo="주차별 우승 확률">
 		<div class="title-history" aria-labelledby="title-history-title">
-			<h3 id="title-history-title"><T en="By week" ko="주차별 변화" /></h3>
+			<h4 id="title-history-title"><T en="By week" ko="주차별 변화" /></h4>
 			<div class="title-history-chart">
 				<svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="title-history-title">
 					<g class="title-history-grid" aria-hidden="true">
@@ -109,23 +126,28 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 				</tbody>
 			</table>
 		</div>
+		</ChartDialog>
+		</>
 	)
 }
 
 <style>
-	.title-history { margin-top: 2.5rem; }
-	.title-history h3 { margin: 0 0 .3rem; font-size: 1.05rem; }
-	.title-history-chart { max-width: 560px; margin-top: 1.5rem; }
+	/* On its own inside the popup, so no alignment to anything beside it. */
+	.title-history { min-width: 0; }
+	.title-history-open { margin-top: 1rem; }
+	/* Same line box as the Title Chances heading it sits beside (global.css). */
+	.title-history h4 { margin: 0 0 .9rem; font-size: .85rem; line-height: 1.5rem; font-weight: 700; opacity: .7; }
+	.title-history-chart { max-width: 560px; }
 	.title-history-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 	.title-history-grid line { stroke: rgba(41, 41, 41, 0.1); stroke-width: 1; }
-	.title-history-grid text { fill: rgba(41, 41, 41, 0.6); font-size: 11px; }
+	.title-history-grid text { fill: rgba(41, 41, 41, 0.55); font-size: 10px; }
 	.title-history-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 	.title-history-marker { stroke: var(--color-background); stroke-width: 2; }
-	.title-history-label { font-size: 12px; font-weight: 700; fill: var(--color-dark); }
-	.title-history-table { max-width: 700px; width: 100%; margin-top: 1rem; border-collapse: collapse; font-size: .85rem; font-variant-numeric: tabular-nums; }
-	/* Kept for screen readers (a table needs a caption) but off the page: the
-	   section says nothing in words about what these numbers are. */
-	.title-history-table caption { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+	.title-history-label { font-size: 10px; font-weight: 600; fill: var(--color-dark); }
+	/* The chart already shows these numbers; the table is the same data a second
+	   time, so it is kept for screen readers and taken off the page. */
+	.title-history-table { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+	.title-history-table caption { text-align: left; }
 	.title-history-table th, .title-history-table td { padding: .35rem .5rem; border-bottom: 1px solid var(--color-sage); text-align: right; }
 	.title-history-table th:first-child { text-align: left; }
 </style>

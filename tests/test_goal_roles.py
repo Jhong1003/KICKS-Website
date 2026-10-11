@@ -11,7 +11,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from update_data import _goal_role_counts, _tag_goal_roles  # noqa: E402
+from update_data import GOAL_ROLES, _goal_role_counts, _tag_goal_roles  # noqa: E402
 
 MATCH = "L-W01-M01"
 
@@ -105,14 +105,22 @@ class GoalRoleCountTests(unittest.TestCase):
         counts = _goal_role_counts(rows)
         self.assertEqual(counts[("L", "P0")]["opener"], 1)
         self.assertEqual(counts[("L", "P0")]["late_winner"], 0)
-        self.assertEqual(counts[("L", "P2")], {
-            "opener": 0, "equalizer": 0, "comeback": 1, "winner": 1, "late_winner": 1,
-        })
+        p2 = counts[("L", "P2")]
+        self.assertEqual(p2["comeback"], 1)
+        self.assertEqual(p2["winner"], 1)
+        self.assertEqual(p2["late_winner"], 1)
 
-    def test_a_winner_before_the_last_three_minutes_is_not_a_late_winner(self):
-        rows = goals("A", minutes=[9])
+    def test_a_goal_can_hold_two_roles_and_both_are_kept(self):
+        # A 1-0 match's only goal is both the opener and the winner. Both stay
+        # in the tally, because the badges ask "did this player ever score a
+        # comeback goal", not "how many of their goals were comebacks". The
+        # player page lists the goals rather than counting these, so nothing
+        # reads it as two goals - see src/lib/goal-roles.ts.
+        rows = goals("A")
         _tag_goal_roles(rows, match(1, 0))
-        self.assertEqual(_goal_role_counts(rows)[("L", "P0")]["late_winner"], 0)
+        tally = _goal_role_counts(rows)[("L", "P0")]
+        self.assertEqual((tally["opener"], tally["winner"]), (1, 1))
+        self.assertEqual({role: tally[role] for role in GOAL_ROLES if tally[role]}, {"opener": 1, "winner": 1})
 
 
 if __name__ == "__main__":

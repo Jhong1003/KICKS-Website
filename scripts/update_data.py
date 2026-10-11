@@ -1129,6 +1129,7 @@ LATE_WINNER_FROM_MINUTE = 10
 GOAL_ROLES = ("opener", "equalizer", "comeback", "winner")
 
 
+
 def _goal_role_counts(goal_rows: list[dict]) -> dict[tuple[str, str], dict[str, int]]:
     """(league, player_id) -> how many of each role that player's goals had.
 
@@ -1138,6 +1139,14 @@ def _goal_role_counts(goal_rows: list[dict]) -> dict[tuple[str, str], dict[str, 
     entirely** - they move the score, but putting one into your own net
     isn't an opener or a winner you get credit for, the same reason own
     goals stay out of a player's `goals`.
+
+    Only the badges read this now: "scored a comeback goal" is true whether
+    or not that goal was also the winner, so every role each goal held is
+    counted. **No count of these belongs on a profile.** Counting every role
+    makes a two-goal player read as three; counting one role per goal hides
+    that a player's three goals were all openers. Both were shipped and both
+    were reported. The page lists the goals instead - see
+    src/lib/goal-roles.ts.
 
     `late_winner` isn't a role of its own, it's a winner late in the match -
     kept here so the badge doesn't have to re-read the events.
@@ -1188,10 +1197,6 @@ def _league_section(
             "weeks_attended": weeks_attended,
             "weeks_played": weeks_played,
         },
-        # What this player's goals did to the score (src/lib/goal-roles.ts
-        # renders it). All zero for a league with no per-goal record, so the
-        # site hides the line rather than printing a row of noughts.
-        "goal_roles": {role: goal_roles.get(role, 0) for role in GOAL_ROLES},
         "weekly_stats": [
             {
                 "week": int(row["week"]),
@@ -1246,8 +1251,9 @@ def build_player_profiles(
     badges, Champion, Treble) and tell which leagues are finished (Golden
     Boot, Playmaker Award); `goal_events` (still name-based) feeds the per-match
     ones (Brace, Hat-trick, Poker); `goal_rows` is `build_goal_events`
-    output, already resolved to ids, and feeds each section's `goal_roles`
-    counts plus the two badges that need them (Comeback King, Late Winner). Back-to-Back is the one badge that
+    output, already resolved to ids, and feeds the two badges that read goal
+    roles (Comeback King, Late Winner). The roles themselves reach the site
+    on `goal_events.json`, not through a profile. Back-to-Back is the one badge that
     looks across leagues: champion of two leagues in a row (consecutive in
     `league_order`), awarded in the second one.
     """

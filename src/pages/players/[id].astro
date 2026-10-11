@@ -7,7 +7,6 @@ import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
 import { getPlayerPhotos } from "../../lib/player-photos";
 import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
-import { GOAL_ROLE_LABELS, hasGoalRoles, listGoalRoles } from "../../lib/goal-roles";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 import { isLeagueFinished, isShownInLeague } from "../../lib/finale";
 
@@ -113,29 +112,6 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 												en={`Previously played for ${section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")} earlier in this league.`}
 												ko={`이번 리그 초반에는 ${section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")} 소속이었어요.`}
 											/>
-										</div>
-									)}
-
-									{hasGoalRoles(section.goal_roles) && (
-										<div class="player-detail-meta">
-											<p class="section-label"><T en="GOALS THAT MATTERED" ko="결정적인 골" /></p>
-											<ul class="goal-role-list">
-												{listGoalRoles(section.goal_roles).map(({ key, count }) => (
-													<li>
-														<span class="goal-role-count">{count}</span>
-														<T
-															class="goal-role-label"
-															en={GOAL_ROLE_LABELS[key].en}
-															ko={GOAL_ROLE_LABELS[key].ko}
-														/>
-														<T
-															class="goal-role-note"
-															en={GOAL_ROLE_LABELS[key].title}
-															ko={GOAL_ROLE_LABELS[key].titleKo}
-														/>
-													</li>
-												))}
-											</ul>
 										</div>
 									)}
 

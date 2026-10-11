@@ -27,20 +27,25 @@ const latest = forecastWeek && {
 		rows: displayRows(pairing.rows),
 	})),
 };
+// Early in a league the Poisson strengths come from a handful of matches, so
+// one week can move both these bars and the title chances below a long way.
+// Said once, here, while fewer than half the league's matches are played —
+// Title Chances runs the same model, and two copies of the warning next to
+// each other was most of what made this part of the page feel heavy.
+const leagueFixtures = (matchesData as Fixture[]).filter((fixture) => fixture.league === league.id);
+const played = leagueFixtures.filter((fixture) => fixture.status === "completed").length;
+const smallSample = played > 0 && played * 2 < leagueFixtures.length;
+
 // Week 1 has no Poisson forecast yet, so it shows the baseline instead.
 const showsPrimary = latest?.pairings.some((pairing) => pairing.rows.some((row) => row.model === PRIMARY_MODEL)) ?? false;
 ---
 
 {
 	latest && (
-		<section class="content-section match-forecasts" id="forecasts" aria-labelledby="forecasts-title">
-			<h2 id="forecasts-title"><T en="Match Forecasts" ko="경기 예측" /></h2>
-			<T
-				as="p"
-				class="about-description"
-				en={`Win / draw / loss forecasts for week ${latest.week}.`}
-				ko={`${latest.week}주차 경기의 승·무·패 예측 확률입니다.`}
-			/>
+		<div class="forecast-block match-forecasts" id="forecasts" aria-labelledby="forecasts-title">
+			<h3 id="forecasts-title">
+				<T en={`Match Forecasts · Week ${latest.week}`} ko={`경기 예측 · ${latest.week}주차`} />
+			</h3>
 			<div class="forecast-list">
 				{latest.pairings.map((pairing) => {
 					const colorA = getTeamColor(pairing.teamA, league);
@@ -66,9 +71,9 @@ const showsPrimary = latest?.pairings.some((pairing) => pairing.rows.some((row) 
 										<span style={`width: ${row.pB * 100}%; background-color: ${colorB}`} />
 									</div>
 									<div class="forecast-numbers">
-										<span>{nameA} <strong>{percent(row.pA)}</strong></span>
+										<strong>{percent(row.pA)}</strong>
 										<span><T en="Draw" ko="무승부" /> <strong>{percent(row.pDraw)}</strong></span>
-										<span>{nameB} <strong>{percent(row.pB)}</strong></span>
+										<strong>{percent(row.pB)}</strong>
 									</div>
 								</div>
 							))}
@@ -100,16 +105,25 @@ const showsPrimary = latest?.pairings.some((pairing) => pairing.rows.some((row) 
 							<dd><T en="No results from this league yet, so: last league's draw rate, and the rest split evenly" ko="아직 이번 리그 결과가 없어서, 지난 리그 무승부 비율을 쓰고 나머지는 두 팀이 반씩" /></dd>
 						</>
 					)}
-					<dt><T en="Published before kickoff" ko="경기 전에 공개" /></dt>
-					<dd><T en="Every forecast is committed to the repo before Friday 23:59, and never edited afterwards" ko="모든 예측은 금요일 밤 11:59 전에 저장소에 기록되고, 그 뒤로는 수정하지 않아요" /></dd>
+					{smallSample && (
+						<>
+							<dt><T en="Early days" ko="아직 초반" /></dt>
+							<dd>
+								<T
+									en={`Only ${played} matches have been played, so these and the title chances below can move a lot in a single week.`}
+									ko={`아직 ${played}경기밖에 안 해서, 이 확률과 아래 우승 확률 모두 한 주 만에 크게 바뀔 수 있어요.`}
+								/>
+							</dd>
+						</>
+					)}
 				</dl>
 			</details>
-		</section>
+		</div>
 	)
 }
 
 <style>
-	.forecast-list { max-width: 700px; margin-top: 1.75rem; }
+	.forecast-list { max-width: 700px; }
 	.forecast-pairing { padding: 1rem 0; border-bottom: 1px solid var(--color-sage); }
 	.forecast-teams { display: flex; align-items: baseline; gap: .6rem; margin: 0 0 .6rem; font-weight: 600; }
 	.forecast-vs { font-size: .75rem; font-weight: 500; opacity: .55; }
@@ -117,9 +131,10 @@ const showsPrimary = latest?.pairings.some((pairing) => pairing.rows.some((row) 
 	.forecast-bar { display: flex; height: .6rem; background: var(--color-sage); }
 	.forecast-bar span { display: block; height: 100%; }
 	.forecast-bar-draw { background-color: #b9b9b2; }
+	/* The two outer figures line up with the ends of the bar above, which is
+	   where their team's name already is; only the draw needs saying. */
 	.forecast-numbers { display: flex; justify-content: space-between; gap: .75rem; margin-top: .4rem; font-size: .85rem; font-variant-numeric: tabular-nums; }
-	.forecast-numbers span:nth-child(2) { text-align: center; }
-	.forecast-numbers span:last-child { text-align: right; }
+	.forecast-numbers > span { text-align: center; opacity: .75; }
 	.forecast-note { max-width: 700px; margin: 1rem 0 0; font-size: .8rem; opacity: .75; }
 	.forecast-method { max-width: 700px; margin: 1rem 0 0; font-size: .85rem; }
 	.forecast-method summary { cursor: pointer; color: var(--color-green); font-weight: 600; }

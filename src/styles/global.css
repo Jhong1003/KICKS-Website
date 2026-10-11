@@ -1160,6 +1160,35 @@ button.league-switcher-link {
 
 }
 
+/* The League page's one Forecasts section holds match forecasts and title
+   chances as h3 blocks, so the page has four headings instead of six and the
+   model-driven views read as one thing. The gap under a sub-heading has to be
+   smaller than the gap above it, or the heading reads as belonging to the
+   block before it. */
+
+.league-forecasts .forecast-block {
+
+	margin-top: 3.5rem;
+
+}
+
+.league-forecasts .forecast-block:first-of-type {
+
+	margin-top: 1.75rem;
+
+}
+
+/* The fixed line-height is what lets "주차별 변화" in the next column start on
+   the same line as this heading and its chart line up with the percentages. */
+
+.league-forecasts .forecast-block h3 {
+
+	margin: 0 0 0.9rem;
+	font-size: 1.05rem;
+	line-height: 1.5rem;
+
+}
+
 /* Goals under a result (src/lib/match-timeline.ts): a 12-minute bar with a dot
    per goal in the scoring team's color, then the same goals as text. Only
    drawn for matches whose goals were recorded with minutes, and folded behind
@@ -2914,74 +2943,6 @@ a.player-card:hover {
 .player-detail-meta:last-child {
 
 	margin-bottom: 0;
-
-}
-
-/* "Goals that mattered" on a player page (src/lib/goal-roles.ts): one line per
-   role the player has, count first. Never a rank or a comparison - the player
-   pages stay a celebration, not a second leaderboard. */
-
-.goal-role-list {
-
-	list-style: none;
-
-	margin: 0;
-
-	padding: 0;
-
-}
-
-.goal-role-list li {
-
-	display: flex;
-
-	align-items: baseline;
-
-	gap: 8px;
-
-	padding: 6px 0;
-
-	border-bottom: 1px solid var(--color-sage);
-
-}
-
-.goal-role-list li:last-child {
-
-	border-bottom: 0;
-
-}
-
-.goal-role-count {
-
-	min-width: 1.4em;
-
-	font-weight: 700;
-
-	font-variant-numeric: tabular-nums;
-
-}
-
-.goal-role-label {
-
-	font-weight: 600;
-
-}
-
-.goal-role-note {
-
-	font-size: 0.8rem;
-
-	opacity: 0.6;
-
-}
-
-@media (max-width: 480px) {
-
-	.goal-role-note {
-
-		display: none;
-
-	}
 
 }
 

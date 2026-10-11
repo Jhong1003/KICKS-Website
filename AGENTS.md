@@ -871,7 +871,10 @@ the protocol's skill scores are measured against — but it ignores who is playi
 and would draw an identical bar under all three pairings, so model comparison
 stays in the repo (protocol doc + scorecard), the same split already used for
 scoring and interpretation. The "Forecast method" box describes only the model
-on screen, plus the before-kickoff publication rule. Pairings appear in the same
+on screen, plus the small-sample caution while it applies — nothing else.
+It is the one place the page explains itself, so it stays short: an entry
+about the before-kickoff publication rule was added and then cut as more
+than a member reading the bars needs. Pairings appear in the same
 order and home/away way round
 as that week's fixtures (`orderLikeFixtures`, src/lib/forecast-order.ts, display only — the
 CSV keeps id order). Hidden while that week's forecasts aren't published yet;
@@ -933,9 +936,7 @@ with ids rather than names.
   warns on two goals in the same minute of one match.
 
 **Each goal also carries `roles`** (`_tag_goal_roles`), what it did to the
-score, by replaying the match's goals in order. None of the four is exclusive,
-so they never sum to a goal total and nothing presents them as a breakdown of
-one:
+score, by replaying the match's goals in order. A goal can hold more than one:
 
 - `opener` — the first goal of the match.
 - `equalizer` — levelled the score for a team that was behind.
@@ -952,42 +953,20 @@ the score has to move — **but never counted for the scorer**
 (`_goal_role_counts` skips them), the same rule that keeps own goals out of a
 player's `goals`.
 
-Per-player counts land on each profile section as `goal_roles`, rendered by
-the player page's "Goals that mattered" block through
-[src/lib/goal-roles.ts](src/lib/goal-roles.ts) (labels only — the counting is
-all done in the pipeline, so there's no second implementation to keep in
-step). The block hides itself when every count is 0, which is any league
-without per-goal minutes. Two badges come from the same counts and so, like
-Brace, start in FA26-L2: `comeback_king` (a comeback goal) and `late_winner`
-(a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on).
+**None of this goes on a player page.** Three attempts shipped and each was
+spotted from the site within the hour: counting every role a goal held made a
+two-goal player read as three, because a 1-0 match's only goal is both the
+opener and the winner; counting one role per goal (most consequential first)
+fixed the total and then hid that another player's three goals had all been
+openers; listing a line per goal was right but long. A single winning-goal
+count, the stat the official leagues keep (GWG, 결승골), was correct and still
+earned its space no better than the Late Winner badge already does. The roles
+stay in the data; a profile says nothing about them.
 
-**Two views draw the goals on the clock**, both over
-[src/lib/match-timeline.ts](src/lib/match-timeline.ts)
-(tests: `tests/match-timeline.test.mjs`) and both per league:
-
-- **Match timelines** — under each completed result in Match Results
-  (`WeeklyResults.astro`): a bar the length of the match with a dot per goal
-  in the scoring team's color, then the same goals as text ("4' 홍지환 · 어시
-  손영보 · 결승골"). `matchTimelines` keys them by `match_id`, drops untimed
-  goals, and leaves a match out of the map entirely rather than returning an
-  empty list, so "not in the map" means "no timeline to draw". Only one role
-  is marked per goal, winner first; **opener is deliberately never marked**,
-  since the first goal is obvious from its position and most goals in this
-  league are openers. **Folded behind a "⚽ 2 골 기록" toggle** (a plain
-  `<details>`, no JavaScript, no remembered state): nine open timelines turned
-  a week of results into a wall, so the card is a scoreboard first and the
-  detail is there for whoever wants it. Two alternatives were built and
-  rejected before this — stripping the rows down to "4' 홍지환 (손영보)" lost
-  the column of coloured dots that let you count a match's goals at a glance,
-  and a FotMob-style scorer summary either side of a ⚽ read worse here than
-  the timeline it replaced. Don't re-try either without a reason.
-- **Goal Clock** (`GoalClock.astro`, last section of the League page) — one
-  bar per minute of the match showing when the league's goals went in, with
-  the busiest minute(s) highlighted and the count printed above each bar, so
-  nothing is read off height alone. Own goals **are** counted: nobody is
-  named or ranked, so this is about when goals happen, not about credit.
-  Hidden below `GOAL_CLOCK_MIN_GOALS` (10), which covers both a league with
-  no per-goal records and one that's only a week old.
+`_goal_role_counts` is read only by the two badges, which ask whether a player
+ever scored such a goal rather than how many: `comeback_king` (a comeback goal)
+and `late_winner` (a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on). Like
+Brace, they start in FA26-L2.
 
 Read so far by the team page's late-goals corner (`src/lib/team-profile.ts`,
 `lateAxis`: a team's share of goals from minute `LATE_FROM_MINUTE` on,
@@ -998,10 +977,18 @@ at 2/3 and stays empty below `LATE_MIN_GOALS` timed goals). Per-match badges
 
 `TitleChanceHistory.astro` draws the published title chances per week from
 `title_forecasts.csv` once a league has two published weeks: frozen numbers, no
-scores — scoring and interpretation stay on GitHub. It renders **inside** the
-Title Chances section (`ChampionshipSimulator.astro`, after the model and
-caution lines) as a `div` with an `h3` — not a section of its own, so the page
-has one Title Chances block rather than two headings showing the same figures.
+scores (its table repeats the chart's numbers, so it is kept for screen
+readers and taken off the page) — scoring and interpretation stay on GitHub. It renders **inside** the
+Title Chances block (`ChampionshipSimulator.astro`) **in a popup**, opened by
+a "주차별 변화 그래프 보기" link under the percentages — the same pattern as
+the points race under Match Results, so the page has one way of saying
+"there's a weekly chart behind this". Both popups are
+[ChartDialog.astro](src/components/ChartDialog.astro), which holds the dialog
+markup, behaviour (opened by any `[data-race-open="<id>"]`, focus returned on
+close) and styling once; `PointsRaceDialog.astro` is a thin wrapper over it.
+The chart was tried inline under the percentages and then beside them in two
+columns; both made a tall block that had to be aligned by hand against a
+column of rows, and the popup is what the page already does elsewhere.
 Deliberately **wordless**: just "주차별 변화" and the chart. There is no sentence
 explaining that these were published before kickoff (the table's caption says so
 for screen readers only, visually hidden) — the members' page shows the numbers,
@@ -1014,7 +1001,15 @@ point of showing them together.
 ### League sections and Title Race UI
 
 League pages keep their existing paths and offer OVERVIEW / PLAYER STATS
-sub-navigation. Overview contains League Table → Match Results → Title Race;
+sub-navigation. Overview reads **past then future**: League Table → Match
+Results → **Forecasts**, the last being one section
+(`league-forecasts` in `LeagueView.astro`, `<h2>예측</h2>`) holding Match
+Forecasts, Title Chances and the week-by-week chart as `h3` blocks
+(`.forecast-block`). They were three stacked `h2` sections of bars and
+percentages and read as three of the same thing; they all come from the same
+model, so they are one. Each keeps its own id (`#forecasts`, `#title-race`),
+so existing anchors still work. The old wording below still describes the
+panels; Overview contains League Table → Match Results → Title Race;
 Player Stats contains the unchanged full leaderboard with consecutive ranks.
 `#player-stats` selects that panel; `#overview` or no hash selects Overview.
 The existing `#player-stats-title` anchor also selects Player Stats.
@@ -1039,12 +1034,14 @@ as ">99.9%", so 10,000 runs never display a misleading 0.0% or 100.0%.
 
 The site shows a read-only result, a simulations / remaining matches line,
 and a model line saying team strength comes from this league's goals (same
-model as Match Forecasts). While **fewer than half the league's matches are
-played** (`smallSample` in the component) a caution line follows it: the
-strengths come from a handful of matches, so one week can move the numbers a
-long way. It's rendered at build time from `model.completed` and disappears by
-itself as results come in — no disclaimer is left standing once the sample is
-big enough. The model itself is never softened to suit the output: k and every
+model as Match Forecasts). Those two lines were three: the model line and a
+small-sample caution moved into **Match Forecasts' "Forecast method" box**,
+which already explains the same model, and the caution now covers both views
+in one place (`smallSample` in `MatchForecasts.astro`, shown while fewer than
+half the league's matches are played and gone by itself after that). Three
+footnotes stacked under one short list of percentages was most of what made
+this part of the page feel heavy — keep new explanation in the method box.
+The model itself is never softened to suit the output: k and every
 other Poisson v1 parameter are fixed for the whole league by
 [docs/forecast-protocol-v2.md](docs/forecast-protocol-v2.md), and the k = 3/6/12
 sensitivity check is a post-season analysis. If these percentages ever look
