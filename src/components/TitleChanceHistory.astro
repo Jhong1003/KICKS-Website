@@ -1,9 +1,14 @@
 ---
 // "Title Chances by Week": the title chances KICKS published before each
 // league week (forecasts/title_forecasts.csv, protocol v2 §4.3), one line per
-// team. Unlike the live Title Chances above it, these are the frozen,
-// committed numbers. No scores or interpretation here — that lives on GitHub.
+// team. These are the frozen, committed numbers — unlike the live percentages
+// above them in the same section, which are recalculated on every page load.
+// No scores or interpretation here — that lives on GitHub.
 // Shown once a league has at least two published weeks.
+//
+// Rendered *inside* ChampionshipSimulator's "Title Chances" section (a div
+// with an h3, not a section of its own), so the page has one Title Chances
+// block: where things stand now, then how that number has moved week by week.
 //
 // Identity is never color alone: each team also gets a marker shape and a
 // direct label, like the points-race chart.
@@ -49,8 +54,8 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 
 {
 	history.length >= 2 && (
-		<section class="content-section title-history" aria-labelledby="title-history-title">
-			<h2 id="title-history-title"><T en="Title Chances by Week" ko="주차별 우승 확률" /></h2>
+		<div class="title-history" aria-labelledby="title-history-title">
+			<h3 id="title-history-title"><T en="By week" ko="주차별 변화" /></h3>
 			<T
 				as="p"
 				class="about-description"
@@ -109,11 +114,13 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 					))}
 				</tbody>
 			</table>
-		</section>
+		</div>
 	)
 }
 
 <style>
+	.title-history { margin-top: 2.5rem; }
+	.title-history h3 { margin: 0 0 .3rem; font-size: 1.05rem; }
 	.title-history-chart { max-width: 560px; margin-top: 1.5rem; }
 	.title-history-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 	.title-history-grid line { stroke: rgba(41, 41, 41, 0.1); stroke-width: 1; }
