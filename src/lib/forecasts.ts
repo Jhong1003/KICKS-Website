@@ -56,16 +56,27 @@ function parse(csv: string): Forecast[] {
 export const forecasts: Forecast[] = parse(forecastsCsv);
 
 /**
- * The forecasts to show for a league: its most recent forecast week, one row
- * per (pairing, model). Only published rows count; if a later row (e.g. a
- * correction) exists for the same pairing and model, the later one wins.
+ * The week whose forecasts a league shows: the earliest week with a fixture
+ * not yet completed, or the league's last week once every fixture is done.
  */
-export function latestForecastWeek(leagueId: string): { week: number; pairings: { teamA: string; teamB: string; rows: Forecast[] }[] } | null {
-	const rows = forecasts.filter((row) => row.league === leagueId && row.status === "published");
-	if (rows.length === 0) return null;
-	const week = Math.max(...rows.map((row) => row.week));
+export function forecastTargetWeek(leagueId: string, fixtures: { league: string; week: number; status: string }[]): number | null {
+	const weeks = fixtures.filter((f) => f.league === leagueId);
+	if (weeks.length === 0) return null;
+	const open = weeks.filter((f) => f.status !== "completed").map((f) => f.week);
+	return open.length > 0 ? Math.min(...open) : Math.max(...weeks.map((f) => f.week));
+}
+
+/**
+ * A league week's published forecasts, one row per (pairing, model), or null
+ * if none are published for that week yet. If a later row (e.g. a correction)
+ * exists for the same pairing and model, the later one wins.
+ */
+export function forecastsForWeek(leagueId: string, week: number): { week: number; pairings: { teamA: string; teamB: string; rows: Forecast[] }[] } | null {
 	const byKey = new Map<string, Forecast>();
-	for (const row of rows.filter((row) => row.week === week)) byKey.set(`${row.teamA}|${row.teamB}|${row.model}`, row);
+	for (const row of forecasts) {
+		if (row.league === leagueId && row.week === week && row.status === "published") byKey.set(`${row.teamA}|${row.teamB}|${row.model}`, row);
+	}
+	if (byKey.size === 0) return null;
 	const pairs = [...new Set([...byKey.values()].map((row) => `${row.teamA}|${row.teamB}`))].sort();
 	return {
 		week,
