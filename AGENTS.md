@@ -927,7 +927,16 @@ as ">99.9%", so 10,000 runs never display a misleading 0.0% or 100.0%.
 
 The site shows a read-only result, a simulations / remaining matches line,
 and a model line saying team strength comes from this league's goals (same
-model as Match Forecasts). Scenario inputs, Run/Reset and
+model as Match Forecasts). While **fewer than half the league's matches are
+played** (`smallSample` in the component) a caution line follows it: the
+strengths come from a handful of matches, so one week can move the numbers a
+long way. It's rendered at build time from `model.completed` and disappears by
+itself as results come in — no disclaimer is left standing once the sample is
+big enough. The model itself is never softened to suit the output: k and every
+other Poisson v1 parameter are fixed for the whole league by
+[docs/forecast-protocol-v2.md](docs/forecast-protocol-v2.md), and the k = 3/6/12
+sensitivity check is a post-season analysis. If these percentages ever look
+overconfident, change how they're presented, not the model mid-league. Scenario inputs, Run/Reset and
 How it works are removed from the UI; unused UI event handlers and styles
 are removed too. Tab changes do not rerun the simulation. Detailed model
 assumptions remain documented above. The core simulator still supports
