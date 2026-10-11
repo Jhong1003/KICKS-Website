@@ -326,7 +326,6 @@
         "play_style_tag": "Rock",
         "badges": [
           "iron_man",
-          "champion",
           "clean_sheet"
         ]
       },
@@ -437,8 +436,7 @@
         "badges": [
           "off_the_mark",
           "iron_man",
-          "on_fire",
-          "champion"
+          "on_fire"
         ]
       },
       {
@@ -531,8 +529,7 @@
         "play_style_tag": "Rock",
         "badges": [
           "iron_man",
-          "clean_sheet",
-          "giant_killer"
+          "clean_sheet"
         ]
       },
       {
@@ -1106,8 +1103,7 @@
           "provider",
           "iron_man",
           "libero",
-          "clean_sheet",
-          "giant_killer"
+          "clean_sheet"
         ]
       },
       {
@@ -1210,11 +1206,8 @@
         },
         "play_style_tag": "Playmaker",
         "badges": [
-          "back_to_back",
           "iron_man",
           "on_fire",
-          "champion",
-          "playmaker_award",
           "maestro"
         ]
       },
@@ -1596,8 +1589,7 @@
         "personal_best_week": null,
         "play_style_tag": "Rock",
         "badges": [
-          "back_to_back",
-          "champion"
+          "squad_member"
         ]
       },
       {
@@ -1763,8 +1755,7 @@
         "badges": [
           "off_the_mark",
           "iron_man",
-          "on_fire",
-          "golden_boot"
+          "on_fire"
         ]
       },
       {
@@ -1860,8 +1851,7 @@
         "play_style_tag": "Rock",
         "badges": [
           "iron_man",
-          "clean_sheet",
-          "giant_killer"
+          "clean_sheet"
         ]
       },
       {
@@ -2049,8 +2039,7 @@
         "personal_best_week": null,
         "play_style_tag": "Target Man",
         "badges": [
-          "iron_man",
-          "champion"
+          "iron_man"
         ]
       },
       {
@@ -2417,8 +2406,7 @@
         "play_style_tag": "Target Man",
         "badges": [
           "off_the_mark",
-          "iron_man",
-          "champion"
+          "iron_man"
         ]
       },
       {
@@ -2504,8 +2492,7 @@
         "personal_best_week": null,
         "play_style_tag": "Target Man",
         "badges": [
-          "iron_man",
-          "champion"
+          "iron_man"
         ]
       },
       {
@@ -2583,7 +2570,6 @@
         "play_style_tag": "Rock",
         "badges": [
           "iron_man",
-          "champion",
           "clean_sheet"
         ]
       },
@@ -2789,10 +2775,8 @@
         },
         "play_style_tag": "Engine",
         "badges": [
-          "back_to_back",
           "off_the_mark",
-          "iron_man",
-          "champion"
+          "iron_man"
         ]
       },
       {
