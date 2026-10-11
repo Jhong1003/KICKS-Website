@@ -23,9 +23,9 @@ const orderedIds = [...new Set([
 const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => team.team_id === id));
 ---
 <div id="title-race" class="forecast-block championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
-	<h3 id="simulator-title"><T en="Title Chances" ko="우승 확률" /></h3>
 	<div class="title-race-grid">
 	{error ? <p role="alert"><T en="Couldn't calculate: " ko="계산하지 못했어요: " />{error}</p> : model && <div class="title-race-now">
+		<h3 id="simulator-title"><T en="Title Chances" ko="우승 확률" /></h3>
 		<div class="title-race-results" data-simulator-results>
 			{orderedTeams.map((team) => <div class="simulator-team" data-team-id={team.team_id}>
 				<strong>{team.name}</strong><span data-credit>—</span>

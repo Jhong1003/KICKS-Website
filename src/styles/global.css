@@ -1160,6 +1160,35 @@ button.league-switcher-link {
 
 }
 
+/* The League page's one Forecasts section holds match forecasts and title
+   chances as h3 blocks, so the page has four headings instead of six and the
+   model-driven views read as one thing. The gap under a sub-heading has to be
+   smaller than the gap above it, or the heading reads as belonging to the
+   block before it. */
+
+.league-forecasts .forecast-block {
+
+	margin-top: 3.5rem;
+
+}
+
+.league-forecasts .forecast-block:first-of-type {
+
+	margin-top: 1.75rem;
+
+}
+
+/* The fixed line-height is what lets "주차별 변화" in the next column start on
+   the same line as this heading and its chart line up with the percentages. */
+
+.league-forecasts .forecast-block h3 {
+
+	margin: 0 0 0.9rem;
+	font-size: 1.05rem;
+	line-height: 1.5rem;
+
+}
+
 /* Goals under a result (src/lib/match-timeline.ts): a 12-minute bar with a dot
    per goal in the scoring team's color, then the same goals as text. Only
    drawn for matches whose goals were recorded with minutes, and folded behind
