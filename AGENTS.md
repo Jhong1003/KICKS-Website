@@ -938,7 +938,7 @@ so they never sum to a goal total and nothing presents them as a breakdown of
 one:
 
 - `opener` — the first goal of the match.
-- `equaliser` — levelled the score for a team that was behind.
+- `equalizer` — levelled the score for a team that was behind.
 - `comeback` — put a team **that had been behind in this match** in front.
   Going ahead from level having never trailed is not a comeback and gets no
   role; that case is usually the `winner` anyway.

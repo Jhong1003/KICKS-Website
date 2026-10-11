@@ -53,9 +53,9 @@ interface Props {
 const { weeks, defaultWeek, raceDialogId, timelines, teamColor, matchMinutes = 12 } = Astro.props;
 const goalsOf = (match: Match) => (match.match_id && timelines?.get(match.match_id)) || [];
 const ROLE_MARK: Record<string, { en: string; ko: string }> = {
-	winner: { en: "winner", ko: "결승골" },
-	equaliser: { en: "equaliser", ko: "동점골" },
-	comeback: { en: "comeback", ko: "역전골" },
+	winner: { en: "winning goal", ko: "결승골" },
+	equalizer: { en: "equalizer", ko: "동점골" },
+	comeback: { en: "comeback goal", ko: "역전골" },
 };
 
 const matchesForRound = (week: Week, round: number) => week.matches.filter((match) => match.round === round);

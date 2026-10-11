@@ -26,7 +26,7 @@ export interface TimelineEntry {
 	ownGoal: boolean;
 	teamId: string | null;
 	/** Shown as a small mark next to the scorer; "" when the goal was routine. */
-	role: "winner" | "equaliser" | "comeback" | null;
+	role: "winner" | "equalizer" | "comeback" | null;
 }
 
 /**
@@ -44,7 +44,7 @@ export function matchTimelines(goals: TimelineGoal[], leagueId: string, matchMin
 	const byMatch = new Map<string, TimelineEntry[]>();
 	for (const goal of goals) {
 		if (goal.league !== leagueId || goal.minute === null) continue;
-		const role = (["winner", "comeback", "equaliser"] as const).find((key) => goal.roles.includes(key)) ?? null;
+		const role = (["winner", "comeback", "equalizer"] as const).find((key) => goal.roles.includes(key)) ?? null;
 		const entries = byMatch.get(goal.match_id) ?? [];
 		entries.push({
 			minute: goal.minute,

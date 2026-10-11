@@ -49,23 +49,23 @@ class GoalRoleTests(unittest.TestCase):
         _tag_goal_roles(rows, match(2, 0))
         self.assertEqual(roles_of(rows), [["opener", "winner"], []])
 
-    def test_a_draw_has_an_opener_and_an_equaliser_but_no_winner(self):
+    def test_a_draw_has_an_opener_and_an_equalizer_but_no_winner(self):
         rows = goals("A", "B")
         _tag_goal_roles(rows, match(1, 1))
-        self.assertEqual(roles_of(rows), [["opener"], ["equaliser"]])
+        self.assertEqual(roles_of(rows), [["opener"], ["equalizer"]])
 
     def test_going_ahead_from_level_is_not_a_comeback(self):
         # 1-1 then A again: A led throughout or was level, never behind.
         rows = goals("A", "B", "A")
         _tag_goal_roles(rows, match(2, 1))
-        self.assertEqual(roles_of(rows), [["opener"], ["equaliser"], ["winner"]])
+        self.assertEqual(roles_of(rows), [["opener"], ["equalizer"], ["winner"]])
 
     def test_comeback_needs_the_team_to_have_trailed(self):
         # 0-1, 1-1, 2-1 to B... from A's point of view: A scores, B levels,
         # B goes ahead having been behind - that third goal is the comeback.
         rows = goals("A", "B", "B")
         _tag_goal_roles(rows, match(1, 2))
-        self.assertEqual(roles_of(rows), [["opener"], ["equaliser"], ["comeback", "winner"]])
+        self.assertEqual(roles_of(rows), [["opener"], ["equalizer"], ["comeback", "winner"]])
 
     def test_the_winner_is_counted_from_the_losers_final_score(self):
         # 3-2, A leading or level all the way: B finish on 2, so it's A's
@@ -75,7 +75,7 @@ class GoalRoleTests(unittest.TestCase):
         _tag_goal_roles(rows, match(3, 2))
         self.assertEqual(
             roles_of(rows),
-            [["opener"], ["equaliser"], [], ["equaliser"], ["winner"]],
+            [["opener"], ["equalizer"], [], ["equalizer"], ["winner"]],
         )
 
     def test_an_own_goal_moves_the_score_but_is_not_the_scorers_credit(self):
@@ -95,7 +95,7 @@ class GoalRoleTests(unittest.TestCase):
     def test_an_unfinished_match_still_gets_the_roles_that_dont_need_a_result(self):
         rows = goals("A", "B")
         _tag_goal_roles(rows, match(None, None))
-        self.assertEqual(roles_of(rows), [["opener"], ["equaliser"]])
+        self.assertEqual(roles_of(rows), [["opener"], ["equalizer"]])
 
 
 class GoalRoleCountTests(unittest.TestCase):
@@ -106,7 +106,7 @@ class GoalRoleCountTests(unittest.TestCase):
         self.assertEqual(counts[("L", "P0")]["opener"], 1)
         self.assertEqual(counts[("L", "P0")]["late_winner"], 0)
         self.assertEqual(counts[("L", "P2")], {
-            "opener": 0, "equaliser": 0, "comeback": 1, "winner": 1, "late_winner": 1,
+            "opener": 0, "equalizer": 0, "comeback": 1, "winner": 1, "late_winner": 1,
         })
 
     def test_a_winner_before_the_last_three_minutes_is_not_a_late_winner(self):
