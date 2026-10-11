@@ -704,7 +704,10 @@ Each league video has a `league` and a `week` within it (weeks restart at 1 per
 league). The page puts **one block per league**, newest video first within each
 and the leagues ordered by their newest video, with the one-off events in a
 block of their own at the end whatever their dates. A flat list sorted by date
-interleaved two "Week 1"s and dropped the friendlies between them. One-off
+interleaved two "Week 1"s and dropped the friendlies between them. A card
+shows **only the date** above its title: the league is the block's heading and
+the week is in the title right below, so naming either again just made the
+line wrap. One-off
 events (friendlies, 11v11 event matches) are saved as
 `{ type: "event", date, title, titleKo?, driveUrl }` — no league or week —
 and their card shows "Event Match" and the entry's own title (the script

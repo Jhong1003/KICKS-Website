@@ -111,20 +111,20 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		driveUrl: string;
 	}
 
+	/**
+	 * A card says the date and nothing else above its title: the league is the
+	 * heading of the block the card is in, and the week is in the title right
+	 * underneath, so "FA26-L1 · Week 4 · Sun, Sep 27" over "Week 4 Full Match"
+	 * repeated both of them and pushed the line onto two rows.
+	 */
 	function cardText(video: VideoEntry) {
+		const meta = { metaEn: formatShortDate(video.date, "en"), metaKo: formatShortDate(video.date, "ko") };
 		if (video.type === "event") {
-			return {
-				metaEn: `Event Match · ${formatShortDate(video.date, "en")}`,
-				metaKo: `이벤트 매치 · ${formatShortDate(video.date, "ko")}`,
-				titleEn: video.title,
-				titleKo: video.titleKo || video.title,
-			};
+			return { ...meta, titleEn: video.title, titleKo: video.titleKo || video.title };
 		}
-		const league = video.league ? `${video.league} · ` : "";
 		const week = video.week ?? 0;
 		return {
-			metaEn: `${league}${weekLabel(week, "en")} · ${formatShortDate(video.date, "en")}`,
-			metaKo: `${league}${weekLabel(week, "ko")} · ${formatShortDate(video.date, "ko")}`,
+			...meta,
 			titleEn: `${weekLabel(week, "en")} Full Match`,
 			titleKo: `${weekLabel(week, "ko")} 풀영상`,
 		};
