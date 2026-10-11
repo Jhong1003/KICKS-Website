@@ -22,6 +22,8 @@ export interface LeagueRules {
 	draw_points: number;
 	matches_per_week: number;
 	matches_per_pair_per_week: number;
+	/** How long one match runs; the range a goal_events minute falls in. */
+	match_minutes: number;
 	ranking_criteria: RankingCriterion[];
 }
 

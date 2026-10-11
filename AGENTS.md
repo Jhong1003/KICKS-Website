@@ -961,6 +961,27 @@ without per-goal minutes. Two badges come from the same counts and so, like
 Brace, start in FA26-L2: `comeback_king` (a comeback goal) and `late_winner`
 (a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on).
 
+**Two views draw the goals on the clock**, both over
+[src/lib/match-timeline.ts](src/lib/match-timeline.ts)
+(tests: `tests/match-timeline.test.mjs`) and both per league:
+
+- **Match timelines** — under each completed result in Match Results
+  (`WeeklyResults.astro`): a bar the length of the match with a dot per goal
+  in the scoring team's color, then the same goals as text ("4' 홍지환 · 어시
+  손영보 · 결승골"). `matchTimelines` keys them by `match_id`, drops untimed
+  goals, and leaves a match out of the map entirely rather than returning an
+  empty list, so "not in the map" means "no timeline to draw". Only one role
+  is marked per goal, winner first; **opener is deliberately never marked**,
+  since the first goal is obvious from its position and most goals in this
+  league are openers.
+- **Goal Clock** (`GoalClock.astro`, last section of the League page) — one
+  bar per minute of the match showing when the league's goals went in, with
+  the busiest minute(s) highlighted and the count printed above each bar, so
+  nothing is read off height alone. Own goals **are** counted: nobody is
+  named or ranked, so this is about when goals happen, not about credit.
+  Hidden below `GOAL_CLOCK_MIN_GOALS` (10), which covers both a league with
+  no per-goal records and one that's only a week old.
+
 Read so far by the team page's late-goals corner (`src/lib/team-profile.ts`,
 `lateAxis`: a team's share of goals from minute `LATE_FROM_MINUTE` on,
 excluding own goals at both ends of the fraction, on a fixed scale that fills

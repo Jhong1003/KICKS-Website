@@ -1,0 +1,81 @@
+---
+// "Goal Clock": when goals happen in a KICKS match, for one league. A bar per
+// minute of the match clock (12, no half-time), built from goal_events.json.
+//
+// Club-wide within the league and nobody is named or ranked, so own goals are
+// counted like any other goal — this is about the clock, not about credit.
+// Hidden entirely below GOAL_CLOCK_MIN_GOALS, which also covers a league with
+// no per-goal records at all (all of FA26-L1).
+import T from "./T.astro";
+import type { League } from "../lib/leagues";
+import { goalClock, type TimelineGoal } from "../lib/match-timeline";
+
+interface Props {
+	league: League;
+	goals: TimelineGoal[];
+}
+
+const { league, goals } = Astro.props;
+const matchMinutes = league.rules.match_minutes ?? 12;
+const clock = goalClock(goals, league.id, matchMinutes);
+// Bars are drawn against the busiest minute, so the shape always fills the
+// box; the count sits above each bar, so nothing is read off height alone.
+const height = (count: number) => (clock && clock.peak > 0 ? (count / clock.peak) * 100 : 0);
+const busiestLabel = clock?.busiest.join(", ") ?? "";
+---
+
+{
+	clock && (
+		<section class="content-section goal-clock" aria-labelledby="goal-clock-title">
+			<h2 id="goal-clock-title"><T en="Goal Clock" ko="골 시계" /></h2>
+			<T
+				as="p"
+				class="about-description"
+				en={`When this league's ${clock.total} goals went in.`}
+				ko={`이번 리그 ${clock.total}골이 몇 분에 터졌는지 보여줘요.`}
+			/>
+			<div
+				class="goal-clock-chart"
+				role="img"
+				aria-label={clock.minutes.map((bucket) => `${bucket.minute}min ${bucket.goals}`).join(", ")}
+			>
+				{clock.minutes.map((bucket) => (
+					<div class="goal-clock-col">
+						<span class="goal-clock-count">{bucket.goals > 0 ? bucket.goals : ""}</span>
+						<div class="goal-clock-bar-track">
+							<div
+								class={`goal-clock-bar${clock.busiest.includes(bucket.minute) ? " goal-clock-bar--peak" : ""}`}
+								style={`height: ${height(bucket.goals)}%`}
+							/>
+						</div>
+						<span class="goal-clock-minute">{bucket.minute}</span>
+					</div>
+				))}
+			</div>
+			<T
+				as="p"
+				class="goal-clock-note"
+				en={`Minutes of a ${matchMinutes}-minute match. Busiest: minute ${busiestLabel}.`}
+				ko={`${matchMinutes}분 경기 기준이에요. 골이 가장 많이 터진 시간은 ${busiestLabel}분.`}
+			/>
+		</section>
+	)
+}
+
+<style>
+	.goal-clock-chart {
+		display: flex;
+		align-items: flex-end;
+		gap: 4px;
+		max-width: 560px;
+		height: 150px;
+		margin-top: 1.5rem;
+	}
+	.goal-clock-col { display: flex; flex: 1; flex-direction: column; align-items: center; height: 100%; gap: 4px; }
+	.goal-clock-count { font-size: .7rem; font-variant-numeric: tabular-nums; opacity: .6; min-height: 1em; }
+	.goal-clock-bar-track { display: flex; align-items: flex-end; width: 100%; flex: 1; }
+	.goal-clock-bar { width: 100%; min-height: 2px; background: var(--color-sage); border-radius: 2px 2px 0 0; }
+	.goal-clock-bar--peak { background: var(--color-green); }
+	.goal-clock-minute { font-size: .7rem; font-variant-numeric: tabular-nums; opacity: .55; }
+	.goal-clock-note { max-width: 560px; margin: .75rem 0 0; font-size: .8rem; opacity: .7; }
+</style>
