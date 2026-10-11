@@ -111,20 +111,20 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		driveUrl: string;
 	}
 
+	/**
+	 * A card says the date and nothing else above its title: the league is the
+	 * heading of the block the card is in, and the week is in the title right
+	 * underneath, so "FA26-L1 · Week 4 · Sun, Sep 27" over "Week 4 Full Match"
+	 * repeated both of them and pushed the line onto two rows.
+	 */
 	function cardText(video: VideoEntry) {
+		const meta = { metaEn: formatShortDate(video.date, "en"), metaKo: formatShortDate(video.date, "ko") };
 		if (video.type === "event") {
-			return {
-				metaEn: `Event Match · ${formatShortDate(video.date, "en")}`,
-				metaKo: `이벤트 매치 · ${formatShortDate(video.date, "ko")}`,
-				titleEn: video.title,
-				titleKo: video.titleKo || video.title,
-			};
+			return { ...meta, titleEn: video.title, titleKo: video.titleKo || video.title };
 		}
-		const league = video.league ? `${video.league} · ` : "";
 		const week = video.week ?? 0;
 		return {
-			metaEn: `${league}${weekLabel(week, "en")} · ${formatShortDate(video.date, "en")}`,
-			metaKo: `${league}${weekLabel(week, "ko")} · ${formatShortDate(video.date, "ko")}`,
+			...meta,
 			titleEn: `${weekLabel(week, "en")} Full Match`,
 			titleKo: `${weekLabel(week, "ko")} 풀영상`,
 		};
@@ -184,22 +184,65 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		return JSON.parse(new TextDecoder().decode(plaintext));
 	}
 
+	/**
+	 * One heading per league, plus one for the one-off events, rather than a
+	 * single run of cards: weeks restart at 1 in every league, so a flat list
+	 * sorted by date interleaves two "Week 1"s and the friendlies between them.
+	 *
+	 * Groups are ordered by their newest video, so the league being played now
+	 * is first and finished ones fall behind it by themselves. Events go last
+	 * whatever their dates — they are the odd ones out, not a season.
+	 */
+	const EVENT_GROUP = "__event__";
+
+	function groupVideos(videos: VideoEntry[]) {
+		const groups = new Map<string, VideoEntry[]>();
+		for (const video of videos) {
+			// A video saved before leagues existed has no league; it keeps its
+			// own group rather than being filed under one it never belonged to.
+			const key = video.type === "event" ? EVENT_GROUP : (video.league ?? "");
+			groups.set(key, [...(groups.get(key) ?? []), video]);
+		}
+		return [...groups.entries()]
+			.map(([key, entries]) => ({
+				key,
+				entries: entries.sort((a, b) => b.date.localeCompare(a.date) || (b.week ?? 0) - (a.week ?? 0)),
+			}))
+			.sort((a, b) => {
+				if ((a.key === EVENT_GROUP) !== (b.key === EVENT_GROUP)) return a.key === EVENT_GROUP ? 1 : -1;
+				return b.entries[0].date.localeCompare(a.entries[0].date);
+			});
+	}
+
+	function groupHeading(key: string) {
+		if (key === EVENT_GROUP) return bilingualHtml("Event Matches", "이벤트 매치");
+		if (!key) return bilingualHtml("Earlier", "이전 영상");
+		return key;
+	}
+
+	function videoCard(video: VideoEntry) {
+		const text = cardText(video);
+		return `
+			<div class="video-card">
+				<div class="video-card-meta">${bilingualHtml(text.metaEn, text.metaKo)}</div>
+				<h3 class="video-card-title">${bilingualHtml(text.titleEn, text.titleKo)}</h3>
+				<a class="button-primary" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">
+					${bilingualHtml("Watch on Google Drive", "구글 드라이브에서 보기")}
+				</a>
+			</div>
+		`;
+	}
+
 	function renderVideos(videos: VideoEntry[]) {
-		// Newest first by date — week numbers alone are ambiguous across leagues.
-		const sorted = [...videos].sort((a, b) => b.date.localeCompare(a.date) || (b.week ?? 0) - (a.week ?? 0));
-		videoListEl.innerHTML = sorted
-			.map((video) => {
-				const text = cardText(video);
-				return `
-					<div class="video-card">
-						<div class="video-card-meta">${bilingualHtml(text.metaEn, text.metaKo)}</div>
-						<h3 class="video-card-title">${bilingualHtml(text.titleEn, text.titleKo)}</h3>
-						<a class="button-primary" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">
-							${bilingualHtml("Watch on Google Drive", "구글 드라이브에서 보기")}
-						</a>
-					</div>
-				`;
-			})
+		videoListEl.innerHTML = groupVideos(videos)
+			.map(
+				(group) => `
+					<section class="video-group">
+						<h2 class="video-group-title">${groupHeading(group.key)}</h2>
+						<div class="video-grid">${group.entries.map(videoCard).join("")}</div>
+					</section>
+				`,
+			)
 			.join("");
 	}
 
