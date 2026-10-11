@@ -1,10 +1,12 @@
 ---
 import T from "./T.astro";
 import { formatShortDate, weekLabel } from "../lib/i18n";
+import type { TimelineEntry } from "../lib/match-timeline";
 
 interface Match {
 	week: number;
 	round: number;
+	match_id?: string;
 	home_team: string;
 	away_team: string;
 	home_score: number | null;
@@ -36,9 +38,25 @@ interface Props {
 	defaultWeek: number;
 	/** When set, each week's table gets a link that opens this points-chart popup. */
 	raceDialogId?: string;
+	/**
+	 * match_id -> that match's goals in minute order (src/lib/match-timeline.ts).
+	 * A match that isn't in here just shows its score, which is every match in a
+	 * league recorded without goal minutes.
+	 */
+	timelines?: Map<string, TimelineEntry[]>;
+	/** team_id -> color, for the dot and the marker beside each scorer. */
+	teamColor?: (teamId: string | null) => string;
+	/** Match length, so a goal's minute places the dot along the bar. */
+	matchMinutes?: number;
 }
 
-const { weeks, defaultWeek, raceDialogId } = Astro.props;
+const { weeks, defaultWeek, raceDialogId, timelines, teamColor, matchMinutes = 12 } = Astro.props;
+const goalsOf = (match: Match) => (match.match_id && timelines?.get(match.match_id)) || [];
+const ROLE_MARK: Record<string, { en: string; ko: string }> = {
+	winner: { en: "winner", ko: "결승골" },
+	equaliser: { en: "equaliser", ko: "동점골" },
+	comeback: { en: "comeback", ko: "역전골" },
+};
 
 const matchesForRound = (week: Week, round: number) => week.matches.filter((match) => match.round === round);
 ---
@@ -121,15 +139,63 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 											.join(" ");
 									return (
 										<div class="match-card">
-											<span class={teamClass(homeWins, awayWins)}>{match.home_team}</span>
-											{match.status === "completed" ? (
-												<span class="match-score">
-													{match.home_score} – {match.away_score}
-												</span>
-											) : (
-												<span class="match-score match-score--vs">vs</span>
+											<div class="match-card-line">
+												<span class={teamClass(homeWins, awayWins)}>{match.home_team}</span>
+												{match.status === "completed" ? (
+													<span class="match-score">
+														{match.home_score} – {match.away_score}
+													</span>
+												) : (
+													<span class="match-score match-score--vs">vs</span>
+												)}
+												<span class={teamClass(awayWins, homeWins)}>{match.away_team}</span>
+											</div>
+											{goalsOf(match).length > 0 && (
+												<div class="match-timeline">
+													<div
+														class="match-timeline-bar"
+														role="img"
+														aria-label={goalsOf(match)
+															.map((goal) => `${goal.minute}min ${goal.scorer}`)
+															.join(", ")}
+													>
+														{goalsOf(match).map((goal) => (
+															<span
+																class="match-timeline-dot"
+																style={`left: ${goal.at * 100}%; background-color: ${teamColor?.(goal.teamId) ?? "var(--color-green)"}`}
+															/>
+														))}
+													</div>
+													<ul class="match-timeline-goals">
+														{goalsOf(match).map((goal) => (
+															<li>
+																<span class="match-timeline-minute">{goal.minute}'</span>
+																<span
+																	class="match-timeline-swatch"
+																	style={`background-color: ${teamColor?.(goal.teamId) ?? "var(--color-green)"}`}
+																	aria-hidden="true"
+																/>
+																<span class="match-timeline-scorer">{goal.scorer}</span>
+																{goal.ownGoal && <T class="match-timeline-tag" en="own goal" ko="자책골" />}
+																{!goal.ownGoal && goal.assist && (
+																	<T
+																		class="match-timeline-assist"
+																		en={`assist ${goal.assist}`}
+																		ko={`어시 ${goal.assist}`}
+																	/>
+																)}
+																{goal.role && (
+																	<T
+																		class="match-timeline-tag"
+																		en={ROLE_MARK[goal.role].en}
+																		ko={ROLE_MARK[goal.role].ko}
+																	/>
+																)}
+															</li>
+														))}
+													</ul>
+												</div>
 											)}
-											<span class={teamClass(awayWins, homeWins)}>{match.away_team}</span>
 										</div>
 									);
 								})}

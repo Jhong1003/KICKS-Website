@@ -5,14 +5,17 @@ import StandingsTable from "./StandingsTable.astro";
 import WeeklyResults from "./WeeklyResults.astro";
 import PlayerStatsTable from "./PlayerStatsTable.astro";
 import MatchForecasts from "./MatchForecasts.astro";
+import GoalClock from "./GoalClock.astro";
 import T from "./T.astro";
 import leagueTableData from "../data/league_table.json";
 import matchesData from "../data/matches.json";
 import weekSummariesData from "../data/week_summaries.json";
 import leaderboardData from "../data/player_leaderboard.json";
 import profilesData from "../data/player_profiles.json";
+import goalEventsData from "../data/goal_events.json";
 import historyData from "../data/standings_history.json";
-import { leagues, getTeamName, type League } from "../lib/leagues";
+import { leagues, getTeamColor, getTeamName, type League } from "../lib/leagues";
+import { matchTimelines, type TimelineGoal } from "../lib/match-timeline";
 import { pointsRaceDialogId } from "../lib/points-race";
 import { isRowShown } from "../lib/finale";
 
@@ -96,6 +99,13 @@ const placeholderStandings = league.teams.map((team) => ({
 	participation_rate: 0,
 	href: `/league/${league.id}/team/${team.team_id}`,
 }));
+
+// Goals under each result, and the goal clock below. Both are empty for a
+// league recorded without goal minutes, and each view hides itself then.
+const matchMinutes = league.rules.match_minutes ?? 12;
+const leagueGoals = (goalEventsData as TimelineGoal[]).filter((goal) => goal.league === league.id);
+const timelines = matchTimelines(leagueGoals, league.id, matchMinutes, (id) => playerNames.get(id) ?? id);
+const goalTeamColor = (teamId: string | null) => getTeamColor(teamId, league);
 
 // The points-chart popup only exists once the league has a week of standings.
 const hasRaceHistory = historyData.some((row) => row.league === league.id);
@@ -203,7 +213,14 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		{
 			weeks.length > 0 ? (
 				<>
-					<WeeklyResults weeks={weeks} defaultWeek={defaultWeek} raceDialogId={hasRaceHistory ? pointsRaceDialogId(league.id) : undefined} />
+					<WeeklyResults
+						weeks={weeks}
+						defaultWeek={defaultWeek}
+						raceDialogId={hasRaceHistory ? pointsRaceDialogId(league.id) : undefined}
+						timelines={timelines}
+						teamColor={goalTeamColor}
+						matchMinutes={matchMinutes}
+					/>
 					<PointsRaceDialog league={league} finished={finished} />
 				</>
 			) : (
@@ -220,6 +237,8 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 	<MatchForecasts league={league} />
 
 	<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
+
+	<GoalClock league={league} goals={leagueGoals} />
 
 	</div>
 	<div id="player-stats" data-league-panel>
