@@ -8,7 +8,11 @@
     "assist_id": "P021",
     "own_goal": false,
     "team_id": "T3",
-    "scorer_team_id": "T3"
+    "scorer_team_id": "T3",
+    "roles": [
+      "opener",
+      "winner"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -19,7 +23,11 @@
     "assist_id": "P029",
     "own_goal": false,
     "team_id": "T2",
-    "scorer_team_id": "T2"
+    "scorer_team_id": "T2",
+    "roles": [
+      "opener",
+      "winner"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -30,7 +38,11 @@
     "assist_id": "P015",
     "own_goal": false,
     "team_id": "T1",
-    "scorer_team_id": "T1"
+    "scorer_team_id": "T1",
+    "roles": [
+      "opener",
+      "winner"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -41,7 +53,10 @@
     "assist_id": "P029",
     "own_goal": false,
     "team_id": "T2",
-    "scorer_team_id": "T2"
+    "scorer_team_id": "T2",
+    "roles": [
+      "opener"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -52,7 +67,10 @@
     "assist_id": "P025",
     "own_goal": false,
     "team_id": "T3",
-    "scorer_team_id": "T3"
+    "scorer_team_id": "T3",
+    "roles": [
+      "equaliser"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -63,7 +81,10 @@
     "assist_id": "P029",
     "own_goal": false,
     "team_id": "T2",
-    "scorer_team_id": "T2"
+    "scorer_team_id": "T2",
+    "roles": [
+      "opener"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -74,7 +95,10 @@
     "assist_id": null,
     "own_goal": false,
     "team_id": "T1",
-    "scorer_team_id": "T1"
+    "scorer_team_id": "T1",
+    "roles": [
+      "equaliser"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -85,7 +109,11 @@
     "assist_id": null,
     "own_goal": false,
     "team_id": "T1",
-    "scorer_team_id": "T1"
+    "scorer_team_id": "T1",
+    "roles": [
+      "opener",
+      "winner"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -96,7 +124,8 @@
     "assist_id": "P026",
     "own_goal": false,
     "team_id": "T1",
-    "scorer_team_id": "T1"
+    "scorer_team_id": "T1",
+    "roles": []
   },
   {
     "league": "FA26-L2",
@@ -107,7 +136,10 @@
     "assist_id": null,
     "own_goal": false,
     "team_id": "T2",
-    "scorer_team_id": "T2"
+    "scorer_team_id": "T2",
+    "roles": [
+      "opener"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -118,7 +150,10 @@
     "assist_id": "P024",
     "own_goal": false,
     "team_id": "T3",
-    "scorer_team_id": "T3"
+    "scorer_team_id": "T3",
+    "roles": [
+      "equaliser"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -129,7 +164,11 @@
     "assist_id": null,
     "own_goal": false,
     "team_id": "T2",
-    "scorer_team_id": "T2"
+    "scorer_team_id": "T2",
+    "roles": [
+      "opener",
+      "winner"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -140,7 +179,10 @@
     "assist_id": "P004",
     "own_goal": false,
     "team_id": "T1",
-    "scorer_team_id": "T1"
+    "scorer_team_id": "T1",
+    "roles": [
+      "opener"
+    ]
   },
   {
     "league": "FA26-L2",
@@ -151,6 +193,9 @@
     "assist_id": "P018",
     "own_goal": false,
     "team_id": "T3",
-    "scorer_team_id": "T3"
+    "scorer_team_id": "T3",
+    "roles": [
+      "equaliser"
+    ]
   }
 ]

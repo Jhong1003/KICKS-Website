@@ -2754,6 +2754,74 @@ a.player-card:hover {
 
 }
 
+/* "Goals that mattered" on a player page (src/lib/goal-roles.ts): one line per
+   role the player has, count first. Never a rank or a comparison - the player
+   pages stay a celebration, not a second leaderboard. */
+
+.goal-role-list {
+
+	list-style: none;
+
+	margin: 0;
+
+	padding: 0;
+
+}
+
+.goal-role-list li {
+
+	display: flex;
+
+	align-items: baseline;
+
+	gap: 8px;
+
+	padding: 6px 0;
+
+	border-bottom: 1px solid var(--color-sage);
+
+}
+
+.goal-role-list li:last-child {
+
+	border-bottom: 0;
+
+}
+
+.goal-role-count {
+
+	min-width: 1.4em;
+
+	font-weight: 700;
+
+	font-variant-numeric: tabular-nums;
+
+}
+
+.goal-role-label {
+
+	font-weight: 600;
+
+}
+
+.goal-role-note {
+
+	font-size: 0.8rem;
+
+	opacity: 0.6;
+
+}
+
+@media (max-width: 480px) {
+
+	.goal-role-note {
+
+		display: none;
+
+	}
+
+}
+
 .player-badge-list {
 
 	display: flex;

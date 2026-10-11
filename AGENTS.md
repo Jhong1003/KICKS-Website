@@ -453,7 +453,10 @@ they joined, so late joiners aren't penalised.
   (fallback when nothing else triggered, so **everyone has at least one
   badge** per league).
 - Rare: `on_fire` (3+ goals + assists in one week), `libero` (primary DF
-  with a goal or assist), `brace` (2 goals in one match).
+  with a goal or assist), `brace` (2 goals in one match), `comeback_king`
+  (scored the goal that put the team ahead after trailing) and `late_winner`
+  (scored the winning goal from minute 10 on) — the last two from
+  `goal_roles`, so FA26-L2 onward like `brace`.
 - Legendary: `champion` (on the rank-1 team of a *finished* league — every
   fixture scored; shown first among Legendary with its own gold look),
   `golden_boot` (most goals) and `playmaker_award` (most assists) in a
@@ -487,7 +490,8 @@ higher-step player as a holder of the lower steps (`holdsBadge`).
 
 `brace`/`hat_trick` need per-match goals, which only `goal_events` has
 (`_max_match_goals`), so they start in FA26-L2; FA26-L1 was recorded as
-weekly totals. Apart from the defender set, team-based badges (`champion`) are kept
+weekly totals. `comeback_king`/`late_winner` need goal minutes on top of
+that (see "Goal events"), so they start there too. Apart from the defender set, team-based badges (`champion`) are kept
 few, since they mostly reflect team strength rather than the player.
 
 (There used to be `week1_starter` and `rookie` badges; they were dropped
@@ -927,6 +931,35 @@ with ids rather than names.
   range, fails a week where some goals have a minute and others don't
   (all-or-nothing per week, which is what catches one row left blank), and
   warns on two goals in the same minute of one match.
+
+**Each goal also carries `roles`** (`_tag_goal_roles`), what it did to the
+score, by replaying the match's goals in order. None of the four is exclusive,
+so they never sum to a goal total and nothing presents them as a breakdown of
+one:
+
+- `opener` — the first goal of the match.
+- `equaliser` — levelled the score for a team that was behind.
+- `comeback` — put a team **that had been behind in this match** in front.
+  Going ahead from level having never trailed is not a comeback and gets no
+  role; that case is usually the `winner` anyway.
+- `winner` — the goal the winning team was never caught after: their
+  (loser's final score + 1)-th. Needs a completed, non-drawn match, so it's
+  the one role a fixture in progress can't have.
+
+A match whose goals aren't all timed can't be replayed, so every goal in it
+gets an empty list rather than a guessed order. **Own goals are tagged** —
+the score has to move — **but never counted for the scorer**
+(`_goal_role_counts` skips them), the same rule that keeps own goals out of a
+player's `goals`.
+
+Per-player counts land on each profile section as `goal_roles`, rendered by
+the player page's "Goals that mattered" block through
+[src/lib/goal-roles.ts](src/lib/goal-roles.ts) (labels only — the counting is
+all done in the pipeline, so there's no second implementation to keep in
+step). The block hides itself when every count is 0, which is any league
+without per-goal minutes. Two badges come from the same counts and so, like
+Brace, start in FA26-L2: `comeback_king` (a comeback goal) and `late_winner`
+(a winning goal from `LATE_WINNER_FROM_MINUTE`, 10, on).
 
 Read so far by the team page's late-goals corner (`src/lib/team-profile.ts`,
 `lateAxis`: a team's share of goals from minute `LATE_FROM_MINUTE` on,

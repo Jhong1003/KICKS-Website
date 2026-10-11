@@ -555,7 +555,80 @@ def build_goal_events(
     # Match order, then minute - an unrecorded minute sorts to the end of its
     # match rather than to the front, so a half-filled match still reads right.
     rows.sort(key=lambda row: (row["league"], row["week"], row["match_id"], row["minute"] is None, row["minute"] or 0))
+    _tag_goal_roles(rows, matches)
     return rows
+
+
+def _tag_goal_roles(rows: list[dict], matches: pd.DataFrame) -> None:
+    """Add `roles` to each goal: what it did to the score, in place.
+
+    Replaying a match's goals in order says more than counting them. The four
+    roles, none exclusive (a 1-0 match's only goal is both an opener and the
+    winner):
+
+    - `opener`    the first goal of the match
+    - `equaliser` levelled the score for a team that was behind
+    - `comeback`  put a team that was behind in front
+    - `winner`    the goal the winning team was never caught after - the
+                  (loser's final score + 1)-th goal they scored. It needs the
+                  final score, so it only exists on a completed match that
+                  wasn't drawn.
+
+    A match whose goals aren't all timed can't be replayed in order, so every
+    goal in it gets an empty list rather than a guessed order. **Own goals
+    take part in the score but are never credited to the scorer** - the roles
+    are tagged on them (the match's score has to move) and the per-player
+    counts skip them, the same way own goals stay out of a player's goals.
+    """
+    info = {
+        match_id: (home_id, away_id, home_score, away_score)
+        for match_id, home_id, away_id, home_score, away_score in zip(
+            matches["match_id"], matches["home_team_id"], matches["away_team_id"],
+            matches["home_score"], matches["away_score"],
+        )
+    }
+    by_match: dict[str, list[dict]] = {}
+    for row in rows:
+        row["roles"] = []
+        by_match.setdefault(row["match_id"], []).append(row)
+
+    for match_id, goals in by_match.items():
+        if match_id not in info or any(goal["minute"] is None or goal["team_id"] is None for goal in goals):
+            continue
+        home_id, away_id, home_score, away_score = info[match_id]
+        # The winning team's nth goal, where n = the loser's final score + 1.
+        winning_team, winning_index = None, None
+        if not (pd.isna(home_score) or pd.isna(away_score)) and home_score != away_score:
+            home_won = home_score > away_score
+            winning_team = home_id if home_won else away_id
+            winning_index = int(away_score if home_won else home_score) + 1
+
+        tally = {home_id: 0, away_id: 0}
+        trailed: set[str] = set()
+        for goal in goals:
+            team = goal["team_id"]
+            if team not in tally:
+                continue  # a goal credited to neither side of this match
+            other_team = away_id if team == home_id else home_id
+            before, against = tally[team], tally[other_team]
+            after = before + 1
+            roles = []
+            if before == 0 and against == 0:
+                roles.append("opener")
+            elif before < against and after == against:
+                roles.append("equaliser")
+            elif after > against and team in trailed:
+                roles.append("comeback")
+            if team == winning_team and after == winning_index:
+                roles.append("winner")
+            goal["roles"] = roles
+            tally[team] = after
+            # Whoever is behind now has trailed in this match, which is what
+            # makes a later go-ahead goal a comeback rather than just a lead.
+            if tally[home_id] < tally[away_id]:
+                trailed.add(home_id)
+            elif tally[away_id] < tally[home_id]:
+                trailed.add(away_id)
 
 
 def build_week_summaries(matches: pd.DataFrame) -> list[dict]:
@@ -799,6 +872,7 @@ def _badges(
     *,
     primary_position: str | None,
     max_match_goals: int,
+    goal_roles: dict[str, int],
     team_weeks: dict[tuple[int, str], list[tuple[int, int, str]]],
     champion_teams: set[str],
     champion: bool,
@@ -854,6 +928,11 @@ def _badges(
         badges.append("champion")
     if max_match_goals >= BRACE_GOALS:
         badges.append("brace")
+    # Both need goal minutes, so like Brace they start in FA26-L2.
+    if goal_roles.get("comeback", 0) >= 1:
+        badges.append("comeback_king")
+    if goal_roles.get("late_winner", 0) >= 1:
+        badges.append("late_winner")
     # Legendary — the league awards first, right after Champion on the site
     badges.extend(badge for badge in ("golden_boot", "playmaker_award") if badge in league_awards)
     if ((attended["goals"] >= GAME_CHANGER_GOALS) & (attended["assists"] >= GAME_CHANGER_ASSISTS)).any():
@@ -1044,6 +1123,38 @@ def _max_match_goals(goal_events: pd.DataFrame, player_ids: dict[str, str]) -> d
     return {key: int(value) for key, value in per_match.groupby(level=[0, 1]).max().items()}
 
 
+# A winning goal from this minute on is a "late winner" badge.
+LATE_WINNER_FROM_MINUTE = 10
+
+GOAL_ROLES = ("opener", "equaliser", "comeback", "winner")
+
+
+def _goal_role_counts(goal_rows: list[dict]) -> dict[tuple[str, str], dict[str, int]]:
+    """(league, player_id) -> how many of each role that player's goals had.
+
+    Built from `build_goal_events` output, so it covers only leagues with
+    per-goal records and fully timed matches (see `_tag_goal_roles`); a
+    player with none simply has no entry. **Own goals are skipped
+    entirely** - they move the score, but putting one into your own net
+    isn't an opener or a winner you get credit for, the same reason own
+    goals stay out of a player's `goals`.
+
+    `late_winner` isn't a role of its own, it's a winner late in the match -
+    kept here so the badge doesn't have to re-read the events.
+    """
+    counts: dict[tuple[str, str], dict[str, int]] = {}
+    for goal in goal_rows:
+        if goal["own_goal"] or not goal["roles"]:
+            continue
+        key = (goal["league"], goal["scorer_id"])
+        tally = counts.setdefault(key, {role: 0 for role in GOAL_ROLES} | {"late_winner": 0})
+        for role in goal["roles"]:
+            tally[role] += 1
+        if "winner" in goal["roles"] and goal["minute"] >= LATE_WINNER_FROM_MINUTE:
+            tally["late_winner"] += 1
+    return counts
+
+
 def _league_section(
     league: str,
     rows: pd.DataFrame,
@@ -1051,6 +1162,7 @@ def _league_section(
     *,
     primary_position: str | None,
     max_match_goals: int,
+    goal_roles: dict[str, int],
     team_weeks: dict[tuple[int, str], list[tuple[int, int, str]]],
     champion_teams: set[str],
     top_scorer: bool,
@@ -1076,6 +1188,10 @@ def _league_section(
             "weeks_attended": weeks_attended,
             "weeks_played": weeks_played,
         },
+        # What this player's goals did to the score (src/lib/goal-roles.ts
+        # renders it). All zero for a league with no per-goal record, so the
+        # site hides the line rather than printing a row of noughts.
+        "goal_roles": {role: goal_roles.get(role, 0) for role in GOAL_ROLES},
         "weekly_stats": [
             {
                 "week": int(row["week"]),
@@ -1092,6 +1208,7 @@ def _league_section(
             rows,
             primary_position=primary_position,
             max_match_goals=max_match_goals,
+            goal_roles=goal_roles,
             team_weeks=team_weeks,
             champion_teams=champion_teams,
             champion=current_team_id in champion_teams,
@@ -1110,6 +1227,7 @@ def build_player_profiles(
     matches: pd.DataFrame,
     league_table: list[dict],
     goal_events: pd.DataFrame,
+    goal_rows: list[dict],
 ) -> list[dict]:
     """One celebratory profile per player who has recorded stats in any league.
 
@@ -1127,7 +1245,9 @@ def build_player_profiles(
     `matches` and `league_table` feed the team-based badges (the defender
     badges, Champion, Treble) and tell which leagues are finished (Golden
     Boot, Playmaker Award); `goal_events` (still name-based) feeds the per-match
-    ones (Brace, Hat-trick, Poker). Back-to-Back is the one badge that
+    ones (Brace, Hat-trick, Poker); `goal_rows` is `build_goal_events`
+    output, already resolved to ids, and feeds each section's `goal_roles`
+    counts plus the two badges that need them (Comeback King, Late Winner). Back-to-Back is the one badge that
     looks across leagues: champion of two leagues in a row (consecutive in
     `league_order`), awarded in the second one.
     """
@@ -1143,6 +1263,7 @@ def build_player_profiles(
     top_attackers = _top_attackers(player_stats)
     award_winners = _league_award_winners(player_stats, matches, statuses)
     max_match_goals = _max_match_goals(goal_events, dict(zip(players["player"], players["player_id"])))
+    goal_roles = _goal_role_counts(goal_rows)
 
     profiles = []
     for player_id, player_rows in player_stats.groupby("player_id"):
@@ -1156,6 +1277,7 @@ def build_player_profiles(
                 int(weeks_played[league]),
                 primary_position=primary_position,
                 max_match_goals=max_match_goals.get((league, player_id), 0),
+                goal_roles=goal_roles.get((league, player_id), {}),
                 team_weeks=team_weeks.get(league, {}),
                 champion_teams=champions.get(league, set()),
                 top_scorer=player_id in top_attackers.get(league, set()),
@@ -1322,11 +1444,14 @@ def main() -> None:
     write_json("standings_history.json", standings_history)
     write_json("matches.json", build_matches(matches))
     write_json("week_summaries.json", build_week_summaries(matches))
-    write_json("goal_events.json", build_goal_events(sheets["goal_events"], player_stats, matches, players))
+    goal_rows = build_goal_events(sheets["goal_events"], player_stats, matches, players)
+    write_json("goal_events.json", goal_rows)
     write_json("player_leaderboard.json", build_leaderboard(player_stats, players))
     write_json(
         "player_profiles.json",
-        build_player_profiles(player_stats, players, league_order, matches, league_table, sheets["goal_events"]),
+        build_player_profiles(
+            player_stats, players, league_order, matches, league_table, sheets["goal_events"], goal_rows
+        ),
     )
 
 

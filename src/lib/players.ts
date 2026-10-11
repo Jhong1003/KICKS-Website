@@ -24,6 +24,16 @@ export interface SeasonTotals {
 	weeks_played: number;
 }
 
+/** How many of a player's goals did each thing to the score (src/lib/goal-roles.ts).
+ *  Roles aren't exclusive, so these don't sum to their goal total. All zero in a
+ *  league recorded without per-goal minutes. */
+export interface GoalRoles {
+	opener: number;
+	equaliser: number;
+	comeback: number;
+	winner: number;
+}
+
 export interface WeeklyStat {
 	week: number;
 	team_id: string;
@@ -70,6 +80,8 @@ export type BadgeKey =
 	| "golden_boot"
 	| "playmaker_award"
 	| "brace"
+	| "comeback_king"
+	| "late_winner"
 	| "game_changer"
 	| "crack"
 	| "fox_in_the_box"
@@ -89,6 +101,7 @@ export interface PlayerLeagueSection {
 	current_team_id: string;
 	team_history: TeamSegment[];
 	season_totals: SeasonTotals;
+	goal_roles?: GoalRoles;
 	weekly_stats: WeeklyStat[];
 	personal_best_week: PersonalBestWeek | null;
 	play_style_tag: PlayStyleTag;
@@ -261,6 +274,22 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		description: "Scored 2 goals in a single match.",
 		descriptionKo: "한 경기에서 2골을 넣었어요.",
 		icon: "✌️",
+		tier: "rare",
+	},
+	comeback_king: {
+		label: "Comeback King",
+		labelKo: "역전골",
+		description: "Scored the goal that put the team in front after trailing.",
+		descriptionKo: "지고 있던 팀을 앞서게 만든 골을 넣었어요.",
+		icon: "🔄",
+		tier: "rare",
+	},
+	late_winner: {
+		label: "Late Winner",
+		labelKo: "막판 해결사",
+		description: "Scored the winning goal in the last 3 minutes.",
+		descriptionKo: "경기 막판 3분에 결승골을 넣었어요.",
+		icon: "⏱️",
 		tier: "rare",
 	},
 	// Legendary
