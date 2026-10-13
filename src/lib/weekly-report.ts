@@ -42,11 +42,12 @@ export const colorName = (hex: string) => COLOR_NAMES[hex.toLowerCase()] ?? "";
 /**
  * Top `limit` by `value`, ties broken by name so the order never wobbles
  * between runs. Players on 0 are left out: a leaderboard of noughts says
- * nothing and the slide has room for five.
+ * nothing. Seven is what fills a column of the slide — five left the panel
+ * looking half empty, and more than seven starts crowding the names.
  */
 export function topBy<T extends { name: string; color: string }>(
 	rows: (T & { value: number })[],
-	limit = 5,
+	limit = 7,
 ): (T & { value: number; rank: number })[] {
 	const ranked = rows
 		.filter((row) => row.value > 0)
