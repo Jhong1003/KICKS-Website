@@ -5,15 +5,21 @@
 // tool, so a week's post can't disagree with the league table.
 //
 // Not in the menu and kept out of the sitemap/robots: it's a tool, not a page
-// for visitors. The background is drawn in CSS, and swapped for
-// public/report-bg.jpg automatically if that file is added.
+// for visitors.
+//
+// The look is dark and editorial rather than a white card on a grass photo:
+// the three team colours (red / gold / blue) are the only colour on the slide,
+// so they carry the identity and nothing has to be art-directed per week. The
+// first version put a white panel on a drawn pitch and read as a web table
+// screenshotted — the dark field lets the team colours and the numbers be the
+// whole design.
 import leaguesData from "../../../data/leagues.json";
 import matchesData from "../../../data/matches.json";
 import leagueTableData from "../../../data/league_table.json";
 import leaderboardData from "../../../data/player_leaderboard.json";
 import profilesData from "../../../data/player_profiles.json";
 import goalEventsData from "../../../data/goal_events.json";
-import { colorName, minuteCounts, topBy } from "../../../lib/weekly-report";
+import { minuteCounts, topBy } from "../../../lib/weekly-report";
 import { formatShortDate } from "../../../lib/i18n";
 
 export function getStaticPaths() {
@@ -34,8 +40,9 @@ const league = (leaguesData as any[]).find((l) => l.id === leagueId)!;
 const teams = new Map<string, { name: string; color: string }>(
 	league.teams.map((t: any) => [t.team_id, { name: t.name, color: t.color }]),
 );
-const team = (id: string | null) => teams.get(id ?? "") ?? { name: "TBD", color: "#999999" };
+const team = (id: string | null) => teams.get(id ?? "") ?? { name: "TBD", color: "#8a8a8a" };
 const names = new Map(profilesData.map((p: any) => [p.player_id, p.name]));
+const palette = league.teams.map((t: any) => t.color);
 
 const weekMatches = (matchesData as any[])
 	.filter((m) => m.league === leagueId && m.week === week && m.status === "completed")
@@ -44,11 +51,6 @@ const date = weekMatches[0]?.date ?? "";
 const rounds = [...new Set(weekMatches.map((m) => m.round))].sort((a, b) => a - b);
 
 const events = (goalEventsData as any[]).filter((g) => g.league === leagueId && g.week === week);
-const goalsOf = (matchId: string) =>
-	events
-		.filter((g) => g.match_id === matchId)
-		.sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0))
-		.map((g) => ({ minute: g.minute, scorer: names.get(g.scorer_id) ?? "", color: team(g.team_id).color }));
 
 // The table is the league's standing *after* this week, which is what
 // league_table.json holds for the latest week. Earlier weeks would need
@@ -60,21 +62,30 @@ const table = (leagueTableData as any[])
 const board = (leaderboardData as any[])
 	.filter((r) => r.league === leagueId)
 	.map((r) => ({ name: names.get(r.player_id) ?? "", color: team(r.team_id).color, goals: r.goals, assists: r.assists }));
-const scorers = topBy(board.map((r) => ({ ...r, value: r.goals })));
-const assisters = topBy(board.map((r) => ({ ...r, value: r.assists })));
-const combined = topBy(board.map((r) => ({ ...r, value: r.goals + r.assists })));
+const charts = [
+	{ title: "GOALS", rows: topBy(board.map((r) => ({ ...r, value: r.goals }))) },
+	{ title: "ASSISTS", rows: topBy(board.map((r) => ({ ...r, value: r.assists }))) },
+	{ title: "G + A", rows: topBy(board.map((r) => ({ ...r, value: r.goals + r.assists }))) },
+];
 
 const matchMinutes = league.rules.match_minutes ?? 12;
-const timed = events.filter((g) => g.minute !== null);
-const clock = minuteCounts(timed.map((g) => g.minute), matchMinutes);
-const peak = Math.max(1, ...clock.map((c) => c.goals));
+const timed = events
+	.filter((g) => g.minute !== null)
+	.map((g) => ({ minute: g.minute as number, color: team(g.team_id).color }));
+const clock = minuteCounts(timed, matchMinutes);
+const peak = Math.max(1, ...clock.map((slot) => slot.goals.length));
 const winners = events
 	.filter((g) => g.roles?.includes("winner"))
 	.sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0))
 	.map((g) => ({ name: names.get(g.scorer_id) ?? "", minute: g.minute, color: team(g.team_id).color }));
 
-const foot = `${formatShortDate(date, "en").toUpperCase()} · ${leagueId} WEEKLY LEAGUE REPORT`;
+const dateLabel = date ? formatShortDate(date, "en").toUpperCase() : "";
 const weekNo = String(week).padStart(2, "0");
+const kicker = `${leagueId} · WEEK ${weekNo}`;
+// One block per goal, so a 3-goal minute is three stacked team colours rather
+// than a taller anonymous bar. The tallest minute fills the chart.
+const BLOCK_GAP = 8;
+const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 ---
 
 <html lang="en">
@@ -85,7 +96,7 @@ const weekNo = String(week).padStart(2, "0");
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Archivo+Black&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Black&display=swap"
 			rel="stylesheet"
 		/>
 	</head>
@@ -95,131 +106,142 @@ const weekNo = String(week).padStart(2, "0");
 		</p>
 
 		<div class="cards">
-			<!-- 1 · Cover -->
-			<section class="card">
+			{/* 1 · Cover */}
+			<section class="card cover">
 				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
-				<div class="cover">
-					<p class="eyebrow">KICKS {leagueId.split("-")[0]}</p>
-					<p class="huge">WEEK</p>
-					<p class="huge">{weekNo}</p>
-					<div class="bars">
-						{league.teams.map((t: any) => <span style={`background:${t.color}`} />)}
-					</div>
-					<p class="cover-sub">STATS &amp; RESULTS</p>
-				</div>
-				<p class="foot">{foot}</p>
+				<p class="eyebrow">KICKS {leagueId}</p>
+				<p class="huge">WEEK</p>
+				<p class="huge outline">{weekNo}</p>
+				<div class="rule big">{palette.map((color: string) => <span style={`background:${color}`} />)}</div>
+				<p class="cover-sub">STATS &amp; RESULTS</p>
+				<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
 			</section>
 
-			<!-- 2 · Match results -->
+			{/* 2 · Match results */}
 			<section class="card">
 				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
-				<h1>MATCH RESULTS</h1>
-				<p class="week">WEEK {weekNo}</p>
-				<div class="panel">
+				<p class="eyebrow">{kicker}</p>
+				<h1>MATCH<br />RESULTS</h1>
+				<div class="rule">{palette.map((color: string) => <span style={`background:${color}`} />)}</div>
+				<div class="body">
 					{rounds.map((round) => (
-						<>
-							<p class="round">ROUND {round}</p>
+						<div class="round">
+							<p class="round-label"><span>ROUND {round}</span></p>
 							{weekMatches
 								.filter((m) => m.round === round)
-								.map((m) => (
-									<div class="result">
-										<span class="side home">
-											<span class="chip" style={`background:${team(m.home_team_id).color}`} />
-											<b>{team(m.home_team_id).name}</b>
-										</span>
-										<span class="score">{m.home_score} - {m.away_score}</span>
-										<span class="side away">
-											<b>{team(m.away_team_id).name}</b>
-											<span class="chip" style={`background:${team(m.away_team_id).color}`} />
-										</span>
-									</div>
-								))}
-						</>
-					))}
-				</div>
-				<p class="foot">{foot}</p>
-			</section>
-
-			<!-- 3 · League table -->
-			<section class="card">
-				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
-				<h1>LEAGUE TABLE</h1>
-				<p class="week">WEEK {weekNo}</p>
-				<div class="panel">
-					<div class="thead"><span>RANK</span><span>TEAM</span><span>P</span><span>W</span><span>D</span><span>L</span><span>PTS</span></div>
-					{table.map((r) => (
-						<div class="trow">
-							<span class="rank">{String(r.rank).padStart(2, "0")}</span>
-							<span class="tteam">
-								<span class="chip tall" style={`background:${r.color}`} />
-								<span><b>{r.name}</b><i>{colorName(r.color)}</i></span>
-							</span>
-							<span>{r.played}</span><span>{r.wins}</span><span>{r.draws}</span><span>{r.losses}</span>
-							<span class="pts"><b>{r.points}</b><i>PTS</i></span>
+								.map((m) => {
+									const home = team(m.home_team_id);
+									const away = team(m.away_team_id);
+									const homeWon = m.home_score > m.away_score;
+									const awayWon = m.away_score > m.home_score;
+									return (
+										<div class="fixture">
+											<span class={`side home${awayWon ? " beaten" : ""}`}>
+												<b>{home.name}</b>
+												<span class="chip" style={`background:${home.color}`} />
+											</span>
+											<span class="score">{m.home_score}<i>:</i>{m.away_score}</span>
+											<span class={`side away${homeWon ? " beaten" : ""}`}>
+												<span class="chip" style={`background:${away.color}`} />
+												<b>{away.name}</b>
+											</span>
+										</div>
+									);
+								})}
 						</div>
 					))}
 				</div>
-				<p class="foot">{foot}</p>
+				<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
 			</section>
 
-			<!-- 4 · Player stats -->
+			{/* 3 · League table */}
 			<section class="card">
 				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
-				<h1>PLAYER STATS</h1>
-				<p class="week">WEEK {weekNo}</p>
-				<div class="panel cols">
-					{[
-						{ title: "TOP SCORERS", note: "GOALS", icon: "⚽", rows: scorers },
-						{ title: "TOP ASSISTS", note: "ASSISTS", icon: "👟", rows: assisters },
-						{ title: "TOP G+A", note: "GOALS · ASSISTS", icon: "📊", rows: combined },
-					].map((col) => (
-						<div class="col">
-							<p class="coltitle">{col.title} <span>{col.icon}</span></p>
-							<p class="colnote">{col.note}</p>
-							{col.rows.map((row) => (
-								<div class="leader">
-									<span class="lrank">{String(row.rank).padStart(2, "0")}</span>
-									<span class="chip" style={`background:${row.color}`} />
+				<p class="eyebrow">{kicker}</p>
+				<h1>LEAGUE<br />TABLE</h1>
+				<div class="rule">{palette.map((color: string) => <span style={`background:${color}`} />)}</div>
+				<div class="body">
+					{table.map((r) => (
+						{/* A faint slab the full width of the row, with the team's colour
+						    washed over its left half — so the row reads as one band and
+						    the points at the far end still sit inside it. */}
+						<div
+							class="standing"
+							style={`--team:${r.color}; background:linear-gradient(90deg, ${r.color}3d, ${r.color}14 56%, ${r.color}00 100%), rgba(255, 255, 255, 0.05)`}
+						>
+							<span class="place">{String(r.rank).padStart(2, "0")}</span>
+							<span class="who">
+								<b>{r.name}</b>
+								<i>
+									<em>{r.played}</em> PLAYED<span class="dot" />
+									<em>{r.wins}</em> W<span class="dot" /><em>{r.draws}</em> D<span class="dot" /><em>{r.losses}</em> L
+								</i>
+							</span>
+							<span class="tally"><b>{r.points}</b><i>PTS</i></span>
+						</div>
+					))}
+				</div>
+				<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
+			</section>
+
+			{/* 4 · Player stats */}
+			<section class="card">
+				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
+				<p class="eyebrow">{kicker}</p>
+				<h1>PLAYER<br />STATS</h1>
+				<div class="rule">{palette.map((color: string) => <span style={`background:${color}`} />)}</div>
+				<div class="body charts">
+					{charts.map((chart) => (
+						<div class="chart">
+							<p class="chart-title">{chart.title}</p>
+							{chart.rows.map((row, index) => (
+								<div class={`entry${index === 0 ? " lead" : ""}`} style={`--team:${row.color}`}>
+									<span class="pos">{String(row.rank).padStart(2, "0")}</span>
 									<b>{row.name}</b>
-									<span class="lval">{row.value}</span>
+									<span class="val">{row.value}</span>
 								</div>
 							))}
 						</div>
 					))}
 				</div>
-				<p class="foot">{foot}</p>
+				<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
 			</section>
 
-			<!-- 5 · Goal times (new: needs the minutes recorded from FA26-L2 on) -->
+			{/* 5 · Goal times (needs the minutes recorded from FA26-L2 on) */}
 			{timed.length > 0 && (
 				<section class="card">
 					<img class="logo" src="/kicks-logo-white.jpg" alt="" />
-					<h1>GOAL TIMES</h1>
-					<p class="week">WEEK {weekNo}</p>
-					<div class="panel">
-						<p class="coltitle">WHEN THE GOALS WENT IN <span>⏱️</span></p>
-						<p class="colnote">{timed.length} GOALS · {matchMinutes}-MINUTE MATCHES</p>
+					<p class="eyebrow">{kicker}</p>
+					<h1>GOAL<br />TIMES</h1>
+					<div class="rule">{palette.map((color: string) => <span style={`background:${color}`} />)}</div>
+					<div class="body">
+						<p class="chart-title spread">
+							<span>WHEN THEY WENT IN</span>
+							<span class="muted">{timed.length} GOALS · {matchMinutes}′ MATCHES</span>
+						</p>
 						<div class="clock">
-							{clock.map((c) => (
-								<div class="ccol">
-									<span class="cnum">{c.goals || ""}</span>
-									<span class="cbar" style={`height:${(c.goals / peak) * 100}%`} />
-									<span class="cmin">{c.minute}</span>
+							{clock.map((slot) => (
+								<div class="minute">
+									<span class="stack">
+										{slot.goals.map((goal) => (
+											<span class="block" style={`background:${goal.color}; height:${blockHeight}px`} />
+										))}
+									</span>
+									<span class={`tick${slot.goals.length ? " hit" : ""}`}>{slot.minute}</span>
 								</div>
 							))}
 						</div>
-						<p class="coltitle wins">WINNING GOALS <span>🎯</span></p>
+						<p class="chart-title spread wins"><span>WINNING GOALS</span></p>
 						<div class="winners">
 							{winners.map((w) => (
-								<div class="leader">
-									<span class="chip" style={`background:${w.color}`} />
+								<div class="entry" style={`--team:${w.color}`}>
 									<b>{w.name}</b>
-									<span class="lval">{w.minute}'</span>
+									<span class="val">{w.minute}′</span>
 								</div>
 							))}
 						</div>
 					</div>
-					<p class="foot">{foot}</p>
+					<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
 				</section>
 			)}
 		</div>
@@ -228,15 +250,11 @@ const weekNo = String(week).padStart(2, "0");
 
 <style is:global>
 	*, *::before, *::after { box-sizing: border-box; }
-	body { margin: 0; background: #1a1a1a; font-family: "Archivo", system-ui, sans-serif; }
-	.hint { color: #999; font-size: 13px; padding: 16px 20px 0; margin: 0; }
+	body { margin: 0; background: #141414; font-family: "Archivo", system-ui, sans-serif; }
+	.hint { color: #888; font-size: 13px; padding: 16px 20px 0; margin: 0; }
 	.cards { display: flex; flex-wrap: wrap; gap: 24px; padding: 20px; }
 
-	/* 1080x1350 exactly, scaled down only for looking at. Screenshot at 100%.
-	   A flex column: the heading sits at the top, the white panel takes every
-	   pixel left over, and the bottom padding is the footer line's room. The
-	   panel filling the card is what stops a short table (three teams) from
-	   leaving half the slide empty green. */
+	/* 1080x1350 exactly, scaled down only for looking at. Screenshot at 100%. */
 	.card {
 		position: relative;
 		width: 1080px;
@@ -244,116 +262,118 @@ const weekNo = String(week).padStart(2, "0");
 		flex: 0 0 auto;
 		display: flex;
 		flex-direction: column;
-		padding: 64px 64px 116px;
+		padding: 72px 76px 108px;
 		color: #fff;
 		overflow: hidden;
 		transform: scale(0.42);
 		transform-origin: top left;
 		margin: 0 calc(-1080px * 0.58) calc(-1350px * 0.58) 0;
-		/* Drawn pitch: mown stripes, a white arc and a touchline, under a wash
-		   that deepens towards the bottom so white type stays readable over it.
-		   Replaced by the real photo as soon as public/report-bg.jpg exists. */
+		/* Near-black with a green cast, lit from the top left. Dark enough that
+		   the team colours are the only thing on the slide that reads as colour. */
 		background:
-			linear-gradient(168deg, rgba(9, 26, 8, 0.40), rgba(7, 20, 7, 0.70)),
-			url("/report-bg.jpg") center / cover no-repeat,
-			repeating-linear-gradient(100deg, #2e7029 0 86px, #27601f 86px 172px);
+			radial-gradient(118% 82% at 16% -6%, #1d3324 0%, #101712 46%, #080b09 100%);
 	}
+	/* A faint diagonal weave, so the field isn't a flat fill in a screenshot. */
 	.card::before {
 		content: "";
-		position: absolute;
-		left: -140px; top: 300px;
-		width: 900px; height: 900px;
-		border: 10px solid rgba(255, 255, 255, 0.22);
-		border-radius: 50%;
-	}
-	.card::after {
-		content: "";
-		position: absolute;
-		left: 0; right: 0; bottom: 210px;
-		height: 10px;
-		background: rgba(255, 255, 255, 0.18);
+		position: absolute; inset: 0;
+		background: repeating-linear-gradient(104deg, rgba(255, 255, 255, 0.028) 0 2px, transparent 2px 76px);
 	}
 	.card > * { position: relative; }
 
-	.logo { position: absolute; top: 44px; right: 56px; height: 54px; width: auto; mix-blend-mode: screen; }
-	h1 { font-family: "Archivo Black", sans-serif; font-size: 86px; letter-spacing: -0.02em; margin: 56px 0 0; }
-	.week { font-size: 40px; font-weight: 700; letter-spacing: 0.06em; margin: 6px 0 0; }
+	.logo { position: absolute; top: 60px; right: 72px; height: 50px; width: auto; mix-blend-mode: screen; }
+
+	/* Shared heading: a tracked kicker, a heavy two-line title, and the three
+	   team colours as a rule. Every slide opens the same way. */
+	.eyebrow { font-size: 22px; font-weight: 700; letter-spacing: 0.34em; margin: 0 0 22px; color: rgba(255, 255, 255, 0.5); }
+	h1 { font-family: "Archivo Black", sans-serif; font-size: 98px; line-height: 0.94; letter-spacing: -0.035em; margin: 0; }
+	.rule { display: flex; gap: 9px; margin: 34px 0 0; }
+	.rule span { width: 76px; height: 9px; border-radius: 999px; }
+	.rule.big span { width: 112px; height: 13px; }
+
+	.body { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; margin-top: 40px; }
+
 	.foot {
-		position: absolute; left: 0; right: 0; bottom: 48px;
-		text-align: center; font-size: 17px; font-weight: 600;
-		letter-spacing: 0.16em; opacity: 0.9; margin: 0;
+		position: absolute; left: 76px; right: 76px; bottom: 54px;
+		display: flex; justify-content: space-between;
+		font-size: 18px; font-weight: 600; letter-spacing: 0.22em;
+		color: rgba(255, 255, 255, 0.42); margin: 0;
 	}
 
-	/* Cover */
-	.cover { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-	.eyebrow { font-size: 42px; font-weight: 700; letter-spacing: 0.22em; margin: 0 0 18px; }
-	.huge { font-family: "Archivo Black", sans-serif; font-size: 200px; line-height: 0.92; letter-spacing: -0.03em; margin: 0; }
-	.bars { display: flex; gap: 14px; margin: 34px 0 26px; }
-	.bars span { width: 118px; height: 13px; border-radius: 2px; }
-	.cover-sub { font-family: "Archivo Black", sans-serif; font-size: 50px; letter-spacing: 0.02em; margin: 0; }
+	/* 1 · Cover */
+	.cover { justify-content: center; }
+	.cover .eyebrow { margin-bottom: 30px; }
+	.huge { font-family: "Archivo Black", sans-serif; font-size: 210px; line-height: 0.86; letter-spacing: -0.045em; margin: 0; }
+	/* The week number is drawn as an outline, so the cover has one solid word
+	   and one hollow one instead of two slabs of the same weight. */
+	.outline { color: transparent; -webkit-text-stroke: 5px #fff; }
+	.cover .rule { margin: 54px 0 34px; }
+	.cover-sub { font-size: 34px; font-weight: 700; letter-spacing: 0.3em; margin: 0; color: rgba(255, 255, 255, 0.72); }
 
-	/* Shared white panel. It fills the card and centres whatever it holds, so
-	   every slide is the same slab whether it carries three rows or twelve. */
-	.panel {
-		background: #fff; color: #1b1b1b; border-radius: 16px;
-		padding: 40px 44px; margin-top: 42px;
-		flex: 1; display: flex; flex-direction: column; justify-content: center;
-	}
-	.round {
-		text-align: center; font-size: 19px; font-weight: 700; letter-spacing: 0.3em;
-		color: #fff; background: #1b1b1b; border-radius: 6px; padding: 10px 0; margin: 20px 0 12px;
-	}
-	.round:first-child { margin-top: 0; }
-
-	.result { display: grid; grid-template-columns: 1fr 150px 1fr; align-items: center; padding: 13px 10px; border-radius: 8px; }
-	.result:nth-child(odd) { background: #f3f3f1; }
-	.side { display: flex; align-items: center; gap: 14px; font-size: 29px; }
+	/* 2 · Match results. Nine fixtures and three round labels is the most any
+	   slide has to hold, so the spacing here is what the card can actually fit
+	   — loosening it pushes the last round over the footer. */
+	.round + .round { margin-top: 28px; }
+	.round-label { display: flex; align-items: center; gap: 22px; margin: 0 0 4px; font-size: 19px; font-weight: 700; letter-spacing: 0.3em; color: rgba(255, 255, 255, 0.45); }
+	.round-label::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, 0.16); }
+	.fixture { display: grid; grid-template-columns: 1fr 190px 1fr; align-items: center; padding: 13px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
+	.fixture:last-child { border-bottom: 0; }
+	.side { display: flex; align-items: center; gap: 16px; font-size: 29px; font-weight: 600; }
 	.side.home { justify-content: flex-end; }
-	.chip { width: 7px; height: 28px; border-radius: 2px; flex: 0 0 auto; }
-	.chip.tall { height: 58px; width: 10px; }
-	.score { text-align: center; font-size: 33px; font-weight: 700; letter-spacing: 0.08em; }
+	/* The beaten side drops back, so the week's results can be read at a glance
+	   without the scores having to be compared one by one. */
+	.side.beaten { color: rgba(255, 255, 255, 0.4); font-weight: 500; }
+	.side.beaten .chip { opacity: 0.45; }
+	.chip { width: 9px; height: 32px; border-radius: 999px; flex: 0 0 auto; }
+	.score { font-family: "Archivo Black", sans-serif; font-size: 38px; text-align: center; letter-spacing: 0.02em; }
+	.score i { font-style: normal; padding: 0 10px; color: rgba(255, 255, 255, 0.35); }
 
-	/* Table. Three teams over a full-height panel, so the rows are deliberately
-	   broadcast-sized rather than web-sized. */
-	.thead, .trow { display: grid; grid-template-columns: 120px 1fr 76px 76px 76px 76px 140px; align-items: center; }
-	.thead { font-size: 17px; font-weight: 700; letter-spacing: 0.18em; color: #8a8a8a; padding-bottom: 18px; border-bottom: 2px solid #ececec; }
-	.thead span:nth-child(n+3) { text-align: center; }
-	/* Rows take a share of the panel's height, up to a cap: three teams fill
-	   most of it without the table going so airy it stops reading as one, and
-	   a league with more teams shrinks to fit instead of overflowing. */
-	.trow { flex: 1 1 auto; min-height: 0; max-height: 210px; padding: 26px 0; border-bottom: 1px solid #ececec; font-size: 34px; font-weight: 600; }
-	.trow:last-child { border-bottom: 0; }
-	.trow span:nth-child(n+3) { text-align: center; }
-	.rank { font-family: "Archivo Black", sans-serif; font-size: 58px; }
-	.tteam { display: flex; align-items: center; gap: 18px; }
-	.tteam b { font-size: 38px; display: block; }
-	.tteam i { font-style: normal; font-size: 16px; letter-spacing: 0.16em; color: #9a9a9a; display: block; margin-top: 2px; }
-	.pts { display: flex; flex-direction: column; align-items: center; }
-	.pts b { font-family: "Archivo Black", sans-serif; font-size: 52px; }
-	.pts i { font-style: normal; font-size: 15px; letter-spacing: 0.18em; color: #9a9a9a; }
+	/* 3 · League table */
+	.standing {
+		display: grid; grid-template-columns: 150px 1fr auto; align-items: center;
+		border-left: 12px solid var(--team); border-radius: 0 10px 10px 0;
+		padding: 46px 36px 46px 30px;
+	}
+	.standing + .standing { margin-top: 26px; }
+	.place { font-family: "Archivo Black", sans-serif; font-size: 76px; line-height: 1; color: rgba(255, 255, 255, 0.28); }
+	.who b { display: block; font-size: 52px; font-weight: 700; letter-spacing: -0.01em; }
+	.who i { display: flex; align-items: center; gap: 7px; margin-top: 12px; font-style: normal; font-size: 19px; font-weight: 600; letter-spacing: 0.2em; color: rgba(255, 255, 255, 0.5); }
+	.who em { font-style: normal; color: #fff; }
+	.dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); margin: 0 9px; }
+	.tally { text-align: right; }
+	.tally b { display: block; font-family: "Archivo Black", sans-serif; font-size: 82px; line-height: 0.9; }
+	.tally i { font-style: normal; font-size: 17px; font-weight: 700; letter-spacing: 0.28em; color: rgba(255, 255, 255, 0.5); }
 
-	/* Player stats. Rows start under their column's title, so a column with
-	   fewer names (fewer assisters than scorers, most weeks) is short at the
-	   bottom rather than floating away from its own heading. */
-	.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
-	.col { display: flex; flex-direction: column; }
-	.col .leader:last-of-type { margin-bottom: auto; }
-	.coltitle { font-size: 23px; font-weight: 700; letter-spacing: 0.1em; margin: 0; display: flex; align-items: center; gap: 8px; }
-	.colnote { font-size: 15px; font-weight: 600; letter-spacing: 0.16em; color: #9a9a9a; margin: 6px 0 14px; }
-	.leader { display: flex; align-items: center; gap: 12px; padding: 21px 0; border-top: 1px solid #ececec; font-size: 27px; }
-	.cols .leader { padding: 30px 0; }
-	.leader b { flex: 1; font-weight: 600; }
-	.lrank { font-weight: 700; color: #9a9a9a; font-size: 20px; }
-	.lval { font-weight: 700; }
+	/* 4 · Player stats */
+	.charts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 46px; align-content: center; }
+	.chart-title { margin: 0 0 20px; font-size: 21px; font-weight: 700; letter-spacing: 0.26em; padding-bottom: 16px; border-bottom: 2px solid rgba(255, 255, 255, 0.22); }
+	.chart-title.spread { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
+	.chart-title .muted { font-size: 17px; letter-spacing: 0.18em; color: rgba(255, 255, 255, 0.45); }
+	.entry { display: flex; align-items: center; gap: 14px; padding: 17px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 27px; }
+	.entry:last-child { border-bottom: 0; }
+	.entry b { flex: 1; font-weight: 600; min-width: 0; }
+	/* The leader of each chart carries their team's colour; the rest stay white
+	   so the slide has three accents rather than twenty-one. */
+	.entry.lead { font-size: 34px; padding: 20px 0 22px; }
+	.entry.lead b { color: var(--team); font-weight: 700; }
+	.entry.lead .val { font-family: "Archivo Black", sans-serif; font-size: 44px; color: var(--team); }
+	.pos { font-size: 19px; font-weight: 700; color: rgba(255, 255, 255, 0.38); }
+	.entry.lead .pos { color: var(--team); }
+	.val { font-weight: 700; font-variant-numeric: tabular-nums; }
 
-	/* Goal times */
-	/* The chart gives up height to the winners list below it, so a week with
-	   more decided matches doesn't push that list out of the panel. */
-	.clock { display: flex; align-items: flex-end; gap: 11px; flex: 1 1 auto; min-height: 190px; max-height: 360px; margin: 10px 0 44px; }
-	.ccol { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; gap: 8px; }
-	.cnum { font-size: 19px; font-weight: 700; color: #9a9a9a; min-height: 22px; }
-	.cbar { width: 100%; background: #3f5128; border-radius: 4px 4px 0 0; min-height: 3px; margin-top: auto; }
-	.cmin { font-size: 17px; font-weight: 600; color: #9a9a9a; }
-	.wins { margin-top: 12px; }
-	.winners { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 36px; }
+	/* 5 · Goal times */
+	.clock { display: flex; align-items: flex-end; gap: 12px; margin: 8px 0 56px; }
+	.minute { flex: 1; display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+	.stack { display: flex; flex-direction: column-reverse; justify-content: flex-start; gap: 8px; min-height: 10px; }
+	.block { border-radius: 5px; }
+	.tick { text-align: center; font-size: 19px; font-weight: 600; color: rgba(255, 255, 255, 0.3); }
+	.tick.hit { color: rgba(255, 255, 255, 0.75); }
+	.wins { margin-top: 0; }
+	.winners { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 56px; }
+	.winners .entry { font-size: 30px; padding: 20px 0; border-bottom: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+	/* The two columns rarely hold the same number of names, so the rules go
+	   above each row — an odd count then can't leave one hanging below. */
+	.winners .entry:nth-child(-n+2) { border-top: 0; }
+	.winners .entry b { padding-left: 20px; border-left: 7px solid var(--team); }
+	.winners .val { font-family: "Archivo Black", sans-serif; font-size: 32px; }
 </style>

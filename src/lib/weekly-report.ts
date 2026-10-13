@@ -65,11 +65,15 @@ export function topBy<T extends { name: string; color: string }>(
 	});
 }
 
-/** Goals per minute of the match, for the goal-times slide. */
-export function minuteCounts(minutes: number[], matchMinutes: number) {
-	const counts = Array.from({ length: matchMinutes }, (_, i) => ({ minute: i + 1, goals: 0 }));
-	for (const minute of minutes) {
-		if (minute >= 1 && minute <= matchMinutes) counts[minute - 1].goals += 1;
+/**
+ * Goals per minute of the match, for the goal-times slide. Each minute keeps
+ * the goals themselves rather than a count, so the slide can draw one block
+ * per goal in the scoring team's colour instead of an anonymous bar.
+ */
+export function minuteCounts<T extends { minute: number }>(goals: T[], matchMinutes: number) {
+	const slots = Array.from({ length: matchMinutes }, (_, i) => ({ minute: i + 1, goals: [] as T[] }));
+	for (const goal of goals) {
+		if (goal.minute >= 1 && goal.minute <= matchMinutes) slots[goal.minute - 1].goals.push(goal);
 	}
-	return counts;
+	return slots;
 }
