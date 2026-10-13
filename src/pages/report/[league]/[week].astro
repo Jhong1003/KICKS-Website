@@ -227,31 +227,36 @@ const weekNo = String(week).padStart(2, "0");
 </html>
 
 <style is:global>
+	*, *::before, *::after { box-sizing: border-box; }
 	body { margin: 0; background: #1a1a1a; font-family: "Archivo", system-ui, sans-serif; }
 	.hint { color: #999; font-size: 13px; padding: 16px 20px 0; margin: 0; }
 	.cards { display: flex; flex-wrap: wrap; gap: 24px; padding: 20px; }
 
-	/* 1080x1350 exactly, scaled down only for looking at. Screenshot at 100%. */
+	/* 1080x1350 exactly, scaled down only for looking at. Screenshot at 100%.
+	   A flex column: the heading sits at the top, the white panel takes every
+	   pixel left over, and the bottom padding is the footer line's room. The
+	   panel filling the card is what stops a short table (three teams) from
+	   leaving half the slide empty green. */
 	.card {
 		position: relative;
 		width: 1080px;
 		height: 1350px;
 		flex: 0 0 auto;
-		padding: 64px 64px 56px;
-		box-sizing: border-box;
+		display: flex;
+		flex-direction: column;
+		padding: 64px 64px 116px;
 		color: #fff;
 		overflow: hidden;
 		transform: scale(0.42);
 		transform-origin: top left;
 		margin: 0 calc(-1080px * 0.58) calc(-1350px * 0.58) 0;
-		/* Drawn pitch: mown stripes, a white arc and a touchline, under a dark
-		   wash so white type stays readable. Replaced by the real photo as soon
-		   as public/report-bg.jpg exists. */
+		/* Drawn pitch: mown stripes, a white arc and a touchline, under a wash
+		   that deepens towards the bottom so white type stays readable over it.
+		   Replaced by the real photo as soon as public/report-bg.jpg exists. */
 		background:
-			linear-gradient(rgba(12, 28, 10, 0.55), rgba(12, 28, 10, 0.72)),
+			linear-gradient(168deg, rgba(9, 26, 8, 0.40), rgba(7, 20, 7, 0.70)),
 			url("/report-bg.jpg") center / cover no-repeat,
-			radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.16) 0 2px, transparent 3px),
-			repeating-linear-gradient(105deg, #2f6b2a 0 90px, #2a6126 90px 180px);
+			repeating-linear-gradient(100deg, #2e7029 0 86px, #27601f 86px 172px);
 	}
 	.card::before {
 		content: "";
@@ -280,59 +285,75 @@ const weekNo = String(week).padStart(2, "0");
 	}
 
 	/* Cover */
-	.cover { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+	.cover { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 	.eyebrow { font-size: 42px; font-weight: 700; letter-spacing: 0.22em; margin: 0 0 18px; }
 	.huge { font-family: "Archivo Black", sans-serif; font-size: 200px; line-height: 0.92; letter-spacing: -0.03em; margin: 0; }
 	.bars { display: flex; gap: 14px; margin: 34px 0 26px; }
 	.bars span { width: 118px; height: 13px; border-radius: 2px; }
 	.cover-sub { font-family: "Archivo Black", sans-serif; font-size: 50px; letter-spacing: 0.02em; margin: 0; }
 
-	/* Shared white panel */
-	.panel { background: #fff; color: #1b1b1b; border-radius: 16px; padding: 34px 38px; margin-top: 46px; }
-	.round {
-		text-align: center; font-size: 18px; font-weight: 700; letter-spacing: 0.3em;
-		color: #fff; background: #1b1b1b; border-radius: 6px; padding: 9px 0; margin: 26px 0 14px;
+	/* Shared white panel. It fills the card and centres whatever it holds, so
+	   every slide is the same slab whether it carries three rows or twelve. */
+	.panel {
+		background: #fff; color: #1b1b1b; border-radius: 16px;
+		padding: 40px 44px; margin-top: 42px;
+		flex: 1; display: flex; flex-direction: column; justify-content: center;
 	}
-	.round:first-child { margin-top: 4px; }
+	.round {
+		text-align: center; font-size: 19px; font-weight: 700; letter-spacing: 0.3em;
+		color: #fff; background: #1b1b1b; border-radius: 6px; padding: 10px 0; margin: 20px 0 12px;
+	}
+	.round:first-child { margin-top: 0; }
 
-	.result { display: grid; grid-template-columns: 1fr 150px 1fr; align-items: center; padding: 15px 10px; border-radius: 8px; }
+	.result { display: grid; grid-template-columns: 1fr 150px 1fr; align-items: center; padding: 13px 10px; border-radius: 8px; }
 	.result:nth-child(odd) { background: #f3f3f1; }
-	.side { display: flex; align-items: center; gap: 14px; font-size: 27px; }
+	.side { display: flex; align-items: center; gap: 14px; font-size: 29px; }
 	.side.home { justify-content: flex-end; }
-	.chip { width: 7px; height: 26px; border-radius: 2px; flex: 0 0 auto; }
-	.chip.tall { height: 46px; width: 9px; }
-	.score { text-align: center; font-size: 31px; font-weight: 700; letter-spacing: 0.08em; }
+	.chip { width: 7px; height: 28px; border-radius: 2px; flex: 0 0 auto; }
+	.chip.tall { height: 58px; width: 10px; }
+	.score { text-align: center; font-size: 33px; font-weight: 700; letter-spacing: 0.08em; }
 
-	/* Table */
-	.thead, .trow { display: grid; grid-template-columns: 110px 1fr 70px 70px 70px 70px 130px; align-items: center; }
-	.thead { font-size: 16px; font-weight: 700; letter-spacing: 0.18em; color: #8a8a8a; padding-bottom: 14px; border-bottom: 2px solid #ececec; }
+	/* Table. Three teams over a full-height panel, so the rows are deliberately
+	   broadcast-sized rather than web-sized. */
+	.thead, .trow { display: grid; grid-template-columns: 120px 1fr 76px 76px 76px 76px 140px; align-items: center; }
+	.thead { font-size: 17px; font-weight: 700; letter-spacing: 0.18em; color: #8a8a8a; padding-bottom: 18px; border-bottom: 2px solid #ececec; }
 	.thead span:nth-child(n+3) { text-align: center; }
-	.trow { padding: 26px 0; border-bottom: 1px solid #ececec; font-size: 28px; font-weight: 600; }
+	/* Rows take a share of the panel's height, up to a cap: three teams fill
+	   most of it without the table going so airy it stops reading as one, and
+	   a league with more teams shrinks to fit instead of overflowing. */
+	.trow { flex: 1 1 auto; min-height: 0; max-height: 210px; padding: 26px 0; border-bottom: 1px solid #ececec; font-size: 34px; font-weight: 600; }
 	.trow:last-child { border-bottom: 0; }
 	.trow span:nth-child(n+3) { text-align: center; }
-	.rank { font-family: "Archivo Black", sans-serif; font-size: 46px; }
-	.tteam { display: flex; align-items: center; gap: 16px; }
-	.tteam b { font-size: 30px; display: block; }
-	.tteam i { font-style: normal; font-size: 15px; letter-spacing: 0.16em; color: #9a9a9a; display: block; }
+	.rank { font-family: "Archivo Black", sans-serif; font-size: 58px; }
+	.tteam { display: flex; align-items: center; gap: 18px; }
+	.tteam b { font-size: 38px; display: block; }
+	.tteam i { font-style: normal; font-size: 16px; letter-spacing: 0.16em; color: #9a9a9a; display: block; margin-top: 2px; }
 	.pts { display: flex; flex-direction: column; align-items: center; }
-	.pts b { font-family: "Archivo Black", sans-serif; font-size: 40px; }
-	.pts i { font-style: normal; font-size: 14px; letter-spacing: 0.18em; color: #9a9a9a; }
+	.pts b { font-family: "Archivo Black", sans-serif; font-size: 52px; }
+	.pts i { font-style: normal; font-size: 15px; letter-spacing: 0.18em; color: #9a9a9a; }
 
-	/* Player stats */
-	.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
-	.coltitle { font-size: 21px; font-weight: 700; letter-spacing: 0.1em; margin: 0; display: flex; align-items: center; gap: 8px; }
-	.colnote { font-size: 14px; font-weight: 600; letter-spacing: 0.16em; color: #9a9a9a; margin: 5px 0 16px; }
-	.leader { display: flex; align-items: center; gap: 11px; padding: 11px 0; border-top: 1px solid #ececec; font-size: 23px; }
+	/* Player stats. Rows start under their column's title, so a column with
+	   fewer names (fewer assisters than scorers, most weeks) is short at the
+	   bottom rather than floating away from its own heading. */
+	.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+	.col { display: flex; flex-direction: column; }
+	.col .leader:last-of-type { margin-bottom: auto; }
+	.coltitle { font-size: 23px; font-weight: 700; letter-spacing: 0.1em; margin: 0; display: flex; align-items: center; gap: 8px; }
+	.colnote { font-size: 15px; font-weight: 600; letter-spacing: 0.16em; color: #9a9a9a; margin: 6px 0 14px; }
+	.leader { display: flex; align-items: center; gap: 12px; padding: 21px 0; border-top: 1px solid #ececec; font-size: 27px; }
+	.cols .leader { padding: 30px 0; }
 	.leader b { flex: 1; font-weight: 600; }
-	.lrank { font-weight: 700; color: #9a9a9a; font-size: 18px; }
+	.lrank { font-weight: 700; color: #9a9a9a; font-size: 20px; }
 	.lval { font-weight: 700; }
 
 	/* Goal times */
-	.clock { display: flex; align-items: flex-end; gap: 10px; height: 300px; margin: 8px 0 34px; }
-	.ccol { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; gap: 7px; }
-	.cnum { font-size: 17px; font-weight: 700; color: #9a9a9a; min-height: 20px; }
+	/* The chart gives up height to the winners list below it, so a week with
+	   more decided matches doesn't push that list out of the panel. */
+	.clock { display: flex; align-items: flex-end; gap: 11px; flex: 1 1 auto; min-height: 190px; max-height: 360px; margin: 10px 0 44px; }
+	.ccol { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; gap: 8px; }
+	.cnum { font-size: 19px; font-weight: 700; color: #9a9a9a; min-height: 22px; }
 	.cbar { width: 100%; background: #3f5128; border-radius: 4px 4px 0 0; min-height: 3px; margin-top: auto; }
-	.cmin { font-size: 16px; font-weight: 600; color: #9a9a9a; }
-	.wins { margin-top: 10px; }
-	.winners { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 34px; }
+	.cmin { font-size: 17px; font-weight: 600; color: #9a9a9a; }
+	.wins { margin-top: 12px; }
+	.winners { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 36px; }
 </style>
