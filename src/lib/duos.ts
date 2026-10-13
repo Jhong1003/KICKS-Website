@@ -35,12 +35,15 @@ export const DUO_MIN_GOALS = 2;
 
 /**
  * And the team needs this many assisted goals before any pair is shown at all.
- * A team with four assisted goals will have a pair on two, and calling that
- * their best combination says more about the sample than about the players —
- * the same reason the style hexagon waits for MIN_MATCHES. Eight is roughly
- * two weeks of a team's assisted goals.
+ * A team with three or four assisted goals will have a pair on two, and calling
+ * that their best combination says more about the sample than about the players
+ * — the same reason the style hexagon waits for MIN_MATCHES.
+ *
+ * Six, not eight: a team picks up three or four assisted goals a week, so eight
+ * held the section back to week three while six turns it on in week two, and
+ * six is still more than any single week can produce on its own.
  */
-export const DUO_MIN_TEAM_GOALS = 8;
+export const DUO_MIN_TEAM_GOALS = 6;
 
 /** At most this many pairs are shown: the point is the top of the list. */
 export const DUO_LIMIT = 3;
