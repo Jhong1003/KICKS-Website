@@ -787,16 +787,26 @@ Everything that lands on `main` must show as **Verified** on GitHub under
 Jhong1003. Never push straight to `main`; instead:
 
 1. Commit on a branch as **Jihwan Hong
-   <330735776+Jhong1003@users.noreply.github.com>** with Claude only as a
-   `Co-Authored-By` trailer — never as the author. Branch commits are
-   **unsigned** (`git config --local commit.gpgsign false` first): a signing
-   key that isn't on the Jhong1003 account would make GitHub label them
-   "Unverified".
+   <330735776+Jhong1003@users.noreply.github.com>** — never Claude as the
+   author. Branch commits are **unsigned** (`git config --local
+   commit.gpgsign false` first): a signing key that isn't on the Jhong1003
+   account would make GitHub label them "Unverified".
 2. Open a pull request and **squash-merge** it (REST API
    `PUT /repos/Jhong1003/KICKS-Website/pulls/<n>/merge` with
    `merge_method: squash`, or the owner clicks "Squash and merge"). GitHub
    signs the squash commit itself, so `main` gets one Verified commit
    merged by Jhong1003. Delete the branch afterwards.
+
+**The `Co-Authored-By: Claude …` trailer is not automatic.** It goes on a
+commit when Claude actually wrote the thing — a feature, a library, tests, a
+change to the pipeline. It is left off when the commit is Jihwan's own
+material and Claude only handled it: photos he shot and chose (resizing them
+is not authorship), Sheet data, hand-edited JSON like `schedule.json` or
+`team-info.json`, and numbers he decided (a threshold he picked, say). The
+`Claude-Session` line follows the same rule. The test is what actually
+happened, not what reads better on a portfolio: a reader should be able to
+trust the trailer either way, and a commit with no trailer should be one
+Jihwan could talk through line by line.
 
 The data workflows (`update-data.yml`, `publish-forecasts.yml`) still push
 their own bot commits to `main` — those are fine as they are. Don't rewrite or
