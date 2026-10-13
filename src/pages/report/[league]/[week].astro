@@ -172,7 +172,7 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 						    pale one let the grass through and turned gold and red to mud. */}
 						<div
 							class="standing"
-							style={`--team:${r.color}; background:linear-gradient(90deg, ${r.color}52, ${r.color}1a 56%, ${r.color}00 100%), rgba(4, 12, 6, 0.6)`}
+							style={`--team:${r.color}; background:linear-gradient(90deg, ${r.color}52, ${r.color}1a 56%, ${r.color}00 100%), rgba(4, 12, 6, 0.82)`}
 						>
 							<span class="place">{String(r.rank).padStart(2, "0")}</span>
 							<span class="who">
@@ -263,9 +263,9 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 	.card {
 		/* How hard the wash sits on the pitch, top / middle / bottom. The cover
 		   lightens all three, since it has only a title to keep readable. */
-		--wash-top: 0.30;
-		--wash-mid: 0.62;
-		--wash-bottom: 0.84;
+		--wash-top: 0.44;
+		--wash-mid: 0.78;
+		--wash-bottom: 0.92;
 		position: relative;
 		width: 1080px;
 		height: 1350px;
@@ -282,43 +282,40 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 		   painted on the grass, mown stripes, the turf itself. The real photo,
 		   when there is one, goes between the wash and the stripes. */
 		background:
-			radial-gradient(76% 46% at 26% -4%, rgba(255, 255, 255, 0.17), transparent 68%),
-			radial-gradient(122% 82% at 50% 44%, transparent 38%, rgba(0, 0, 0, 0.38) 100%),
+			radial-gradient(76% 46% at 26% -4%, rgba(255, 255, 255, 0.10), transparent 68%),
+			radial-gradient(122% 82% at 50% 44%, transparent 36%, rgba(0, 0, 0, 0.40) 100%),
 			linear-gradient(
 				180deg,
 				rgba(8, 24, 11, var(--wash-top)) 0%,
 				rgba(6, 18, 8, var(--wash-mid)) 46%,
 				rgba(3, 11, 5, var(--wash-bottom)) 100%
 			),
-			linear-gradient(180deg, transparent 0 1046px, rgba(255, 255, 255, 0.26) 1046px 1054px, transparent 1054px),
 			url("/report-bg.jpg") center / cover no-repeat,
-			/* Mown stripes. The stops leave gaps so the colours interpolate across
-			   them — hard-edged bands read as CSS, soft ones read as grass. */
+			/* Only reached if the photo is ever removed: mown stripes whose stops
+			   leave gaps, so the colours interpolate and the bands read as grass. */
 			repeating-linear-gradient(90deg, #4c8f3f 0 46px, #408034 96px 150px, #4c8f3f 196px),
 			#46883a;
 	}
-	.cover { --wash-top: 0.16; --wash-mid: 0.38; --wash-bottom: 0.62; }
-
-	/* The centre circle, swung in from the left like the feed's photos. */
-	.card::before {
-		content: "";
-		position: absolute;
-		left: -230px; top: 300px;
-		width: 980px; height: 980px;
-		border: 9px solid rgba(255, 255, 255, 0.17);
-		border-radius: 50%;
-		z-index: 0;
-	}
-	/* Grain over the whole card. Without it the turf reads as flat CSS bands in
-	   a screenshot; with it, it passes for a photograph of a pitch. */
-	.card::after {
-		content: "";
-		position: absolute; inset: 0;
-		z-index: 1;
-		pointer-events: none;
-		opacity: 0.17;
-		mix-blend-mode: overlay;
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+	/* The cover carries only a title, so the pitch comes through much brighter —
+	   that contrast between the cover and the data slides is the feed's. The
+	   extra layer is a soft pool of shade behind the title, because the pitch
+	   line runs right through where the week number sits. */
+	.cover {
+		--wash-top: 0.14;
+		--wash-mid: 0.34;
+		--wash-bottom: 0.58;
+		background-image:
+			radial-gradient(58% 34% at 50% 48%, rgba(2, 10, 4, 0.52), transparent 72%),
+			radial-gradient(76% 46% at 26% -4%, rgba(255, 255, 255, 0.10), transparent 68%),
+			radial-gradient(122% 82% at 50% 44%, transparent 36%, rgba(0, 0, 0, 0.40) 100%),
+			linear-gradient(
+				180deg,
+				rgba(8, 24, 11, var(--wash-top)) 0%,
+				rgba(6, 18, 8, var(--wash-mid)) 46%,
+				rgba(3, 11, 5, var(--wash-bottom)) 100%
+			),
+			url("/report-bg.jpg"),
+			repeating-linear-gradient(90deg, #4c8f3f 0 46px, #408034 96px 150px, #4c8f3f 196px);
 	}
 	.card > * { position: relative; z-index: 2; }
 
@@ -392,7 +389,7 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 	.charts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 46px; align-content: center; }
 	.chart-title { margin: 0 0 20px; font-size: 21px; font-weight: 700; letter-spacing: 0.26em; padding-bottom: 16px; border-bottom: 2px solid rgba(255, 255, 255, 0.22); }
 	.chart-title.spread { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
-	.chart-title .muted { font-size: 17px; letter-spacing: 0.18em; color: rgba(255, 255, 255, 0.45); }
+	.chart-title .muted { font-size: 17px; letter-spacing: 0.18em; color: rgba(255, 255, 255, 0.66); }
 	.entry { display: flex; align-items: center; gap: 14px; padding: 17px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 27px; }
 	.entry:last-child { border-bottom: 0; }
 	.entry b { flex: 1; font-weight: 600; min-width: 0; }
