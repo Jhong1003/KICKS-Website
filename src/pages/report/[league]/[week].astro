@@ -24,7 +24,7 @@ import leagueTableData from "../../../data/league_table.json";
 import leaderboardData from "../../../data/player_leaderboard.json";
 import profilesData from "../../../data/player_profiles.json";
 import goalEventsData from "../../../data/goal_events.json";
-import { topBy } from "../../../lib/weekly-report";
+import { minuteCounts, topBy } from "../../../lib/weekly-report";
 import { formatShortDate } from "../../../lib/i18n";
 
 export function getStaticPaths() {
@@ -73,30 +73,24 @@ const charts = [
 	{ title: "G + A", rows: topBy(board.map((r) => ({ ...r, value: r.goals + r.assists }))) },
 ];
 
-// Every goal of the week, under the team whose score it moved — so an own goal
-// is listed by the team that benefited, flagged, and never reads as that
-// player having scored for them. Ordered by minute: these are six different
-// matches, so match order would read as no order at all.
-const scoring = league.teams
-	.map((t: any) => ({
-		id: t.team_id,
-		name: t.name,
-		color: t.color,
-		goals: events
-			.filter((g) => g.team_id === t.team_id)
-			.sort((a, b) => (a.minute ?? 99) - (b.minute ?? 99) || String(a.match_id).localeCompare(String(b.match_id)))
-			.map((g) => ({
-				minute: g.minute as number | null,
-				scorer: names.get(g.scorer_id) ?? "",
-				assist: g.assist_id ? names.get(g.assist_id) ?? "" : "",
-				ownGoal: Boolean(g.own_goal),
-			})),
-	}))
-	.filter((t: { goals: unknown[] }) => t.goals.length > 0);
+const matchMinutes = league.rules.match_minutes ?? 12;
+const timed = events
+	.filter((g) => g.minute !== null)
+	.map((g) => ({ minute: g.minute as number, color: team(g.team_id).color }));
+const clock = minuteCounts(timed, matchMinutes);
+const peak = Math.max(1, ...clock.map((slot) => slot.goals.length));
+const winners = events
+	.filter((g) => g.roles?.includes("winner"))
+	.sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0))
+	.map((g) => ({ name: names.get(g.scorer_id) ?? "", minute: g.minute, color: team(g.team_id).color }));
 
 const dateLabel = date ? formatShortDate(date, "en").toUpperCase() : "";
 const weekNo = String(week).padStart(2, "0");
 const kicker = `${leagueId} · WEEK ${weekNo}`;
+// One block per goal, so a 3-goal minute is three stacked team colours rather
+// than a taller anonymous bar. The tallest minute fills the chart.
+const BLOCK_GAP = 8;
+const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 ---
 
 <html lang="en">
@@ -218,30 +212,39 @@ const kicker = `${leagueId} · WEEK ${weekNo}`;
 				<p class="foot">{dateLabel} · WEEKLY LEAGUE REPORT</p>
 			</section>
 
-			{/* 5 · Every goal of the week, under the team it was scored for. */}
-			{events.length > 0 && (
+			{/* 5 · Goal times (needs the minutes recorded from FA26-L2 on) */}
+			{timed.length > 0 && (
 				<section class="card">
 					<img class="logo" src="/kicks-logo-white.jpg" alt="" />
 					<p class="eyebrow">{kicker}</p>
-					<h1>GOALS &amp;<br />ASSISTS</h1>
+					<h1>GOAL<br />TIMES</h1>
 					<div class="rule">{palette.map((color: string) => <span style={`background:${color}`} />)}</div>
-					<div class={`body scoring${events.length > 16 ? " tight" : ""}`}>
-						{scoring.map((t: any) => (
-							<div
-								class="scorers"
-								style={`--team:${t.color}; background:linear-gradient(90deg, ${t.color}3a, ${t.color}10 58%, ${t.color}00 100%), rgba(4, 12, 6, 0.8)`}
-							>
-								<p class="scorers-head"><b>{t.name}</b><i>{t.goals.length} {t.goals.length === 1 ? "GOAL" : "GOALS"}</i></p>
-								{t.goals.map((goal: any) => (
-									<p class="goal">
-										<span class="min">{goal.minute === null ? "" : `${goal.minute}′`}</span>
-										<b>{goal.scorer}</b>
-										{goal.ownGoal && <span class="og">O.G.</span>}
-										{goal.assist && <span class="assist"><i>←</i>{goal.assist}</span>}
-									</p>
-								))}
-							</div>
-						))}
+					<div class="body">
+						<p class="chart-title spread">
+							<span>WHEN THEY WENT IN</span>
+							<span class="muted">{timed.length} GOALS · {matchMinutes}′ MATCHES</span>
+						</p>
+						<div class="clock">
+							{clock.map((slot) => (
+								<div class="minute">
+									<span class="stack">
+										{slot.goals.map((goal) => (
+											<span class="block" style={`background:${goal.color}; height:${blockHeight}px`} />
+										))}
+									</span>
+									<span class={`tick${slot.goals.length ? " hit" : ""}`}>{slot.minute}</span>
+								</div>
+							))}
+						</div>
+						<p class="chart-title spread wins"><span>WINNING GOALS</span></p>
+						<div class="winners">
+							{winners.map((w) => (
+								<div class="entry" style={`--team:${w.color}`}>
+									<b>{w.name}</b>
+									<span class="val">{w.minute}′</span>
+								</div>
+							))}
+						</div>
 					</div>
 					<p class="foot">{dateLabel} · WEEKLY LEAGUE REPORT</p>
 				</section>
@@ -399,25 +402,19 @@ const kicker = `${leagueId} · WEEK ${weekNo}`;
 	.entry.lead .pos { color: var(--team); }
 	.val { font-weight: 700; font-variant-numeric: tabular-nums; }
 
-	/* 5 · Goals & assists. One block per team, the same colour band as the
-	   league table, so the carousel reads as one set. Every goal of the week is
-	   here — split three ways it stays four or five lines a block, which is the
-	   density the rest of the slides keep. */
-	.scoring { gap: 16px; }
-	.scorers { border-left: 12px solid var(--team); border-radius: 0 10px 10px 0; padding: 16px 30px 18px 26px; }
-	.scorers-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin: 0 0 8px; }
-	.scorers-head b { font-size: 31px; font-weight: 700; }
-	.scorers-head i { font-style: normal; font-size: 17px; font-weight: 700; letter-spacing: 0.24em; color: rgba(255, 255, 255, 0.6); }
-	/* Scorer left, assist right, like the name/number rows on the other slides. */
-	.goal { display: flex; align-items: baseline; gap: 14px; margin: 0; padding: 5px 0; font-size: 26px; }
-	.goal b { flex: 1; font-weight: 600; }
-	.min { min-width: 62px; font-weight: 700; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, 0.55); }
-	/* The assist is the quieter half of the line: the goal is whose it is. */
-	.assist { font-weight: 500; color: rgba(255, 255, 255, 0.62); }
-	.assist i { font-style: normal; padding-right: 9px; color: rgba(255, 255, 255, 0.4); }
-	/* A heavier week still has to fit between the title and the footer. */
-	.scoring.tight .scorers { padding: 12px 30px 14px 26px; }
-	.scoring.tight .scorers-head b { font-size: 28px; }
-	.scoring.tight .goal { font-size: 23px; padding: 3px 0; }
-	.og { font-size: 15px; font-weight: 700; letter-spacing: 0.14em; color: rgba(255, 255, 255, 0.55); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 4px; padding: 2px 7px; }
+	/* 5 · Goal times */
+	.clock { display: flex; align-items: flex-end; gap: 12px; margin: 8px 0 56px; }
+	.minute { flex: 1; display: flex; flex-direction: column; align-items: stretch; gap: 14px; }
+	.stack { display: flex; flex-direction: column-reverse; justify-content: flex-start; gap: 8px; min-height: 10px; }
+	.block { border-radius: 5px; }
+	.tick { text-align: center; font-size: 19px; font-weight: 600; color: rgba(255, 255, 255, 0.3); }
+	.tick.hit { color: rgba(255, 255, 255, 0.75); }
+	.wins { margin-top: 0; }
+	.winners { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 56px; }
+	.winners .entry { font-size: 30px; padding: 20px 0; border-bottom: 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+	/* The two columns rarely hold the same number of names, so the rules go
+	   above each row — an odd count then can't leave one hanging below. */
+	.winners .entry:nth-child(-n+2) { border-top: 0; }
+	.winners .entry b { padding-left: 20px; border-left: 7px solid var(--team); }
+	.winners .val { font-family: "Archivo Black", sans-serif; font-size: 32px; }
 </style>
