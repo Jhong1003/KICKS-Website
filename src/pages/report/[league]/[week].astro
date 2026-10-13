@@ -67,10 +67,13 @@ const table = (leagueTableData as any[])
 const board = (leaderboardData as any[])
 	.filter((r) => r.league === leagueId)
 	.map((r) => ({ name: names.get(r.player_id) ?? "", color: team(r.team_id).color, goals: r.goals, assists: r.assists }));
+// Five a chart, not seven: by seventh place everyone is on one goal, which is
+// a list rather than a ranking, and the club's own slides show five.
+const TOP_N = 5;
 const charts = [
-	{ title: "GOALS", rows: topBy(board.map((r) => ({ ...r, value: r.goals }))) },
-	{ title: "ASSISTS", rows: topBy(board.map((r) => ({ ...r, value: r.assists }))) },
-	{ title: "G + A", rows: topBy(board.map((r) => ({ ...r, value: r.goals + r.assists }))) },
+	{ title: "TOP SCORERS", note: "GOALS", icon: "⚽", rows: topBy(board.map((r) => ({ ...r, value: r.goals })), TOP_N) },
+	{ title: "TOP ASSISTS", note: "ASSISTS", icon: "👟", rows: topBy(board.map((r) => ({ ...r, value: r.assists })), TOP_N) },
+	{ title: "TOP G+A", note: "GOALS · ASSISTS", icon: "📊", rows: topBy(board.map((r) => ({ ...r, value: r.goals + r.assists })), TOP_N) },
 ];
 
 const matchMinutes = league.rules.match_minutes ?? 12;
@@ -198,11 +201,13 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 				<div class="body charts">
 					{charts.map((chart) => (
 						<div class="chart">
-							<p class="chart-title">{chart.title}</p>
-							{chart.rows.map((row, index) => (
-								<div class={`entry${index === 0 ? " lead" : ""}`} style={`--team:${row.color}`}>
+							<p class="chart-title">{chart.title} <span>{chart.icon}</span></p>
+							<p class="chart-note">{chart.note}</p>
+							{chart.rows.map((row) => (
+								<div class="entry">
 									<span class="pos">{String(row.rank).padStart(2, "0")}</span>
 									<b>{row.name}</b>
+									<span class="chip" style={`background:${row.color}`} />
 									<span class="val">{row.value}</span>
 								</div>
 							))}
@@ -385,22 +390,25 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 	.tally b { display: block; font-family: "Archivo Black", sans-serif; font-size: 82px; line-height: 0.9; }
 	.tally i { font-style: normal; font-size: 17px; font-weight: 700; letter-spacing: 0.28em; color: rgba(255, 255, 255, 0.5); }
 
-	/* 4 · Player stats */
-	.charts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 46px; align-content: center; }
-	.chart-title { margin: 0 0 20px; font-size: 21px; font-weight: 700; letter-spacing: 0.26em; padding-bottom: 16px; border-bottom: 2px solid rgba(255, 255, 255, 0.22); }
+	/* 4 · Player stats. White panels on the grass, the way the club's own
+	   slides have always had them — the dark hairline version read as a
+	   spreadsheet. Every row carries its team's colour as a chip beside the
+	   number, so the colour runs down all fifteen names instead of sitting on
+	   three leaders. */
+	.charts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-content: center; }
+	.chart { background: #fff; color: #17181a; border-radius: 18px; padding: 26px 24px 20px; text-shadow: none; }
+	.chart-title { display: flex; align-items: center; gap: 9px; margin: 0; font-size: 23px; font-weight: 800; letter-spacing: 0.04em; }
+	.chart-note { margin: 7px 0 0; padding-bottom: 15px; border-bottom: 1px solid #e8e9eb; font-size: 14px; font-weight: 700; letter-spacing: 0.16em; color: #9a9ca1; }
+	.entry { display: flex; align-items: center; gap: 13px; padding: 15px 0; font-size: 28px; }
+	.entry b { flex: 1; font-weight: 700; min-width: 0; }
+	.pos { font-size: 19px; font-weight: 700; color: #a2a4a9; font-variant-numeric: tabular-nums; }
+	.chart .chip { width: 6px; height: 27px; border-radius: 2px; }
+	.val { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 30px; text-align: right; }
+
+	/* The goal-times slide titles sit on the pitch, not in a panel. */
+	.body > .chart-title { font-size: 21px; font-weight: 700; letter-spacing: 0.26em; padding-bottom: 16px; margin-bottom: 20px; border-bottom: 2px solid rgba(255, 255, 255, 0.22); }
 	.chart-title.spread { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; }
-	.chart-title .muted { font-size: 17px; letter-spacing: 0.18em; color: rgba(255, 255, 255, 0.66); }
-	.entry { display: flex; align-items: center; gap: 14px; padding: 17px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 27px; }
-	.entry:last-child { border-bottom: 0; }
-	.entry b { flex: 1; font-weight: 600; min-width: 0; }
-	/* The leader of each chart carries their team's colour; the rest stay white
-	   so the slide has three accents rather than twenty-one. */
-	.entry.lead { font-size: 34px; padding: 20px 0 22px; }
-	.entry.lead b { color: var(--team); font-weight: 700; }
-	.entry.lead .val { font-family: "Archivo Black", sans-serif; font-size: 44px; color: var(--team); }
-	.pos { font-size: 19px; font-weight: 700; color: rgba(255, 255, 255, 0.38); }
-	.entry.lead .pos { color: var(--team); }
-	.val { font-weight: 700; font-variant-numeric: tabular-nums; }
+	.chart-title .muted { font-size: 17px; font-weight: 700; letter-spacing: 0.18em; color: rgba(255, 255, 255, 0.66); }
 
 	/* 5 · Goal times */
 	.clock { display: flex; align-items: flex-end; gap: 12px; margin: 8px 0 56px; }
