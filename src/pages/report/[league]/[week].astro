@@ -7,12 +7,17 @@
 // Not in the menu and kept out of the sitemap/robots: it's a tool, not a page
 // for visitors.
 //
-// The look is dark and editorial rather than a white card on a grass photo:
-// the three team colours (red / gold / blue) are the only colour on the slide,
-// so they carry the identity and nothing has to be art-directed per week. The
-// first version put a white panel on a drawn pitch and read as a web table
-// screenshotted — the dark field lets the team colours and the numbers be the
-// whole design.
+// The look follows the club's Instagram feed: white type straight onto a lit
+// pitch, the three team colours (red / gold / blue) as a rule under the title,
+// and the KICKS mark top right. The pitch is drawn in CSS — mown stripes, a
+// centre circle, a touchline, grain — under a wash that deepens down the card
+// so the type stays readable over it; the cover keeps a lighter wash because
+// it carries only the title, which is how the feed's covers look. Drop a real
+// photo at public/report-bg.jpg and it is used instead with no code change.
+//
+// Two earlier versions are worth not repeating: a white panel on the pitch
+// read as a web table screenshotted, and a near-black field read well but was
+// nothing like the feed.
 import leaguesData from "../../../data/leagues.json";
 import matchesData from "../../../data/matches.json";
 import leagueTableData from "../../../data/league_table.json";
@@ -106,15 +111,15 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 		</p>
 
 		<div class="cards">
-			{/* 1 · Cover */}
+			{/* 1 · Cover — laid out like the feed's: centred, title over the rule. */}
 			<section class="card cover">
 				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
 				<p class="eyebrow">KICKS {leagueId}</p>
 				<p class="huge">WEEK</p>
-				<p class="huge outline">{weekNo}</p>
+				<p class="huge">{weekNo}</p>
 				<div class="rule big">{palette.map((color: string) => <span style={`background:${color}`} />)}</div>
 				<p class="cover-sub">STATS &amp; RESULTS</p>
-				<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
+				<p class="foot">{dateLabel} · WEEKLY LEAGUE REPORT</p>
 			</section>
 
 			{/* 2 · Match results */}
@@ -151,7 +156,7 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 						</div>
 					))}
 				</div>
-				<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
+				<p class="foot">{dateLabel} · WEEKLY LEAGUE REPORT</p>
 			</section>
 
 			{/* 3 · League table */}
@@ -162,12 +167,12 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 				<div class="rule">{palette.map((color: string) => <span style={`background:${color}`} />)}</div>
 				<div class="body">
 					{table.map((r) => (
-						{/* A faint slab the full width of the row, with the team's colour
-						    washed over its left half — so the row reads as one band and
-						    the points at the far end still sit inside it. */}
+						{/* A dark glass slab the full width of the row, with the team's
+						    colour washed over its left half. The slab has to be dark: a
+						    pale one let the grass through and turned gold and red to mud. */}
 						<div
 							class="standing"
-							style={`--team:${r.color}; background:linear-gradient(90deg, ${r.color}3d, ${r.color}14 56%, ${r.color}00 100%), rgba(255, 255, 255, 0.05)`}
+							style={`--team:${r.color}; background:linear-gradient(90deg, ${r.color}52, ${r.color}1a 56%, ${r.color}00 100%), rgba(4, 12, 6, 0.6)`}
 						>
 							<span class="place">{String(r.rank).padStart(2, "0")}</span>
 							<span class="who">
@@ -181,7 +186,7 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 						</div>
 					))}
 				</div>
-				<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
+				<p class="foot">{dateLabel} · WEEKLY LEAGUE REPORT</p>
 			</section>
 
 			{/* 4 · Player stats */}
@@ -204,7 +209,7 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 						</div>
 					))}
 				</div>
-				<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
+				<p class="foot">{dateLabel} · WEEKLY LEAGUE REPORT</p>
 			</section>
 
 			{/* 5 · Goal times (needs the minutes recorded from FA26-L2 on) */}
@@ -241,7 +246,7 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 							))}
 						</div>
 					</div>
-					<p class="foot"><span>{dateLabel}</span><span>KICKSUIUC.COM</span></p>
+					<p class="foot">{dateLabel} · WEEKLY LEAGUE REPORT</p>
 				</section>
 			)}
 		</div>
@@ -256,59 +261,98 @@ const blockHeight = (360 - (peak - 1) * BLOCK_GAP) / peak;
 
 	/* 1080x1350 exactly, scaled down only for looking at. Screenshot at 100%. */
 	.card {
+		/* How hard the wash sits on the pitch, top / middle / bottom. The cover
+		   lightens all three, since it has only a title to keep readable. */
+		--wash-top: 0.30;
+		--wash-mid: 0.62;
+		--wash-bottom: 0.84;
 		position: relative;
 		width: 1080px;
 		height: 1350px;
 		flex: 0 0 auto;
 		display: flex;
 		flex-direction: column;
-		padding: 72px 76px 108px;
+		padding: 72px 76px 112px;
 		color: #fff;
 		overflow: hidden;
 		transform: scale(0.42);
 		transform-origin: top left;
 		margin: 0 calc(-1080px * 0.58) calc(-1350px * 0.58) 0;
-		/* Near-black with a green cast, lit from the top left. Dark enough that
-		   the team colours are the only thing on the slide that reads as colour. */
+		/* The pitch, top layer down: floodlight bloom, the wash, a touchline
+		   painted on the grass, mown stripes, the turf itself. The real photo,
+		   when there is one, goes between the wash and the stripes. */
 		background:
-			radial-gradient(118% 82% at 16% -6%, #1d3324 0%, #101712 46%, #080b09 100%);
+			radial-gradient(76% 46% at 26% -4%, rgba(255, 255, 255, 0.17), transparent 68%),
+			radial-gradient(122% 82% at 50% 44%, transparent 38%, rgba(0, 0, 0, 0.38) 100%),
+			linear-gradient(
+				180deg,
+				rgba(8, 24, 11, var(--wash-top)) 0%,
+				rgba(6, 18, 8, var(--wash-mid)) 46%,
+				rgba(3, 11, 5, var(--wash-bottom)) 100%
+			),
+			linear-gradient(180deg, transparent 0 1046px, rgba(255, 255, 255, 0.26) 1046px 1054px, transparent 1054px),
+			url("/report-bg.jpg") center / cover no-repeat,
+			/* Mown stripes. The stops leave gaps so the colours interpolate across
+			   them — hard-edged bands read as CSS, soft ones read as grass. */
+			repeating-linear-gradient(90deg, #4c8f3f 0 46px, #408034 96px 150px, #4c8f3f 196px),
+			#46883a;
 	}
-	/* A faint diagonal weave, so the field isn't a flat fill in a screenshot. */
+	.cover { --wash-top: 0.16; --wash-mid: 0.38; --wash-bottom: 0.62; }
+
+	/* The centre circle, swung in from the left like the feed's photos. */
 	.card::before {
 		content: "";
-		position: absolute; inset: 0;
-		background: repeating-linear-gradient(104deg, rgba(255, 255, 255, 0.028) 0 2px, transparent 2px 76px);
+		position: absolute;
+		left: -230px; top: 300px;
+		width: 980px; height: 980px;
+		border: 9px solid rgba(255, 255, 255, 0.17);
+		border-radius: 50%;
+		z-index: 0;
 	}
-	.card > * { position: relative; }
+	/* Grain over the whole card. Without it the turf reads as flat CSS bands in
+	   a screenshot; with it, it passes for a photograph of a pitch. */
+	.card::after {
+		content: "";
+		position: absolute; inset: 0;
+		z-index: 1;
+		pointer-events: none;
+		opacity: 0.17;
+		mix-blend-mode: overlay;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+	}
+	.card > * { position: relative; z-index: 2; }
 
 	.logo { position: absolute; top: 60px; right: 72px; height: 50px; width: auto; mix-blend-mode: screen; }
 
 	/* Shared heading: a tracked kicker, a heavy two-line title, and the three
 	   team colours as a rule. Every slide opens the same way. */
-	.eyebrow { font-size: 22px; font-weight: 700; letter-spacing: 0.34em; margin: 0 0 22px; color: rgba(255, 255, 255, 0.5); }
-	h1 { font-family: "Archivo Black", sans-serif; font-size: 98px; line-height: 0.94; letter-spacing: -0.035em; margin: 0; }
+	.eyebrow { font-size: 22px; font-weight: 700; letter-spacing: 0.34em; margin: 0 0 22px; color: rgba(255, 255, 255, 0.78); }
+	h1 { font-family: "Archivo Black", sans-serif; font-size: 98px; line-height: 0.94; letter-spacing: -0.035em; margin: 0; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
 	.rule { display: flex; gap: 9px; margin: 34px 0 0; }
 	.rule span { width: 76px; height: 9px; border-radius: 999px; }
 	.rule.big span { width: 112px; height: 13px; }
 
-	.body { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; margin-top: 40px; }
+	/* The data sits on the grass, so it gets a soft shadow of its own and the
+	   hairlines are a touch brighter than they would need to be on a flat fill. */
+	.body { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 0; margin-top: 40px; text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55); }
 
 	.foot {
-		position: absolute; left: 76px; right: 76px; bottom: 54px;
-		display: flex; justify-content: space-between;
+		position: absolute; left: 76px; right: 76px; bottom: 56px;
+		text-align: center;
 		font-size: 18px; font-weight: 600; letter-spacing: 0.22em;
-		color: rgba(255, 255, 255, 0.42); margin: 0;
+		color: rgba(255, 255, 255, 0.78); margin: 0;
+		text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
 	}
 
-	/* 1 · Cover */
-	.cover { justify-content: center; }
-	.cover .eyebrow { margin-bottom: 30px; }
-	.huge { font-family: "Archivo Black", sans-serif; font-size: 210px; line-height: 0.86; letter-spacing: -0.045em; margin: 0; }
-	/* The week number is drawn as an outline, so the cover has one solid word
-	   and one hollow one instead of two slabs of the same weight. */
-	.outline { color: transparent; -webkit-text-stroke: 5px #fff; }
-	.cover .rule { margin: 54px 0 34px; }
-	.cover-sub { font-size: 34px; font-weight: 700; letter-spacing: 0.3em; margin: 0; color: rgba(255, 255, 255, 0.72); }
+	/* 1 · Cover — centred title over the rule, the way the feed's covers read. */
+	.cover { justify-content: center; align-items: center; text-align: center; }
+	.cover .eyebrow { margin-bottom: 26px; color: rgba(255, 255, 255, 0.92); }
+	.huge { font-family: "Archivo Black", sans-serif; font-size: 206px; line-height: 0.88; letter-spacing: -0.045em; margin: 0; }
+	.cover .rule { margin: 46px 0 32px; justify-content: center; }
+	.cover-sub { font-size: 36px; font-weight: 700; letter-spacing: 0.28em; margin: 0; }
+	/* White type sits straight on the grass here, so it carries its own shadow
+	   rather than the whole card being darkened to suit it. */
+	.cover .eyebrow, .cover .huge, .cover-sub { text-shadow: 0 4px 26px rgba(0, 0, 0, 0.55); }
 
 	/* 2 · Match results. Nine fixtures and three round labels is the most any
 	   slide has to hold, so the spacing here is what the card can actually fit
