@@ -30,7 +30,19 @@ site reads.
   `TeamRadar.astro` over `src/lib/team-profile.ts` (tested by `tests/team-profile.test.mjs`):
   attack, link-up, one team, attendance, defense, late goals on FIXED scales with the league
   average dashed behind, shown from 12 matches; late goals read `goal_events.json` and stay
-  empty until a team has LATE_MIN_GOALS timed goals).
+  empty until a team has LATE_MIN_GOALS timed goals); plus "Duos"
+  (`TeamDuos.astro` over `src/lib/duos.ts`, tested by `tests/duos.test.mjs`) — the
+  pairs inside the team who have combined for the most goals, one assisting the
+  other, from `goal_events.json`. **Direction is ignored on purpose**: A setting
+  up B and B setting up A are the same duo, since splitting them files a pair who
+  scored one for each other as two one-goal pairs and halves every count. Two
+  gates keep it from claiming things on a tiny sample, the same way the hexagon
+  waits for MIN_MATCHES: a pair needs DUO_MIN_GOALS (2) goals together, and the
+  team needs DUO_MIN_TEAM_GOALS (6, more than one week can produce) assisted
+  goals before any pair shows at all — so the section appears around week 2 and
+  never appears for FA26-L1, which has no goal_events rows. Top DUO_LIMIT (3)
+  only, and on the team page rather than a player page, since /players never
+  ranks one player against another.
 - [src/components/](src/components/) — Astro components used by the pages
   (e.g. `LeagueView`, `StandingsTable`, `PlayerStatsTable`, `WeeklyResults`,
   `ScheduleTimeline`, `PlayerCard`, `WeeklyStatsChart`, `PhotoGallery`,
