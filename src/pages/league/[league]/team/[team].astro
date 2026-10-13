@@ -27,6 +27,8 @@ import { titleHistory } from "../../../../lib/forecasts";
 import { headToHead, recentForm, teamLeaders, teamRecords, teamResults } from "../../../../lib/team-stats";
 import teamInfoData from "../../../../data/team-info.json";
 import TeamRadar from "../../../../components/TeamRadar.astro";
+import TeamDuos from "../../../../components/TeamDuos.astro";
+import { teamDuos, DUO_MIN_TEAM_GOALS, type DuoGoal } from "../../../../lib/duos";
 import { averageProfile, teamProfile, MIN_MATCHES, type ProfileGoal, type TeamProfile } from "../../../../lib/team-profile";
 
 export function getStaticPaths() {
@@ -150,6 +152,22 @@ const profileOf = (teamId: string) =>
 const styleProfile = profileOf(team.team_id);
 const leagueAverage = averageProfile(league.teams.map((entry) => profileOf(entry.team_id)).filter((p): p is TeamProfile => p !== null));
 
+// Duos (src/lib/duos.ts): the pairs who have combined for the most goals. Names
+// are joined here, as everywhere else, and a pair is dropped if either player
+// can't be resolved rather than rendering a blank side.
+const playerById = new Map((profilesData as PlayerProfile[]).map((player) => [player.player_id, player]));
+type DuoSide = { id: string; name: string };
+const duos = teamDuos(goalEventsData as DuoGoal[], league.id, team.team_id).flatMap((duo) => {
+	const first = playerById.get(duo.playerIds[0]);
+	const second = playerById.get(duo.playerIds[1]);
+	if (!first || !second) return [];
+	const players: [DuoSide, DuoSide] = [
+		{ id: first.id, name: first.name },
+		{ id: second.id, name: second.name },
+	];
+	return [{ players, goals: duo.goals }];
+});
+
 // Hand-edited extras (src/data/team-info.json): captain (exact name), motto, photo.
 interface TeamInfo {
 	captain?: string;
@@ -247,6 +265,21 @@ const captainId = captain?.player_id;
 							ko={`${MIN_MATCHES}경기(2주차)가 지나면 팀 스타일이 나타나요.`}
 						/>
 					)}
+				</section>
+			)
+		}
+
+		{
+			duos.length > 0 && (
+				<section class="content-section" aria-labelledby="team-duos-title">
+					<h2 id="team-duos-title"><T en="Duos" ko="합작 듀오" /></h2>
+					<T
+						as="p"
+						class="about-description"
+						en={`Pairs who have combined for the most goals in this league — whichever way round the pass went. Shown once a team has ${DUO_MIN_TEAM_GOALS} assisted goals.`}
+						ko={`이번 리그에서 가장 많이 합작한 짝이에요. 누가 넣고 누가 줬는지는 가리지 않아요. 팀이 도움 받은 골 ${DUO_MIN_TEAM_GOALS}개를 넘기면 나타나요.`}
+					/>
+					<TeamDuos duos={duos} leagueId={league.id} color={color} />
 				</section>
 			)
 		}
