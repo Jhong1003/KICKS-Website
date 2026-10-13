@@ -721,6 +721,32 @@ in that script must stay in sync with `src/pages/full-matches.astro`.
 Commit and push the updated `.enc.json` file afterward like any other
 change.
 
+### Weekly report cards
+
+`/report/<league>/<week>` ([src/pages/report/[league]/[week].astro](src/pages/report/[league]/[week].astro),
+numbers in [src/lib/weekly-report.ts](src/lib/weekly-report.ts)) renders the
+week's Instagram post as **1080×1350 cards** — cover, match results, league
+table, player stats, and goal times — from the same generated JSON the site
+reads. Staff open the page and screenshot each card; nothing is retyped from
+the Sheet into a design tool, so a week's post can't disagree with the league
+table. One route per (league, week) that has a completed match.
+
+- **A staff tool, not a page**: no menu entry, `noindex`, and `Disallow:
+  /report/` in robots.txt. It doesn't use `BaseLayout` either — the cards are
+  the whole document, so no header or footer lands in a screenshot.
+- **The background is drawn in CSS** (mown stripes, a centre arc, a
+  touchline, under a dark wash). Drop the real pitch photo at
+  `public/report-bg.jpg` and it is used instead with no code change — the
+  drawn one stays as the fallback.
+- **The cards are full size underneath a `transform: scale()`** so several fit
+  on screen; screenshot at 100%, not at the scaled size.
+- The goal-times card needs goal minutes, so it only appears from FA26-L2 (see
+  "Goal events"); earlier weeks simply render four cards.
+- The league table is the standing **after the newest week**, which is what
+  `league_table.json` holds. An older week's card would need
+  `standings_history.json` — worth doing if the report is ever made
+  retroactively.
+
 ### Member perks
 
 `/benefits` is the members-only coupon screen ("Member Benefits", linked from

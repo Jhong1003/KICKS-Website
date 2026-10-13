@@ -1,0 +1,338 @@
+---
+// The weekly league report as Instagram-sized cards (1080x1350), one slide per
+// panel, built from the same generated JSON as the site. Staff open the page
+// and screenshot each card — nothing is retyped from the Sheet into a design
+// tool, so a week's post can't disagree with the league table.
+//
+// Not in the menu and kept out of the sitemap/robots: it's a tool, not a page
+// for visitors. The background is drawn in CSS, and swapped for
+// public/report-bg.jpg automatically if that file is added.
+import leaguesData from "../../../data/leagues.json";
+import matchesData from "../../../data/matches.json";
+import leagueTableData from "../../../data/league_table.json";
+import leaderboardData from "../../../data/player_leaderboard.json";
+import profilesData from "../../../data/player_profiles.json";
+import goalEventsData from "../../../data/goal_events.json";
+import { colorName, minuteCounts, topBy } from "../../../lib/weekly-report";
+import { formatShortDate } from "../../../lib/i18n";
+
+export function getStaticPaths() {
+	const played = new Set(
+		(matchesData as { league: string; week: number; status: string }[])
+			.filter((m) => m.status === "completed")
+			.map((m) => `${m.league}|${m.week}`),
+	);
+	return [...played].map((key) => {
+		const [league, week] = key.split("|");
+		return { params: { league, week } };
+	});
+}
+
+const { league: leagueId, week: weekParam } = Astro.params;
+const week = Number(weekParam);
+const league = (leaguesData as any[]).find((l) => l.id === leagueId)!;
+const teams = new Map<string, { name: string; color: string }>(
+	league.teams.map((t: any) => [t.team_id, { name: t.name, color: t.color }]),
+);
+const team = (id: string | null) => teams.get(id ?? "") ?? { name: "TBD", color: "#999999" };
+const names = new Map(profilesData.map((p: any) => [p.player_id, p.name]));
+
+const weekMatches = (matchesData as any[])
+	.filter((m) => m.league === leagueId && m.week === week && m.status === "completed")
+	.sort((a, b) => String(a.match_id).localeCompare(String(b.match_id)));
+const date = weekMatches[0]?.date ?? "";
+const rounds = [...new Set(weekMatches.map((m) => m.round))].sort((a, b) => a - b);
+
+const events = (goalEventsData as any[]).filter((g) => g.league === leagueId && g.week === week);
+const goalsOf = (matchId: string) =>
+	events
+		.filter((g) => g.match_id === matchId)
+		.sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0))
+		.map((g) => ({ minute: g.minute, scorer: names.get(g.scorer_id) ?? "", color: team(g.team_id).color }));
+
+// The table is the league's standing *after* this week, which is what
+// league_table.json holds for the latest week. Earlier weeks would need
+// standings_history, so the slide only claims "as of" the newest week.
+const table = (leagueTableData as any[])
+	.filter((r) => r.league === leagueId)
+	.map((r, index) => ({ ...r, rank: index + 1, ...team(r.team_id) }));
+
+const board = (leaderboardData as any[])
+	.filter((r) => r.league === leagueId)
+	.map((r) => ({ name: names.get(r.player_id) ?? "", color: team(r.team_id).color, goals: r.goals, assists: r.assists }));
+const scorers = topBy(board.map((r) => ({ ...r, value: r.goals })));
+const assisters = topBy(board.map((r) => ({ ...r, value: r.assists })));
+const combined = topBy(board.map((r) => ({ ...r, value: r.goals + r.assists })));
+
+const matchMinutes = league.rules.match_minutes ?? 12;
+const timed = events.filter((g) => g.minute !== null);
+const clock = minuteCounts(timed.map((g) => g.minute), matchMinutes);
+const peak = Math.max(1, ...clock.map((c) => c.goals));
+const winners = events
+	.filter((g) => g.roles?.includes("winner"))
+	.sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0))
+	.map((g) => ({ name: names.get(g.scorer_id) ?? "", minute: g.minute, color: team(g.team_id).color }));
+
+const foot = `${formatShortDate(date, "en").toUpperCase()} · ${leagueId} WEEKLY LEAGUE REPORT`;
+const weekNo = String(week).padStart(2, "0");
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="robots" content="noindex, nofollow" />
+		<title>{leagueId} Week {weekNo} · Report cards</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Archivo+Black&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<p class="hint">
+			Screenshot each card at 1080 × 1350. Zoom is display only — the cards are full size underneath.
+		</p>
+
+		<div class="cards">
+			<!-- 1 · Cover -->
+			<section class="card">
+				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
+				<div class="cover">
+					<p class="eyebrow">KICKS {leagueId.split("-")[0]}</p>
+					<p class="huge">WEEK</p>
+					<p class="huge">{weekNo}</p>
+					<div class="bars">
+						{league.teams.map((t: any) => <span style={`background:${t.color}`} />)}
+					</div>
+					<p class="cover-sub">STATS &amp; RESULTS</p>
+				</div>
+				<p class="foot">{foot}</p>
+			</section>
+
+			<!-- 2 · Match results -->
+			<section class="card">
+				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
+				<h1>MATCH RESULTS</h1>
+				<p class="week">WEEK {weekNo}</p>
+				<div class="panel">
+					{rounds.map((round) => (
+						<>
+							<p class="round">ROUND {round}</p>
+							{weekMatches
+								.filter((m) => m.round === round)
+								.map((m) => (
+									<div class="result">
+										<span class="side home">
+											<span class="chip" style={`background:${team(m.home_team_id).color}`} />
+											<b>{team(m.home_team_id).name}</b>
+										</span>
+										<span class="score">{m.home_score} - {m.away_score}</span>
+										<span class="side away">
+											<b>{team(m.away_team_id).name}</b>
+											<span class="chip" style={`background:${team(m.away_team_id).color}`} />
+										</span>
+									</div>
+								))}
+						</>
+					))}
+				</div>
+				<p class="foot">{foot}</p>
+			</section>
+
+			<!-- 3 · League table -->
+			<section class="card">
+				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
+				<h1>LEAGUE TABLE</h1>
+				<p class="week">WEEK {weekNo}</p>
+				<div class="panel">
+					<div class="thead"><span>RANK</span><span>TEAM</span><span>P</span><span>W</span><span>D</span><span>L</span><span>PTS</span></div>
+					{table.map((r) => (
+						<div class="trow">
+							<span class="rank">{String(r.rank).padStart(2, "0")}</span>
+							<span class="tteam">
+								<span class="chip tall" style={`background:${r.color}`} />
+								<span><b>{r.name}</b><i>{colorName(r.color)}</i></span>
+							</span>
+							<span>{r.played}</span><span>{r.wins}</span><span>{r.draws}</span><span>{r.losses}</span>
+							<span class="pts"><b>{r.points}</b><i>PTS</i></span>
+						</div>
+					))}
+				</div>
+				<p class="foot">{foot}</p>
+			</section>
+
+			<!-- 4 · Player stats -->
+			<section class="card">
+				<img class="logo" src="/kicks-logo-white.jpg" alt="" />
+				<h1>PLAYER STATS</h1>
+				<p class="week">WEEK {weekNo}</p>
+				<div class="panel cols">
+					{[
+						{ title: "TOP SCORERS", note: "GOALS", icon: "⚽", rows: scorers },
+						{ title: "TOP ASSISTS", note: "ASSISTS", icon: "👟", rows: assisters },
+						{ title: "TOP G+A", note: "GOALS · ASSISTS", icon: "📊", rows: combined },
+					].map((col) => (
+						<div class="col">
+							<p class="coltitle">{col.title} <span>{col.icon}</span></p>
+							<p class="colnote">{col.note}</p>
+							{col.rows.map((row) => (
+								<div class="leader">
+									<span class="lrank">{String(row.rank).padStart(2, "0")}</span>
+									<span class="chip" style={`background:${row.color}`} />
+									<b>{row.name}</b>
+									<span class="lval">{row.value}</span>
+								</div>
+							))}
+						</div>
+					))}
+				</div>
+				<p class="foot">{foot}</p>
+			</section>
+
+			<!-- 5 · Goal times (new: needs the minutes recorded from FA26-L2 on) -->
+			{timed.length > 0 && (
+				<section class="card">
+					<img class="logo" src="/kicks-logo-white.jpg" alt="" />
+					<h1>GOAL TIMES</h1>
+					<p class="week">WEEK {weekNo}</p>
+					<div class="panel">
+						<p class="coltitle">WHEN THE GOALS WENT IN <span>⏱️</span></p>
+						<p class="colnote">{timed.length} GOALS · {matchMinutes}-MINUTE MATCHES</p>
+						<div class="clock">
+							{clock.map((c) => (
+								<div class="ccol">
+									<span class="cnum">{c.goals || ""}</span>
+									<span class="cbar" style={`height:${(c.goals / peak) * 100}%`} />
+									<span class="cmin">{c.minute}</span>
+								</div>
+							))}
+						</div>
+						<p class="coltitle wins">WINNING GOALS <span>🎯</span></p>
+						<div class="winners">
+							{winners.map((w) => (
+								<div class="leader">
+									<span class="chip" style={`background:${w.color}`} />
+									<b>{w.name}</b>
+									<span class="lval">{w.minute}'</span>
+								</div>
+							))}
+						</div>
+					</div>
+					<p class="foot">{foot}</p>
+				</section>
+			)}
+		</div>
+	</body>
+</html>
+
+<style is:global>
+	body { margin: 0; background: #1a1a1a; font-family: "Archivo", system-ui, sans-serif; }
+	.hint { color: #999; font-size: 13px; padding: 16px 20px 0; margin: 0; }
+	.cards { display: flex; flex-wrap: wrap; gap: 24px; padding: 20px; }
+
+	/* 1080x1350 exactly, scaled down only for looking at. Screenshot at 100%. */
+	.card {
+		position: relative;
+		width: 1080px;
+		height: 1350px;
+		flex: 0 0 auto;
+		padding: 64px 64px 56px;
+		box-sizing: border-box;
+		color: #fff;
+		overflow: hidden;
+		transform: scale(0.42);
+		transform-origin: top left;
+		margin: 0 calc(-1080px * 0.58) calc(-1350px * 0.58) 0;
+		/* Drawn pitch: mown stripes, a white arc and a touchline, under a dark
+		   wash so white type stays readable. Replaced by the real photo as soon
+		   as public/report-bg.jpg exists. */
+		background:
+			linear-gradient(rgba(12, 28, 10, 0.55), rgba(12, 28, 10, 0.72)),
+			url("/report-bg.jpg") center / cover no-repeat,
+			radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.16) 0 2px, transparent 3px),
+			repeating-linear-gradient(105deg, #2f6b2a 0 90px, #2a6126 90px 180px);
+	}
+	.card::before {
+		content: "";
+		position: absolute;
+		left: -140px; top: 300px;
+		width: 900px; height: 900px;
+		border: 10px solid rgba(255, 255, 255, 0.22);
+		border-radius: 50%;
+	}
+	.card::after {
+		content: "";
+		position: absolute;
+		left: 0; right: 0; bottom: 210px;
+		height: 10px;
+		background: rgba(255, 255, 255, 0.18);
+	}
+	.card > * { position: relative; }
+
+	.logo { position: absolute; top: 44px; right: 56px; height: 54px; width: auto; mix-blend-mode: screen; }
+	h1 { font-family: "Archivo Black", sans-serif; font-size: 86px; letter-spacing: -0.02em; margin: 56px 0 0; }
+	.week { font-size: 40px; font-weight: 700; letter-spacing: 0.06em; margin: 6px 0 0; }
+	.foot {
+		position: absolute; left: 0; right: 0; bottom: 48px;
+		text-align: center; font-size: 17px; font-weight: 600;
+		letter-spacing: 0.16em; opacity: 0.9; margin: 0;
+	}
+
+	/* Cover */
+	.cover { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; }
+	.eyebrow { font-size: 42px; font-weight: 700; letter-spacing: 0.22em; margin: 0 0 18px; }
+	.huge { font-family: "Archivo Black", sans-serif; font-size: 200px; line-height: 0.92; letter-spacing: -0.03em; margin: 0; }
+	.bars { display: flex; gap: 14px; margin: 34px 0 26px; }
+	.bars span { width: 118px; height: 13px; border-radius: 2px; }
+	.cover-sub { font-family: "Archivo Black", sans-serif; font-size: 50px; letter-spacing: 0.02em; margin: 0; }
+
+	/* Shared white panel */
+	.panel { background: #fff; color: #1b1b1b; border-radius: 16px; padding: 34px 38px; margin-top: 46px; }
+	.round {
+		text-align: center; font-size: 18px; font-weight: 700; letter-spacing: 0.3em;
+		color: #fff; background: #1b1b1b; border-radius: 6px; padding: 9px 0; margin: 26px 0 14px;
+	}
+	.round:first-child { margin-top: 4px; }
+
+	.result { display: grid; grid-template-columns: 1fr 150px 1fr; align-items: center; padding: 15px 10px; border-radius: 8px; }
+	.result:nth-child(odd) { background: #f3f3f1; }
+	.side { display: flex; align-items: center; gap: 14px; font-size: 27px; }
+	.side.home { justify-content: flex-end; }
+	.chip { width: 7px; height: 26px; border-radius: 2px; flex: 0 0 auto; }
+	.chip.tall { height: 46px; width: 9px; }
+	.score { text-align: center; font-size: 31px; font-weight: 700; letter-spacing: 0.08em; }
+
+	/* Table */
+	.thead, .trow { display: grid; grid-template-columns: 110px 1fr 70px 70px 70px 70px 130px; align-items: center; }
+	.thead { font-size: 16px; font-weight: 700; letter-spacing: 0.18em; color: #8a8a8a; padding-bottom: 14px; border-bottom: 2px solid #ececec; }
+	.thead span:nth-child(n+3) { text-align: center; }
+	.trow { padding: 26px 0; border-bottom: 1px solid #ececec; font-size: 28px; font-weight: 600; }
+	.trow:last-child { border-bottom: 0; }
+	.trow span:nth-child(n+3) { text-align: center; }
+	.rank { font-family: "Archivo Black", sans-serif; font-size: 46px; }
+	.tteam { display: flex; align-items: center; gap: 16px; }
+	.tteam b { font-size: 30px; display: block; }
+	.tteam i { font-style: normal; font-size: 15px; letter-spacing: 0.16em; color: #9a9a9a; display: block; }
+	.pts { display: flex; flex-direction: column; align-items: center; }
+	.pts b { font-family: "Archivo Black", sans-serif; font-size: 40px; }
+	.pts i { font-style: normal; font-size: 14px; letter-spacing: 0.18em; color: #9a9a9a; }
+
+	/* Player stats */
+	.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+	.coltitle { font-size: 21px; font-weight: 700; letter-spacing: 0.1em; margin: 0; display: flex; align-items: center; gap: 8px; }
+	.colnote { font-size: 14px; font-weight: 600; letter-spacing: 0.16em; color: #9a9a9a; margin: 5px 0 16px; }
+	.leader { display: flex; align-items: center; gap: 11px; padding: 11px 0; border-top: 1px solid #ececec; font-size: 23px; }
+	.leader b { flex: 1; font-weight: 600; }
+	.lrank { font-weight: 700; color: #9a9a9a; font-size: 18px; }
+	.lval { font-weight: 700; }
+
+	/* Goal times */
+	.clock { display: flex; align-items: flex-end; gap: 10px; height: 300px; margin: 8px 0 34px; }
+	.ccol { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; gap: 7px; }
+	.cnum { font-size: 17px; font-weight: 700; color: #9a9a9a; min-height: 20px; }
+	.cbar { width: 100%; background: #3f5128; border-radius: 4px 4px 0 0; min-height: 3px; margin-top: auto; }
+	.cmin { font-size: 16px; font-weight: 600; color: #9a9a9a; }
+	.wins { margin-top: 10px; }
+	.winners { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 34px; }
+</style>
