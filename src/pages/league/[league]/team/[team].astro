@@ -187,7 +187,8 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 
 <BaseLayout title={`${team.name} · ${league.id} | KICKS`} description={`${team.name} in KICKS ${league.id}: record, squad, and results.`}>
 	<main>
-		<section class="team-hero" style={`--team-color: ${color}; --team-text: ${headerText};`} aria-labelledby="team-title">
+		<section class:list={["team-hero", { "team-hero--reel": reelValid }]} style={`--team-color: ${color}; --team-text: ${headerText};`} aria-labelledby="team-title">
+			<div class="team-hero-text">
 			<a class="team-back" href={`/league/${league.id}`}>
 				← <T en={`${league.id} league`} ko={`${league.id} 리그`} />
 			</a>
@@ -225,27 +226,28 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 				)
 			}
 			{info.motto && <T as="p" class="team-motto" en={`“${info.motto_en ?? info.motto}”`} ko={`“${info.motto}”`} />}
+			</div>
+			{
+				reelValid && (
+					<figure class="team-reel">
+						<div class="team-reel-frame">
+							<iframe
+								src={`https://www.instagram.com/reel/${reelId}/embed`}
+								title={`${team.name} team intro reel`}
+								loading="lazy"
+								allowfullscreen
+								scrolling="no"
+							></iframe>
+						</div>
+						<figcaption>
+							<a href={`https://www.instagram.com/reel/${reelId}/`} target="_blank" rel="noopener">
+								<T en="Team intro reel · Instagram ↗" ko="팀 소개 영상 · 인스타그램 ↗" />
+							</a>
+						</figcaption>
+					</figure>
+				)
+			}
 		</section>
-
-		{
-			reelValid && (
-				<section class="content-section team-reel-section" style={`--team-color: ${color};`} aria-labelledby="team-reel-title">
-					<h2 id="team-reel-title"><T en="Meet the team" ko="팀 소개 영상" /></h2>
-					<div class="team-reel">
-						<iframe
-							src={`https://www.instagram.com/reel/${reelId}/embed`}
-							title={`${team.name} team intro reel`}
-							loading="lazy"
-							allowfullscreen
-							scrolling="no"
-						></iframe>
-					</div>
-					<a class="team-reel-link" href={`https://www.instagram.com/reel/${reelId}/`} target="_blank" rel="noopener">
-						<T en="Watch on Instagram ↗" ko="인스타그램에서 보기 ↗" />
-					</a>
-				</section>
-			)
-		}
 
 		{
 			row && row.played > 0 && (
@@ -819,17 +821,23 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 		opacity: 0.9;
 	}
 
-	.team-reel-section {
-		padding-top: 32px;
-		padding-bottom: 8px;
-		text-align: center;
+	/* With a reel, the header splits: team text on the left, the reel on the
+	   right, so it fills the empty side of the band instead of sitting alone
+	   in the middle of the page. Stacks below the text on narrow screens. */
+	.team-hero--reel {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 32px clamp(24px, 4vw, 64px);
 	}
 
 	.team-reel {
-		width: 100%;
-		max-width: 400px;
-		margin: 16px auto 0;
-		border: 3px solid var(--team-color);
+		width: 320px;
+		margin: 0;
+	}
+
+	.team-reel-frame {
+		border: 3px solid var(--team-text);
 		border-radius: 12px;
 		overflow: hidden;
 		background-color: #fff;
@@ -838,14 +846,31 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 	.team-reel iframe {
 		display: block;
 		width: 100%;
-		height: 640px;
+		height: 620px;
 		border: 0;
 	}
 
-	.team-reel-link {
-		display: inline-block;
-		margin-top: 10px;
-		font-size: 0.9rem;
+	.team-reel figcaption {
+		margin-top: 8px;
+		text-align: center;
+		font-size: 0.85rem;
+	}
+
+	.team-reel figcaption a {
+		color: var(--team-text);
+		opacity: 0.9;
+	}
+
+	@media (max-width: 760px) {
+		.team-hero--reel {
+			grid-template-columns: minmax(0, 1fr);
+		}
+
+		.team-reel {
+			width: 100%;
+			max-width: 360px;
+			justify-self: center;
+		}
 	}
 
 	.team-photo-section {
