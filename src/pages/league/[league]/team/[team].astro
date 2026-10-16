@@ -187,8 +187,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 
 <BaseLayout title={`${team.name} · ${league.id} | KICKS`} description={`${team.name} in KICKS ${league.id}: record, squad, and results.`}>
 	<main>
-		<section class:list={["team-hero", { "team-hero--reel": reelValid }]} style={`--team-color: ${color}; --team-text: ${headerText};`} aria-labelledby="team-title">
-			<div class="team-hero-text">
+		<section class="team-hero" style={`--team-color: ${color}; --team-text: ${headerText};`} aria-labelledby="team-title">
 			<a class="team-back" href={`/league/${league.id}`}>
 				← <T en={`${league.id} league`} ko={`${league.id} 리그`} />
 			</a>
@@ -226,28 +225,29 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 				)
 			}
 			{info.motto && <T as="p" class="team-motto" en={`“${info.motto_en ?? info.motto}”`} ko={`“${info.motto}”`} />}
-			</div>
 			{
 				reelValid && (
-					<figure class="team-reel">
-						<div class="team-reel-frame">
-							<iframe
-								src={`https://www.instagram.com/reel/${reelId}/embed`}
-								title={`${team.name} team intro reel`}
-								loading="lazy"
-								allowfullscreen
-								scrolling="no"
-							></iframe>
-						</div>
-						<figcaption>
-							<a href={`https://www.instagram.com/reel/${reelId}/`} target="_blank" rel="noopener">
-								<T en="Team intro reel · Instagram ↗" ko="팀 소개 영상 · 인스타그램 ↗" />
-							</a>
-						</figcaption>
-					</figure>
+					<button type="button" class="team-reel-button" data-reel-open>
+						<span class="team-reel-play" aria-hidden="true">▶</span>
+						<T en="Watch team intro" ko="팀 소개 영상 보기" />
+					</button>
 				)
 			}
 		</section>
+
+		{
+			reelValid && (
+				<dialog class="team-reel-dialog" style={`--team-color: ${color};`} data-reel-dialog data-reel-src={`https://www.instagram.com/reel/${reelId}/embed`} aria-label={`${team.name} team intro reel`}>
+					<button type="button" class="team-reel-close" data-reel-close aria-label="Close">✕</button>
+					<div class="team-reel-frame">
+						<iframe title={`${team.name} team intro reel`} allowfullscreen scrolling="no"></iframe>
+					</div>
+					<a class="team-reel-link" href={`https://www.instagram.com/reel/${reelId}/`} target="_blank" rel="noopener">
+						<T en="Watch on Instagram ↗" ko="인스타그램에서 보기 ↗" />
+					</a>
+				</dialog>
+			)
+		}
 
 		{
 			row && row.played > 0 && (
@@ -570,6 +570,27 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 	</main>
 </BaseLayout>
 
+<script>
+	// Team intro reel pop-up: load the Instagram embed only when opened, and
+	// blank it on close so the video stops playing.
+	const dialog = document.querySelector<HTMLDialogElement>("[data-reel-dialog]");
+	const frame = dialog?.querySelector("iframe");
+	const openReel = () => {
+		if (!dialog || !frame) return;
+		frame.src = dialog.dataset.reelSrc ?? "";
+		dialog.showModal();
+	};
+	document.querySelector("[data-reel-open]")?.addEventListener("click", openReel);
+	dialog?.querySelector("[data-reel-close]")?.addEventListener("click", () => dialog.close());
+	// A click on the dark backdrop (outside the video) closes it too.
+	dialog?.addEventListener("click", (event) => {
+		if (event.target === dialog) dialog.close();
+	});
+	dialog?.addEventListener("close", () => {
+		if (frame) frame.src = "about:blank";
+	});
+</script>
+
 <style>
 	.team-hero {
 		padding: 96px clamp(24px, 6vw, 88px) 40px;
@@ -821,56 +842,79 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 		opacity: 0.9;
 	}
 
-	/* With a reel, the header splits: team text on the left, the reel on the
-	   right, so it fills the empty side of the band instead of sitting alone
-	   in the middle of the page. Stacks below the text on narrow screens. */
-	.team-hero--reel {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
+	/* The reel opens in a pop-up from a button in the header, so the header
+	   stays as short as it is without one. The video only loads when opened. */
+	.team-reel-button {
+		display: inline-flex;
 		align-items: center;
-		gap: 32px clamp(24px, 4vw, 64px);
+		gap: 8px;
+		margin-top: 18px;
+		padding: 9px 18px;
+		border: 2px solid var(--team-text);
+		border-radius: 999px;
+		background: transparent;
+		color: var(--team-text);
+		font: inherit;
+		font-size: 0.95rem;
+		font-weight: 700;
+		cursor: pointer;
 	}
 
-	.team-reel {
-		width: 320px;
-		margin: 0;
+	.team-reel-button:hover {
+		background-color: var(--team-text);
+		color: var(--team-color);
+	}
+
+	.team-reel-play {
+		font-size: 0.8em;
+	}
+
+	.team-reel-dialog {
+		width: min(360px, calc(100vw - 32px));
+		padding: 0;
+		border: 0;
+		background: transparent;
+		overflow: visible;
+	}
+
+	.team-reel-dialog::backdrop {
+		background-color: rgba(0, 0, 0, 0.75);
 	}
 
 	.team-reel-frame {
-		border: 3px solid var(--team-text);
+		border: 3px solid var(--team-color);
 		border-radius: 12px;
 		overflow: hidden;
 		background-color: #fff;
 	}
 
-	.team-reel iframe {
+	.team-reel-frame iframe {
 		display: block;
 		width: 100%;
-		height: 620px;
+		height: min(640px, calc(100vh - 110px));
 		border: 0;
 	}
 
-	.team-reel figcaption {
+	.team-reel-close {
+		position: absolute;
+		top: -40px;
+		right: 0;
+		width: 32px;
+		height: 32px;
+		border: 0;
+		border-radius: 50%;
+		background-color: #fff;
+		color: #222;
+		font-size: 1rem;
+		cursor: pointer;
+	}
+
+	.team-reel-link {
+		display: block;
 		margin-top: 8px;
 		text-align: center;
 		font-size: 0.85rem;
-	}
-
-	.team-reel figcaption a {
-		color: var(--team-text);
-		opacity: 0.9;
-	}
-
-	@media (max-width: 760px) {
-		.team-hero--reel {
-			grid-template-columns: minmax(0, 1fr);
-		}
-
-		.team-reel {
-			width: 100%;
-			max-width: 360px;
-			justify-self: center;
-		}
+		color: #fff;
 	}
 
 	.team-photo-section {
