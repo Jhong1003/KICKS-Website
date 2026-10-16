@@ -174,7 +174,7 @@ the numbers live in `src/data/league-config.json`, not in code):
 
 6-1. **팀 페이지 주장·구호 (선택)** — `src/data/team-info.json`에 리그 id 아래
    `team_id`별로 `{ "captain": "이름" }`(players 탭과 똑같은 이름), 원하면 `motto`/`motto_en`,
-   팀 사진 `photo`(public/ 아래 경로)를 넣습니다. 비워 둬도 팀 페이지는 정상으로 나옵니다.
+   팀 사진 `photo`(public/ 아래 경로), 팀 소개 릴스 `reel`(인스타에서 복사한 링크를 그대로 붙여도 됨)을 넣습니다. 비워 둬도 팀 페이지는 정상으로 나옵니다.
 
 **B. 이적 배너**
 

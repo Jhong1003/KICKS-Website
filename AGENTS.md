@@ -73,7 +73,9 @@ site reads.
   trophy photos for any award, read by `src/lib/awards.ts` for the Hall of
   Fame; photos go in `public/trophies/`), and [team-info.json](src/data/team-info.json)
   (per league → team_id: optional `captain` (exact player name), `motto` /
-  `motto_en`, `photo` (a path under public/) for the team pages).
+  `motto_en`, `photo` (a path under public/), `reel` (the team intro Instagram
+  reel — share link or bare ID; shown as a lazy-loaded embed right under the
+  team header) for the team pages).
 - [src/lib/schedule.ts](src/lib/schedule.ts) — shared helpers (date
   formatting, past/upcoming/next-up flags, month grouping) used by both
   the Schedule page and the homepage's "Next up" card.
