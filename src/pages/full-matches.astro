@@ -20,7 +20,19 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 	<main>
 		<section class="content-section" aria-labelledby="full-matches-title">
 			<p class="section-label"><T en="MEMBERS ONLY" ko="멤버 전용" /></p>
-			<h1 id="full-matches-title"><T en="Full Matches" ko="풀영상" /></h1>
+			<div class="mascot-title-row">
+				<h1 id="full-matches-title"><T en="Full Matches" ko="풀영상" /></h1>
+				<img
+					class="mascot mascot--title"
+					src="/mascot/kicks-squirrel-camera.webp"
+					alt=""
+					aria-hidden="true"
+					width="480"
+					height="421"
+					loading="lazy"
+					decoding="async"
+				/>
+			</div>
 			<MediaTabs current="videos" />
 
 			<div id="lock-screen" class="lock-screen">

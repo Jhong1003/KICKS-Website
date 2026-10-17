@@ -5049,3 +5049,52 @@ html[data-season] .hero-season-note--past {
 	}
 
 }
+
+/* ---------- Mascot (KICKS squirrel) ----------
+   Small decorative stickers; purely cosmetic, hidden from screen readers. */
+.split-photo--hero {
+	position: relative;
+}
+
+.mascot {
+	display: block;
+	height: auto;
+	pointer-events: none;
+	user-select: none;
+	filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.25));
+}
+
+.split-photo--hero img.mascot--hero {
+	position: absolute;
+	height: auto;
+	border-radius: 0;
+	left: -36px;
+	bottom: -28px;
+	width: 140px;
+	transform: rotate(-6deg);
+	z-index: 2;
+}
+
+.mascot-title-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.mascot--title {
+	width: 92px;
+	transform: rotate(4deg);
+}
+
+@media (max-width: 860px) {
+	.split-photo--hero img.mascot--hero {
+		left: auto;
+		right: 8px;
+		bottom: -22px;
+		width: 96px;
+	}
+
+	.mascot--title {
+		width: 68px;
+	}
+}
