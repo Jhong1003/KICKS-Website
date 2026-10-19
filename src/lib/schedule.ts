@@ -28,9 +28,6 @@ export interface ScheduleEvent {
 	popup?: boolean;
 	/** Optional photo for the popup header, a path under public/ (e.g. "/events/team-dinner-1.jpg"). */
 	image?: string;
-	/** Optional stamp label on the popup photo (e.g. "필참!"). */
-	stamp?: string;
-	stamp_ko?: string;
 	/** Optional extra line for the popup (what to bring, RSVP, …). */
 	note?: string;
 	note_ko?: string;
