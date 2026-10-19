@@ -17,7 +17,7 @@ test("needs MIN_MATCHES scored matches", () => {
 	assert.notEqual(teamProfile("X", "T1", [...few, match("T2", "T1", 0, 0)], [], 0.9), null);
 });
 
-test("fixed scales: attack/defense against 2.5 goals a match, clamped", () => {
+test("fixed scales: attack against 1.5, defense against 2.5 goals a match, clamped", () => {
 	const matches = Array.from({ length: 12 }, () => match("T1", "T2", 5, 0));
 	const p = teamProfile("X", "T1", matches, [], 0.5);
 	assert.equal(axis(p, "attack").value, 1);
@@ -86,7 +86,7 @@ test("real FA26-L1: every team has a shape, goals per match match the league tab
 		const p = teamProfile("FA26-L1", row.team_id, matches, players, row.participation_rate);
 		assert.ok(p, row.team_id);
 		assert.equal(p.matches, row.played);
-		assert.ok(Math.abs(axis(p, "attack").value * 2.5 - row.goals_for / row.played) < 1e-9);
+		assert.ok(Math.abs(axis(p, "attack").value * 1.5 - row.goals_for / row.played) < 1e-9);
 		for (const a of p.axes) if (a.value !== null) assert.ok(a.value >= 0 && a.value <= 1, `${row.team_id} ${a.key}`);
 	}
 });

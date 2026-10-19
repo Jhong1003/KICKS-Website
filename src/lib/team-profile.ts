@@ -57,7 +57,7 @@ export interface AxisInfo {
 
 /** Clockwise from the top. */
 export const AXES: AxisInfo[] = [
-	{ key: "attack", icon: "⚔️", en: "Attack", ko: "공격", noteEn: "Goals per match (full at 2.5)", noteKo: "경기당 득점 (2.5골이면 만점)" },
+	{ key: "attack", icon: "⚔️", en: "Attack", ko: "공격", noteEn: "Goals per match (full at 1.5)", noteKo: "경기당 득점 (1.5골이면 만점)" },
 	{ key: "linkup", icon: "🔗", en: "Link-up", ko: "연계", noteEn: "Share of goals that had an assist", noteKo: "어시스트가 붙은 골의 비율" },
 	{ key: "oneteam", icon: "🤝", en: "One team", ko: "한 팀", noteEn: "Share of the squad who scored", noteKo: "골을 넣어본 선수의 비율" },
 	{ key: "attendance", icon: "📋", en: "Attendance", ko: "출석", noteEn: "Participation rate (league table)", noteKo: "팀 참여율 (순위표와 같은 값)" },
@@ -65,8 +65,14 @@ export const AXES: AxisInfo[] = [
 	{ key: "late", icon: "⏱️", en: "Late goals", ko: "뒷심", noteEn: "Share of goals in minutes 9–12", noteKo: "9~12분에 넣은 골의 비율" },
 ];
 
-/** Goals per match that fills the attack corner / empties the defense corner. */
+/** Goals conceded per match that empties the defense corner. */
 export const GOALS_PER_MATCH_FULL = 2.5;
+/**
+ * Goals scored per match that fills the attack corner. Lower than the defense
+ * scale: in 12-minute matches teams score about 0.6-1.5 a match, so 2.5 left
+ * every team's attack corner small. 1.5 is the best season so far (L1 문전박대).
+ */
+export const ATTACK_GOALS_FULL = 1.5;
 /** Two weeks of matches (6 a week) before a team's shape means anything. */
 export const MIN_MATCHES = 12;
 
@@ -172,7 +178,7 @@ export function teamProfile(
 	const axes: AxisValue[] = [
 		{
 			key: "attack",
-			value: clamp01(scored / played / GOALS_PER_MATCH_FULL),
+			value: clamp01(scored / played / ATTACK_GOALS_FULL),
 			raw: { en: `${perMatch(scored)} per match`, ko: `경기당 ${perMatch(scored)}골` },
 		},
 		{
