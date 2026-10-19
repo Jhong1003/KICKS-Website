@@ -197,5 +197,171 @@
     "roles": [
       "equalizer"
     ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M01",
+    "minute": 6,
+    "scorer_id": "P010",
+    "assist_id": "P020",
+    "own_goal": false,
+    "team_id": "T1",
+    "scorer_team_id": "T1",
+    "roles": [
+      "opener",
+      "winner"
+    ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M01",
+    "minute": 12,
+    "scorer_id": "P010",
+    "assist_id": null,
+    "own_goal": false,
+    "team_id": "T1",
+    "scorer_team_id": "T1",
+    "roles": []
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M02",
+    "minute": 5,
+    "scorer_id": "P024",
+    "assist_id": "P032",
+    "own_goal": false,
+    "team_id": "T3",
+    "scorer_team_id": "T3",
+    "roles": [
+      "opener",
+      "winner"
+    ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M02",
+    "minute": 12,
+    "scorer_id": "P016",
+    "assist_id": "P024",
+    "own_goal": false,
+    "team_id": "T3",
+    "scorer_team_id": "T3",
+    "roles": []
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M04",
+    "minute": 9,
+    "scorer_id": "P018",
+    "assist_id": "P021",
+    "own_goal": false,
+    "team_id": "T3",
+    "scorer_team_id": "T3",
+    "roles": [
+      "opener",
+      "winner"
+    ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M05",
+    "minute": 7,
+    "scorer_id": "P013",
+    "assist_id": "P029",
+    "own_goal": false,
+    "team_id": "T2",
+    "scorer_team_id": "T2",
+    "roles": [
+      "opener",
+      "winner"
+    ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M06",
+    "minute": 2,
+    "scorer_id": "P010",
+    "assist_id": null,
+    "own_goal": false,
+    "team_id": "T1",
+    "scorer_team_id": "T1",
+    "roles": [
+      "opener"
+    ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M06",
+    "minute": 4,
+    "scorer_id": "P012",
+    "assist_id": "P019",
+    "own_goal": false,
+    "team_id": "T2",
+    "scorer_team_id": "T2",
+    "roles": [
+      "equalizer"
+    ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M08",
+    "minute": 5,
+    "scorer_id": "P029",
+    "assist_id": null,
+    "own_goal": false,
+    "team_id": "T2",
+    "scorer_team_id": "T2",
+    "roles": [
+      "opener",
+      "winner"
+    ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M09",
+    "minute": 5,
+    "scorer_id": "P014",
+    "assist_id": "P019",
+    "own_goal": false,
+    "team_id": "T2",
+    "scorer_team_id": "T2",
+    "roles": [
+      "opener",
+      "winner"
+    ]
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M09",
+    "minute": 7,
+    "scorer_id": "P014",
+    "assist_id": "P019",
+    "own_goal": false,
+    "team_id": "T2",
+    "scorer_team_id": "T2",
+    "roles": []
+  },
+  {
+    "league": "FA26-L2",
+    "week": 2,
+    "match_id": "FA26-L2-W02-M09",
+    "minute": 9,
+    "scorer_id": "P014",
+    "assist_id": "P013",
+    "own_goal": false,
+    "team_id": "T2",
+    "scorer_team_id": "T2",
+    "roles": []
   }
 ]
