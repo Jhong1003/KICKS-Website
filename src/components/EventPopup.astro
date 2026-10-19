@@ -76,6 +76,14 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 		return days >= 0 && days <= POPUP_DAYS_BEFORE && !seen(d.dataset.eventKey ?? "");
 	});
 
+	// Lets TeamRevealPopup.astro / WelcomePopup.astro know the decision,
+	// whichever order the page's scripts happen to run in.
+	const announce = (state: "open" | "none") => {
+		document.documentElement.dataset.eventPopup = state;
+		document.dispatchEvent(new Event("kicks:event-popup"));
+	};
+
+	if (!dialog) announce("none");
 	if (dialog) {
 		const days = daysUntil(dialog.dataset.eventDate ?? "");
 		const dday = dialog.querySelector("[data-event-dday]");
@@ -85,9 +93,8 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 		dialog.querySelectorAll("[data-event-close]").forEach((button) => button.addEventListener("click", close));
 		dialog.addEventListener("cancel", markSeen);
 		dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
-		// Tells TeamRevealPopup.astro and WelcomePopup.astro (rendered after this) to sit this visit out.
-		document.documentElement.dataset.eventPopup = "open";
 		dialog.showModal();
+		announce("open");
 	}
 </script>
 

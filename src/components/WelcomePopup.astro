@@ -40,10 +40,15 @@ import T from "./T.astro";
 		if (!revealSeen) dismissed = true;
 	}
 
-	// The event popup (EventPopup.astro, rendered before this one) takes this visit when it opened.
-	if (document.documentElement.dataset.eventPopup === "open") dismissed = true;
+	// Waits for EventPopup.astro to decide; on a visit where it opens, this one sits out.
+	const afterEventPopup = (run: () => void) => {
+		const decided = () => document.documentElement.dataset.eventPopup !== undefined || !document.querySelector("dialog.event-popup");
+		const go = () => { if (document.documentElement.dataset.eventPopup !== "open") run(); };
+		if (decided()) go();
+		else document.addEventListener("kicks:event-popup", go, { once: true });
+	};
 
-	if (dialog && !dismissed) {
+	if (dialog && !dismissed) afterEventPopup(() => {
 		const body = document.body;
 		const scrollX = window.scrollX;
 		const scrollY = window.scrollY;
@@ -91,7 +96,7 @@ import T from "./T.astro";
 		dialog.addEventListener("click", event => { if (startedOutside && isOutside(event)) dismiss(); });
 
 		dialog.showModal();
-	}
+	});
 </script>
 
 <style>
