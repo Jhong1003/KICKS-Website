@@ -544,11 +544,11 @@
     "round": 1,
     "home_team_id": "T1",
     "away_team_id": "T3",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 2,
+    "away_score": 0,
     "match_id": "FA26-L2-W02-M01",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
@@ -556,11 +556,11 @@
     "round": 1,
     "home_team_id": "T3",
     "away_team_id": "T2",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 2,
+    "away_score": 0,
     "match_id": "FA26-L2-W02-M02",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
@@ -568,11 +568,11 @@
     "round": 1,
     "home_team_id": "T2",
     "away_team_id": "T1",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 0,
+    "away_score": 0,
     "match_id": "FA26-L2-W02-M03",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
@@ -580,11 +580,11 @@
     "round": 2,
     "home_team_id": "T1",
     "away_team_id": "T3",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 0,
+    "away_score": 1,
     "match_id": "FA26-L2-W02-M04",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
@@ -592,11 +592,11 @@
     "round": 2,
     "home_team_id": "T3",
     "away_team_id": "T2",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 0,
+    "away_score": 1,
     "match_id": "FA26-L2-W02-M05",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
@@ -604,11 +604,11 @@
     "round": 2,
     "home_team_id": "T2",
     "away_team_id": "T1",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 1,
+    "away_score": 1,
     "match_id": "FA26-L2-W02-M06",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
@@ -616,11 +616,11 @@
     "round": 3,
     "home_team_id": "T1",
     "away_team_id": "T3",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 0,
+    "away_score": 0,
     "match_id": "FA26-L2-W02-M07",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
@@ -628,11 +628,11 @@
     "round": 3,
     "home_team_id": "T3",
     "away_team_id": "T2",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 0,
+    "away_score": 1,
     "match_id": "FA26-L2-W02-M08",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
@@ -640,11 +640,11 @@
     "round": 3,
     "home_team_id": "T2",
     "away_team_id": "T1",
-    "home_score": null,
-    "away_score": null,
+    "home_score": 3,
+    "away_score": 0,
     "match_id": "FA26-L2-W02-M09",
     "league": "FA26-L2",
-    "status": "scheduled",
+    "status": "completed",
     "date": "2026-10-17"
   },
   {
