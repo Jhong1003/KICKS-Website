@@ -5,9 +5,9 @@
 // window is open today (POPUP_DAYS_BEFORE days before through the event day,
 // in Champaign time) and shows it once per event per browser.
 //
-// Popups never stack: the team reveal (TeamRevealPopup.astro) goes first if
-// it hasn't been seen, and the welcome popup (WelcomePopup.astro) steps aside
-// on a visit where this one shows.
+// Popups never stack, and this one goes first: on a visit where it opens,
+// the team reveal (TeamRevealPopup.astro) and the welcome popup
+// (WelcomePopup.astro) both wait for a later visit.
 import T from "./T.astro";
 import scheduleData from "../data/schedule.json";
 import type { ScheduleEvent } from "../lib/schedule";
@@ -71,15 +71,12 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 	const daysUntil = (date: string) => Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
 	const seen = (key: string) => { try { return localStorage.getItem(key) === "1"; } catch { return false; } };
 
-	const reveal = document.querySelector<HTMLDialogElement>("#team-reveal");
-	const revealFirst = reveal !== null && !seen(reveal.dataset.revealKey ?? "");
-
 	const dialog = [...document.querySelectorAll<HTMLDialogElement>("dialog.event-popup")].find((d) => {
 		const days = daysUntil(d.dataset.eventDate ?? "");
 		return days >= 0 && days <= POPUP_DAYS_BEFORE && !seen(d.dataset.eventKey ?? "");
 	});
 
-	if (dialog && !revealFirst) {
+	if (dialog) {
 		const days = daysUntil(dialog.dataset.eventDate ?? "");
 		const dday = dialog.querySelector("[data-event-dday]");
 		if (dday) dday.textContent = days === 0 ? "D-DAY" : `D-${days}`;
@@ -88,7 +85,7 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 		dialog.querySelectorAll("[data-event-close]").forEach((button) => button.addEventListener("click", close));
 		dialog.addEventListener("cancel", markSeen);
 		dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
-		// Tells WelcomePopup.astro to sit this visit out.
+		// Tells TeamRevealPopup.astro and WelcomePopup.astro (rendered after this) to sit this visit out.
 		document.documentElement.dataset.eventPopup = "open";
 		dialog.showModal();
 	}

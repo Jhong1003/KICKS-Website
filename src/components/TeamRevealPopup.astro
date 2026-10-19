@@ -75,7 +75,8 @@ const revealKey = `kicks-team-reveal-${league.id}`;
 
 <script>
 	const dialog = document.querySelector<HTMLDialogElement>("#team-reveal");
-	if (dialog) {
+	// The event popup (EventPopup.astro, rendered before this one) takes this visit when it opened.
+	if (dialog && document.documentElement.dataset.eventPopup !== "open") {
 		const key = dialog.dataset.revealKey ?? "kicks-team-reveal";
 		let seen = false;
 		try { seen = localStorage.getItem(key) === "1"; } catch { /* Storage disabled: show it, once per page load. */ }
