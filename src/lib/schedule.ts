@@ -22,6 +22,8 @@ export interface ScheduleEvent {
 	location?: string;
 	/** Optional start time, shown as written (e.g. "6:00 PM"). */
 	time?: string;
+	/** Korean version of `time` (e.g. "오후 4시"); falls back to `time`. */
+	time_ko?: string;
 	/** Show this event as a homepage popup in the week before it (EventPopup.astro). */
 	popup?: boolean;
 	/** Optional extra line for the popup (what to bring, RSVP, …). */

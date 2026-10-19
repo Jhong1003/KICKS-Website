@@ -39,7 +39,7 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 						<dt><T en="When" ko="언제" /></dt>
 						<dd>
 							<T en={dayName(event.date!, "en-US")} ko={dayName(event.date!, "ko-KR")} />
-							{event.time && <span class="event-time"> · {event.time}</span>}
+							{event.time && <span class="event-time"> · <T en={event.time} ko={event.time_ko ?? event.time} /></span>}
 						</dd>
 					</div>
 					{event.location && (
