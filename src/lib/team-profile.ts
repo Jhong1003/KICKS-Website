@@ -62,7 +62,7 @@ export const AXES: AxisInfo[] = [
 	{ key: "oneteam", icon: "🤝", en: "One team", ko: "원팀", noteEn: "Share of the squad who scored", noteKo: "골을 넣어본 선수의 비율" },
 	{ key: "attendance", icon: "📋", en: "Attendance", ko: "출석", noteEn: "Participation rate (league table)", noteKo: "팀 참여율 (순위표와 같은 값)" },
 	{ key: "defense", icon: "🛡️", en: "Defense", ko: "수비", noteEn: "Fewer goals conceded per match (0 = full)", noteKo: "경기당 실점이 적을수록 (0실점이면 만점)" },
-	{ key: "late", icon: "⏱️", en: "Late goals", ko: "뒷심", noteEn: "Share of goals in minutes 9–12", noteKo: "9~12분에 넣은 골의 비율" },
+	{ key: "late", icon: "⏱️", en: "Clutch", ko: "클러치", noteEn: "Share of goals in minutes 9–12", noteKo: "9~12분에 넣은 골의 비율" },
 ];
 
 /** Goals per match that fills the attack corner / empties the defense corner. */
