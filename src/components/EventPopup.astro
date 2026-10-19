@@ -1,0 +1,157 @@
+---
+// Homepage popup for club events with `"popup": true` in schedule.json
+// (the awards & team dinners). One <dialog> per such event is rendered at
+// build time; the script below picks, in the visitor's browser, the one whose
+// window is open today (POPUP_DAYS_BEFORE days before through the event day,
+// in Champaign time) and shows it once per event per browser.
+//
+// Popups never stack: the team reveal (TeamRevealPopup.astro) goes first if
+// it hasn't been seen, and the welcome popup (WelcomePopup.astro) steps aside
+// on a visit where this one shows.
+import T from "./T.astro";
+import scheduleData from "../data/schedule.json";
+import type { ScheduleEvent } from "../lib/schedule";
+
+const events = (scheduleData as ScheduleEvent[]).filter((event) => event.popup && event.date);
+
+const dayName = (date: string, locale: string) =>
+	new Date(`${date}T12:00:00Z`).toLocaleDateString(locale, { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
+---
+
+{
+	events.map((event) => (
+		<dialog class="event-popup" data-event-date={event.date} data-event-key={`kicks-event-popup-${event.date}`} aria-labelledby={`event-title-${event.date}`}>
+			<div class="event-panel">
+				<button class="event-close" type="button" data-event-close aria-label="Close" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close", ko: "닫기" } })}>
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+						<path d="m6 6 12 12M18 6 6 18" />
+					</svg>
+				</button>
+				<p class="event-brand">
+					KICKS · <span data-event-dday />
+				</p>
+				<h2 id={`event-title-${event.date}`} tabindex="-1">
+					<T en={event.title} ko={event.title_ko ?? event.title} />
+				</h2>
+				<dl class="event-facts">
+					<div>
+						<dt><T en="When" ko="언제" /></dt>
+						<dd>
+							<T en={dayName(event.date!, "en-US")} ko={dayName(event.date!, "ko-KR")} />
+							{event.time && <span class="event-time"> · {event.time}</span>}
+						</dd>
+					</div>
+					{event.location && (
+						<div>
+							<dt><T en="Where" ko="어디서" /></dt>
+							<dd>{event.location}</dd>
+						</div>
+					)}
+				</dl>
+				{(event.note || event.note_ko) && <T as="p" class="event-note" en={event.note ?? event.note_ko} ko={event.note_ko ?? event.note} />}
+				<div class="event-actions">
+					{event.location && (
+						<a class="event-map" href={mapUrl(event.location)} target="_blank" rel="noopener">
+							<T en="Open in Maps" ko="지도 보기" />
+						</a>
+					)}
+					<button class="event-done" type="button" data-event-close><T en="Got it" ko="확인" /></button>
+				</div>
+			</div>
+		</dialog>
+	))
+}
+
+<script>
+	const POPUP_DAYS_BEFORE = 7;
+	// Today's date in Champaign, as YYYY-MM-DD, whatever the visitor's own time zone.
+	const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date());
+	const daysUntil = (date: string) => Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
+	const seen = (key: string) => { try { return localStorage.getItem(key) === "1"; } catch { return false; } };
+
+	const reveal = document.querySelector<HTMLDialogElement>("#team-reveal");
+	const revealFirst = reveal !== null && !seen(reveal.dataset.revealKey ?? "");
+
+	const dialog = [...document.querySelectorAll<HTMLDialogElement>("dialog.event-popup")].find((d) => {
+		const days = daysUntil(d.dataset.eventDate ?? "");
+		return days >= 0 && days <= POPUP_DAYS_BEFORE && !seen(d.dataset.eventKey ?? "");
+	});
+
+	if (dialog && !revealFirst) {
+		const days = daysUntil(dialog.dataset.eventDate ?? "");
+		const dday = dialog.querySelector("[data-event-dday]");
+		if (dday) dday.textContent = days === 0 ? "D-DAY" : `D-${days}`;
+		const markSeen = () => { try { localStorage.setItem(dialog.dataset.eventKey ?? "", "1"); } catch { /* Fine without storage. */ } };
+		const close = () => { markSeen(); dialog.close(); };
+		dialog.querySelectorAll("[data-event-close]").forEach((button) => button.addEventListener("click", close));
+		dialog.addEventListener("cancel", markSeen);
+		dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
+		// Tells WelcomePopup.astro to sit this visit out.
+		document.documentElement.dataset.eventPopup = "open";
+		dialog.showModal();
+	}
+</script>
+
+<style>
+	dialog {
+		width: min(480px, calc(100% - 32px));
+		max-width: none;
+		max-height: calc(100dvh - 32px);
+		margin: auto;
+		padding: 0;
+		border: 1px solid rgba(63, 81, 40, 0.25);
+		border-radius: 8px;
+		color: var(--color-green);
+		background: var(--color-background);
+		overscroll-behavior: contain;
+	}
+	dialog::backdrop { background: rgba(20, 29, 14, 0.45); }
+	.event-panel { position: relative; padding: clamp(24px, 5vw, 36px); }
+	.event-brand { margin: 0 48px 18px 0; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; }
+	h2 { outline: none; margin: 0; font-size: clamp(1.6rem, 5vw, 2.1rem); line-height: 1.1; letter-spacing: -0.02em; }
+	.event-facts { display: grid; gap: 12px; margin: 22px 0 0; padding: 16px 0 0; border-top: 1px solid rgba(63, 81, 40, 0.18); }
+	.event-facts div { display: grid; grid-template-columns: 4.5rem 1fr; gap: 8px; align-items: baseline; }
+	dt { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; }
+	dd { margin: 0; color: var(--color-dark); font-size: 0.98rem; font-weight: 600; line-height: 1.4; }
+	.event-note { margin: 16px 0 0; color: var(--color-dark); font-size: 0.9rem; line-height: 1.5; }
+	.event-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 24px; }
+	.event-map, .event-done {
+		padding: 10px 24px;
+		border: 1px solid var(--color-green);
+		border-radius: 999px;
+		font: inherit;
+		font-size: 0.92rem;
+		font-weight: 700;
+		text-decoration: none;
+		cursor: pointer;
+	}
+	.event-map { color: var(--color-green); background: transparent; }
+	.event-map:hover { background: var(--color-sage); }
+	.event-done { color: var(--color-background); background: var(--color-green); }
+	.event-close {
+		position: absolute;
+		top: 14px;
+		right: 14px;
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		border: none;
+		border-radius: 6px;
+		color: inherit;
+		background: transparent;
+		cursor: pointer;
+	}
+	.event-close:hover { background: var(--color-sage); }
+	.event-close:focus-visible, .event-map:focus-visible, .event-done:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
+	@media (max-width: 640px) {
+		.event-panel { padding: 20px 18px 18px; }
+		.event-close { top: 8px; right: 8px; width: 40px; height: 40px; }
+		.event-facts div { grid-template-columns: 1fr; gap: 2px; }
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		dialog[open] { animation: event-in 200ms ease-out; }
+		@keyframes event-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+	}
+</style>

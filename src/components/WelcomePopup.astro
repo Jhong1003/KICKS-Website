@@ -40,6 +40,9 @@ import T from "./T.astro";
 		if (!revealSeen) dismissed = true;
 	}
 
+	// The event popup (EventPopup.astro, rendered before this one) takes this visit when it opened.
+	if (document.documentElement.dataset.eventPopup === "open") dismissed = true;
+
 	if (dialog && !dismissed) {
 		const body = document.body;
 		const scrollX = window.scrollX;

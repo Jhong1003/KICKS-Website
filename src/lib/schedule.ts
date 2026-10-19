@@ -20,6 +20,13 @@ export interface ScheduleEvent {
 	tbd?: boolean;
 	/** Optional place, shown as written in both languages (e.g. "Noyes Laboratory, Room 217"). */
 	location?: string;
+	/** Optional start time, shown as written (e.g. "6:00 PM"). */
+	time?: string;
+	/** Show this event as a homepage popup in the week before it (EventPopup.astro). */
+	popup?: boolean;
+	/** Optional extra line for the popup (what to bring, RSVP, …). */
+	note?: string;
+	note_ko?: string;
 }
 
 export interface ScheduleEventView extends ScheduleEvent {
