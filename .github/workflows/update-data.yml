@@ -52,6 +52,7 @@ jobs:
             src/data/standings_history.json \
             src/data/matches.json \
             src/data/week_summaries.json \
+            src/data/goal_events.json \
             src/data/player_leaderboard.json \
             src/data/player_profiles.json
           if git diff --cached --quiet; then
