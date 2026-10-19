@@ -9,7 +9,6 @@
 // it hasn't been seen, and the welcome popup (WelcomePopup.astro) steps aside
 // on a visit where this one shows.
 import T from "./T.astro";
-import BbqArt from "./BbqArt.astro";
 import scheduleData from "../data/schedule.json";
 import type { ScheduleEvent } from "../lib/schedule";
 
@@ -29,7 +28,7 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 						<path d="m6 6 12 12M18 6 6 18" />
 					</svg>
 				</button>
-				<div class="event-art"><BbqArt /></div>
+				{event.image && <div class="event-art"><img src={event.image} alt="" width="960" height="400" decoding="async" /></div>}
 				<p class="event-brand">
 					KICKS · <span data-event-dday />
 				</p>
@@ -112,7 +111,8 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 	.event-panel { --pad: clamp(24px, 5vw, 36px); position: relative; padding: var(--pad); }
 	/* The illustration bleeds to the dialog's edges above the text. */
 	.event-art { margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) 22px; overflow: hidden; border-bottom: 1px solid rgba(63, 81, 40, 0.18); }
-	.event-brand { margin: 0 0 12px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; }
+	.event-art img { display: block; width: 100%; height: auto; aspect-ratio: 12 / 5; object-fit: cover; }
+	.event-brand { margin: 0 48px 12px 0; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; }
 	h2 { outline: none; margin: 0; font-size: clamp(1.6rem, 5vw, 2.1rem); line-height: 1.1; letter-spacing: -0.02em; }
 	.event-facts { display: grid; gap: 12px; margin: 22px 0 0; padding: 16px 0 0; border-top: 1px solid rgba(63, 81, 40, 0.18); }
 	.event-facts div { display: grid; grid-template-columns: 4.5rem 1fr; gap: 8px; align-items: baseline; }
