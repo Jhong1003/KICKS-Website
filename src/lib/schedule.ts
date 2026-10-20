@@ -30,6 +30,8 @@ export interface ScheduleEvent {
 	map_query?: string;
 	/** Optional photo for the popup header, a path under public/ (e.g. "/events/team-dinner-1.jpg"). */
 	image?: string;
+	/** Optional run of show for the popup, in order. */
+	agenda?: { time: string; time_ko?: string; en: string; ko?: string }[];
 	/** Optional extra line for the popup (what to bring, RSVP, …). */
 	note?: string;
 	note_ko?: string;

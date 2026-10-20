@@ -49,6 +49,21 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 							<dd>{event.location}</dd>
 						</div>
 					)}
+					{event.agenda && event.agenda.length > 0 && (
+						<div>
+							<dt><T en="Plan" ko="일정" /></dt>
+							<dd>
+								<ol class="event-agenda">
+									{event.agenda.map((item) => (
+										<li>
+											<span class="event-agenda-time"><T en={item.time} ko={item.time_ko ?? item.time} /></span>
+											<T en={item.en} ko={item.ko ?? item.en} />
+										</li>
+									))}
+								</ol>
+							</dd>
+						</div>
+					)}
 				</dl>
 				{(event.note || event.note_ko) && <T as="p" class="event-note" en={event.note ?? event.note_ko} ko={event.note_ko ?? event.note} />}
 				<div class="event-actions">
@@ -122,6 +137,9 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 	.event-facts div { display: grid; grid-template-columns: 4.5rem 1fr; gap: 8px; align-items: baseline; }
 	dt { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; }
 	dd { margin: 0; color: var(--color-dark); font-size: 0.98rem; font-weight: 600; line-height: 1.4; }
+	.event-agenda { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-weight: 500; }
+	.event-agenda li { display: grid; grid-template-columns: 5.2rem 1fr; gap: 8px; }
+	.event-agenda-time { font-weight: 700; font-variant-numeric: tabular-nums; }
 	.event-note { margin: 16px 0 0; color: var(--color-dark); font-size: 0.9rem; line-height: 1.5; }
 	.event-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 24px; }
 	.event-map, .event-done {
