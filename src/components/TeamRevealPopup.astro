@@ -75,7 +75,14 @@ const revealKey = `kicks-team-reveal-${league.id}`;
 
 <script>
 	const dialog = document.querySelector<HTMLDialogElement>("#team-reveal");
-	if (dialog) {
+	// Waits for EventPopup.astro to decide; on a visit where it opens, this one sits out.
+	const afterEventPopup = (run: () => void) => {
+		const decided = () => document.documentElement.dataset.eventPopup !== undefined || !document.querySelector("dialog.event-popup");
+		const go = () => { if (document.documentElement.dataset.eventPopup !== "open") run(); };
+		if (decided()) go();
+		else document.addEventListener("kicks:event-popup", go, { once: true });
+	};
+	if (dialog) afterEventPopup(() => {
 		const key = dialog.dataset.revealKey ?? "kicks-team-reveal";
 		let seen = false;
 		try { seen = localStorage.getItem(key) === "1"; } catch { /* Storage disabled: show it, once per page load. */ }
@@ -89,7 +96,7 @@ const revealKey = `kicks-team-reveal-${league.id}`;
 			dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
 			dialog.showModal();
 		}
-	}
+	});
 </script>
 
 <style>

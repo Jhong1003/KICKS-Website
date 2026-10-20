@@ -9,6 +9,7 @@ import LeagueStatusBanner from "../components/LeagueStatusBanner.astro";
 import TeamRevealPopup from "../components/TeamRevealPopup.astro";
 import TransferBanner from "../components/TransferBanner.astro";
 import WelcomePopup from "../components/WelcomePopup.astro";
+import EventPopup from "../components/EventPopup.astro";
 import leagueTable from "../data/league_table.json";
 import heroImage from "../assets/hero-wide.jpg";
 import scheduleData from "../data/schedule.json";
@@ -71,6 +72,7 @@ const titleFavourite = latestTitle
 	description="KICKS is a student-run, Korean-inspired futsal community at the University of Illinois Urbana-Champaign (UIUC) — weekly league, standings, player stats, and events. UIUC 한인 풋살 동아리."
 	header="custom"
 >
+	<EventPopup />
 	<TeamRevealPopup league={currentLeague} />
 	<WelcomePopup />
 	{/* Tells search engines what KICKS is (shown in Google's results/knowledge panel). */}
