@@ -777,6 +777,7 @@ BRACE_GOALS = 2  # goals in a single *match* (needs goal_events, so FA26-L2 onwa
 HAT_TRICK_GOALS = 3  # goals in a single match (also counts as a Brace)
 POKER_GOALS = 4  # goals in a single match (Icon; also counts as Hat-trick and Brace)
 OWN_GOAL_AWARD_MIN = 1  # 1+ own goal in the league
+GOAL_MILESTONE_STEP = 100  # History Maker: scorer of KICKS' 100th, 200th, ... all-time goal
 
 DEFENSIVE_POSITIONS = {"DF", "GK"}
 
@@ -1225,6 +1226,45 @@ def _league_section(
     }
 
 
+def _milestone_scorers(matches: pd.DataFrame, goal_rows: list[dict]) -> set[tuple[str, str]]:
+    """(league, player_id) of everyone who scored a KICKS milestone goal - the
+    100th, 200th, ... goal across all leagues - for the History Maker badge.
+
+    Same count as the homepage goal counter (src/lib/goals.ts milestoneScorer):
+    completed matches in date order (match_id breaks ties), then the goals of
+    the match that crossed the milestone in minute order. A milestone is
+    skipped when it can't be told for certain: that match has no per-goal
+    rows with minutes (weekly-total leagues), its rows don't add up to the
+    score, two goals share the minute, or it was an own goal.
+    """
+    played = matches[matches["home_score"].notna() & matches["away_score"].notna()].copy()
+    played["date"] = [_week_date(league, int(week)) for league, week in zip(played["league"], played["week"])]
+    played = played.sort_values(["date", "match_id"])
+    by_match: dict[str, list[dict]] = {}
+    for goal in goal_rows:
+        by_match.setdefault(goal["match_id"], []).append(goal)
+
+    scorers: set[tuple[str, str]] = set()
+    before = 0
+    for match in played.itertuples(index=False):
+        in_match = int(match.home_score) + int(match.away_score)
+        first, last = before + 1, before + in_match
+        before = last
+        milestones = [n for n in range(first, last + 1) if n % GOAL_MILESTONE_STEP == 0]
+        if not milestones:
+            continue
+        events = by_match.get(match.match_id, [])
+        if len(events) != in_match or any(goal["minute"] is None for goal in events):
+            continue
+        events = sorted(events, key=lambda goal: goal["minute"])
+        for milestone in milestones:
+            goal = events[milestone - first]
+            same_minute = sum(other["minute"] == goal["minute"] for other in events)
+            if same_minute == 1 and not goal["own_goal"] and goal["scorer_id"]:
+                scorers.add((match.league, goal["scorer_id"]))
+    return scorers
+
+
 def build_player_profiles(
     player_stats: pd.DataFrame,
     players: pd.DataFrame,
@@ -1253,9 +1293,10 @@ def build_player_profiles(
     ones (Brace, Hat-trick, Poker); `goal_rows` is `build_goal_events`
     output, already resolved to ids, and feeds the two badges that read goal
     roles (Comeback King, Late Winner). The roles themselves reach the site
-    on `goal_events.json`, not through a profile. Back-to-Back is the one badge that
-    looks across leagues: champion of two leagues in a row (consecutive in
-    `league_order`), awarded in the second one.
+    on `goal_events.json`, not through a profile. Back-to-Back and History Maker
+    look across leagues: Back-to-Back is champion of two leagues in a row
+    (consecutive in `league_order`), awarded in the second one; History Maker
+    is scoring a club milestone goal (see _milestone_scorers).
     """
     weeks_played = player_stats.groupby("league")["week"].nunique().to_dict()
     player_stats = player_stats.fillna({"games": 0, "goals": 0, "assists": 0, "own_goals": 0})
@@ -1270,6 +1311,7 @@ def build_player_profiles(
     award_winners = _league_award_winners(player_stats, matches, statuses)
     max_match_goals = _max_match_goals(goal_events, dict(zip(players["player"], players["player_id"])))
     goal_roles = _goal_role_counts(goal_rows)
+    milestone_scorers = _milestone_scorers(matches, goal_rows)
 
     profiles = []
     for player_id, player_rows in player_stats.groupby("player_id"):
@@ -1299,6 +1341,13 @@ def build_player_profiles(
             rank = league_rank[section["league"]]
             if section["league"] in won and rank > 0 and league_order[rank - 1] in won:
                 section["badges"].insert(0, "back_to_back")
+            # Just for fun, like Own Goal Award: being the one who happened to
+            # score a round-number goal. Needs every league's matches, so it's
+            # added here rather than in _badges.
+            if (section["league"], player_id) in milestone_scorers:
+                if section["badges"] == ["squad_member"]:
+                    section["badges"] = []
+                section["badges"].append("history_maker")
 
         profiles.append(
             {

@@ -83,7 +83,8 @@ export type BadgeKey =
 	| "poker"
 	| "back_to_back"
 	| "own_goal_award"
-	| "journeyman";
+	| "journeyman"
+	| "history_maker";
 
 /** One player's profile within a single league (its stats, tag and badges). */
 export interface PlayerLeagueSection {
@@ -366,6 +367,13 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		description: "Played for more than one team in this league.",
 		descriptionKo: "이번 리그에서 두 팀 이상에서 뛰었어요.",
 		icon: "🧳",
+		tier: "special",
+	},
+	history_maker: {
+		label: "History Maker",
+		description: "Scored one of KICKS' milestone goals (the 100th, 200th, … all-time goal).",
+		descriptionKo: "KICKS 통산 100호, 200호처럼 기념이 되는 골을 넣은 주인공이에요.",
+		icon: "💯",
 		tier: "special",
 	},
 };

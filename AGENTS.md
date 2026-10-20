@@ -493,7 +493,9 @@ they joined, so late joiners aren't penalised.
   champion's back line.
 - Special (just for fun): `own_goal_award` (1+ own goal — the club runs an
   own-goal award), `journeyman` (played for more than one team in the
-  league).
+  league), `history_maker` (scored a club milestone goal — the 100th, 200th, …
+  all-time goal across every league; `_milestone_scorers`, same count as the
+  homepage goal counter in `src/lib/goals.ts`).
 
 **Step-up badges** (`BADGE_LADDERS`, in both `update_data.py` and
 `src/lib/players.ts`): off_the_mark → fox_in_the_box; provider → maestro →
