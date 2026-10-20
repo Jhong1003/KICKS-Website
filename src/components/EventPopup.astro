@@ -3,7 +3,9 @@
 // (the awards & team dinners). One <dialog> per such event is rendered at
 // build time; the script below picks, in the visitor's browser, the one whose
 // window is open today (POPUP_DAYS_BEFORE days before through the event day,
-// in Champaign time) and shows it once per event per browser.
+// in Champaign time) and shows it once per visit: closing it keeps it away
+// while the tab stays on the site, and it comes back on the next visit
+// (sessionStorage, so a new tab or a reopened site counts as a new visit).
 //
 // Popups never stack, and this one goes first: on a visit where it opens,
 // the team reveal (TeamRevealPopup.astro) and the welcome popup
@@ -84,7 +86,7 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 	// Today's date in Champaign, as YYYY-MM-DD, whatever the visitor's own time zone.
 	const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).format(new Date());
 	const daysUntil = (date: string) => Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
-	const seen = (key: string) => { try { return localStorage.getItem(key) === "1"; } catch { return false; } };
+	const seen = (key: string) => { try { return sessionStorage.getItem(key) === "1"; } catch { return false; } };
 
 	const dialog = [...document.querySelectorAll<HTMLDialogElement>("dialog.event-popup")].find((d) => {
 		const days = daysUntil(d.dataset.eventDate ?? "");
@@ -103,7 +105,7 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 		const days = daysUntil(dialog.dataset.eventDate ?? "");
 		const dday = dialog.querySelector("[data-event-dday]");
 		if (dday) dday.textContent = days === 0 ? "D-DAY" : `D-${days}`;
-		const markSeen = () => { try { localStorage.setItem(dialog.dataset.eventKey ?? "", "1"); } catch { /* Fine without storage. */ } };
+		const markSeen = () => { try { sessionStorage.setItem(dialog.dataset.eventKey ?? "", "1"); } catch { /* Fine without storage. */ } };
 		const close = () => { markSeen(); dialog.close(); };
 		dialog.querySelectorAll("[data-event-close]").forEach((button) => button.addEventListener("click", close));
 		dialog.addEventListener("cancel", markSeen);
