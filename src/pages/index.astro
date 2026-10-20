@@ -16,6 +16,7 @@ import scheduleData from "../data/schedule.json";
 import transferNews from "../data/transfer-news.json";
 import profilesData from "../data/player_profiles.json";
 import matchesData from "../data/matches.json";
+import goalEventsData from "../data/goal_events.json";
 import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";
 import { formatShortDate } from "../lib/i18n";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
@@ -24,7 +25,7 @@ import { halloweenFinal } from "../lib/season-theme";
 import { bannerMode, weekSummary, type BannerMatch, type BannerProfile } from "../lib/league-banner";
 import { titleHistory } from "../lib/forecasts";
 import { getLeagueFinale } from "../lib/finale";
-import { buildGoalCountdown, isCelebratingMilestone, type MatchScore } from "../lib/goals";
+import { buildGoalCountdown, isCelebratingMilestone, milestoneScorer, type MatchScore, type MilestoneGoalEvent } from "../lib/goals";
 
 const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
 // Transfers only make sense within one league (teams are reshuffled between
@@ -47,6 +48,11 @@ const showTransferBanner =
 // build time here; the script below re-checks it against the visitor's date.
 const goalCountdown = buildGoalCountdown(matchesData as MatchScore[]);
 const celebratingMilestone = isCelebratingMilestone(goalCountdown);
+// Who scored that milestone goal (needs per-goal minutes, so FA26-L2 onward), linked to their page.
+const milestoneScorerId = goalCountdown.lastMilestone
+	? milestoneScorer(matchesData as MatchScore[], goalEventsData as MilestoneGoalEvent[], goalCountdown.lastMilestone)
+	: null;
+const milestoneHero = milestoneScorerId ? (profilesData as PlayerProfile[]).find((player) => player.player_id === milestoneScorerId) ?? null : null;
 // Seasonal (src/lib/season-theme.ts): rendered always, shown only while
 // <html data-season="halloween"> is set for the visitor's date.
 const halloweenFinalWeek = halloweenFinal(currentLeague, scheduleData as ScheduleEvent[]);
@@ -200,11 +206,25 @@ const titleFavourite = latestTitle
 								<span id="hero-goal-counter-celebrate" hidden={!celebratingMilestone}>
 									<span data-lang="en">
 										<strong>KICKS hit {goalCountdown.lastMilestone} all-time goals!</strong> 🎉 ·{" "}
-										{goalCountdown.total} so far
+										{milestoneHero ? (
+											<>
+												{goalCountdown.lastMilestone}th goal by{" "}
+												<a class="hero-goal-counter-hero" href={`/players/${milestoneHero.id}`}>{milestoneHero.name}</a>
+											</>
+										) : (
+											<>{goalCountdown.total} so far</>
+										)}
 									</span>
 									<span data-lang="ko" lang="ko">
-										<strong>KICKS 통산 {goalCountdown.lastMilestone}골 달성!</strong> 🎉 · 지금까지{" "}
-										{goalCountdown.total}골
+										<strong>KICKS 통산 {goalCountdown.lastMilestone}골 달성!</strong> 🎉 ·{" "}
+										{milestoneHero ? (
+											<>
+												{goalCountdown.lastMilestone}호 골{" "}
+												<a class="hero-goal-counter-hero" href={`/players/${milestoneHero.id}`}>{milestoneHero.name}</a>
+											</>
+										) : (
+											<>지금까지 {goalCountdown.total}골</>
+										)}
 									</span>
 								</span>
 							</p>

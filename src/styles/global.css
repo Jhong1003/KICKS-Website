@@ -2356,6 +2356,23 @@ button.league-switcher-link {
 
 }
 
+.hero-goal-counter-hero {
+
+	color: var(--color-background);
+	font-weight: 700;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+
+}
+
+.hero-goal-counter-hero:hover,
+.hero-goal-counter-hero:focus-visible {
+
+	text-decoration-thickness: 2px;
+
+}
+
 .hero-goal-counter [hidden] {
 
 	display: none;

@@ -30,16 +30,28 @@ export interface GoalCountdown {
 	lastMilestoneDate: string | null;
 }
 
+/** One goal from goal_events.json, as the milestone lookup reads it. */
+export interface MilestoneGoalEvent {
+	match_id: string;
+	minute: number | null;
+	scorer_id: string | null;
+	own_goal: boolean;
+}
+
 const isScored = (m: MatchScore) =>
 	m.status === "completed" && typeof m.home_score === "number" && typeof m.away_score === "number";
 
-export function buildGoalCountdown(matches: MatchScore[]): GoalCountdown {
-	// Chronological order, so the running total finds the match that actually
-	// crossed each milestone. match_id (league-week-match) breaks same-day ties.
-	const completed = matches.filter(isScored).sort((a, b) => {
+// Chronological order, so the running total finds the match that actually
+// crossed each milestone. match_id (league-week-match) breaks same-day ties.
+function chronological(matches: MatchScore[]): MatchScore[] {
+	return matches.filter(isScored).sort((a, b) => {
 		const byDate = (a.date ?? "9999").localeCompare(b.date ?? "9999");
 		return byDate !== 0 ? byDate : a.match_id.localeCompare(b.match_id);
 	});
+}
+
+export function buildGoalCountdown(matches: MatchScore[]): GoalCountdown {
+	const completed = chronological(matches);
 
 	const total = completed.reduce((sum, m) => sum + m.home_score! + m.away_score!, 0);
 	const passed = Math.floor(total / GOAL_MILESTONE_STEP) * GOAL_MILESTONE_STEP;
@@ -74,4 +86,28 @@ export function isCelebratingMilestone(countdown: GoalCountdown, today: Date = n
 	const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 	const days = Math.round((start.getTime() - reached.getTime()) / 86_400_000);
 	return days >= 0 && days <= MILESTONE_CELEBRATION_DAYS;
+}
+
+/**
+ * Who scored goal number `milestone` (e.g. the 100th), or null when that can't
+ * be told for certain: the match that crossed it needs goal_events with a
+ * minute on every goal (weekly-total leagues have none), the event count has
+ * to match the official score, and an own goal has no scorer to credit.
+ */
+export function milestoneScorer(matches: MatchScore[], goals: MilestoneGoalEvent[], milestone: number): string | null {
+	let before = 0;
+	for (const m of chronological(matches)) {
+		const inMatch = m.home_score! + m.away_score!;
+		if (before + inMatch < milestone) {
+			before += inMatch;
+			continue;
+		}
+		const events = goals.filter((goal) => goal.match_id === m.match_id);
+		if (events.length !== inMatch || events.some((goal) => goal.minute === null)) return null;
+		const goal = [...events].sort((a, b) => a.minute! - b.minute!)[milestone - before - 1];
+		// Two goals in the same minute can't be put in order.
+		if (events.filter((other) => other.minute === goal.minute).length > 1) return null;
+		return goal.own_goal ? null : goal.scorer_id;
+	}
+	return null;
 }
