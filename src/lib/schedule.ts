@@ -26,6 +26,11 @@ export interface ScheduleEvent {
 	time_ko?: string;
 	/** Show this event as a homepage popup in the week before it (EventPopup.astro). */
 	popup?: boolean;
+	/** Optional shorter title for the popup only; the schedule keeps `title`. */
+	popup_title?: string;
+	popup_title_ko?: string;
+	/** Optional fixed line breaks for `location` in the popup, each line kept whole. */
+	location_lines?: string[];
 	/** Optional Google Maps search for the popup's map button, when `location` alone finds the wrong spot. */
 	map_query?: string;
 	/** Optional photo for the popup header, a path under public/ (e.g. "/events/team-dinner-1.jpg"). */

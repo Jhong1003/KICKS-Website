@@ -33,7 +33,7 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 					KICKS · <span data-event-dday />
 				</p>
 				<h2 id={`event-title-${event.date}`} tabindex="-1">
-					<T en={event.title} ko={event.title_ko ?? event.title} />
+					<T en={event.popup_title ?? event.title} ko={event.popup_title_ko ?? event.title_ko ?? event.popup_title ?? event.title} />
 				</h2>
 				<dl class="event-facts">
 					<div>
@@ -46,7 +46,7 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 					{event.location && (
 						<div>
 							<dt><T en="Where" ko="어디서" /></dt>
-							<dd>{event.location}</dd>
+							<dd>{event.location_lines ? event.location_lines.map((line) => <span class="event-line">{line}</span>) : event.location}</dd>
 						</div>
 					)}
 					{event.agenda && event.agenda.length > 0 && (
@@ -132,7 +132,8 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 	.event-art { margin: calc(-1 * var(--pad)) calc(-1 * var(--pad)) 22px; overflow: hidden; border-bottom: 1px solid rgba(63, 81, 40, 0.18); }
 	.event-art img { display: block; width: 100%; height: auto; aspect-ratio: 12 / 5; object-fit: cover; }
 	.event-brand { margin: 0 48px 12px 0; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; }
-	h2 { outline: none; margin: 0; font-size: clamp(1.6rem, 5vw, 2.1rem); line-height: 1.1; letter-spacing: -0.02em; }
+	h2 { outline: none; margin: 0; font-size: clamp(1.35rem, 5.6vw, 1.8rem); line-height: 1.15; letter-spacing: -0.02em; word-break: keep-all; text-wrap: balance; }
+	.event-line { display: block; white-space: nowrap; }
 	.event-facts { display: grid; gap: 12px; margin: 22px 0 0; padding: 16px 0 0; border-top: 1px solid rgba(63, 81, 40, 0.18); }
 	.event-facts div { display: grid; grid-template-columns: 4.5rem 1fr; gap: 8px; align-items: baseline; }
 	dt { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.7; }
@@ -176,7 +177,10 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 		.event-panel { --pad: 18px; }
 		.event-close { top: 8px; right: 8px; width: 40px; height: 40px; }
 		.event-facts div { grid-template-columns: 1fr; gap: 2px; }
+		dd { font-size: 0.9rem; }
 	}
+	/* Very narrow phones: let an address line wrap rather than overflow. */
+	@media (max-width: 340px) { .event-line { white-space: normal; } }
 	@media (prefers-reduced-motion: no-preference) {
 		dialog[open] { animation: event-in 200ms ease-out; }
 		@keyframes event-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
