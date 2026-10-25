@@ -1,7 +1,7 @@
 ---
 // Receiving end of the managers' match log (see ./index.astro). The manager's
-// "Send" button shares a link whose ?d= parameter carries the whole week; this
-// page decodes it into a one-glance summary (every match, who scored when)
+// "Send" button shares a short link plus a "기록 코드" line carrying the whole
+// week (KakaoTalk cuts long links). Pasting the message here decodes it into a one-glance summary (every match, who scored when)
 // and Sheet-ready copy buttons — copied from the browser, so the columns
 // arrive split correctly.
 import BaseLayout from "../../layouts/BaseLayout.astro";
@@ -17,9 +17,20 @@ const teams = Object.fromEntries(
 	<main class="mi">
 		<script type="application/json" id="mi-teams" set:html={JSON.stringify(teams)} />
 
-		<p id="mi-error" class="mi-card" hidden><T en="This link has no match log in it. Open the link the manager sent." ko="기록이 없는 링크예요. 매니저가 보낸 링크를 그대로 열어주세요." /></p>
+		<section id="mi-paste" class="mi-card" hidden>
+			<p class="mi-label"><T en="MATCH LOG" ko="경기 기록" /></p>
+			<h1><T en="Paste the manager's message" ko="매니저 메시지 붙여넣기" /></h1>
+			<p class="mi-hint"><T en="Copy the whole KakaoTalk message (with the code) and paste it here." ko="카톡으로 받은 메시지를 통째로 복사해서 아래 칸에 붙여넣으세요." /></p>
+			<textarea id="mi-input" rows="5" placeholder="KICKS … 기록 코드: …"></textarea>
+			<div class="mi-paste-actions">
+				<button type="button" id="mi-paste-clip" class="mi-btn mi-btn--ghost"><T en="Paste from clipboard" ko="클립보드에서 붙여넣기" /></button>
+				<button type="button" id="mi-open" class="mi-btn"><T en="Show" ko="보기" /></button>
+			</div>
+			<p id="mi-error" class="mi-error" hidden><T en="Couldn't find a log code in that text." ko="기록 코드를 찾지 못했어요. 메시지 전체를 다시 복사해주세요." /></p>
+		</section>
 
 		<div id="mi-view" hidden>
+			<button type="button" id="mi-again" class="mi-btn mi-btn--ghost mi-again"><T en="Paste another log" ko="다른 기록 붙여넣기" /></button>
 			<p class="mi-label" id="mi-league"></p>
 			<h1 id="mi-title"></h1>
 			<p id="mi-warn" class="mi-warn" hidden></p>
@@ -59,10 +70,19 @@ const teams = Object.fromEntries(
 	const L = (en: string, kr: string) => (document.documentElement.lang === "ko" ? kr : en);
 	const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
-	/** Reads ?d= (current links) or #… (the first version's links). */
-	function decode(): Payload | null {
+	/** Pulls the log code out of a pasted message ("기록 코드: …", "d=…", or just the code). */
+	function findCode(text: string): string {
+		// After the label, ignore any line breaks a chat app wrapped into the code.
+		const label = text.match(/(?:기록 코드|code)\s*[:：]([\s\S]*)/i);
+		if (label) return (label[1].replace(/\s+/g, "").match(/^[A-Za-z0-9_-]+/) ?? [""])[0];
+		const link = text.match(/[?#&]d=([A-Za-z0-9_-]{16,})/);
+		if (link) return link[1];
+		const tokens = text.replace(/\s+/g, " ").match(/[A-Za-z0-9_-]{24,}/g) ?? [];
+		return tokens.sort((a, b) => b.length - a.length)[0] ?? "";
+	}
+
+	function decode(raw: string): Payload | null {
 		try {
-			const raw = new URLSearchParams(location.search).get("d") ?? location.hash.slice(1);
 			const b64 = raw.replace(/-/g, "+").replace(/_/g, "/");
 			if (!b64) return null;
 			const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -90,10 +110,17 @@ const teams = Object.fromEntries(
 		}
 	}
 
-	function render() {
-		const p = decode();
-		$("mi-error").hidden = Boolean(p);
+	let current: Payload | null = null;
+
+	function show(p: Payload | null) {
+		current = p;
+		$("mi-paste").hidden = Boolean(p);
 		$("mi-view").hidden = !p;
+		if (p) render();
+	}
+
+	function render() {
+		const p = current;
 		if (!p) return;
 		const team = (id: string) => teams[p.l]?.[id] ?? { name: id, color: "#999" };
 		const score = (m: Match) => [m.g.filter((g) => g[0] === m.h).length, m.g.filter((g) => g[0] === m.a).length];
@@ -165,8 +192,26 @@ const teams = Object.fromEntries(
 		}),
 	);
 
-	render();
-	window.addEventListener("hashchange", render);
+	const tryOpen = (text: string) => {
+		const p = decode(findCode(text));
+		$("mi-error").hidden = Boolean(p);
+		if (p) { show(p); window.scrollTo({ top: 0 }); }
+	};
+	$("mi-open").addEventListener("click", () => tryOpen(($("mi-input") as HTMLTextAreaElement).value));
+	$("mi-input").addEventListener("paste", () => setTimeout(() => tryOpen(($("mi-input") as HTMLTextAreaElement).value), 0));
+	$("mi-paste-clip").addEventListener("click", async () => {
+		try {
+			const text = await navigator.clipboard.readText();
+			($("mi-input") as HTMLTextAreaElement).value = text;
+			tryOpen(text);
+		} catch {
+			($("mi-input") as HTMLTextAreaElement).focus();
+		}
+	});
+	$("mi-again").addEventListener("click", () => { ($("mi-input") as HTMLTextAreaElement).value = ""; $("mi-error").hidden = true; show(null); });
+
+	// Links from the earlier versions (?d=… or #…) still open directly.
+	show(decode(new URLSearchParams(location.search).get("d") ?? location.hash.slice(1)));
 	new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
 </script>
 
@@ -204,5 +249,10 @@ const teams = Object.fromEntries(
 	.mi-table td { padding: 5px 4px; border-bottom: 1px solid #eee; }
 	.mi-num { font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
 	.mi-btn { padding: 10px 18px; border: none; border-radius: 999px; color: var(--color-background); background: var(--color-green); font: inherit; font-weight: 700; cursor: pointer; }
+	.mi-error { margin: 10px 0 0; color: #c0392b; font-size: 0.9rem; }
+	.mi textarea { box-sizing: border-box; width: 100%; padding: 10px; border: 1px solid rgba(63, 81, 40, 0.3); border-radius: 8px; font: inherit; font-size: 16px; resize: vertical; }
+	.mi-paste-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+	.mi-btn--ghost { border: 1px solid var(--color-green); color: var(--color-green); background: transparent; }
+	.mi-again { margin-bottom: 16px; padding: 8px 14px; font-size: 0.88rem; }
 	.mi-copied { min-height: 1.2em; margin: 8px 0 0; color: var(--color-green); font-size: 0.88rem; font-weight: 700; }
 </style>
