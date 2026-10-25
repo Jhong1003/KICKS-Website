@@ -1,9 +1,9 @@
 ---
 // Receiving end of the managers' match log (see ./index.astro). The manager's
-// "Send" button shares a link whose #fragment carries the whole week; this
+// "Send" button shares a link whose ?d= parameter carries the whole week; this
 // page decodes it into a one-glance summary (every match, who scored when)
 // and Sheet-ready copy buttons — copied from the browser, so the columns
-// arrive split correctly. The fragment never reaches a server.
+// arrive split correctly.
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import T from "../../components/T.astro";
 import { leagues, getTeamColor } from "../../lib/leagues";
@@ -59,13 +59,32 @@ const teams = Object.fromEntries(
 	const L = (en: string, kr: string) => (document.documentElement.lang === "ko" ? kr : en);
 	const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
+	/** Reads ?d= (current links) or #… (the first version's links). */
 	function decode(): Payload | null {
 		try {
-			const b64 = location.hash.slice(1).replace(/-/g, "+").replace(/_/g, "/");
+			const raw = new URLSearchParams(location.search).get("d") ?? location.hash.slice(1);
+			const b64 = raw.replace(/-/g, "+").replace(/_/g, "/");
 			if (!b64) return null;
 			const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-			const payload = JSON.parse(new TextDecoder().decode(bytes)) as Payload;
-			return payload && payload.v === 1 && Array.isArray(payload.m) ? payload : null;
+			const parsed = JSON.parse(new TextDecoder().decode(bytes));
+			if (parsed && parsed.v === 1 && Array.isArray(parsed.m)) return parsed as Payload;
+			// v2: [2, league, week, [[home, away, ended, [[side, scorer, assist, own, minute], …]], …]]
+			if (Array.isArray(parsed) && parsed[0] === 2) {
+				const [, l, w, rows] = parsed as [number, string, number, [string, string, 0 | 1, [0 | 1, string, string, 0 | 1, number][]][]];
+				return {
+					v: 2,
+					l,
+					w,
+					m: rows.map(([h, a, d, goals], index) => ({
+						i: `${l}-W${String(w).padStart(2, "0")}-M${String(index + 1).padStart(2, "0")}`,
+						h,
+						a,
+						d,
+						g: goals.map(([side, scorer, assist, own, minute]) => [side ? a : h, scorer, assist, own, minute] as Goal),
+					})),
+				};
+			}
+			return null;
 		} catch {
 			return null;
 		}

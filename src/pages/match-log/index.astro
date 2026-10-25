@@ -5,7 +5,7 @@
 // same rule as the Sheet: 5:30 → 6). At 12:00 the clock turns red (and the
 // phone vibrates where the browser allows it); ending a match goes straight
 // to the next one. At the end of the day "Send" shares a link through the
-// phone's share sheet (KakaoTalk); the week's log rides inside the link and
+// phone's share sheet (KakaoTalk); the week's log rides inside the link (?d=) and
 // /match-log/import/ turns it into a summary plus Sheet-ready copy buttons.
 //
 // Nothing is sent anywhere: the log lives in this phone's localStorage, so a
@@ -216,32 +216,33 @@ const data = {
 	});
 
 	// ---------- send (share sheet → KakaoTalk)
-	// The whole week travels inside the link (#fragment, never sent to a server):
-	// /match-log/import/ decodes it into a readable summary and Sheet-ready copy buttons.
+	// The whole week travels inside the link (?d=…) — not after a "#", which
+	// KakaoTalk cuts off as a hashtag. Compact v2 form, decoded by
+	// /match-log/import/: [league, week, [[home, away, ended, [[side 0/1, scorer, assist, own 0/1, minute], …]], …]]
+	// with matches in M01… order.
 	function weekLink() {
 		const weekMatches = data.matches.filter((m) => m.week === store.week);
-		const payload = {
-			v: 1,
-			l: data.league,
-			w: store.week,
-			m: weekMatches.map((match) => {
+		const payload = [
+			2,
+			data.league,
+			store.week,
+			weekMatches.map((match) => {
 				const log = logOf(match.id);
-				return {
-					i: match.id,
-					h: match.home,
-					a: match.away,
-					d: log.state === "done" ? 1 : 0,
-					g: [...log.goals].sort((x, y) => x.minute - y.minute).map((g) => [g.team, g.scorer, g.assist ?? "", g.own ? 1 : 0, g.minute]),
-				};
+				return [
+					match.home,
+					match.away,
+					log.state === "done" ? 1 : 0,
+					[...log.goals].sort((x, y) => x.minute - y.minute).map((g) => [g.team === match.home ? 0 : 1, g.scorer, g.assist ?? "", g.own ? 1 : 0, g.minute]),
+				];
 			}),
-		};
+		] as const;
 		const bytes = new TextEncoder().encode(JSON.stringify(payload));
 		const b64 = btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-		const done = payload.m.filter((m) => m.d).length;
-		const goals = payload.m.reduce((n, m) => n + m.g.length, 0);
+		const done = payload[3].filter((m) => m[2]).length;
+		const goals = payload[3].reduce((n, m) => n + m[3].length, 0);
 		return {
-			url: `${location.origin}/match-log/import/#${b64}`,
-			title: `KICKS ${data.league} ${store.week}주차 경기 기록 (종료 ${done}/${payload.m.length}경기 · ${goals}골)`,
+			url: `${location.origin}/match-log/import/?d=${b64}`,
+			title: `KICKS ${data.league} ${store.week}주차 경기 기록 (종료 ${done}/${payload[3].length}경기 · ${goals}골)`,
 		};
 	}
 
