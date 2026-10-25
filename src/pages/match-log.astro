@@ -2,9 +2,12 @@
 // Match-day log for the league manager, on a phone at the field: pick the
 // match, press Kick-off, and tap team → scorer → assist when a goal goes in.
 // The minute comes from the running 12-minute clock (elapsed time rounded up,
-// same rule as the Sheet: 5:30 → 6). At the end of the day one button copies
-// the goal_events rows (match_id, scorer, assist, own_goal, minute) and the
-// nine scores, ready to paste into the Sheet.
+// same rule as the Sheet: 5:30 → 6). At 12:00 the clock turns red (and the
+// phone vibrates where the browser allows it); ending a match goes straight
+// to the next one. At the end of the day "Send" shares the week's log — the
+// goal_events rows (match_id, scorer, assist, own_goal, minute) and the nine
+// scores, tab-separated for pasting — through the phone's share sheet
+// (KakaoTalk), so whoever enters the Sheet gets it.
 //
 // Nothing is sent anywhere: the log lives in this phone's localStorage, so a
 // refresh or a dead screen doesn't lose it. One manager, one phone. The code
@@ -70,23 +73,10 @@ const data = {
 			</div>
 			<ol id="ml-match-list" class="ml-list"></ol>
 
-			<div class="ml-card ml-export">
-				<h2><T en="Copy for the Sheet" ko="시트용 복사" /></h2>
-				<p id="ml-export-warn" class="ml-warn" hidden></p>
-
-				<h3><T en="① goal_events tab" ko="① goal_events 탭" /></h3>
-				<p class="ml-hint"><T en="Paste into the first empty row (column A = match_id)." ko="맨 아래 빈 줄의 match_id 칸(A열)을 누르고 붙여넣기 하세요." /></p>
-				<pre id="ml-export-goals" class="ml-pre"></pre>
-				<button type="button" class="ml-btn ml-btn--primary" data-copy="ml-export-goals"><T en="Copy goals" ko="골 기록 복사" /></button>
-
-				<h3><T en="② matches tab — scores" ko="② matches 탭 — 점수" /></h3>
-				<p class="ml-hint"><T en="Select this week's first home_score cell (M01) and paste: home and away scores for M01–M09." ko="이번 주 M01 줄의 home_score 칸을 누르고 붙여넣기 하세요. M01~M09의 홈·원정 점수가 들어가요." /></p>
-				<table class="ml-score-table"><tbody id="ml-export-score-rows"></tbody></table>
-				<pre id="ml-export-scores" class="ml-pre" hidden></pre>
-				<button type="button" class="ml-btn ml-btn--primary" data-copy="ml-export-scores"><T en="Copy scores" ko="점수 복사" /></button>
-				<p id="ml-copied" class="ml-copied" role="status"></p>
-
-				<button type="button" id="ml-clear-week" class="ml-btn ml-btn--ghost ml-danger"><T en="Clear this week's log" ko="이번 주 기록 지우기" /></button>
+			<div class="ml-send">
+				<button type="button" id="ml-send" class="ml-btn ml-btn--primary ml-btn--big"><T en="Send this week's log" ko="기록 보내기" /></button>
+				<p class="ml-hint"><T en="Opens the share sheet — send it to the board on KakaoTalk." ko="공유창이 열리면 카톡으로 운영진에게 보내주세요." /></p>
+				<p id="ml-send-status" class="ml-copied" role="status"></p>
 			</div>
 		</section>
 
@@ -119,7 +109,6 @@ const data = {
 			</div>
 
 			<ol id="ml-goals" class="ml-goals"></ol>
-			<button type="button" id="ml-next" class="ml-btn ml-btn--primary ml-btn--big" hidden><T en="Next match →" ko="다음 경기 →" /></button>
 		</section>
 
 		<!-- Goal picker -->
@@ -141,7 +130,7 @@ const data = {
 	type Team = { id: string; name: string; color: string; text: string; roster: string[] };
 	type Match = { id: string; week: number; round: number; home: string; away: string; status: string; date: string | null };
 	type Goal = { id: string; team: string; scorer: string; assist: string | null; own: boolean; minute: number };
-	type MatchLog = { state: "idle" | "live" | "paused" | "done"; startedAt: number | null; pausedAt: number | null; pausedMs: number; goals: Goal[] };
+	type MatchLog = { state: "idle" | "live" | "paused" | "done"; startedAt: number | null; pausedAt: number | null; pausedMs: number; goals: Goal[]; buzzed?: boolean };
 	type Store = { week: number | null; matches: Record<string, MatchLog> };
 	type Data = { league: string; minutes: number; codeHash: string; teams: Team[]; matches: Match[] };
 
@@ -220,7 +209,6 @@ const data = {
 			li.querySelector("button")!.addEventListener("click", () => openMatch(match.id));
 			list.append(li);
 		}
-		renderExport();
 	}
 	$("ml-week-select").addEventListener("change", (event) => {
 		store.week = Number((event.target as HTMLSelectElement).value);
@@ -228,67 +216,53 @@ const data = {
 		renderWeek();
 	});
 
-	// ---------- export
-	function renderExport() {
+	// ---------- send (share sheet → KakaoTalk)
+	function weekReport() {
 		const weekMatches = data.matches.filter((m) => m.week === store.week);
-		const rows: string[] = [];
+		const goals: string[] = [];
 		for (const match of weekMatches) {
 			const log = logOf(match.id);
 			if (log.state === "idle") continue;
 			for (const g of [...log.goals].sort((x, y) => x.minute - y.minute)) {
-				rows.push([match.id, g.scorer, g.assist ?? "", g.own ? "Y" : "", g.minute].join("\t"));
+				goals.push([match.id, g.scorer, g.assist ?? "", g.own ? "Y" : "", g.minute].join("\t"));
 			}
 		}
-		$("ml-export-goals").textContent = rows.join("\n") || L("(no goals yet)", "(아직 골 없음)");
-		$("ml-export-goals").dataset.empty = rows.length ? "" : "1";
-
-		const scoreRows = weekMatches.map((match) => {
+		const scores = weekMatches.map((match) => {
 			const log = logOf(match.id);
 			const [h, a] = score(match);
-			return { match, done: log.state === "done", h, a };
+			return log.state === "done" ? `${h}\t${a}` : "\t";
 		});
-		$("ml-export-scores").textContent = scoreRows.map((r) => (r.done ? `${r.h}\t${r.a}` : "\t")).join("\n");
-		$("ml-export-score-rows").innerHTML = scoreRows
-			.map((r) => `<tr><td>${r.match.id.slice(-3)}</td><td>${teamById(r.match.home).name}</td><td class="ml-num">${r.done ? r.h : "–"}</td><td class="ml-num">${r.done ? r.a : "–"}</td><td>${teamById(r.match.away).name}</td></tr>`)
-			.join("");
-		const notDone = scoreRows.filter((r) => !r.done).length;
-		const warn = $("ml-export-warn");
-		warn.hidden = notDone === 0;
-		warn.textContent = L(`${notDone} match(es) not ended yet — their scores are left blank.`, `아직 종료 안 된 경기가 ${notDone}개 있어요. 그 경기 점수는 빈칸으로 복사돼요.`);
+		const notDone = weekMatches.filter((m) => logOf(m.id).state !== "done").length;
+		return [
+			`KICKS ${data.league} ${store.week}주차 경기 기록`,
+			...(notDone ? [`(종료 안 된 경기 ${notDone}개)`] : []),
+			"",
+			"[goal_events]",
+			...(goals.length ? goals : ["(골 없음)"]),
+			"",
+			"[matches 점수 M01~M09]",
+			...scores,
+		].join("\n");
 	}
 
-	document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((button) =>
-		button.addEventListener("click", async () => {
-			const el = $(button.dataset.copy!);
-			if (el.dataset.empty === "1") return;
-			const text = el.textContent ?? "";
-			let ok = false;
-			try { await navigator.clipboard.writeText(text); ok = true; } catch {
-				const area = document.createElement("textarea");
-				area.value = text;
-				document.body.append(area);
-				area.select();
-				try { ok = document.execCommand("copy"); } catch { /* ignore */ }
-				area.remove();
+	$("ml-send").addEventListener("click", async () => {
+		const text = weekReport();
+		const status = $("ml-send-status");
+		try {
+			if (navigator.share) {
+				await navigator.share({ text });
+				status.textContent = "";
+				return;
 			}
-			$("ml-copied").textContent = ok ? L("Copied! Paste it into the Sheet.", "복사됐어요! 시트에 붙여넣기 하세요.") : L("Couldn't copy — select the text and copy it.", "복사가 안 됐어요. 글자를 길게 눌러 직접 복사해주세요.");
-		}),
-	);
-
-	let clearArmed = false;
-	$("ml-clear-week").addEventListener("click", () => {
-		const button = $("ml-clear-week");
-		if (!clearArmed) {
-			clearArmed = true;
-			button.textContent = L("Tap again to clear", "한 번 더 누르면 지워져요");
-			setTimeout(() => { clearArmed = false; button.textContent = L("Clear this week's log", "이번 주 기록 지우기"); }, 3000);
-			return;
+		} catch (error) {
+			if ((error as Error).name === "AbortError") return;
 		}
-		for (const match of data.matches.filter((m) => m.week === store.week)) delete store.matches[match.id];
-		clearArmed = false;
-		button.textContent = L("Clear this week's log", "이번 주 기록 지우기");
-		save();
-		renderWeek();
+		try {
+			await navigator.clipboard.writeText(text);
+			status.textContent = L("Copied — paste it into KakaoTalk.", "복사됐어요. 카톡에 붙여넣기 해서 보내주세요.");
+		} catch {
+			status.textContent = L("Couldn't share or copy on this phone.", "이 휴대폰에서는 공유·복사가 안 돼요.");
+		}
 	});
 
 	// ---------- match view
@@ -332,7 +306,6 @@ const data = {
 		$("ml-resume").hidden = log.state !== "paused";
 		$("ml-end").hidden = log.state !== "live" && log.state !== "paused";
 		$("ml-reopen").hidden = log.state !== "done";
-		$("ml-next").hidden = log.state !== "done" || !nextMatch();
 		$("ml-clock-note").textContent =
 			log.state === "idle" ? L("Press Kick-off when the match starts. Goal minutes come from this clock.", "경기가 시작되면 킥오프를 누르세요. 골 시간은 이 시계로 자동 기록돼요.")
 			: log.state === "done" ? L("Match ended.", "경기가 끝났어요.")
@@ -384,6 +357,12 @@ const data = {
 		clock.textContent = mmss(ms);
 		clock.classList.toggle("ml-clock--over", ms >= data.minutes * 60000);
 		clock.classList.toggle("ml-clock--live", log.state === "live");
+		// Full time: buzz once (Android; iPhones don't allow vibration from a website).
+		if (log.state === "live" && ms >= data.minutes * 60000 && !log.buzzed) {
+			log.buzzed = true;
+			save();
+			try { navigator.vibrate?.([400, 200, 400]); } catch { /* not supported */ }
+		}
 	}
 	setInterval(renderClock, 500);
 
@@ -417,17 +396,16 @@ const data = {
 		if (log.state === "live") log.pausedAt = Date.now();
 		log.state = "done";
 		save();
-		renderMatch();
+		// Straight on to the next match (ready for Kick-off); after the last one, back to the list.
+		const next = nextMatch();
+		if (next) openMatch(next.id);
+		else $("ml-back").click();
 	});
 	$("ml-reopen").addEventListener("click", () => {
 		const log = logOf(currentMatchId!);
 		log.state = "paused";
 		save();
 		renderMatch();
-	});
-	$("ml-next").addEventListener("click", () => {
-		const next = nextMatch();
-		if (next) openMatch(next.id);
 	});
 
 	// ---------- goal picker: team → scorer (or own goal by an opponent) → assist
@@ -536,12 +514,8 @@ const data = {
 	.ml-state-live .ml-chip, .ml-state-paused .ml-chip { background: #fde8e6; color: #c0392b; }
 	.ml-state-done .ml-chip { background: var(--color-sage); color: var(--color-green); }
 
-	.ml-export h2 { margin: 0 0 8px; font-size: 1.2rem; }
-	.ml-export h3 { margin: 18px 0 2px; font-size: 0.95rem; }
+	.ml-send { display: grid; justify-items: center; gap: 4px; padding: 8px 0 0; text-align: center; }
 	.ml-pre { overflow-x: auto; max-height: 220px; margin: 0 0 10px; padding: 10px; border-radius: 8px; background: #f4f4f0; font-size: 0.82rem; line-height: 1.5; white-space: pre; }
-	.ml-score-table { width: 100%; margin: 0 0 10px; border-collapse: collapse; font-size: 0.88rem; }
-	.ml-score-table td { padding: 5px 4px; border-bottom: 1px solid #eee; }
-	.ml-num { font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
 	.ml-copied { min-height: 1.2em; margin: 6px 0 0; color: var(--color-green); font-size: 0.88rem; font-weight: 700; }
 
 	.ml-back { margin-bottom: 14px; padding: 8px 14px; }
