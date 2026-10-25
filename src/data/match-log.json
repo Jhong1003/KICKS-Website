@@ -1,0 +1,4 @@
+{
+  "_comment": "Manager code for /match-log, stored only as a SHA-256 hash. The page writes nothing to any server (it keeps the log on the manager's phone and copies rows for the Sheet), so this is a light lock against curious visitors, not real security. To change it: python3 -c \"import hashlib;print(hashlib.sha256(b'NEW CODE').hexdigest())\"",
+  "code_sha256": "e68c51bdaef2f24a7cb2e4477a764b0d0fe5ef337385cd19038e8eaf5dc34c83"
+}
