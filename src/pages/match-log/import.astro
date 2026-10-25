@@ -1,0 +1,189 @@
+---
+// Receiving end of the managers' match log (see ./index.astro). The manager's
+// "Send" button shares a link whose #fragment carries the whole week; this
+// page decodes it into a one-glance summary (every match, who scored when)
+// and Sheet-ready copy buttons — copied from the browser, so the columns
+// arrive split correctly. The fragment never reaches a server.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+import { leagues, getTeamColor } from "../../lib/leagues";
+
+const teams = Object.fromEntries(
+	leagues.map((league) => [league.id, Object.fromEntries(league.teams.map((team) => [team.team_id, { name: team.name, color: getTeamColor(team.team_id, league) }]))]),
+);
+---
+
+<BaseLayout title="Match Log Summary | KICKS" description="KICKS staff: match-day log summary." noindex>
+	<main class="mi">
+		<script type="application/json" id="mi-teams" set:html={JSON.stringify(teams)} />
+
+		<p id="mi-error" class="mi-card" hidden><T en="This link has no match log in it. Open the link the manager sent." ko="기록이 없는 링크예요. 매니저가 보낸 링크를 그대로 열어주세요." /></p>
+
+		<div id="mi-view" hidden>
+			<p class="mi-label" id="mi-league"></p>
+			<h1 id="mi-title"></h1>
+			<p id="mi-warn" class="mi-warn" hidden></p>
+
+			<section class="mi-section">
+				<h2><T en="At a glance" ko="한눈에 보기" /></h2>
+				<div id="mi-leaders" class="mi-leaders"></div>
+				<ol id="mi-matches" class="mi-matches"></ol>
+			</section>
+
+			<section class="mi-section mi-card">
+				<h2><T en="Copy for the Sheet" ko="시트용 복사" /></h2>
+
+				<h3><T en="① goal_events tab" ko="① goal_events 탭" /></h3>
+				<p class="mi-hint"><T en="Click the first empty cell in column A (match_id) and paste." ko="맨 아래 빈 줄의 A열(match_id) 칸을 누르고 붙여넣기 하세요." /></p>
+				<pre id="mi-goals" class="mi-pre"></pre>
+				<button type="button" class="mi-btn" data-copy="mi-goals"><T en="Copy goals" ko="골 기록 복사" /></button>
+
+				<h3><T en="② matches tab — scores" ko="② matches 탭 — 점수" /></h3>
+				<p class="mi-hint"><T en="Click this week's M01 home_score cell and paste (home and away scores for M01–M09)." ko="이번 주 M01 줄의 home_score 칸을 누르고 붙여넣기 하세요. M01~M09의 홈·원정 점수가 들어가요." /></p>
+				<pre id="mi-scores" class="mi-pre" hidden></pre>
+				<table class="mi-table"><tbody id="mi-score-rows"></tbody></table>
+				<button type="button" class="mi-btn" data-copy="mi-scores"><T en="Copy scores" ko="점수 복사" /></button>
+				<p id="mi-copied" class="mi-copied" role="status"></p>
+			</section>
+		</div>
+	</main>
+</BaseLayout>
+
+<script>
+	type Goal = [team: string, scorer: string, assist: string, own: 0 | 1, minute: number];
+	type Match = { i: string; h: string; a: string; d: 0 | 1; g: Goal[] };
+	type Payload = { v: number; l: string; w: number; m: Match[] };
+
+	const teams = JSON.parse(document.getElementById("mi-teams")!.textContent!) as Record<string, Record<string, { name: string; color: string }>>;
+	const $ = (id: string) => document.getElementById(id)!;
+	const L = (en: string, kr: string) => (document.documentElement.lang === "ko" ? kr : en);
+	const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+
+	function decode(): Payload | null {
+		try {
+			const b64 = location.hash.slice(1).replace(/-/g, "+").replace(/_/g, "/");
+			if (!b64) return null;
+			const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+			const payload = JSON.parse(new TextDecoder().decode(bytes)) as Payload;
+			return payload && payload.v === 1 && Array.isArray(payload.m) ? payload : null;
+		} catch {
+			return null;
+		}
+	}
+
+	function render() {
+		const p = decode();
+		$("mi-error").hidden = Boolean(p);
+		$("mi-view").hidden = !p;
+		if (!p) return;
+		const team = (id: string) => teams[p.l]?.[id] ?? { name: id, color: "#999" };
+		const score = (m: Match) => [m.g.filter((g) => g[0] === m.h).length, m.g.filter((g) => g[0] === m.a).length];
+
+		$("mi-league").textContent = `${p.l} · ${L("MATCH LOG", "경기 기록")}`;
+		$("mi-title").textContent = L(`Week ${p.w}`, `${p.w}주차`);
+		const notDone = p.m.filter((m) => !m.d).length;
+		$("mi-warn").hidden = notDone === 0;
+		$("mi-warn").textContent = L(`${notDone} match(es) weren't ended on the manager's phone — check them; their scores copy as blanks.`, `매니저 휴대폰에서 종료 안 된 경기가 ${notDone}개 있어요. 확인해주세요. 그 경기 점수는 빈칸으로 복사돼요.`);
+
+		// Leaders this week (own goals don't count as goals).
+		const tally = (key: (g: Goal) => string) => {
+			const counts = new Map<string, number>();
+			for (const m of p.m) for (const g of m.g) { const k = key(g); if (k) counts.set(k, (counts.get(k) ?? 0) + 1); }
+			return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko"));
+		};
+		const scorers = tally((g) => (g[3] ? "" : g[1]));
+		const assisters = tally((g) => g[2]);
+		const line = (rows: [string, number][]) => rows.map(([name, n]) => `${esc(name)} <b>${n}</b>`).join(" · ") || "–";
+		$("mi-leaders").innerHTML = `<p><span>${L("Goals", "골")}</span>${line(scorers)}</p><p><span>${L("Assists", "어시")}</span>${line(assisters)}</p>`;
+
+		$("mi-matches").innerHTML = p.m
+			.map((m) => {
+				const [h, a] = score(m);
+				const home = team(m.h), away = team(m.a);
+				const goals = m.g
+					.map((g) => {
+						const t = team(g[0]);
+						const who = `${esc(g[1])}${g[3] ? ` <em>${L("(own goal)", "(자책골)")}</em>` : ""}${g[2] ? ` <small>${L("assist", "어시")} ${esc(g[2])}</small>` : ""}`;
+						return `<li style="--team:${t.color}"><span class="mi-min">${g[4]}'</span><span>${who}</span></li>`;
+					})
+					.join("");
+				return `<li class="mi-match">
+					<div class="mi-match-head">
+						<span class="mi-no">${esc(m.i.slice(-3))}</span>
+						<span class="mi-team" style="--team:${home.color}">${esc(home.name)}</span>
+						<b class="mi-score">${m.d ? `${h} : ${a}` : `${h} : ${a} <small>${L("not ended", "미종료")}</small>`}</b>
+						<span class="mi-team mi-team--away" style="--team:${away.color}">${esc(away.name)}</span>
+					</div>
+					${goals ? `<ol class="mi-goals">${goals}</ol>` : `<p class="mi-none">${L("No goals", "골 없음")}</p>`}
+				</li>`;
+			})
+			.join("");
+
+		const rows: string[] = [];
+		for (const m of p.m) for (const g of m.g) rows.push([m.i, g[1], g[2], g[3] ? "Y" : "", g[4]].join("\t"));
+		$("mi-goals").textContent = rows.join("\n") || L("(no goals)", "(골 없음)");
+		$("mi-goals").dataset.empty = rows.length ? "" : "1";
+		$("mi-scores").textContent = p.m.map((m) => { const [h, a] = score(m); return m.d ? `${h}\t${a}` : "\t"; }).join("\n");
+		$("mi-score-rows").innerHTML = p.m
+			.map((m) => { const [h, a] = score(m); return `<tr><td>${esc(m.i.slice(-3))}</td><td>${esc(team(m.h).name)}</td><td class="mi-num">${m.d ? h : "–"}</td><td class="mi-num">${m.d ? a : "–"}</td><td>${esc(team(m.a).name)}</td></tr>`; })
+			.join("");
+	}
+
+	document.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((button) =>
+		button.addEventListener("click", async () => {
+			const el = $(button.dataset.copy!);
+			if (el.dataset.empty === "1") return;
+			let ok = false;
+			try { await navigator.clipboard.writeText(el.textContent ?? ""); ok = true; } catch {
+				const area = document.createElement("textarea");
+				area.value = el.textContent ?? "";
+				document.body.append(area);
+				area.select();
+				try { ok = document.execCommand("copy"); } catch { /* ignore */ }
+				area.remove();
+			}
+			$("mi-copied").textContent = ok ? L("Copied! Paste it into the Sheet.", "복사됐어요! 시트에 붙여넣기 하세요.") : L("Couldn't copy — select the text and copy it.", "복사가 안 됐어요. 글자를 선택해서 직접 복사해주세요.");
+		}),
+	);
+
+	render();
+	window.addEventListener("hashchange", render);
+	new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+</script>
+
+<style>
+	.mi { max-width: 640px; margin: 0 auto; padding: 24px 16px 64px; color: var(--color-dark); }
+	.mi [hidden] { display: none !important; }
+	.mi-card { padding: 20px; border: 1px solid rgba(63, 81, 40, 0.18); border-radius: 12px; background: #fff; }
+	.mi-label { margin: 0 0 4px; color: var(--color-green); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; }
+	.mi h1 { margin: 0 0 14px; font-size: 2rem; }
+	.mi h2 { margin: 0 0 12px; font-size: 1.2rem; }
+	.mi h3 { margin: 18px 0 2px; font-size: 0.95rem; }
+	.mi-section { margin-top: 24px; }
+	.mi-warn { padding: 10px 12px; border-radius: 8px; background: #fff4e0; color: #8a5a00; font-size: 0.88rem; }
+	.mi-hint { margin: 2px 0 8px; color: #6b6b6b; font-size: 0.85rem; }
+	.mi-leaders { display: grid; gap: 6px; margin-bottom: 14px; padding: 12px 14px; border-radius: 10px; background: var(--color-sage); font-size: 0.92rem; line-height: 1.5; }
+	.mi-leaders p { margin: 0; }
+	.mi-leaders span { display: inline-block; min-width: 3rem; color: var(--color-green); font-weight: 800; }
+	.mi-matches { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+	.mi-match { padding: 12px 14px; border: 1px solid rgba(63, 81, 40, 0.15); border-radius: 10px; background: #fff; }
+	.mi-match-head { display: grid; grid-template-columns: 2.4rem 1fr auto 1fr; gap: 8px; align-items: center; }
+	.mi-no { color: #8a8a8a; font-size: 0.78rem; font-weight: 700; }
+	.mi-team { font-weight: 700; word-break: keep-all; }
+	.mi-team::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 6px; border-radius: 50%; background: var(--team); }
+	.mi-team--away { text-align: right; }
+	.mi-score { font-size: 1.15rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+	.mi-score small { color: #c0392b; font-size: 0.7rem; }
+	.mi-goals { display: grid; gap: 2px; margin: 8px 0 0 2.4rem; padding: 0; list-style: none; font-size: 0.9rem; }
+	.mi-goals li { display: grid; grid-template-columns: 2.4rem 1fr; padding-left: 8px; border-left: 3px solid var(--team); }
+	.mi-goals small { color: #6b6b6b; }
+	.mi-goals em { color: #c0392b; font-style: normal; font-size: 0.85rem; }
+	.mi-min { font-weight: 800; font-variant-numeric: tabular-nums; }
+	.mi-none { margin: 6px 0 0 2.4rem; color: #9a9a9a; font-size: 0.85rem; }
+	.mi-pre { overflow-x: auto; max-height: 220px; margin: 0 0 10px; padding: 10px; border-radius: 8px; background: #f4f4f0; font-size: 0.82rem; line-height: 1.5; white-space: pre; }
+	.mi-table { width: 100%; margin: 0 0 10px; border-collapse: collapse; font-size: 0.88rem; }
+	.mi-table td { padding: 5px 4px; border-bottom: 1px solid #eee; }
+	.mi-num { font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+	.mi-btn { padding: 10px 18px; border: none; border-radius: 999px; color: var(--color-background); background: var(--color-green); font: inherit; font-weight: 700; cursor: pointer; }
+	.mi-copied { min-height: 1.2em; margin: 8px 0 0; color: var(--color-green); font-size: 0.88rem; font-weight: 700; }
+</style>

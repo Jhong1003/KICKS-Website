@@ -4,21 +4,20 @@
 // The minute comes from the running 12-minute clock (elapsed time rounded up,
 // same rule as the Sheet: 5:30 → 6). At 12:00 the clock turns red (and the
 // phone vibrates where the browser allows it); ending a match goes straight
-// to the next one. At the end of the day "Send" shares the week's log — the
-// goal_events rows (match_id, scorer, assist, own_goal, minute) and the nine
-// scores, tab-separated for pasting — through the phone's share sheet
-// (KakaoTalk), so whoever enters the Sheet gets it.
+// to the next one. At the end of the day "Send" shares a link through the
+// phone's share sheet (KakaoTalk); the week's log rides inside the link and
+// /match-log/import/ turns it into a summary plus Sheet-ready copy buttons.
 //
 // Nothing is sent anywhere: the log lives in this phone's localStorage, so a
 // refresh or a dead screen doesn't lose it. One manager, one phone. The code
 // lock (src/data/match-log.json) only keeps curious visitors out.
-import BaseLayout from "../layouts/BaseLayout.astro";
-import T from "../components/T.astro";
-import profilesData from "../data/player_profiles.json";
-import matchesData from "../data/matches.json";
-import matchLog from "../data/match-log.json";
-import { currentLeague, getTeamColor } from "../lib/leagues";
-import { getContrastingTextColor, type PlayerProfile } from "../lib/players";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+import profilesData from "../../data/player_profiles.json";
+import matchesData from "../../data/matches.json";
+import matchLog from "../../data/match-log.json";
+import { currentLeague, getTeamColor } from "../../lib/leagues";
+import { getContrastingTextColor, type PlayerProfile } from "../../lib/players";
 
 const league = currentLeague;
 const collator = new Intl.Collator("ko");
@@ -217,36 +216,38 @@ const data = {
 	});
 
 	// ---------- send (share sheet → KakaoTalk)
-	function weekReport() {
+	// The whole week travels inside the link (#fragment, never sent to a server):
+	// /match-log/import/ decodes it into a readable summary and Sheet-ready copy buttons.
+	function weekLink() {
 		const weekMatches = data.matches.filter((m) => m.week === store.week);
-		const goals: string[] = [];
-		for (const match of weekMatches) {
-			const log = logOf(match.id);
-			if (log.state === "idle") continue;
-			for (const g of [...log.goals].sort((x, y) => x.minute - y.minute)) {
-				goals.push([match.id, g.scorer, g.assist ?? "", g.own ? "Y" : "", g.minute].join("\t"));
-			}
-		}
-		const scores = weekMatches.map((match) => {
-			const log = logOf(match.id);
-			const [h, a] = score(match);
-			return log.state === "done" ? `${h}\t${a}` : "\t";
-		});
-		const notDone = weekMatches.filter((m) => logOf(m.id).state !== "done").length;
-		return [
-			`KICKS ${data.league} ${store.week}주차 경기 기록`,
-			...(notDone ? [`(종료 안 된 경기 ${notDone}개)`] : []),
-			"",
-			"[goal_events]",
-			...(goals.length ? goals : ["(골 없음)"]),
-			"",
-			"[matches 점수 M01~M09]",
-			...scores,
-		].join("\n");
+		const payload = {
+			v: 1,
+			l: data.league,
+			w: store.week,
+			m: weekMatches.map((match) => {
+				const log = logOf(match.id);
+				return {
+					i: match.id,
+					h: match.home,
+					a: match.away,
+					d: log.state === "done" ? 1 : 0,
+					g: [...log.goals].sort((x, y) => x.minute - y.minute).map((g) => [g.team, g.scorer, g.assist ?? "", g.own ? 1 : 0, g.minute]),
+				};
+			}),
+		};
+		const bytes = new TextEncoder().encode(JSON.stringify(payload));
+		const b64 = btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+		const done = payload.m.filter((m) => m.d).length;
+		const goals = payload.m.reduce((n, m) => n + m.g.length, 0);
+		return {
+			url: `${location.origin}/match-log/import/#${b64}`,
+			title: `KICKS ${data.league} ${store.week}주차 경기 기록 (종료 ${done}/${payload.m.length}경기 · ${goals}골)`,
+		};
 	}
 
 	$("ml-send").addEventListener("click", async () => {
-		const text = weekReport();
+		const { url, title } = weekLink();
+		const text = `${title}\n${url}`;
 		const status = $("ml-send-status");
 		try {
 			if (navigator.share) {
