@@ -216,8 +216,7 @@ const data = {
 	});
 
 	// ---------- send (share sheet → KakaoTalk)
-	// The whole week travels as a code in the message (KakaoTalk cuts long
-	// links, so it can't ride inside one). Compact v2 form, decoded by
+	// The whole week travels inside the link (?d=…). Compact v2 form, decoded by
 	// /match-log/import/: [league, week, [[home, away, ended, [[side 0/1, scorer, assist, own 0/1, minute], …]], …]]
 	// with matches in M01… order.
 	function weekLink() {
@@ -241,17 +240,17 @@ const data = {
 		const done = payload[3].filter((m) => m[2]).length;
 		const goals = payload[3].reduce((n, m) => n + m[3].length, 0);
 		return {
-			url: `${location.origin}/match-log/import/`,
-			code: b64,
+			url: `${location.origin}/match-log/import/?d=${b64}`,
 			title: `KICKS ${data.league} ${store.week}주차 경기 기록 (종료 ${done}/${payload[3].length}경기 · ${goals}골)`,
 		};
 	}
 
 	$("ml-send").addEventListener("click", async () => {
-		// KakaoTalk only links the first ~80 characters of a URL, so the log goes
-		// as a separate "code" line: open the short link, paste the whole message.
-		const { url, code, title } = weekLink();
-		const text = `${title}\n👉 ${url}\n(링크를 열고 이 메시지 전체를 복사해서 붙여넣기)\n기록 코드: ${code}`;
+		// KakaoTalk only links the first ~80 characters, so on the receiving end
+		// open the message in full view, copy the whole URL and paste it into a
+		// browser (or paste the message on /match-log/import/).
+		const { url, title } = weekLink();
+		const text = `${title}\n${url}`;
 		const status = $("ml-send-status");
 		try {
 			if (navigator.share) {
