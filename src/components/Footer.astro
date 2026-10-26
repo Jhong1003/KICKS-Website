@@ -1,5 +1,9 @@
 ---
 import T from "./T.astro";
+
+// The managers' match log (/match-log) is linked only from the league pages'
+// footer: small, out of the members' way, and still one tap from the site.
+const onLeaguePage = /^\/league(\/|$)/.test(Astro.url.pathname);
 ---
 
 <footer class="site-footer">
@@ -16,7 +20,15 @@ import T from "./T.astro";
 	</div>
 
 	<div class="site-footer-copyright">
-		<span>© {new Date().getFullYear()} KICKS. All rights reserved.</span>
+		<span>
+			© {new Date().getFullYear()} KICKS. All rights reserved.
+			{onLeaguePage && (
+				<>
+					<span class="site-footer-sep" aria-hidden="true">·</span>
+					<a class="site-footer-manager" href="/match-log/" rel="nofollow"><T en="Manager" ko="매니저" /></a>
+				</>
+			)}
+		</span>
 		<span id="daily-visits" hidden>
 			<T>
 				<Fragment slot="en"><span class="visits-heading">TODAY</span><br />👀 <span data-visit-count></span> visitors</Fragment>
@@ -35,5 +47,8 @@ import T from "./T.astro";
 <style>
 	.site-footer-copyright { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; }
 	#daily-visits { white-space: nowrap; }
+	.site-footer-sep { margin: 0 6px; opacity: 0.6; }
+	.site-footer-manager { color: inherit; opacity: 0.75; text-decoration: none; }
+	.site-footer-manager:hover, .site-footer-manager:focus-visible { opacity: 1; text-decoration: underline; }
 	.visits-heading { font-size: 0.65rem; letter-spacing: 0.08em; }
 </style>
