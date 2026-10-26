@@ -19,7 +19,7 @@
           "assists": 1,
           "attacking_points": 1,
           "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -35,6 +35,13 @@
             "games": 6,
             "goals": 0,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
           }
         ],
         "personal_best_week": {
@@ -46,7 +53,6 @@
         "play_style_tag": "Rock",
         "badges": [
           "provider",
-          "iron_man",
           "libero",
           "the_wall"
         ]
@@ -129,11 +135,11 @@
         "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
-          "goals": 0,
-          "assists": 1,
-          "attacking_points": 1,
-          "weeks_attended": 1,
-          "weeks_played": 2
+          "goals": 1,
+          "assists": 2,
+          "attacking_points": 3,
+          "weeks_attended": 2,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -149,16 +155,24 @@
             "games": 6,
             "goals": 0,
             "assists": 1
+          },
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 1,
+            "assists": 1
           }
         ],
         "personal_best_week": {
-          "week": 2,
-          "goals": 0,
+          "week": 3,
+          "goals": 1,
           "assists": 1,
-          "attacking_points": 1
+          "attacking_points": 2
         },
-        "play_style_tag": "Target Man",
+        "play_style_tag": "All-Rounder",
         "badges": [
+          "off_the_mark",
           "provider"
         ]
       },
@@ -326,11 +340,11 @@
         "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
-          "goals": 3,
+          "goals": 4,
           "assists": 0,
-          "attacking_points": 3,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "attacking_points": 4,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -345,6 +359,13 @@
             "team_id": "T2",
             "games": 6,
             "goals": 3,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T2",
+            "games": 6,
+            "goals": 1,
             "assists": 0
           }
         ],
@@ -446,11 +467,11 @@
         "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
-          "goals": 3,
-          "assists": 0,
-          "attacking_points": 3,
-          "weeks_attended": 1,
-          "weeks_played": 2
+          "goals": 4,
+          "assists": 1,
+          "attacking_points": 5,
+          "weeks_attended": 2,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -466,6 +487,13 @@
             "games": 0,
             "goals": 0,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T2",
+            "games": 6,
+            "goals": 1,
+            "assists": 1
           }
         ],
         "personal_best_week": {
@@ -477,6 +505,7 @@
         "play_style_tag": "Finisher",
         "badges": [
           "off_the_mark",
+          "provider",
           "on_fire",
           "late_winner"
         ]
@@ -555,8 +584,8 @@
           "goals": 0,
           "assists": 0,
           "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -568,6 +597,13 @@
           },
           {
             "week": 2,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
@@ -657,8 +693,8 @@
           "goals": 0,
           "assists": 1,
           "attacking_points": 1,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -674,6 +710,13 @@
             "games": 6,
             "goals": 0,
             "assists": 1
+          },
+          {
+            "week": 3,
+            "team_id": "T1",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
           }
         ],
         "personal_best_week": {
@@ -760,8 +803,8 @@
           "goals": 0,
           "assists": 0,
           "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -773,6 +816,13 @@
           },
           {
             "week": 2,
+            "team_id": "T1",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
@@ -864,7 +914,7 @@
           "assists": 1,
           "attacking_points": 2,
           "weeks_attended": 1,
-          "weeks_played": 2
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -876,6 +926,13 @@
           },
           {
             "week": 2,
+            "team_id": "T1",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T1",
             "games": 0,
             "goals": 0,
@@ -969,8 +1026,8 @@
           "goals": 0,
           "assists": 0,
           "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -982,6 +1039,13 @@
           },
           {
             "week": 2,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
@@ -1065,11 +1129,11 @@
         "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
-          "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "goals": 2,
+          "assists": 1,
+          "attacking_points": 3,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1085,12 +1149,28 @@
             "games": 6,
             "goals": 0,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T1",
+            "games": 6,
+            "goals": 2,
+            "assists": 1
           }
         ],
-        "personal_best_week": null,
-        "play_style_tag": "Rock",
+        "personal_best_week": {
+          "week": 3,
+          "goals": 2,
+          "assists": 1,
+          "attacking_points": 3
+        },
+        "play_style_tag": "All-Rounder",
         "badges": [
+          "off_the_mark",
+          "provider",
           "iron_man",
+          "on_fire",
+          "libero",
           "the_wall"
         ]
       },
@@ -1168,10 +1248,10 @@
         "team_history": [],
         "season_totals": {
           "goals": 0,
-          "assists": 2,
-          "attacking_points": 2,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "assists": 7,
+          "attacking_points": 7,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1187,19 +1267,27 @@
             "games": 6,
             "goals": 0,
             "assists": 1
+          },
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 0,
+            "assists": 5
           }
         ],
         "personal_best_week": {
-          "week": 1,
+          "week": 3,
           "goals": 0,
-          "assists": 1,
-          "attacking_points": 1
+          "assists": 5,
+          "attacking_points": 5
         },
         "play_style_tag": "Playmaker",
         "badges": [
-          "provider",
           "iron_man",
+          "on_fire",
           "libero",
+          "delivery_service",
           "the_wall"
         ]
       },
@@ -1284,7 +1372,7 @@
           "assists": 4,
           "attacking_points": 5,
           "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1300,6 +1388,13 @@
             "games": 6,
             "goals": 1,
             "assists": 1
+          },
+          {
+            "week": 3,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
           }
         ],
         "personal_best_week": {
@@ -1311,7 +1406,6 @@
         "play_style_tag": "Playmaker",
         "badges": [
           "off_the_mark",
-          "iron_man",
           "on_fire",
           "crack",
           "maestro",
@@ -1380,11 +1474,11 @@
         "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
-          "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "goals": 2,
+          "assists": 1,
+          "attacking_points": 3,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1400,12 +1494,29 @@
             "games": 6,
             "goals": 0,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T1",
+            "games": 6,
+            "goals": 2,
+            "assists": 1
           }
         ],
-        "personal_best_week": null,
-        "play_style_tag": "Rock",
+        "personal_best_week": {
+          "week": 3,
+          "goals": 2,
+          "assists": 1,
+          "attacking_points": 3
+        },
+        "play_style_tag": "All-Rounder",
         "badges": [
+          "off_the_mark",
+          "provider",
           "iron_man",
+          "on_fire",
+          "libero",
+          "brace",
           "the_wall"
         ]
       },
@@ -1485,8 +1596,8 @@
           "goals": 0,
           "assists": 1,
           "attacking_points": 1,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1498,6 +1609,13 @@
           },
           {
             "week": 2,
+            "team_id": "T1",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
@@ -1590,11 +1708,11 @@
         "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
-          "goals": 3,
+          "goals": 6,
           "assists": 1,
-          "attacking_points": 4,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "attacking_points": 7,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1610,6 +1728,13 @@
             "games": 6,
             "goals": 1,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 3,
+            "assists": 0
           }
         ],
         "personal_best_week": {
@@ -1620,10 +1745,11 @@
         },
         "play_style_tag": "Finisher",
         "badges": [
-          "off_the_mark",
           "provider",
           "iron_man",
-          "on_fire"
+          "on_fire",
+          "brace",
+          "fox_in_the_box"
         ]
       },
       {
@@ -1702,8 +1828,8 @@
           "goals": 0,
           "assists": 0,
           "attacking_points": 0,
-          "weeks_attended": 1,
-          "weeks_played": 2
+          "weeks_attended": 2,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1715,6 +1841,13 @@
           },
           {
             "week": 2,
+            "team_id": "T2",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
@@ -1865,11 +1998,11 @@
         "current_team_id": "T1",
         "team_history": [],
         "season_totals": {
-          "goals": 7,
+          "goals": 9,
           "assists": 0,
-          "attacking_points": 7,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "attacking_points": 9,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1884,6 +2017,13 @@
             "team_id": "T1",
             "games": 6,
             "goals": 3,
+            "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T1",
+            "games": 6,
+            "goals": 2,
             "assists": 0
           }
         ],
@@ -1979,8 +2119,8 @@
           "goals": 0,
           "assists": 0,
           "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -1992,6 +2132,13 @@
           },
           {
             "week": 2,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
@@ -2075,8 +2222,8 @@
           "goals": 0,
           "assists": 1,
           "attacking_points": 1,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2088,6 +2235,13 @@
           },
           {
             "week": 2,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
@@ -2180,10 +2334,10 @@
         "team_history": [],
         "season_totals": {
           "goals": 1,
-          "assists": 0,
-          "attacking_points": 1,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "assists": 1,
+          "attacking_points": 2,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2199,6 +2353,13 @@
             "games": 6,
             "goals": 1,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T2",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
           }
         ],
         "personal_best_week": {
@@ -2207,9 +2368,10 @@
           "assists": 0,
           "attacking_points": 1
         },
-        "play_style_tag": "Target Man",
+        "play_style_tag": "All-Rounder",
         "badges": [
           "off_the_mark",
+          "provider",
           "iron_man"
         ]
       },
@@ -2376,11 +2538,11 @@
         "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
-          "goals": 1,
-          "assists": 0,
-          "attacking_points": 1,
-          "weeks_attended": 1,
-          "weeks_played": 2
+          "goals": 2,
+          "assists": 2,
+          "attacking_points": 4,
+          "weeks_attended": 2,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2396,17 +2558,26 @@
             "games": 6,
             "goals": 1,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 1,
+            "assists": 2
           }
         ],
         "personal_best_week": {
-          "week": 2,
+          "week": 3,
           "goals": 1,
-          "assists": 0,
-          "attacking_points": 1
+          "assists": 2,
+          "attacking_points": 3
         },
-        "play_style_tag": "Rock",
+        "play_style_tag": "All-Rounder",
         "badges": [
           "off_the_mark",
+          "provider",
+          "on_fire",
           "libero",
           "the_wall"
         ]
@@ -2486,10 +2657,10 @@
         "team_history": [],
         "season_totals": {
           "goals": 0,
-          "assists": 0,
-          "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "assists": 1,
+          "attacking_points": 1,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2505,12 +2676,26 @@
             "games": 6,
             "goals": 0,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T1",
+            "games": 6,
+            "goals": 0,
+            "assists": 1
           }
         ],
-        "personal_best_week": null,
+        "personal_best_week": {
+          "week": 3,
+          "goals": 0,
+          "assists": 1,
+          "attacking_points": 1
+        },
         "play_style_tag": "Rock",
         "badges": [
+          "provider",
           "iron_man",
+          "libero",
           "the_wall"
         ]
       },
@@ -2574,11 +2759,11 @@
         "current_team_id": "T2",
         "team_history": [],
         "season_totals": {
-          "goals": 2,
+          "goals": 3,
           "assists": 1,
-          "attacking_points": 3,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "attacking_points": 4,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2594,6 +2779,13 @@
             "games": 6,
             "goals": 1,
             "assists": 1
+          },
+          {
+            "week": 3,
+            "team_id": "T2",
+            "games": 6,
+            "goals": 1,
+            "assists": 0
           }
         ],
         "personal_best_week": {
@@ -2602,7 +2794,7 @@
           "assists": 1,
           "attacking_points": 2
         },
-        "play_style_tag": "All-Rounder",
+        "play_style_tag": "Finisher",
         "badges": [
           "off_the_mark",
           "provider",
@@ -2678,7 +2870,7 @@
           "assists": 0,
           "attacking_points": 0,
           "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2694,12 +2886,19 @@
             "games": 6,
             "goals": 0,
             "assists": 0
+          },
+          {
+            "week": 3,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
           }
         ],
         "personal_best_week": null,
         "play_style_tag": "Target Man",
         "badges": [
-          "iron_man"
+          "squad_member"
         ]
       },
       {
@@ -2761,8 +2960,8 @@
           "goals": 0,
           "assists": 0,
           "attacking_points": 0,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2774,6 +2973,13 @@
           },
           {
             "week": 2,
+            "team_id": "T2",
+            "games": 6,
+            "goals": 0,
+            "assists": 0
+          },
+          {
+            "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
@@ -2855,11 +3061,11 @@
         "current_team_id": "T3",
         "team_history": [],
         "season_totals": {
-          "goals": 3,
-          "assists": 2,
-          "attacking_points": 5,
-          "weeks_attended": 2,
-          "weeks_played": 2
+          "goals": 9,
+          "assists": 4,
+          "attacking_points": 13,
+          "weeks_attended": 3,
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2875,21 +3081,31 @@
             "games": 6,
             "goals": 1,
             "assists": 1
+          },
+          {
+            "week": 3,
+            "team_id": "T3",
+            "games": 6,
+            "goals": 6,
+            "assists": 2
           }
         ],
         "personal_best_week": {
-          "week": 1,
-          "goals": 2,
-          "assists": 1,
-          "attacking_points": 3
+          "week": 3,
+          "goals": 6,
+          "assists": 2,
+          "attacking_points": 8
         },
-        "play_style_tag": "All-Rounder",
+        "play_style_tag": "Finisher",
         "badges": [
-          "off_the_mark",
           "provider",
           "iron_man",
           "on_fire",
-          "crack"
+          "late_winner",
+          "game_changer",
+          "crack",
+          "fox_in_the_box",
+          "hat_trick"
         ]
       },
       {
@@ -2978,7 +3194,7 @@
           "assists": 3,
           "attacking_points": 4,
           "weeks_attended": 2,
-          "weeks_played": 2
+          "weeks_played": 3
         },
         "weekly_stats": [
           {
@@ -2994,6 +3210,13 @@
             "games": 6,
             "goals": 0,
             "assists": 3
+          },
+          {
+            "week": 3,
+            "team_id": "T2",
+            "games": 0,
+            "goals": 0,
+            "assists": 0
           }
         ],
         "personal_best_week": {
@@ -3005,7 +3228,6 @@
         "play_style_tag": "Playmaker",
         "badges": [
           "off_the_mark",
-          "iron_man",
           "on_fire",
           "maestro"
         ]
