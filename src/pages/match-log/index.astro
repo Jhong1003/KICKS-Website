@@ -100,6 +100,7 @@ const data = {
 					<button type="button" id="ml-end" class="ml-btn ml-btn--ghost"><T en="End match" ko="경기 종료" /></button>
 					<button type="button" id="ml-reopen" class="ml-btn ml-btn--ghost"><T en="Reopen" ko="다시 열기" /></button>
 				</div>
+				<button type="button" id="ml-reset" class="ml-btn ml-btn--ghost ml-reset"><T en="Reset this match" ko="이 경기 기록 초기화" /></button>
 			</div>
 
 			<div class="ml-goal-buttons">
@@ -310,6 +311,11 @@ const data = {
 		$("ml-resume").hidden = log.state !== "paused";
 		$("ml-end").hidden = log.state !== "live" && log.state !== "paused";
 		$("ml-reopen").hidden = log.state !== "done";
+		// A match started by mistake: put it back to "Not started" (clock and goals cleared).
+		const reset = $<HTMLButtonElement>("ml-reset");
+		reset.hidden = log.state === "idle";
+		reset.dataset.armed = "";
+		reset.textContent = L("Reset this match", "이 경기 기록 초기화");
 		$("ml-clock-note").textContent =
 			log.state === "idle" ? L("Press Kick-off when the match starts. Goal minutes come from this clock.", "경기가 시작되면 킥오프를 누르세요. 골 시간은 이 시계로 자동 기록돼요.")
 			: log.state === "done" ? L("Match ended.", "경기가 끝났어요.")
@@ -408,6 +414,23 @@ const data = {
 	$("ml-reopen").addEventListener("click", () => {
 		const log = logOf(currentMatchId!);
 		log.state = "paused";
+		save();
+		renderMatch();
+	});
+
+	$("ml-reset").addEventListener("click", () => {
+		const button = $<HTMLButtonElement>("ml-reset");
+		const log = logOf(currentMatchId!);
+		// Two taps, like deleting a goal: the first one asks, the second one resets.
+		if (button.dataset.armed !== "1") {
+			button.dataset.armed = "1";
+			button.textContent = log.goals.length
+				? L(`Clear the clock and ${log.goals.length} goal(s)? Tap again`, `시계와 골 ${log.goals.length}개가 지워져요. 한 번 더 누르세요`)
+				: L("Back to Not started? Tap again", "시작 전으로 되돌릴까요? 한 번 더 누르세요");
+			setTimeout(() => { if (button.dataset.armed === "1") { button.dataset.armed = ""; button.textContent = L("Reset this match", "이 경기 기록 초기화"); } }, 3000);
+			return;
+		}
+		store.matches[currentMatchId!] = { state: "idle", startedAt: null, pausedAt: null, pausedMs: 0, goals: [] };
 		save();
 		renderMatch();
 	});
@@ -534,6 +557,8 @@ const data = {
 	.ml-clock { margin: 0; font-size: 3.2rem; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: #9a9a9a; }
 	.ml-clock--live { color: var(--color-green); }
 	.ml-clock--over { color: #c0392b; }
+	.ml-reset { display: block; margin: 14px auto 0; font-size: 0.85rem; color: #c0392b; }
+	.ml-reset[hidden] { display: none; }
 	.ml-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 	.ml-goal-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
 	.ml-goal-btn { min-height: 76px; padding: 12px 8px; border: none; border-radius: 12px; font: inherit; font-size: 1.05rem; font-weight: 800; word-break: keep-all; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); }
