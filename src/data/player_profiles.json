@@ -1709,8 +1709,8 @@
         "team_history": [],
         "season_totals": {
           "goals": 6,
-          "assists": 1,
-          "attacking_points": 7,
+          "assists": 2,
+          "attacking_points": 8,
           "weeks_attended": 3,
           "weeks_played": 3
         },
@@ -1734,14 +1734,14 @@
             "team_id": "T3",
             "games": 6,
             "goals": 3,
-            "assists": 0
+            "assists": 1
           }
         ],
         "personal_best_week": {
-          "week": 1,
-          "goals": 2,
+          "week": 3,
+          "goals": 3,
           "assists": 1,
-          "attacking_points": 3
+          "attacking_points": 4
         },
         "play_style_tag": "Finisher",
         "badges": [
