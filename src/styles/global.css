@@ -1148,15 +1148,32 @@ button.league-switcher-link {
 
 }
 
-/* Emoji reactions under a finished match (WeeklyResults.astro). Small and
-   quiet so the card still reads as a scoreboard first. */
+/* Goals toggle and emoji reactions share one row under the score
+   (WeeklyResults.astro); reactions are small and sit to the right so the card
+   still reads as a scoreboard first. */
+
+.match-card-foot {
+
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+
+}
+
+.match-card-foot > .match-goals {
+
+	flex: 1;
+	min-width: 0;
+
+}
 
 .match-reactions {
 
 	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: 10px;
+	flex-shrink: 0;
+	gap: 0;
+	margin-top: 6px;
+	margin-left: auto;
 
 }
 
@@ -1170,30 +1187,41 @@ button.league-switcher-link {
 
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
-	min-height: 30px;
-	padding: 2px 10px;
-	border: 1px solid var(--color-sage);
+	gap: 2px;
+	min-height: 26px;
+	padding: 0 5px;
+	border: none;
 	border-radius: 999px;
 	background: none;
 	color: var(--color-dark);
 	font: inherit;
-	font-size: 0.85rem;
+	font-size: 0.78rem;
 	font-variant-numeric: tabular-nums;
+	opacity: 0.45;
+	filter: grayscale(0.6);
 	cursor: pointer;
-	transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+	transition: opacity 0.15s ease, filter 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+
+}
+
+/* Bright once someone has reacted, or when it's yours. */
+.match-reaction:not([data-n="0"]),
+.match-reaction[aria-pressed="true"],
+.match-reaction:hover {
+
+	opacity: 1;
+	filter: none;
 
 }
 
 .match-reaction:active {
 
-	transform: scale(0.92);
+	transform: scale(0.9);
 
 }
 
 .match-reaction[aria-pressed="true"] {
 
-	border-color: var(--color-green);
 	background-color: var(--color-sage);
 	font-weight: 700;
 
@@ -1202,7 +1230,7 @@ button.league-switcher-link {
 .match-reaction:focus-visible {
 
 	outline: 2px solid var(--color-green);
-	outline-offset: 2px;
+	outline-offset: 1px;
 
 }
 

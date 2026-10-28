@@ -159,6 +159,8 @@ const REACTIONS = [
 												)}
 												<span class={teamClass(awayWins, homeWins)}>{match.away_team}</span>
 											</div>
+											{/* Goals toggle on the left, reactions small on the right: one quiet row. */}
+											<div class="match-card-foot">
 											{goalsOf(match).length > 0 && (
 												/* Folded away by default: the card is a scoreboard first, and a
 												   week of nine open timelines reads as a wall. A plain <details>,
@@ -233,6 +235,7 @@ const REACTIONS = [
 													))}
 												</div>
 											)}
+											</div>
 										</div>
 									);
 								})}
