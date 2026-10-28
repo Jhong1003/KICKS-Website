@@ -42,3 +42,22 @@ node scripts/make_forecasts.mjs --league FA26-L2 --week 2 --dry-run   # look fir
 node scripts/make_forecasts.mjs --league FA26-L2 --week 2             # append
 git add forecasts && git commit -m "Publish FA26-L2 week 2 forecasts" && git push
 ```
+
+## Scoring
+
+`scripts/score_forecasts.mjs` scores a league's forecasts against the results (protocol §8):
+RPS per match (primary), Brier and log loss, averaged per week, and Poisson v1 − baseline on the
+same matches. Title forecasts are described only once the league is finished (§8.1). Scores are
+recomputed every run, never stored in the CSVs (§6).
+
+It also replays the git history of `forecasts.csv` to check the file was only ever appended to,
+and that each week's rows were committed before that week's deadline. Late or invalid rows are
+listed and left out of the scores. Unplayed matches are counted as pending, never filled in.
+
+```sh
+node scripts/score_forecasts.mjs --league FA26-L2                       # print the scorecard
+node scripts/score_forecasts.mjs --league FA26-L2 --markdown forecasts/scorecard-FA26-L2.md
+node --test tests/score-forecasts.test.mjs
+```
+
+The history check needs a full clone (`git fetch --unshallow` on a shallow one).
