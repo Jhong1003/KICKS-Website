@@ -10,7 +10,7 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/visits", "/api/perks/*"]
+    "run_worker_first": ["/api/visits", "/api/perks/*", "/api/reactions"]
   },
   "d1_databases": [
     {

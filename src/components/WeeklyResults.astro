@@ -59,6 +59,15 @@ const ROLE_MARK: Record<string, { en: string; ko: string }> = {
 };
 
 const matchesForRound = (week: Week, round: number) => week.matches.filter((match) => match.round === round);
+
+// Emoji reactions under each finished match (functions/api/reactions.js).
+// Counts only; which ones this browser pressed is kept in localStorage.
+const REACTIONS = [
+	{ key: "fire", emoji: "🔥", en: "Fire", ko: "불타오름" },
+	{ key: "laugh", emoji: "😂", en: "Funny", ko: "웃김" },
+	{ key: "cry", emoji: "😭", en: "Heartbreak", ko: "눈물" },
+	{ key: "clap", emoji: "👏", en: "Well played", ko: "박수" },
+];
 ---
 
 <div class="week-tabs">
@@ -206,6 +215,24 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 												</div>
 												</details>
 											)}
+											{match.status === "completed" && match.match_id && (
+												/* Hidden until the counts load, so nothing shows if the API is down. */
+												<div class="match-reactions" data-match-reactions={match.match_id} hidden>
+													{REACTIONS.map((reaction) => (
+														<button
+															type="button"
+															class="match-reaction"
+															data-reaction={reaction.key}
+															aria-pressed="false"
+															aria-label={reaction.en}
+															data-i18n-attrs={JSON.stringify({ "aria-label": { en: reaction.en, ko: reaction.ko } })}
+														>
+															<span aria-hidden="true">{reaction.emoji}</span>
+															<span class="match-reaction-count" data-count></span>
+														</button>
+													))}
+												</div>
+											)}
 										</div>
 									);
 								})}
@@ -245,6 +272,72 @@ const matchesForRound = (week: Week, round: number) => week.matches.filter((matc
 				});
 			});
 		});
+	});
+
+	// Emoji reactions: one GET per league on the page, then optimistic toggles.
+	// This browser's own picks live in localStorage (kicks-reactions); the
+	// server only keeps totals. If the API isn't reachable the rows stay hidden.
+	const STORE = "kicks-reactions";
+	const readMine = (): Record<string, string[]> => {
+		try { return JSON.parse(localStorage.getItem(STORE) ?? "{}") ?? {}; } catch { return {}; }
+	};
+	const saveMine = (mine: Record<string, string[]>) => {
+		try { localStorage.setItem(STORE, JSON.stringify(mine)); } catch { /* still counts on the server */ }
+	};
+	const rows = Array.from(document.querySelectorAll<HTMLElement>("[data-match-reactions]"));
+	const leaguesOnPage = [...new Set(rows.map((row) => row.dataset.matchReactions!.split("-W")[0]))];
+	const setCount = (button: HTMLElement, count: number) => {
+		button.dataset.n = String(count);
+		button.querySelector("[data-count]")!.textContent = count > 0 ? String(count) : "";
+	};
+	Promise.all(leaguesOnPage.map((league) =>
+		fetch(`/api/reactions?league=${encodeURIComponent(league)}`, { cache: "no-store" })
+			.then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+			.then((data: { counts: Record<string, Record<string, number>> }) => data.counts),
+	)).then((all) => {
+		const counts = Object.assign({}, ...all) as Record<string, Record<string, number>>;
+		const mine = readMine();
+		for (const row of rows) {
+			const match = row.dataset.matchReactions!;
+			for (const button of row.querySelectorAll<HTMLButtonElement>("[data-reaction]")) {
+				const key = button.dataset.reaction!;
+				setCount(button, counts[match]?.[key] ?? 0);
+				button.setAttribute("aria-pressed", String(mine[match]?.includes(key) ?? false));
+			}
+			row.hidden = false;
+		}
+	}).catch(() => { /* leave the rows hidden */ });
+
+	document.addEventListener("click", async (event) => {
+		const button = (event.target as HTMLElement).closest<HTMLButtonElement>(".match-reaction");
+		if (!button || button.disabled) return;
+		const match = button.closest<HTMLElement>("[data-match-reactions]")!.dataset.matchReactions!;
+		const key = button.dataset.reaction!;
+		const on = button.getAttribute("aria-pressed") !== "true";
+		const before = Number(button.dataset.n ?? 0);
+		button.setAttribute("aria-pressed", String(on));
+		setCount(button, Math.max(before + (on ? 1 : -1), 0));
+		button.disabled = true;
+		try {
+			const res = await fetch("/api/reactions", {
+				method: "POST",
+				headers: { "Content-Type": "application/json", "X-Kicks-Reaction": "1" },
+				body: JSON.stringify({ match, reaction: key, delta: on ? 1 : -1 }),
+			});
+			if (!res.ok) throw new Error(String(res.status));
+			const data = await res.json();
+			setCount(button, data.count);
+			const mine = readMine();
+			const list = new Set(mine[match] ?? []);
+			if (on) list.add(key); else list.delete(key);
+			if (list.size) mine[match] = [...list]; else delete mine[match];
+			saveMine(mine);
+		} catch {
+			button.setAttribute("aria-pressed", String(!on));
+			setCount(button, before);
+		} finally {
+			button.disabled = false;
+		}
 	});
 
 	// Deep link from the Schedule page (e.g. /league/FA26-L1?week=3): select that
