@@ -1724,6 +1724,64 @@ button.league-switcher-link {
 	max-width: 85vw;
 	max-height: 85vh;
 	object-fit: contain;
+	user-select: none;
+	-webkit-user-drag: none;
+
+}
+
+/* Swipe left/right is handled in PhotoGallery.astro; vertical panning and
+   pinch-zoom stay with the browser. */
+.lightbox {
+
+	touch-action: pan-y pinch-zoom;
+	overflow: hidden;
+
+}
+
+.lightbox-counter {
+
+	position: absolute;
+	bottom: 20px;
+	left: 0;
+	right: 0;
+	margin: 0;
+	color: var(--color-background);
+	font-size: 0.85rem;
+	text-align: center;
+	opacity: 0.75;
+	font-variant-numeric: tabular-nums;
+
+}
+
+@media (max-width: 700px) {
+
+	/* Phones: the photo uses the full width; the arrows sit over its edges. */
+	.lightbox {
+		padding: 0;
+		gap: 0;
+	}
+
+	.lightbox-image {
+		max-width: 100vw;
+		max-height: 80vh;
+	}
+
+	.lightbox-prev,
+	.lightbox-next {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		padding: 12px;
+		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+	}
+
+	.lightbox-prev {
+		left: 4px;
+	}
+
+	.lightbox-next {
+		right: 4px;
+	}
 
 }
 

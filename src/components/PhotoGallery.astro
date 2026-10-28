@@ -39,22 +39,40 @@ const fullSize = await Promise.all(images.map((image) => getImage({ src: image.s
 	<button class="lightbox-prev" type="button" aria-label="Previous photo">‹</button>
 	<img class="lightbox-image" id="lightbox-image" src="" alt="" />
 	<button class="lightbox-next" type="button" aria-label="Next photo">›</button>
+	<p class="lightbox-counter" aria-live="polite"></p>
 </div>
 
 <script>
 	const items = Array.from(document.querySelectorAll<HTMLButtonElement>(".gallery-item"));
 	const lightbox = document.getElementById("lightbox");
 	const lightboxImage = document.getElementById("lightbox-image") as HTMLImageElement | null;
+	const counter = document.querySelector<HTMLElement>(".lightbox-counter");
 	let currentIndex = 0;
+
+	const fullSrc = (index: number) => {
+		const item = items[index];
+		return item?.dataset.full ?? item?.querySelector("img")?.src ?? "";
+	};
+	const wrap = (index: number) => (index + items.length) % items.length;
+
+	// Load the photos on either side in the background, so a swipe shows the
+	// next one straight away instead of waiting for it to download.
+	function preloadAround(index: number) {
+		for (const i of [wrap(index + 1), wrap(index - 1)]) {
+			const img = new Image();
+			img.src = fullSrc(i);
+		}
+	}
 
 	function openLightbox(index: number) {
 		currentIndex = index;
-		const item = items[currentIndex];
-		const img = item?.querySelector("img");
+		const img = items[currentIndex]?.querySelector("img");
 		if (!img || !lightboxImage || !lightbox) return;
-		lightboxImage.src = item.dataset.full ?? img.src;
+		lightboxImage.src = fullSrc(currentIndex);
 		lightboxImage.alt = img.alt;
 		lightbox.hidden = false;
+		if (counter) counter.textContent = `${currentIndex + 1} / ${items.length}`;
+		preloadAround(currentIndex);
 	}
 
 	function closeLightbox() {
@@ -63,8 +81,25 @@ const fullSize = await Promise.all(images.map((image) => getImage({ src: image.s
 
 	function showRelative(delta: number) {
 		if (items.length === 0) return;
-		currentIndex = (currentIndex + delta + items.length) % items.length;
-		openLightbox(currentIndex);
+		openLightbox(wrap(currentIndex + delta));
+	}
+
+	// Slide the current photo out and the next one in from the other side.
+	function slideTo(delta: number) {
+		if (!lightboxImage || items.length < 2) return;
+		const out = delta > 0 ? "-100vw" : "100vw";
+		const enter = delta > 0 ? "100vw" : "-100vw";
+		lightboxImage.style.transition = "transform 0.18s ease-out";
+		lightboxImage.style.transform = `translateX(${out})`;
+		window.setTimeout(() => {
+			showRelative(delta);
+			lightboxImage.style.transition = "none";
+			lightboxImage.style.transform = `translateX(${enter})`;
+			requestAnimationFrame(() => requestAnimationFrame(() => {
+				lightboxImage.style.transition = "transform 0.2s ease-out";
+				lightboxImage.style.transform = "";
+			}));
+		}, 160);
 	}
 
 	items.forEach((item, index) => {
@@ -72,8 +107,8 @@ const fullSize = await Promise.all(images.map((image) => getImage({ src: image.s
 	});
 
 	document.querySelector(".lightbox-close")?.addEventListener("click", closeLightbox);
-	document.querySelector(".lightbox-prev")?.addEventListener("click", () => showRelative(-1));
-	document.querySelector(".lightbox-next")?.addEventListener("click", () => showRelative(1));
+	document.querySelector(".lightbox-prev")?.addEventListener("click", () => slideTo(-1));
+	document.querySelector(".lightbox-next")?.addEventListener("click", () => slideTo(1));
 
 	lightbox?.addEventListener("click", (event) => {
 		if (event.target === lightbox) closeLightbox();
@@ -82,7 +117,39 @@ const fullSize = await Promise.all(images.map((image) => getImage({ src: image.s
 	document.addEventListener("keydown", (event) => {
 		if (lightbox?.hidden) return;
 		if (event.key === "Escape") closeLightbox();
-		if (event.key === "ArrowLeft") showRelative(-1);
-		if (event.key === "ArrowRight") showRelative(1);
+		if (event.key === "ArrowLeft") slideTo(-1);
+		if (event.key === "ArrowRight") slideTo(1);
+	});
+
+	// Swipe on phones: the photo follows the finger sideways; let go past a
+	// short distance (or with a quick flick) and it moves to the next photo.
+	// Ignored while pinch-zoomed in, so zooming into a photo still works.
+	let startX = 0, startY = 0, startTime = 0, dx = 0, tracking = false, horizontal: boolean | null = null;
+	lightbox?.addEventListener("touchstart", (event) => {
+		if (event.touches.length !== 1 || (window.visualViewport?.scale ?? 1) > 1.01) { tracking = false; return; }
+		tracking = true; horizontal = null; dx = 0;
+		startX = event.touches[0].clientX; startY = event.touches[0].clientY; startTime = Date.now();
+		if (lightboxImage) lightboxImage.style.transition = "none";
+	}, { passive: true });
+	lightbox?.addEventListener("touchmove", (event) => {
+		if (!tracking || !lightboxImage) return;
+		const x = event.touches[0].clientX - startX;
+		const y = event.touches[0].clientY - startY;
+		if (horizontal === null && Math.abs(x) + Math.abs(y) > 8) horizontal = Math.abs(x) > Math.abs(y);
+		if (!horizontal) return;
+		event.preventDefault();
+		dx = x;
+		lightboxImage.style.transform = `translateX(${dx}px)`;
+	}, { passive: false });
+	lightbox?.addEventListener("touchend", () => {
+		if (!tracking || !lightboxImage) return;
+		tracking = false;
+		if (!horizontal) return;
+		const fast = Math.abs(dx) / Math.max(Date.now() - startTime, 1) > 0.4;
+		if (Math.abs(dx) > 60 || (fast && Math.abs(dx) > 20)) slideTo(dx < 0 ? 1 : -1);
+		else {
+			lightboxImage.style.transition = "transform 0.2s ease-out";
+			lightboxImage.style.transform = "";
+		}
 	});
 </script>
