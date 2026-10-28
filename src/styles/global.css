@@ -1148,6 +1148,70 @@ button.league-switcher-link {
 
 }
 
+/* Emoji reactions under a finished match (WeeklyResults.astro). Small and
+   quiet so the card still reads as a scoreboard first. */
+
+.match-reactions {
+
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 10px;
+
+}
+
+.match-reactions[hidden] {
+
+	display: none;
+
+}
+
+.match-reaction {
+
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	min-height: 30px;
+	padding: 2px 10px;
+	border: 1px solid var(--color-sage);
+	border-radius: 999px;
+	background: none;
+	color: var(--color-dark);
+	font: inherit;
+	font-size: 0.85rem;
+	font-variant-numeric: tabular-nums;
+	cursor: pointer;
+	transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+
+}
+
+.match-reaction:active {
+
+	transform: scale(0.92);
+
+}
+
+.match-reaction[aria-pressed="true"] {
+
+	border-color: var(--color-green);
+	background-color: var(--color-sage);
+	font-weight: 700;
+
+}
+
+.match-reaction:focus-visible {
+
+	outline: 2px solid var(--color-green);
+	outline-offset: 2px;
+
+}
+
+.match-reaction-count:empty {
+
+	display: none;
+
+}
+
 /* The score line. It was .match-card itself until the goal timeline moved in
    underneath it, so the card is now a block and this row keeps the grid. */
 

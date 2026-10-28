@@ -921,6 +921,22 @@ Home Screen), Android (Chrome's one-tap install via `beforeinstallprompt`, or �
 Install app), and on a computer only a pointer to open it on a phone (no desktop
 install — the app is for phones). No service worker / offline support yet.
 
+### Match reactions
+
+Each finished match card in Match Results (`WeeklyResults.astro`) has four emoji
+buttons — 🔥 fire, 😂 laugh, 😭 cry, 👏 clap — with a running count. Counts live
+in D1 (`match_reactions`, [migrations/0003_match_reactions.sql](migrations/0003_match_reactions.sql),
+same `VISITS_DB` binding) behind [functions/api/reactions.js](functions/api/reactions.js)
+(`/api/reactions`, Worker-first): `GET ?league=<id>` returns every count for that
+league in one call, `POST {match, reaction, delta: 1|-1}` adds or takes one back
+(never below 0; same-origin + `X-Kicks-Reaction: 1` header check like visits).
+**Aggregate only** — no visitor ids, IPs or timestamps; which buttons a browser
+pressed is kept in that browser's localStorage (`kicks-reactions`), so it's a
+light toggle, not a vote anyone has to trust. The rows stay hidden until the
+counts load, so nothing shows if the API or table is missing. One-time setup:
+`npx wrangler d1 migrations apply kicks-visits --remote`. Tests:
+`node --test tests/reactions.test.mjs`.
+
 ### Match Forecasts
 
 `MatchForecasts.astro` (League page Overview, between Match Results and Title
