@@ -4,6 +4,8 @@ import type { League } from "../lib/leagues";
 import { buildSimulationModel, type MatchRecord, type SimulationModel } from "../lib/championship-simulator";
 import type { TeamStanding } from "../lib/standings";
 import TitleChanceHistory from "./TitleChanceHistory.astro";
+import historyData from "../data/standings_history.json";
+import { scenarioSetup } from "../lib/title-scenarios";
 interface Props {
 	league: League;
 	matches: MatchRecord[];
@@ -20,6 +22,9 @@ const orderedIds = [...new Set([
 	...standings.filter((row) => row.league === league.id).map((row) => row.team_id),
 	...league.teams.map((team) => team.team_id),
 ])];
+// The "what each team needs" page opens once only the final week is left, and
+// stays (eve-of-final-week picture) after the league ends.
+const scenarios = scenarioSetup(league, matches, standings, historyData);
 const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => team.team_id === id));
 ---
 <div id="title-race" class="forecast-block championship-simulator" aria-labelledby="simulator-title" data-model={model ? JSON.stringify(model) : undefined}>
@@ -38,6 +43,14 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 		<noscript><p><T en="Turn on JavaScript to see the results." ko="결과를 보려면 JavaScript를 켜 주세요." /></p></noscript>
 
 	</>}
+	{scenarios.mode !== "unavailable" && (
+		<a class="week-race-link title-scenarios-link" href={`/league/${league.id}/scenarios/`}>
+			<span aria-hidden="true">🧮</span>{" "}
+			{scenarios.mode === "live"
+				? <T en="What each team needs" ko="우승 경우의 수 보기" />
+				: <T en="Title scenarios before the final week" ko="마지막 주 전 우승 경우의 수" />} →
+		</a>
+	)}
 	{/* Not a chart of its own on the page: a link beside these percentages that
 	    opens the weekly history in a popup, the same way Match Results links to
 	    the points race. Shows itself from two published weeks. */}
@@ -105,6 +118,7 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 	meter::-moz-meter-bar { background: var(--color-green); }
 	.title-race-meta { font-size: .8rem; margin: 1rem 0; opacity: .75; font-variant-numeric: tabular-nums; }
 	.title-race-status { font-size: .85rem; }
+	.title-scenarios-link { margin: 0 1.5rem 0 0; }
 	.title-race-status:empty { display: none; }
 	@media (max-width: 480px) { .simulator-team { gap: .6rem; grid-template-columns: minmax(0, 1fr) 5.5rem minmax(50px, .7fr); font-size: .9rem; } }
 </style>

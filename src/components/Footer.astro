@@ -22,6 +22,8 @@ const onLeaguePage = /^\/league(\/|$)/.test(Astro.url.pathname);
 	<div class="site-footer-copyright">
 		<span>
 			© {new Date().getFullYear()} KICKS. All rights reserved.
+			<span class="site-footer-sep" aria-hidden="true">·</span>
+			<a class="site-footer-manager" href="/app/"><T en="Get the app" ko="앱 설치" /></a>
 			{onLeaguePage && (
 				<>
 					<span class="site-footer-sep" aria-hidden="true">·</span>

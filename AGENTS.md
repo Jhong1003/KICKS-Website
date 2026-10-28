@@ -888,6 +888,38 @@ Verification (offline):
 - `npm run build`
 
 
+### Title scenarios (우승 경우의 수)
+
+`/league/<league>/scenarios/` ([src/pages/league/[league]/scenarios.astro](src/pages/league/[league]/scenarios.astro),
+logic in [src/lib/title-scenarios.ts](src/lib/title-scenarios.ts), tests in
+`tests/title-scenarios.test.mjs`): what each team needs from the final week, and a
+"Try it yourself" board where each remaining match can be set to win/draw/loss.
+**Exact and points-only** — every W/D/L combination of the remaining matches is
+enumerated (3^9 = 19,683), no model, no randomness, no guessed scores, so it never
+contradicts `titleStatus`. A tie on points is shown as "tied → participation
+decides" and never settled here, because the final week's attendance still moves
+participation. Per team: `clinchWins` (fewest own wins that guarantee being alone on
+top whatever else happens → "자력 우승"), `minWins` (fewest wins that can still leave
+it alone on top with help), `tieOnly`. Offered only when every remaining match is in
+the final week (`scenarioAvailable`); the Title Chances block then links to it
+("우승 경우의 수 보기"). After the league ends the page keeps the eve-of-final-week
+picture (`scenarioSetup` "archive": final-week matches reset, participation from
+`standings_history` week final−1) with the real results pre-filled; the link reads
+"마지막 주 전 우승 경우의 수". A board state is shareable: `?s=` holds one letter
+per remaining match (H/D/A, `-` = open).
+
+### Home-screen app (PWA)
+
+The site installs to a phone's home screen: [public/manifest.webmanifest](public/manifest.webmanifest)
+(standalone, club green `#3f5128`), icons in `public/icons/` (192/512 + a maskable
+512, the favicon ball on green), and theme-color / apple-mobile-web-app tags in
+`BaseLayout.astro`. `/app` ([src/pages/app.astro](src/pages/app.astro), linked from
+the footer as "앱 설치") shows the one guide that fits the visitor: already
+installed, KakaoTalk in-app (button reopening the page through
+`kakaotalk://web/openExternal`), Instagram in-app, iPhone (Safari → Share → Add to
+Home Screen), Android (Chrome's one-tap install via `beforeinstallprompt`, or ⋮ →
+Install app), computer. No service worker / offline support yet.
+
 ### Match Forecasts
 
 `MatchForecasts.astro` (League page Overview, between Match Results and Title

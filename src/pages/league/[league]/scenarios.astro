@@ -1,0 +1,329 @@
+---
+// "Title scenarios" (우승 경우의 수): /league/<league>/scenarios
+// What each team needs from the final week, plus a "try it yourself" board
+// where every remaining match can be set to a win/draw/loss. Exact and
+// points-only (src/lib/title-scenarios.ts) — no model, no randomness, no
+// guessed scores. A points tie is left to participation, which the final
+// week's attendance still moves, so it is shown as "tied", never decided here.
+//
+// Offered once every remaining match is in the final week (linked from Title
+// Chances). After the league ends the page keeps the eve-of-final-week picture
+// with the real results filled in. Any other time it says when it will open.
+// A scenario is shareable: ?s= holds one letter (H/D/A, "-" = open) per match.
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import T from "../../../components/T.astro";
+import matchesData from "../../../data/matches.json";
+import leagueTableData from "../../../data/league_table.json";
+import historyData from "../../../data/standings_history.json";
+import { leagues, getTeamColor, type League } from "../../../lib/leagues";
+import { formatShortDate } from "../../../lib/i18n";
+import type { MatchRecord } from "../../../lib/championship-simulator";
+import { analyseScenarios, conditionText, scenarioSetup } from "../../../lib/title-scenarios";
+
+export function getStaticPaths() {
+	return leagues.map((league) => ({ params: { league: league.id }, props: { league } }));
+}
+
+interface Props {
+	league: League;
+}
+
+interface MatchRow extends MatchRecord {
+	round: number;
+	date: string;
+}
+
+const { league } = Astro.props;
+const matches = matchesData as MatchRow[];
+const setup = scenarioSetup(league, matches, leagueTableData, historyData);
+const rules = league.rules;
+const teamName = (id: string) => league.teams.find((team) => team.team_id === id)?.name ?? id;
+
+const view = setup.mode === "unavailable" ? null : (() => {
+	const { model, actual, mode } = setup;
+	const analysis = analyseScenarios(model);
+	const order = [...model.base].sort((a, b) => b.points - a.points || b.participation_rate - a.participation_rate);
+	const fixtures = model.remaining.map((match, index) => {
+		const row = matches.find((entry) => entry.match_id === match.key);
+		return { ...match, index, round: row?.round ?? null, date: row?.date ?? null };
+	});
+	const rounds = [...new Set(fixtures.map((fixture) => fixture.round))];
+	const date = fixtures.find((fixture) => fixture.date)?.date ?? null;
+	return { model, actual, mode, analysis, order, fixtures, rounds, date };
+})();
+
+const percent = (rate: number) => `${(rate * 100).toFixed(1)}%`;
+const winPoints = rules.final_win_points;
+const clientData = view && {
+	model: view.model,
+	actual: view.actual,
+	mode: view.mode,
+	teams: view.order.map((row) => ({ id: row.team_id, name: teamName(row.team_id), color: getTeamColor(row.team_id, league) })),
+};
+const description = view?.mode === "live"
+	? `KICKS ${league.id}: what each team needs in the final week to win the title.`
+	: `KICKS ${league.id} title scenarios.`;
+---
+
+<BaseLayout title={`Title Scenarios · ${league.id} | KICKS`} description={description}>
+	<main class="scenarios-page">
+		<section class="content-section" aria-labelledby="scenarios-title">
+			<a class="back-link" href={`/league/${league.id}#title-race`}>
+				← <T en={`${league.id} league`} ko={`${league.id} 리그`} />
+			</a>
+			<p class="section-label">{league.id}</p>
+			<h1 id="scenarios-title"><T en="Title Scenarios" ko="우승 경우의 수" /></h1>
+
+			{!view ? (
+				<T
+					as="p"
+					class="about-description"
+					en="This opens once only the final week is left to play."
+					ko="마지막 주 경기만 남으면 열려요."
+				/>
+			) : (
+				<>
+					{view.mode === "live" ? (
+						<p class="about-description">
+							<T
+								en={`${view.model.remaining.length} matches left${view.date ? ` (${formatShortDate(view.date, "en")})` : ""}, each team plays ${view.fixtures.filter((f) => f.home === view.order[0].team_id || f.away === view.order[0].team_id).length}. A win is worth ${winPoints} pts this week.`}
+								ko={`${view.date ? `${formatShortDate(view.date, "ko")} ` : ""}마지막 주 ${view.model.remaining.length}경기가 남았고, 팀마다 ${view.fixtures.filter((f) => f.home === view.order[0].team_id || f.away === view.order[0].team_id).length}경기씩 해요. 이번 주는 승리 ${winPoints}점이에요.`}
+							/>
+						</p>
+					) : (
+						<T
+							as="p"
+							class="about-description"
+							en="The league is over. This is how things stood before the final week — with the real results filled in below."
+							ko="리그가 끝났어요. 마지막 주를 앞두고 이런 상황이었어요 — 아래에는 실제 결과가 채워져 있어요."
+						/>
+					)}
+
+					<ol class="scenario-standings" aria-label="Standings before the final week">
+						{view.order.map((row) => (
+							<li style={`--team-color: ${getTeamColor(row.team_id, league)};`}>
+								<span class="scenario-dot" aria-hidden="true"></span>
+								<strong>{teamName(row.team_id)}</strong>
+								<span class="scenario-points"><T en={`${row.points} pts`} ko={`승점 ${row.points}`} /></span>
+								<span class="scenario-participation"><T en={`Participation ${percent(row.participation_rate)}`} ko={`참여율 ${percent(row.participation_rate)}`} /></span>
+							</li>
+						))}
+					</ol>
+				</>
+			)}
+		</section>
+
+		{view && (
+			<>
+				<section class="content-section" aria-labelledby="needs-title">
+					<h2 id="needs-title"><T en="What each team needs" ko="팀별 우승 조건" /></h2>
+					<div class="scenario-needs">
+						{view.order.map((row) => {
+							const outlook = view.analysis.teams[row.team_id];
+							return (
+								<article class="scenario-need" style={`--team-color: ${getTeamColor(row.team_id, league)};`} data-status={outlook.status}>
+									<h3>{teamName(row.team_id)}</h3>
+									<ul>
+										{conditionText(outlook).map((line) => <T as="li" en={line.en} ko={line.ko} />)}
+									</ul>
+								</article>
+							);
+						})}
+					</div>
+					<T
+						as="p"
+						class="scenario-note"
+						en="Level on points → participation → goal difference → goals scored. Participation still changes with this week's attendance, so a tie on points is left open here."
+						ko="승점이 같으면 참여율 → 득실차 → 득점 순이에요. 참여율은 이번 주 출석까지 반영돼서 바뀌니까, 승점 동점은 여기서 정하지 않아요."
+					/>
+				</section>
+
+				<section class="content-section" aria-labelledby="try-title">
+					<h2 id="try-title"><T en="Try it yourself" ko="직접 해보기" /></h2>
+					<T
+						as="p"
+						class="about-description"
+						en="Pick a result for any match and see where everyone ends up. Leave a match blank to keep it open."
+						ko="경기 결과를 눌러서 골라보세요. 안 고른 경기는 아직 모르는 걸로 계산해요."
+					/>
+
+					<div class="scenario-board" data-scenario={JSON.stringify(clientData)}>
+						<div class="scenario-summary" aria-live="polite">
+							<div class="scenario-summary-rows">
+								{view.order.map((row) => (
+									<div class="scenario-summary-row" data-team-id={row.team_id} style={`--team-color: ${getTeamColor(row.team_id, league)};`}>
+										<span class="scenario-dot" aria-hidden="true"></span>
+										<strong>{teamName(row.team_id)}</strong>
+										<span class="scenario-summary-points" data-points>{row.points}</span>
+										<span class="scenario-chip" data-chip>—</span>
+									</div>
+								))}
+							</div>
+							<p class="scenario-verdict" data-verdict></p>
+							<div class="scenario-actions">
+								<span class="scenario-progress" data-progress></span>
+								{view.mode === "archive" && (
+									<button type="button" class="scenario-action" data-actual><T en="Real results" ko="실제 결과" /></button>
+								)}
+								<button type="button" class="scenario-action" data-reset><T en="Clear" ko="초기화" /></button>
+								<button type="button" class="scenario-action" data-share><T en="Copy link" ko="링크 복사" /></button>
+							</div>
+						</div>
+
+						{view.rounds.map((round) => (
+							<div class="scenario-round">
+								{round !== null && <h3><T en={`Round ${round}`} ko={`${round}라운드`} /></h3>}
+								{view.fixtures.filter((fixture) => fixture.round === round).map((fixture) => (
+									<div class="scenario-match" role="group" aria-label={`${teamName(fixture.home)} vs ${teamName(fixture.away)}`} data-key={fixture.key}>
+										<button type="button" data-outcome="H" style={`--team-color: ${getTeamColor(fixture.home, league)};`} aria-pressed="false">
+											<T en={`${teamName(fixture.home)} win`} ko={`${teamName(fixture.home)} 승`} />
+										</button>
+										<button type="button" data-outcome="D" class="scenario-draw" aria-pressed="false"><T en="Draw" ko="무" /></button>
+										<button type="button" data-outcome="A" style={`--team-color: ${getTeamColor(fixture.away, league)};`} aria-pressed="false">
+											<T en={`${teamName(fixture.away)} win`} ko={`${teamName(fixture.away)} 승`} />
+										</button>
+									</div>
+								))}
+							</div>
+						))}
+						<noscript><T as="p" en="Turn on JavaScript to try scenarios." ko="직접 해보려면 JavaScript를 켜 주세요." /></noscript>
+					</div>
+				</section>
+			</>
+		)}
+	</main>
+</BaseLayout>
+
+<script>
+	import { analyseScenarios, decodeScenario, encodeScenario, type FixedOutcomes, type Outcome, type ScenarioModel } from "../../../lib/title-scenarios";
+	import { bilingualHtml } from "../../../lib/i18n";
+
+	interface ClientData {
+		model: ScenarioModel;
+		actual: FixedOutcomes;
+		mode: "live" | "archive";
+		teams: { id: string; name: string; color: string }[];
+	}
+
+	const board = document.querySelector<HTMLElement>("[data-scenario]");
+	if (board?.dataset.scenario) {
+		const data = JSON.parse(board.dataset.scenario) as ClientData;
+		const { model } = data;
+		const names = Object.fromEntries(data.teams.map((team) => [team.id, team.name]));
+		const fromUrl = new URLSearchParams(location.search).get("s");
+		let fixed: FixedOutcomes = fromUrl ? decodeScenario(model, fromUrl) : data.mode === "archive" ? { ...data.actual } : {};
+
+		const set = (el: Element | null, en: string, ko: string) => { if (el) el.innerHTML = bilingualHtml(en, ko); };
+
+		function render() {
+			const analysis = analyseScenarios(model, fixed);
+			for (const group of board!.querySelectorAll<HTMLElement>("[data-key]")) {
+				for (const button of group.querySelectorAll<HTMLButtonElement>("[data-outcome]")) {
+					button.setAttribute("aria-pressed", String(fixed[group.dataset.key!] === button.dataset.outcome));
+				}
+			}
+			for (const row of board!.querySelectorAll<HTMLElement>(".scenario-summary-row")) {
+				const team = analysis.teams[row.dataset.teamId!];
+				const points = row.querySelector("[data-points]")!;
+				points.textContent = team.minPoints === team.maxPoints ? String(team.minPoints) : `${team.minPoints}–${team.maxPoints}`;
+				const chip = row.querySelector<HTMLElement>("[data-chip]")!;
+				let state: string;
+				if (analysis.final) {
+					const leaders = analysis.final.leaders;
+					state = leaders.includes(team.team_id) ? (leaders.length === 1 ? "champion" : "tied") : "out";
+					if (state === "champion") set(chip, "Champion 🏆", "우승 🏆");
+					else if (state === "tied") set(chip, "Tied 1st", "공동 1위");
+					else set(chip, "—", "—");
+				} else {
+					state = team.status === "clinched" ? "champion" : team.status === "eliminated" ? "out" : team.tieOnly ? "tied" : "open";
+					if (state === "champion") set(chip, "Clinched", "우승 확정");
+					else if (state === "out") set(chip, "Out", "탈락");
+					else if (state === "tied") set(chip, "Tie at best", "동점까지만");
+					else set(chip, "Still possible", "우승 가능");
+				}
+				row.dataset.state = state;
+			}
+			const verdict = board!.querySelector("[data-verdict]");
+			if (analysis.final) {
+				const leaders = analysis.final.leaders.map((id) => names[id]);
+				const top = analysis.final.points[analysis.final.leaders[0]];
+				if (leaders.length === 1) set(verdict, `${leaders[0]} win the title on ${top} pts.`, `${leaders[0]} 우승! (승점 ${top})`);
+				else set(verdict, `${leaders.join(" & ")} level on ${top} pts — participation decides.`, `${leaders.join(" · ")} 승점 ${top}점 동점 — 참여율로 결정돼요.`);
+			} else set(verdict, "", "");
+			const picked = Object.keys(fixed).length;
+			set(board!.querySelector("[data-progress]"), `${picked} / ${model.remaining.length} picked`, `${picked} / ${model.remaining.length}경기 선택`);
+			const code = encodeScenario(model, fixed);
+			const url = new URL(location.href);
+			if (picked > 0) url.searchParams.set("s", code); else url.searchParams.delete("s");
+			history.replaceState(null, "", url);
+		}
+
+		board.addEventListener("click", (event) => {
+			const target = event.target as HTMLElement;
+			const button = target.closest<HTMLButtonElement>("[data-outcome]");
+			if (button) {
+				const key = button.closest<HTMLElement>("[data-key]")!.dataset.key!;
+				const outcome = button.dataset.outcome as Outcome;
+				if (fixed[key] === outcome) delete fixed[key]; else fixed[key] = outcome;
+				render();
+				return;
+			}
+			if (target.closest("[data-reset]")) { fixed = {}; render(); }
+			if (target.closest("[data-actual]")) { fixed = { ...data.actual }; render(); }
+			const share = target.closest<HTMLButtonElement>("[data-share]");
+			if (share) {
+				const done = () => { share.dataset.copied = "true"; setTimeout(() => delete share.dataset.copied, 1600); };
+				if (navigator.clipboard) navigator.clipboard.writeText(location.href).then(done, () => prompt("", location.href));
+				else prompt("", location.href);
+			}
+		});
+		render();
+	}
+</script>
+
+<style>
+	.scenario-standings { list-style: none; margin: 24px 0 0; padding: 0; max-width: 700px; }
+	.scenario-standings li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-sage); }
+	.scenario-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--team-color); }
+	.scenario-points { font-weight: 700; font-variant-numeric: tabular-nums; }
+	.scenario-participation { font-size: .8rem; opacity: .7; font-variant-numeric: tabular-nums; }
+
+	.scenario-needs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 24px; }
+	.scenario-need { padding: 18px 20px; border-left: 5px solid var(--team-color); background: #fff; }
+	.scenario-need h3 { margin: 0 0 10px; font-size: 1.1rem; }
+	.scenario-need ul { margin: 0; padding-left: 18px; line-height: 1.55; font-size: .92rem; }
+	.scenario-need li + li { margin-top: 6px; }
+	.scenario-need[data-status="eliminated"] { opacity: .6; }
+	.scenario-note { margin: 20px 0 0; max-width: 700px; font-size: .8rem; opacity: .75; line-height: 1.5; }
+
+	.scenario-board { max-width: 760px; margin-top: 24px; }
+	.scenario-summary { position: sticky; top: 8px; z-index: 2; padding: 14px 16px; background: var(--color-background); border: 1px solid var(--color-sage); box-shadow: 0 4px 14px rgb(0 0 0 / .06); }
+	.scenario-summary-row { display: grid; grid-template-columns: 12px minmax(0, 1fr) 4.5rem 7rem; align-items: center; gap: 10px; padding: 6px 0; }
+	.scenario-summary-points { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+	.scenario-chip { justify-self: end; padding: 2px 10px; font-size: .75rem; font-weight: 700; border-radius: 999px; background: var(--color-sage); white-space: nowrap; }
+	.scenario-summary-row[data-state="champion"] .scenario-chip { background: #d4a017; color: #fff; }
+	.scenario-summary-row[data-state="tied"] .scenario-chip { background: var(--color-dark); color: #fff; }
+	.scenario-summary-row[data-state="out"] { opacity: .5; }
+	.scenario-verdict { margin: 8px 0 0; font-weight: 700; }
+	.scenario-verdict:empty { display: none; }
+	.scenario-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+	.scenario-progress { margin-right: auto; font-size: .8rem; opacity: .7; font-variant-numeric: tabular-nums; }
+	.scenario-action { padding: 5px 12px; border: 1px solid var(--color-green); background: none; color: var(--color-green); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer; }
+	.scenario-action[data-copied="true"]::after { content: " ✓"; }
+
+	.scenario-round h3 { margin: 24px 0 8px; font-size: .85rem; letter-spacing: .08em; opacity: .7; }
+	.scenario-match { display: grid; grid-template-columns: 1fr 3.2rem 1fr; gap: 6px; margin-bottom: 8px; }
+	.scenario-match button { min-height: 44px; padding: 6px 8px; border: 1px solid var(--color-sage); background: #fff; color: var(--color-dark); font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; border-left: 4px solid var(--team-color, var(--color-sage)); }
+	.scenario-match .scenario-draw { border-left-width: 1px; }
+	.scenario-match button[aria-pressed="true"] { background: var(--team-color, var(--color-dark)); border-color: var(--team-color, var(--color-dark)); color: #fff; }
+	.scenario-match .scenario-draw[aria-pressed="true"] { background: var(--color-dark); border-color: var(--color-dark); }
+	.scenario-match button:focus-visible, .scenario-action:focus-visible { outline: 2px solid var(--color-green); outline-offset: 2px; }
+
+	@media (max-width: 480px) {
+		.scenario-standings li { grid-template-columns: 12px minmax(0, 1fr) auto; }
+		.scenario-participation { grid-column: 2 / -1; margin-top: -8px; }
+		.scenario-summary-row { grid-template-columns: 12px minmax(0, 1fr) 3.6rem 6.2rem; gap: 8px; font-size: .9rem; }
+		.scenario-match { grid-template-columns: 1fr 2.6rem 1fr; }
+		.scenario-match button { font-size: .78rem; padding: 6px 4px; }
+	}
+</style>

@@ -20,6 +20,7 @@ const STATIC_PATHS = [
 	"/partners/",
 	"/join/",
 	"/dream-team/",
+	"/app/",
 ];
 
 export const GET: APIRoute = ({ site }) => {
