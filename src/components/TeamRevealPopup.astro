@@ -1,8 +1,10 @@
 ---
 // "Team reveal" popup on the homepage: the newest league's teams as cards
 // (team color, name, captain, squad) with a link to each team page. Shown
-// once per league per browser (localStorage), only while that league isn't
-// finished. On the visit it shows, the welcome popup steps aside
+// once per league per browser (localStorage), only around kickoff: from the
+// rosters going in until the league's first week is played. After that the
+// teams are old news, so the popup stops on its own (and comes back for the
+// next league). On the visit it shows, the welcome popup steps aside
 // (WelcomePopup.astro checks #team-reveal first), so nobody gets two
 // popups at once; a first-time visitor simply sees the welcome next visit.
 import T from "./T.astro";
@@ -10,7 +12,7 @@ import profilesData from "../data/player_profiles.json";
 import teamInfoData from "../data/team-info.json";
 import { getTeamColor, type League } from "../lib/leagues";
 import { getContrastingTextColor, getSection, type PlayerProfile } from "../lib/players";
-import { isLeagueFinished } from "../lib/finale";
+import matchesData from "../data/matches.json";
 
 interface Props {
 	league: League;
@@ -27,7 +29,10 @@ const teams = league.teams.map((team) => {
 	const color = getTeamColor(team.team_id, league);
 	return { ...team, color, text: getContrastingTextColor(color), captain, squad };
 });
-const show = !isLeagueFinished(league.id) && teams.every((team) => team.squad.length > 0);
+// Kickoff only: hidden once any match from week 2 on has a score.
+const pastWeekOne = (matchesData as { league: string; week: number; status: string }[])
+	.some((match) => match.league === league.id && match.week >= 2 && match.status === "completed");
+const show = !pastWeekOne && teams.every((team) => team.squad.length > 0);
 const revealKey = `kicks-team-reveal-${league.id}`;
 ---
 

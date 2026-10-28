@@ -678,7 +678,8 @@ for the visit (sessionStorage, per league/mode/week).
 
 `TeamRevealPopup.astro` shows the newest league's teams (color, captain from
 team-info.json, squad, team page link) once per league per browser (localStorage
-`kicks-team-reveal-<league>`), only while that league isn't finished. On the visit it
+`kicks-team-reveal-<league>`), only around kickoff — from the rosters going in until
+the league's week 1 is played (hidden once any week-2+ match has a score). On the visit it
 shows, `WelcomePopup.astro` steps aside so there's never two popups.
 
 ### Season themes
