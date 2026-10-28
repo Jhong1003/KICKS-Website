@@ -1197,8 +1197,8 @@ button.league-switcher-link {
 	font: inherit;
 	font-size: 0.78rem;
 	font-variant-numeric: tabular-nums;
-	opacity: 0.45;
-	filter: grayscale(0.6);
+	opacity: 0.75;
+	filter: grayscale(0.25);
 	cursor: pointer;
 	transition: opacity 0.15s ease, filter 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
 
