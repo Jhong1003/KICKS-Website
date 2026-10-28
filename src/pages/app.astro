@@ -65,8 +65,7 @@ import T from "../components/T.astro";
 
 				<div class="app-guide" data-guide="desktop">
 					<T as="h2" en="On a computer?" ko="컴퓨터로 보고 있나요?" />
-					<T as="p" en="Open kicksuiuc.com/app on your phone to add it there." ko="휴대폰에서 kicksuiuc.com/app을 열어서 추가해주세요." />
-					<button type="button" class="button-primary app-button" data-install hidden><T en="Install on this computer" ko="이 컴퓨터에 설치" /></button>
+					<T as="p" en="The app is for phones — open kicksuiuc.com/app on your phone to add it there." ko="앱은 휴대폰용이에요. 휴대폰에서 kicksuiuc.com/app을 열어서 추가해주세요." />
 				</div>
 			</div>
 		</section>
@@ -92,7 +91,8 @@ import T from "../components/T.astro";
 			location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}`;
 		});
 
-		// Chrome/Edge offer a one-tap install; keep the event and show the button.
+		// Android Chrome offers a one-tap install; keep the event and show the button
+		// (phones only — on a computer the page just points to the phone).
 		let deferred: (Event & { prompt: () => Promise<void> }) | null = null;
 		window.addEventListener("beforeinstallprompt", (event) => {
 			event.preventDefault();

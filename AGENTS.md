@@ -918,7 +918,8 @@ the footer as "앱 설치") shows the one guide that fits the visitor: already
 installed, KakaoTalk in-app (button reopening the page through
 `kakaotalk://web/openExternal`), Instagram in-app, iPhone (Safari → Share → Add to
 Home Screen), Android (Chrome's one-tap install via `beforeinstallprompt`, or ⋮ →
-Install app), computer. No service worker / offline support yet.
+Install app), and on a computer only a pointer to open it on a phone (no desktop
+install — the app is for phones). No service worker / offline support yet.
 
 ### Match Forecasts
 
