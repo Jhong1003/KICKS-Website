@@ -163,6 +163,26 @@ const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 
 			}
 		}
 
+		// Phones: the strip stays one line and its chips take turns (CSS shows
+		// only [data-current]); wider screens show them all side by side.
+		const phone = matchMedia("(max-width: 700px)");
+		wrap.querySelectorAll<HTMLElement>(".finale-banner-list").forEach((list) => {
+			const chips = [...list.children] as HTMLElement[];
+			if (chips.length < 2) return;
+			let index = 0;
+			let timer: number | undefined;
+			const show = () => chips.forEach((chip, i) => chip.toggleAttribute("data-current", i === index));
+			const apply = () => {
+				clearInterval(timer);
+				if (!phone.matches) { list.removeAttribute("data-rotating"); return; }
+				list.setAttribute("data-rotating", "");
+				show();
+				timer = window.setInterval(() => { index = (index + 1) % chips.length; show(); }, 3000);
+			};
+			phone.addEventListener("change", apply);
+			apply();
+		});
+
 		// Closing hides it for the rest of this visit (same as the finale banner).
 		const key = wrap.dataset.dismissKey ?? "kicks-league-banner";
 		try {

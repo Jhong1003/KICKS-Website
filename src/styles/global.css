@@ -5061,8 +5061,75 @@ html[data-season] .hero-season-note--past {
 	/* The finale banner hides its label on phones; here the label is the message. */
 	.league-banner .finale-banner-label {
 		display: inline-flex;
+		flex: 0 0 auto;
 		font-size: 0.78rem;
 		white-space: nowrap;
 	}
+
+	/* Phones: one line. The chips take turns in the space beside the label
+	   (LeagueStatusBanner.astro rotates them) instead of a sideways scroll
+	   that was hard to swipe. */
+
+	.league-banner .finale-banner-list[data-rotating] {
+		min-width: 0;
+		overflow: hidden;
+	}
+
+	.league-banner .finale-banner-list[data-rotating] > .finale-chip {
+		display: none;
+		max-width: 100%;
+	}
+
+	.league-banner .finale-banner-list[data-rotating] > .finale-chip[data-current] {
+		display: inline-flex;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		animation: league-chip-in 0.35s ease-out;
+	}
+
+	.league-banner .finale-chip {
+		font-weight: 600;
+		background-color: #fff;
+	}
+
+}
+
+@keyframes league-chip-in {
+
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.league-banner .finale-banner-list[data-rotating] > .finale-chip[data-current] {
+		animation: none;
+	}
+
+}
+
+/* Halloween strip: stronger text and edges so it doesn't look washed out on
+   the pastel background. */
+.league-banner--halloween .finale-banner-label,
+.league-banner--halloween .finale-chip-title,
+.league-banner--halloween .league-chip--link {
+
+	color: #4b2391;
+
+}
+
+.league-banner--halloween .finale-chip {
+
+	border-color: #ff8f2e;
+	background-color: #fff;
+	color: #2b1a06;
+
+}
+
+.league-banner--halloween .finale-banner-close {
+
+	color: #4b2391;
+	opacity: 0.85;
 
 }
