@@ -5061,34 +5061,50 @@ html[data-season] .hero-season-note--past {
 	/* The finale banner hides its label on phones; here the label is the message. */
 	.league-banner .finale-banner-label {
 		display: inline-flex;
-		flex: 1;
-		font-size: 0.85rem;
+		flex: 0 0 auto;
+		font-size: 0.78rem;
 		white-space: nowrap;
 	}
 
-	/* Phones: label + ✕ on the first line, chips wrapping underneath — everything
-	   visible at once instead of a sideways scroll that was hard to swipe. */
-	.league-banner .finale-banner-inner {
-		flex-wrap: wrap;
-		row-gap: 8px;
+	/* Phones: one line. The chips take turns in the space beside the label
+	   (LeagueStatusBanner.astro rotates them) instead of a sideways scroll
+	   that was hard to swipe. */
+
+	.league-banner .finale-banner-list[data-rotating] {
+		min-width: 0;
+		overflow: hidden;
 	}
 
-	.league-banner .finale-banner-close {
-		order: 2;
+	.league-banner .finale-banner-list[data-rotating] > .finale-chip {
+		display: none;
+		max-width: 100%;
 	}
 
-	.league-banner .finale-banner-list {
-		order: 3;
-		flex-basis: 100%;
-		flex-wrap: wrap;
-		gap: 6px;
-		overflow: visible;
+	.league-banner .finale-banner-list[data-rotating] > .finale-chip[data-current] {
+		display: inline-flex;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		animation: league-chip-in 0.35s ease-out;
 	}
 
 	.league-banner .finale-chip {
-		font-size: 0.8rem;
 		font-weight: 600;
 		background-color: #fff;
+	}
+
+}
+
+@keyframes league-chip-in {
+
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.league-banner .finale-banner-list[data-rotating] > .finale-chip[data-current] {
+		animation: none;
 	}
 
 }
