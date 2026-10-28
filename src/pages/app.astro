@@ -1,0 +1,127 @@
+---
+// /app — how to put KICKS on your home screen. The site is a PWA
+// (public/manifest.webmanifest, icons in public/icons/), not a store app:
+// "installing" adds an icon that opens the site full-screen.
+//
+// Every guide is rendered; a small script shows the one that fits the
+// visitor's phone (already installed / KakaoTalk or Instagram in-app browser /
+// iPhone / Android / computer). Without JavaScript all of them stay visible.
+// KakaoTalk can't install anything, but it does honour
+// kakaotalk://web/openExternal, which reopens the page in the phone's browser.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import T from "../components/T.astro";
+---
+
+<BaseLayout title="Get the App | KICKS" description="Add KICKS to your home screen — standings, results and title races one tap away.">
+	<main class="app-page">
+		<section class="content-section" aria-labelledby="app-title">
+			<p class="section-label">KICKS APP</p>
+			<h1 id="app-title"><T en="KICKS on your home screen" ko="KICKS 앱 설치하기" /></h1>
+			<T
+				as="p"
+				class="about-description"
+				en="Add KICKS to your home screen and it opens like an app — full screen, one tap from standings, results and the title race. No app store needed."
+				ko="홈 화면에 추가하면 앱처럼 전체 화면으로 열려요. 순위·경기 결과·우승 경우의 수를 한 번에. 앱스토어 설치는 필요 없어요."
+			/>
+			<img class="app-icon" src="/icons/icon-192.png" alt="" width="96" height="96" />
+
+			<div class="app-guides" data-app-guides>
+				<div class="app-guide" data-guide="installed">
+					<T as="h2" en="You're all set ✓" ko="이미 앱으로 쓰고 있어요 ✓" />
+					<T as="p" en="You opened KICKS from your home screen. Nothing else to do." ko="홈 화면 아이콘으로 열었네요. 더 할 건 없어요." />
+				</div>
+
+				<div class="app-guide" data-guide="kakao">
+					<T as="h2" en="Open it in your browser first" ko="먼저 브라우저로 열어주세요" />
+					<T as="p" en="Apps can't be added from inside KakaoTalk. Open this page in Safari or Chrome, then follow the steps there." ko="카카오톡 안에서는 홈 화면에 추가할 수 없어요. Safari나 Chrome으로 연 다음 그 안내를 따라주세요." />
+					<button type="button" class="button-primary app-button" data-open-external><T en="Open in browser" ko="브라우저로 열기" /></button>
+					<T as="p" class="app-hint" en="If nothing happens: tap ⋮ (or the share icon) at the bottom right → “Open in another browser”." ko="안 열리면: 오른쪽 아래 ⋮ (또는 공유 아이콘) → ‘다른 브라우저로 열기’를 눌러주세요." />
+				</div>
+
+				<div class="app-guide" data-guide="instagram">
+					<T as="h2" en="Open it in your browser first" ko="먼저 브라우저로 열어주세요" />
+					<T as="p" en="Tap ⋯ at the top right → “Open in external browser”, then follow the steps there." ko="오른쪽 위 ⋯ → ‘외부 브라우저에서 열기’를 누른 다음 그 안내를 따라주세요." />
+				</div>
+
+				<div class="app-guide" data-guide="ios">
+					<T as="h2" en="iPhone" ko="아이폰" />
+					<ol class="app-steps">
+						<T as="li" en="Open kicksuiuc.com in Safari." ko="Safari에서 kicksuiuc.com을 열어요." />
+						<T as="li" en="Tap the Share button (□ with an arrow) at the bottom." ko="아래쪽 공유 버튼(네모에 화살표)을 눌러요." />
+						<T as="li" en="Scroll down and tap “Add to Home Screen”." ko="아래로 내려서 ‘홈 화면에 추가’를 눌러요." />
+						<T as="li" en="Tap “Add”. KICKS is now on your home screen." ko="‘추가’를 누르면 끝! 홈 화면에 KICKS가 생겨요." />
+					</ol>
+				</div>
+
+				<div class="app-guide" data-guide="android">
+					<T as="h2" en="Android" ko="안드로이드" />
+					<button type="button" class="button-primary app-button" data-install hidden><T en="Install KICKS" ko="KICKS 앱 설치" /></button>
+					<ol class="app-steps">
+						<T as="li" en="Open kicksuiuc.com in Chrome." ko="Chrome에서 kicksuiuc.com을 열어요." />
+						<T as="li" en="Tap ⋮ at the top right." ko="오른쪽 위 ⋮ 를 눌러요." />
+						<T as="li" en="Tap “Install app” (or “Add to Home screen”)." ko="‘앱 설치’(또는 ‘홈 화면에 추가’)를 눌러요." />
+					</ol>
+				</div>
+
+				<div class="app-guide" data-guide="desktop">
+					<T as="h2" en="On a computer?" ko="컴퓨터로 보고 있나요?" />
+					<T as="p" en="The app is for phones — open kicksuiuc.com/app on your phone to add it there." ko="앱은 휴대폰용이에요. 휴대폰에서 kicksuiuc.com/app을 열어서 추가해주세요." />
+				</div>
+			</div>
+		</section>
+	</main>
+</BaseLayout>
+
+<script>
+	const root = document.querySelector<HTMLElement>("[data-app-guides]");
+	if (root) {
+		const ua = navigator.userAgent;
+		const standalone = matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+		const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+		const guide = standalone ? "installed"
+			: /KAKAOTALK/i.test(ua) ? "kakao"
+			: /Instagram/i.test(ua) ? "instagram"
+			: ios ? "ios"
+			: /Android/i.test(ua) ? "android"
+			: "desktop";
+		root.dataset.active = guide;
+		for (const el of root.querySelectorAll<HTMLElement>("[data-guide]")) el.hidden = el.dataset.guide !== guide;
+
+		root.querySelector("[data-open-external]")?.addEventListener("click", () => {
+			location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}`;
+		});
+
+		// Android Chrome offers a one-tap install; keep the event and show the button
+		// (phones only — on a computer the page just points to the phone).
+		let deferred: (Event & { prompt: () => Promise<void> }) | null = null;
+		window.addEventListener("beforeinstallprompt", (event) => {
+			event.preventDefault();
+			deferred = event as Event & { prompt: () => Promise<void> };
+			for (const button of root.querySelectorAll<HTMLButtonElement>("[data-install]")) button.hidden = false;
+		});
+		for (const button of root.querySelectorAll<HTMLButtonElement>("[data-install]")) {
+			button.addEventListener("click", async () => {
+				if (!deferred) return;
+				await deferred.prompt();
+				deferred = null;
+				button.hidden = true;
+			});
+		}
+		window.addEventListener("appinstalled", () => {
+			for (const el of root.querySelectorAll<HTMLElement>("[data-guide]")) el.hidden = el.dataset.guide !== "installed";
+		});
+	}
+</script>
+
+<style>
+	.app-icon { display: block; width: 96px; height: 96px; margin: 28px 0 8px; border-radius: 22px; box-shadow: 0 6px 18px rgb(0 0 0 / .15); }
+	.app-guides { max-width: 620px; }
+	.app-guide { margin-top: 28px; padding: 22px 24px; background: #fff; border-left: 5px solid var(--color-green); }
+	.app-guide h2 { margin: 0 0 12px; font-size: 1.3rem; }
+	.app-guide p { margin: 0 0 12px; line-height: 1.6; }
+	.app-steps { margin: 0; padding-left: 22px; line-height: 1.7; }
+	.app-steps li + li { margin-top: 6px; }
+	.app-button { margin: 4px 0 16px; border: 0; cursor: pointer; font: inherit; font-weight: 700; }
+	.app-button[hidden] { display: none; }
+	.app-hint { font-size: .85rem; opacity: .75; }
+</style>
