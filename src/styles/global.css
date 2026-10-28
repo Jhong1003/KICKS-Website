@@ -5092,6 +5092,23 @@ html[data-season] .hero-season-note--past {
 		background-color: #fff;
 	}
 
+	/* Room for one chip at a time: a compact label and plain-case chip titles,
+	   so "Title favourite 하극상 41%" fits instead of being cut off. */
+	.league-banner--halloween .league-banner-label-text {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
+
+	.league-banner .finale-chip-title {
+		font-size: 0.72rem;
+		letter-spacing: 0;
+		text-transform: none;
+	}
+
 }
 
 @keyframes league-chip-in {

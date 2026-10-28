@@ -108,7 +108,8 @@ const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 
 				<div class="finale-banner-inner">
 					<span class="finale-banner-label">
 						<span aria-hidden="true">🎃 </span>
-						<T en="Halloween Final" ko="할로윈 파이널" />
+						{/* Phones show just 🎃 D-n here (the hero already says Halloween Final), leaving room for the chips. */}
+						<span class="league-banner-label-text"><T en="Halloween Final" ko="할로윈 파이널" /></span>
 						<span class="league-banner-dday" data-dday-date={halloween.date} hidden />
 					</span>
 					<div class="finale-banner-list">
