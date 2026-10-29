@@ -23,26 +23,47 @@ const maxValue = Math.max(1, ...weeklyStats.flatMap((week) => [week.goals, week.
 			<span class="weekly-chart-swatch weekly-chart-swatch--assists" />
 			<T en="Assists" ko="어시스트" />
 		</span>
+		<T class="weekly-chart-hint" en="Tap a week to see the numbers" ko="막대를 누르면 기록이 보여요" />
 	</div>
-	<div class="weekly-chart-bars">
+	{/* Each week is a button: tapping it shows that week's goals and assists
+	    above its bars (tap again to hide). Several charts on one page (one
+	    per league section) each keep their own selection. */}
+	<div class="weekly-chart-bars" data-weekly-chart>
 		{
 			weeklyStats.map((week) => (
-				<div class="weekly-chart-week">
-					<div class="weekly-chart-bar-group">
-						<div
-							class="weekly-chart-bar weekly-chart-bar--goals"
-							style={`height: ${(week.goals / maxValue) * 100}%`}
-							title={`Week ${week.week}: ${week.goals} goals`}
-						/>
-						<div
-							class="weekly-chart-bar weekly-chart-bar--assists"
-							style={`height: ${(week.assists / maxValue) * 100}%`}
-							title={`Week ${week.week}: ${week.assists} assists`}
-						/>
-					</div>
-					<span class="weekly-chart-week-label">W{week.week}</span>
-				</div>
+				<button
+					type="button"
+					class="weekly-chart-week"
+					aria-pressed="false"
+					aria-label={`Week ${week.week}: ${week.goals} goals, ${week.assists} assists`}
+					data-i18n-attrs={JSON.stringify({ "aria-label": {
+						en: `Week ${week.week}: ${week.goals} goals, ${week.assists} assists`,
+						ko: `${week.week}주차: ${week.goals}골, 어시스트 ${week.assists}개`,
+					} })}
+				>
+					<span class="weekly-chart-bar-group" aria-hidden="true">
+						<span class="weekly-chart-bar weekly-chart-bar--goals" style={`height: ${(week.goals / maxValue) * 100}%`}>
+							<span class="weekly-chart-value">{week.goals}</span>
+						</span>
+						<span class="weekly-chart-bar weekly-chart-bar--assists" style={`height: ${(week.assists / maxValue) * 100}%`}>
+							<span class="weekly-chart-value">{week.assists}</span>
+						</span>
+					</span>
+					<span class="weekly-chart-week-label" aria-hidden="true">W{week.week}</span>
+				</button>
 			))
 		}
 	</div>
 </div>
+
+<script>
+	document.querySelectorAll<HTMLElement>("[data-weekly-chart]").forEach((chart) => {
+		chart.addEventListener("click", (event) => {
+			const week = (event.target as HTMLElement).closest<HTMLButtonElement>(".weekly-chart-week");
+			if (!week) return;
+			const on = week.getAttribute("aria-pressed") !== "true";
+			chart.querySelectorAll(".weekly-chart-week").forEach((other) => other.setAttribute("aria-pressed", "false"));
+			week.setAttribute("aria-pressed", String(on));
+		});
+	});
+</script>
