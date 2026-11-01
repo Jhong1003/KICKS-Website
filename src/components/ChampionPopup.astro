@@ -1,0 +1,223 @@
+---
+// "Champions" popup on the homepage: once the newest league is finished
+// (every fixture scored, same rule as the Champion badge and the gold finale
+// banner), it announces the champion team — name in its team color, final
+// record, squad with the captain first — with links to the team page and the
+// Hall of Fame. Shown once per league per browser (localStorage
+// `kicks-champion-<league>`); it goes away by itself when the next league's
+// rosters go in, since the homepage then follows that league. Co-champions
+// (all four ranking criteria level) each get a card.
+//
+// Popups never stack: like the team reveal, it waits for EventPopup.astro and
+// sits out a visit where an event popup opens. It can't meet the team reveal,
+// which only shows before a league's week 2 is played.
+import T from "./T.astro";
+import profilesData from "../data/player_profiles.json";
+import leagueTableData from "../data/league_table.json";
+import teamInfoData from "../data/team-info.json";
+import { getTeamColor, type League } from "../lib/leagues";
+import { getContrastingTextColor, getSection, type PlayerProfile } from "../lib/players";
+import { getLeagueFinale, isShownInLeague } from "../lib/finale";
+
+interface Props {
+	league: League;
+}
+
+const { league } = Astro.props;
+const finale = getLeagueFinale(league);
+const info = (teamInfoData as Record<string, Record<string, { captain?: string }>>)[league.id] ?? {};
+const collator = new Intl.Collator("ko");
+const table = leagueTableData.filter((row) => row.league === league.id);
+const runnerUpPoints = Math.max(-Infinity, ...table.filter((row) => row.rank !== 1).map((row) => row.points));
+
+const champions = (finale?.championTeamIds ?? []).flatMap((teamId) => {
+	const team = league.teams.find((entry) => entry.team_id === teamId);
+	const row = table.find((entry) => entry.team_id === teamId);
+	if (!team || !row) return [];
+	const captain = info[teamId]?.captain;
+	const squad = (profilesData as PlayerProfile[])
+		.filter((player) => isShownInLeague(player, league.id) && getSection(player, league.id)?.current_team_id === teamId)
+		.sort((a, b) => Number(b.name === captain) - Number(a.name === captain) || collator.compare(a.name, b.name));
+	const color = getTeamColor(teamId, league);
+	return [{ ...team, row, color, text: getContrastingTextColor(color), captain, squad }];
+});
+const shared = champions.length > 1;
+// "Won by one point" etc. Only for a sole champion that finished ahead on points.
+const margin = !shared && champions[0] && Number.isFinite(runnerUpPoints) ? champions[0].row.points - runnerUpPoints : 0;
+const show = champions.length > 0;
+const storageKey = `kicks-champion-${league.id}`;
+---
+
+{
+	show && (
+		<dialog id="champion-popup" data-champion-key={storageKey} aria-labelledby="champion-title">
+			<div class="champ-panel">
+				<button class="champ-close" type="button" data-champ-close aria-label="Close" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Close", ko: "닫기" } })}>
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+						<path d="m6 6 12 12M18 6 6 18" />
+					</svg>
+				</button>
+				<p class="champ-brand">KICKS · {league.id}</p>
+				<p class="champ-trophy" aria-hidden="true">🏆</p>
+				<h2 id="champion-title" tabindex="-1" autofocus>
+					{shared ? <T en={`${league.id} co-champions`} ko={`${league.id} 공동 우승`} /> : <T en={`${league.id} Champions`} ko={`${league.id} 우승팀`} />}
+				</h2>
+				{margin > 0 && (
+					<T as="p" class="champ-subtitle" en={margin === 1 ? "Decided by a single point." : `Champions by ${margin} points.`} ko={margin === 1 ? "단 1점 차로 정상에 올랐어요." : `${margin}점 차로 정상에 올랐어요.`} />
+				)}
+				<div class="champ-cards">
+					{champions.map((team) => (
+						<a class="champ-card" href={`/league/${league.id}/team/${team.team_id}`} style={`--team-color: ${team.color}; --team-text: ${team.text}`}>
+							<span class="champ-card-head">
+								<span class="champ-card-name">{team.name}</span>
+								<span class="champ-card-record">
+									<T
+										en={`${team.row.points} pts · ${team.row.wins}W ${team.row.draws}D ${team.row.losses}L`}
+										ko={`승점 ${team.row.points} · ${team.row.wins}승 ${team.row.draws}무 ${team.row.losses}패`}
+									/>
+								</span>
+							</span>
+							<span class="champ-card-body">
+								{team.captain && (
+									<span class="champ-captain">
+										<span class="champ-captain-mark" aria-hidden="true">C</span>
+										{team.captain}
+									</span>
+								)}
+								<span class="champ-squad">{team.squad.filter((player) => player.name !== team.captain).map((player) => player.name).join(" · ")}</span>
+								<span class="champ-card-link"><T en="Team page →" ko="팀 페이지 →" /></span>
+							</span>
+						</a>
+					))}
+				</div>
+				<div class="champ-actions">
+					<a class="champ-hof" href="/hall-of-fame/"><T en="Hall of Fame" ko="명예의 전당" /></a>
+					<button class="champ-done" type="button" data-champ-close><T en="Congrats! 🎉" ko="축하해요! 🎉" /></button>
+				</div>
+			</div>
+		</dialog>
+	)
+}
+
+<script>
+	const dialog = document.querySelector<HTMLDialogElement>("#champion-popup");
+	// Waits for EventPopup.astro to decide; on a visit where it opens, this one sits out.
+	const afterEventPopup = (run: () => void) => {
+		const decided = () => document.documentElement.dataset.eventPopup !== undefined || !document.querySelector("dialog.event-popup");
+		const go = () => { if (document.documentElement.dataset.eventPopup !== "open") run(); };
+		if (decided()) go();
+		else document.addEventListener("kicks:event-popup", go, { once: true });
+	};
+	if (dialog) afterEventPopup(() => {
+		const key = dialog.dataset.championKey ?? "kicks-champion";
+		let seen = false;
+		try { seen = localStorage.getItem(key) === "1"; } catch { /* Storage disabled: show it, once per page load. */ }
+		if (seen) return;
+		const markSeen = () => { try { localStorage.setItem(key, "1"); } catch { /* Fine without storage. */ } };
+		const close = () => { markSeen(); dialog.close(); };
+		dialog.querySelectorAll("[data-champ-close]").forEach((button) => button.addEventListener("click", close));
+		dialog.querySelectorAll("a").forEach((link) => link.addEventListener("click", markSeen));
+		dialog.addEventListener("cancel", markSeen);
+		// Clicking the dimmed area outside the panel closes it.
+		dialog.addEventListener("click", (event) => { if (event.target === dialog) close(); });
+		dialog.showModal();
+	});
+</script>
+
+<style>
+	dialog {
+		width: min(460px, calc(100% - 32px));
+		max-width: none;
+		max-height: calc(100dvh - 32px);
+		margin: auto;
+		padding: 0;
+		border: 1px solid rgba(176, 138, 40, 0.45);
+		border-radius: 8px;
+		color: var(--color-green);
+		background: var(--color-background);
+		overscroll-behavior: contain;
+	}
+	dialog::backdrop { background: rgba(20, 29, 14, 0.5); }
+	.champ-panel {
+		position: relative;
+		padding: clamp(24px, 5vw, 32px);
+		text-align: center;
+		background: radial-gradient(120% 60% at 50% 0%, rgba(232, 190, 80, 0.22), transparent 70%);
+	}
+	.champ-brand { margin: 0 44px 8px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; }
+	.champ-trophy { margin: 4px 0 6px; font-size: 3rem; line-height: 1; }
+	h2 { outline: none; margin: 0; font-size: clamp(1.7rem, 6vw, 2.3rem); line-height: 1.05; letter-spacing: -0.03em; }
+	.champ-subtitle { margin: 10px 0 0; color: var(--color-dark); font-size: 0.92rem; }
+	.champ-cards { display: grid; gap: 10px; margin-top: 20px; text-align: left; }
+	.champ-card {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		border: 1px solid rgba(176, 138, 40, 0.4);
+		border-radius: 10px;
+		background: #fff;
+		color: var(--color-dark);
+		text-decoration: none;
+		box-shadow: 0 6px 18px rgba(176, 138, 40, 0.18);
+		transition: transform 0.15s ease, box-shadow 0.15s ease;
+	}
+	.champ-card:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(176, 138, 40, 0.26); }
+	.champ-card-head { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px 12px; background: var(--team-color); color: var(--team-text); }
+	.champ-card-name { font-size: 1.45rem; font-weight: 800; line-height: 1.1; }
+	.champ-card-record { font-size: 0.78rem; font-weight: 600; opacity: 0.9; }
+	.champ-card-body { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 14px; }
+	.champ-captain { display: inline-flex; align-items: center; gap: 6px; font-size: 0.92rem; font-weight: 700; }
+	.champ-captain-mark {
+		display: inline-grid;
+		place-items: center;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: var(--team-color);
+		color: var(--team-text);
+		font-size: 0.65rem;
+		font-weight: 800;
+	}
+	.champ-squad { font-size: 0.82rem; line-height: 1.55; opacity: 0.8; }
+	.champ-card-link { color: var(--color-green); font-size: 0.78rem; font-weight: 700; }
+	.champ-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 18px; margin-top: 20px; }
+	.champ-hof { color: var(--color-green); font-size: 0.88rem; font-weight: 700; }
+	.champ-done {
+		padding: 10px 26px;
+		border: none;
+		border-radius: 999px;
+		background: var(--color-green);
+		color: var(--color-background);
+		font: inherit;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.champ-close {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		border: none;
+		border-radius: 6px;
+		color: inherit;
+		background: transparent;
+		cursor: pointer;
+	}
+	.champ-close:hover { background: var(--color-sage); }
+	.champ-close:focus-visible, .champ-done:focus-visible, .champ-hof:focus-visible, .champ-card:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
+	@media (max-width: 640px) {
+		dialog { width: calc(100% - 24px); max-height: calc(100dvh - 24px); }
+		.champ-panel { padding: 20px 16px 18px; }
+		.champ-trophy { font-size: 2.5rem; }
+		.champ-close { top: 6px; right: 6px; width: 40px; height: 40px; }
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		dialog[open] { animation: champ-in 240ms ease-out; }
+		dialog[open] .champ-trophy { animation: champ-trophy 700ms ease-out 120ms both; }
+		@keyframes champ-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+		@keyframes champ-trophy { 0% { transform: translateY(8px) scale(0.6); opacity: 0; } 60% { transform: translateY(-4px) scale(1.12); opacity: 1; } 100% { transform: none; } }
+	}
+</style>

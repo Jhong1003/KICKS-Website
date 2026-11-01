@@ -4,9 +4,8 @@
 // once per league per browser (localStorage), only around kickoff: from the
 // rosters going in until the league's first week is played. After that the
 // teams are old news, so the popup stops on its own (and comes back for the
-// next league). On the visit it shows, the welcome popup steps aside
-// (WelcomePopup.astro checks #team-reveal first), so nobody gets two
-// popups at once; a first-time visitor simply sees the welcome next visit.
+// next league). It never meets the champions popup (ChampionPopup.astro),
+// which only shows once a league is finished.
 import T from "./T.astro";
 import profilesData from "../data/player_profiles.json";
 import teamInfoData from "../data/team-info.json";
