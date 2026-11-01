@@ -187,5 +187,32 @@
     "draws": 0,
     "losses": 6,
     "points": 0
+  },
+  {
+    "league": "FA26-L2",
+    "week": 4,
+    "team_id": "T1",
+    "wins": 3,
+    "draws": 2,
+    "losses": 1,
+    "points": 11
+  },
+  {
+    "league": "FA26-L2",
+    "week": 4,
+    "team_id": "T3",
+    "wins": 3,
+    "draws": 2,
+    "losses": 1,
+    "points": 11
+  },
+  {
+    "league": "FA26-L2",
+    "week": 4,
+    "team_id": "T2",
+    "wins": 0,
+    "draws": 2,
+    "losses": 4,
+    "points": 2
   }
 ]

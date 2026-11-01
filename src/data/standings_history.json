@@ -208,5 +208,35 @@
     "goal_difference": -6,
     "goals_for": 14,
     "participation_rate": 0.815
+  },
+  {
+    "league": "FA26-L2",
+    "week": 4,
+    "team_id": "T3",
+    "rank": 1,
+    "points": 31,
+    "goal_difference": 8,
+    "goals_for": 26,
+    "participation_rate": 0.944
+  },
+  {
+    "league": "FA26-L2",
+    "week": 4,
+    "team_id": "T1",
+    "rank": 2,
+    "points": 30,
+    "goal_difference": 4,
+    "goals_for": 20,
+    "participation_rate": 0.861
+  },
+  {
+    "league": "FA26-L2",
+    "week": 4,
+    "team_id": "T2",
+    "rank": 3,
+    "points": 17,
+    "goal_difference": -12,
+    "goals_for": 17,
+    "participation_rate": 0.833
   }
 ]
