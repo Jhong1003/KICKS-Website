@@ -351,7 +351,7 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		label: "Back-to-Back",
 		description: "Won two leagues in a row.",
 		descriptionKo: "두 리그 연속 우승을 차지했어요.",
-		icon: "🔁",
+		icon: "🌟",
 		tier: "icon",
 	},
 	// Special — just for fun
