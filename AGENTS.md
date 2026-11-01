@@ -499,11 +499,16 @@ they joined, so late joiners aren't penalised.
   homepage goal counter in `src/lib/goals.ts`).
 
 **Step-up badges** (`BADGE_LADDERS`, in both `update_data.py` and
-`src/lib/players.ts`): off_the_mark → fox_in_the_box; provider → maestro →
+`src/lib/players.ts`): off_the_mark → fox_in_the_box; provider →
 delivery_service; brace → hat_trick → poker; clean_sheet → the_wall →
 great_wall. A card keeps only the highest step reached, so one achievement
 doesn't fill a card several times; the All Badges popup still lists a
-higher-step player as a holder of the lower steps (`holdsBadge`).
+higher-step player as a holder of the lower steps (`holdsBadge`). A ladder
+only joins steps that measure the same thing on the same scale: `maestro`
+(3+ assists in one week) is a one-week burst and `delivery_service` (5+ over
+the league) a season total, so neither implies the other and `maestro` stands
+alone, like `on_fire` and `game_changer`. It used to sit between them, which
+hid it from anyone who also reached Delivery Service.
 
 `brace`/`hat_trick` need per-match goals, which only `goal_events` has
 (`_max_match_goals`), so they start in FA26-L2; FA26-L1 was recorded as

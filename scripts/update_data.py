@@ -786,7 +786,7 @@ DEFENSIVE_POSITIONS = {"DF", "GK"}
 # Keep in sync with BADGE_LADDERS in src/lib/players.ts.
 BADGE_LADDERS = [
     ["off_the_mark", "fox_in_the_box"],
-    ["provider", "maestro", "delivery_service"],
+    ["provider", "delivery_service"],
     ["brace", "hat_trick", "poker"],
     ["clean_sheet", "the_wall", "great_wall"],
 ]
