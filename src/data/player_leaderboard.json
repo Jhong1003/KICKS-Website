@@ -548,6 +548,19 @@
   {
     "league": "FA26-L2",
     "rank": 11,
+    "player_id": "P006",
+    "goals": 2,
+    "assists": 2,
+    "team_id": "T1",
+    "status": "active",
+    "attacking_points": 4,
+    "weeks_attended": 4,
+    "weeks_played": 4,
+    "id": "66ec6daf"
+  },
+  {
+    "league": "FA26-L2",
+    "rank": 12,
     "player_id": "P016",
     "goals": 2,
     "assists": 2,
@@ -557,19 +570,6 @@
     "weeks_attended": 3,
     "weeks_played": 4,
     "id": "e816824a"
-  },
-  {
-    "league": "FA26-L2",
-    "rank": 12,
-    "player_id": "P006",
-    "goals": 2,
-    "assists": 1,
-    "team_id": "T1",
-    "status": "active",
-    "attacking_points": 3,
-    "weeks_attended": 4,
-    "weeks_played": 4,
-    "id": "66ec6daf"
   },
   {
     "league": "FA26-L2",

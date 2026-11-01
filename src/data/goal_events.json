@@ -655,7 +655,7 @@
     "match_id": "FA26-L2-W04-M02",
     "minute": 12,
     "scorer_id": "P001",
-    "assist_id": null,
+    "assist_id": "P006",
     "own_goal": false,
     "team_id": "T1",
     "scorer_team_id": "T1",
