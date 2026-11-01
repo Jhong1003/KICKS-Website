@@ -133,7 +133,6 @@
     "name": "김동하",
     "avatar_initials": "동하",
     "positions": [
-      "FW",
       "MF"
     ],
     "status": "active",
@@ -218,7 +217,7 @@
           "assists": 1,
           "attacking_points": 1
         },
-        "play_style_tag": "Target Man",
+        "play_style_tag": "Engine",
         "badges": [
           "provider",
           "iron_man"
@@ -603,8 +602,8 @@
     "name": "노윤오",
     "avatar_initials": "윤오",
     "positions": [
-      "DF",
-      "GK"
+      "GK",
+      "DF"
     ],
     "status": "active",
     "leagues": [
@@ -650,11 +649,12 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Rock",
+        "play_style_tag": "Black Spider",
         "badges": [
           "back_to_back",
           "iron_man",
           "champion",
+          "number_one",
           "the_wall"
         ]
       },
@@ -705,12 +705,12 @@
           "assists": 0,
           "attacking_points": 1
         },
-        "play_style_tag": "Rock",
+        "play_style_tag": "Black Spider",
         "badges": [
           "off_the_mark",
           "iron_man",
-          "libero",
           "champion",
+          "number_one",
           "great_wall"
         ]
       }
@@ -722,6 +722,7 @@
     "name": "문재홍",
     "avatar_initials": "재홍",
     "positions": [
+      "MF",
       "DF"
     ],
     "status": "active",
@@ -773,13 +774,10 @@
           "assists": 1,
           "attacking_points": 1
         },
-        "play_style_tag": "Rock",
+        "play_style_tag": "Engine",
         "badges": [
           "provider",
-          "iron_man",
-          "libero",
-          "giant_killer",
-          "the_wall"
+          "iron_man"
         ]
       },
       {
@@ -824,11 +822,10 @@
           }
         ],
         "personal_best_week": null,
-        "play_style_tag": "Rock",
+        "play_style_tag": "Engine",
         "badges": [
           "iron_man",
-          "champion",
-          "great_wall"
+          "champion"
         ]
       }
     ]
@@ -2484,6 +2481,7 @@
     "name": "이희준",
     "avatar_initials": "희준",
     "positions": [
+      "MF",
       "FW"
     ],
     "status": "active",
@@ -2589,7 +2587,7 @@
           "assists": 0,
           "attacking_points": 1
         },
-        "play_style_tag": "Target Man",
+        "play_style_tag": "Engine",
         "badges": [
           "off_the_mark",
           "iron_man",
@@ -2822,7 +2820,8 @@
     "name": "진홍주",
     "avatar_initials": "홍주",
     "positions": [
-      "DF"
+      "DF",
+      "MF"
     ],
     "status": "active",
     "leagues": [
