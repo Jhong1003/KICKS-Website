@@ -1825,8 +1825,8 @@
         "team_history": [],
         "season_totals": {
           "goals": 8,
-          "assists": 2,
-          "attacking_points": 10,
+          "assists": 3,
+          "attacking_points": 11,
           "weeks_attended": 4,
           "weeks_played": 4
         },
@@ -1857,7 +1857,7 @@
             "team_id": "T3",
             "games": 6,
             "goals": 2,
-            "assists": 0
+            "assists": 1
           }
         ],
         "personal_best_week": {

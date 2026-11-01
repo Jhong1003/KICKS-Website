@@ -640,7 +640,7 @@
     "match_id": "FA26-L2-W04-M01",
     "minute": 2,
     "scorer_id": "P024",
-    "assist_id": null,
+    "assist_id": "P018",
     "own_goal": false,
     "team_id": "T3",
     "scorer_team_id": "T3",
