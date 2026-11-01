@@ -680,8 +680,18 @@ for the visit (sessionStorage, per league/mode/week).
 `TeamRevealPopup.astro` shows the newest league's teams (color, captain from
 team-info.json, squad, team page link) once per league per browser (localStorage
 `kicks-team-reveal-<league>`), only around kickoff — from the rosters going in until
-the league's week 1 is played (hidden once any week-2+ match has a score). On the visit it
-shows, `WelcomePopup.astro` steps aside so there's never two popups.
+the league's week 1 is played (hidden once any week-2+ match has a score).
+
+`ChampionPopup.astro` announces the newest league's champion once it's finished
+(every fixture scored, `getLeagueFinale`): trophy, the team name in its color, final
+points and W-D-L, the winning margin when it's a sole champion ahead on points, the
+squad captain-first (`isShownInLeague`, so the finished-league rule for inactive
+players applies), and links to the team page and Hall of Fame. Co-champions each get
+a card. Once per league per browser (localStorage `kicks-champion-<league>`); it stops
+by itself when the next league's rosters go in. It replaced the old "new website"
+welcome popup. Both this and the team reveal wait for `EventPopup.astro` and sit out a
+visit where an event popup opens, so there are never two popups; the two never overlap
+each other (kickoff vs finished).
 
 ### Season themes
 

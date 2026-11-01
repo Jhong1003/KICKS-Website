@@ -66,8 +66,9 @@ try {
       assert.equal(await page.locator('h1').isVisible(), true);
       await page.unroute('**/api/visits');
       await page.goto(origin + '/');
-      const popup = page.locator('#welcome-popup'); await popup.waitFor({ state: 'visible' });
-      await page.keyboard.press('Escape'); assert.equal(await popup.isVisible(), false);
+      // The champions popup only exists while the newest league is finished.
+      const popup = page.locator('#champion-popup');
+      if (await popup.count()) { await popup.waitFor({ state: 'visible' }); await page.keyboard.press('Escape'); assert.equal(await popup.isVisible(), false); }
       assert.equal(await page.locator('.hero').isVisible(), true);
       assert.deepEqual(errors, []);
       await context.close();

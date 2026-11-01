@@ -8,8 +8,8 @@
 // (sessionStorage, so a new tab or a reopened site counts as a new visit).
 //
 // Popups never stack, and this one goes first: on a visit where it opens,
-// the team reveal (TeamRevealPopup.astro) and the welcome popup
-// (WelcomePopup.astro) both wait for a later visit.
+// the team reveal (TeamRevealPopup.astro) and the champions popup
+// (ChampionPopup.astro) both wait for a later visit.
 import T from "./T.astro";
 import scheduleData from "../data/schedule.json";
 import type { ScheduleEvent } from "../lib/schedule";
@@ -93,7 +93,7 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 		return days >= 0 && days <= POPUP_DAYS_BEFORE && !seen(d.dataset.eventKey ?? "");
 	});
 
-	// Lets TeamRevealPopup.astro / WelcomePopup.astro know the decision,
+	// Lets TeamRevealPopup.astro / ChampionPopup.astro know the decision,
 	// whichever order the page's scripts happen to run in.
 	const announce = (state: "open" | "none") => {
 		document.documentElement.dataset.eventPopup = state;
