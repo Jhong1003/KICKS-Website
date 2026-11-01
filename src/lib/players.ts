@@ -79,7 +79,7 @@ export type BadgeKey =
 	| "delivery_service"
 	| "hat_trick"
 	| "great_wall"
-	| "treble"
+	| "goat"
 	| "poker"
 	| "back_to_back"
 	| "own_goal_award"
@@ -333,10 +333,10 @@ export const BADGES: Record<BadgeKey, BadgeInfo> = {
 		tier: "legendary",
 	},
 	// Icon — shown as a locked "???" card until someone earns it
-	treble: {
-		label: "Treble",
-		description: "Won the league, topped attacking points, never missed a week.",
-		descriptionKo: "리그 우승·공격포인트 1위·전 주차 출석을 모두 해냈어요.",
+	goat: {
+		label: "GOAT",
+		description: "Won the league and topped its attacking points.",
+		descriptionKo: "리그 우승과 공격포인트 1위를 함께 해냈어요.",
 		icon: "🐐",
 		tier: "icon",
 	},

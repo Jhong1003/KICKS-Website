@@ -909,8 +909,8 @@ def _badges(
 
     badges = []
     # Icon — "???"-locked on the site until someone earns one
-    if champion and top_scorer and len(attended) == weeks_played:
-        badges.append("treble")
+    if champion and top_scorer:
+        badges.append("goat")
     if max_match_goals >= POKER_GOALS:
         badges.append("poker")
     # Common
@@ -1087,12 +1087,12 @@ def _league_award_winners(
 
 
 def _top_attackers(player_stats: pd.DataFrame) -> dict[str, set[str]]:
-    """player_id(s) first in each league's attacking-points ranking, for Treble.
+    """player_id(s) first in each league's attacking-points ranking, for GOAT.
 
     Same order as the leaderboard (attacking points -> goals -> assists), but
-    without its final name-order fallback: a player still level on all three
-    shares first place. Attendance, the leaderboard's last real tiebreaker,
-    is left out because Treble already requires every week attended.
+    without its attendance and name-order fallbacks: a player still level on
+    all three shares first place, so a tie on the pitch is never settled by
+    who turned up more often.
     """
     top: dict[str, set[str]] = {}
     for league, league_stats in player_stats.groupby("league", sort=False):
@@ -1288,7 +1288,7 @@ def build_player_profiles(
     get one automatically once their first week of stats is entered.
 
     `matches` and `league_table` feed the team-based badges (the defender
-    badges, Champion, Treble) and tell which leagues are finished (Golden
+    badges, Champion, GOAT) and tell which leagues are finished (Golden
     Boot, Playmaker Award); `goal_events` (still name-based) feeds the per-match
     ones (Brace, Hat-trick, Poker); `goal_rows` is `build_goal_events`
     output, already resolved to ids, and feeds the two badges that read goal

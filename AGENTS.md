@@ -453,9 +453,10 @@ people hold one — and pages show badges rarest-first (`sortBadges`).
 "Attended" means a week with `games > 0`; a player's rows start the week
 they joined, so late joiners aren't penalised.
 
-- Icon (above Legendary): `treble` (champion + first in the league's
+- Icon (above Legendary): `goat` (champion + first in the league's
   attacking-points ranking — AP → goals → assists, still level = shared
-  first — + attended every week of the league), `poker` (4 goals in one
+  first; attendance is not a condition — replaced `treble`, which also
+  required every week attended), `poker` (4 goals in one
   match; FA26-L2 onward like `brace`), `back_to_back` (champion of two
   leagues in a row, consecutive in `league_order`; awarded in the second
   one, added in `build_player_profiles` since it spans leagues). In the
