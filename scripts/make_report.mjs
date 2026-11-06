@@ -355,8 +355,8 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .race-panel .grid { stroke: #e6e6e6; stroke-width: 2; }
 .race-panel .tick { font-family: Antonio, sans-serif; font-size: 32px; font-weight: 700; fill: #666; letter-spacing: .06em; }
 .race-panel .band { font-family: Antonio, sans-serif; font-size: 26px; font-weight: 700; fill: #9a7a1c; letter-spacing: .14em; text-anchor: middle; }
-.race-panel .lgname { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 800; dominant-baseline: middle; }
-.race-panel .lgpts { font-family: Antonio, sans-serif; font-size: 46px; font-weight: 700; dominant-baseline: middle; }
+.race-panel .lgname { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 36px; font-weight: 500; dominant-baseline: middle; }
+.race-panel .lgpts { font-family: Antonio, sans-serif; font-size: 44px; font-weight: 600; dominant-baseline: middle; }
 </style></head><body>${slides.map((s) => s.html).join("")}</body></html>`;
 
 const outDir = join(ROOT, "report/out", `${leagueId}-W${ww}`);
