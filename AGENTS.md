@@ -777,8 +777,11 @@ update. Not part of the site build; nothing under `report/` is deployed.
   through that week, so an old week can be remade later and still be right.
 - **Leaders**: top 5 by goals / assists / G+A, ranks shared on the stat itself
   (01, 02, 02, 04), inactive players left out.
-- **Defensive Spotlight** is the board's pick: `report/spotlight.json`
-  `{ "<league>": { "<week>": [three names] } }`; no entry, no box.
+- **The box under the leaderboards is for defenders**: the board's Defensive
+  Spotlight when entered (`report/spotlight.json`,
+  `{ "<league>": { "<week>": [three names] } }`), otherwise an automatic
+  **Best Defense** — the team(s) with the fewest goals conceded through that
+  week, with their DF/GK (primary position, non-inactive) listed GK first.
 - PNGs need Playwright (`import("playwright")`, or a global install found via
   `NODE_PATH`); `--html-only` writes just `report.html`. The team colour word
   under a team name (RED / ORANGE / BLUE …) comes from the hue, with yellows

@@ -118,6 +118,26 @@ const contributors = top("ga", (a, b) => b.goals - a.goals);
 
 const spotlightFile = join(ROOT, "report/spotlight.json");
 const spotlightNames = existsSync(spotlightFile) ? JSON.parse(readFileSync(spotlightFile, "utf8"))[leagueId]?.[String(week)] ?? [] : [];
+// Best Defense: the team(s) that conceded fewest through this week, with their
+// DF/GK (primary position) named — so defenders get a spot under three
+// attacking leaderboards even when the board hasn't picked a Spotlight. The
+// board's Spotlight, when entered, takes this box instead.
+const conceded = new Map();
+for (const m of scored.filter((m) => m.week <= week)) {
+	conceded.set(m.home_team_id, (conceded.get(m.home_team_id) ?? 0) + m.away_score);
+	conceded.set(m.away_team_id, (conceded.get(m.away_team_id) ?? 0) + m.home_score);
+}
+const fewest = Math.min(...conceded.values());
+const bestDefense = [...conceded].filter(([, ga]) => ga === fewest).map(([id]) => {
+	const backs = profiles
+		.filter((p) => p.status !== "inactive" && ["GK", "DF"].includes(p.positions?.[0]))
+		.map((p) => ({ p, w: p.leagues.find((s) => s.league === leagueId)?.weekly_stats.filter((x) => x.week <= week && x.games > 0).at(-1) }))
+		.filter(({ w }) => w?.team_id === id)
+		.sort((a, b) => (a.p.positions[0] === "GK" ? -1 : 0) - (b.p.positions[0] === "GK" ? -1 : 0) || a.p.name.localeCompare(b.p.name, "ko"))
+		.map(({ p }) => p.name);
+	return { team: team(id), ga: fewest, backs };
+});
+
 const spotlight = spotlightNames.map((name) => {
 	const p = profiles.find((x) => x.name === name);
 	const w = p?.leagues.find((s) => s.league === leagueId)?.weekly_stats.filter((x) => x.week <= week).at(-1);
@@ -217,7 +237,15 @@ const stats = card(
 		spotlight.length
 			? `<div class="spotlight"><div class="sp-head"><b>DEFENSIVE<br>SPOTLIGHT</b><small>WEEK ${ww} · SELECTED BY KICKS</small></div>
 			<div class="sp-names">${spotlight.map((s) => `<span>${bar(s.color)}${esc(s.name)}</span>`).join("")}</div></div>`
-			: ""
+			: bestDefense.length
+				? `<div class="spotlight best-defense"><div class="sp-head"><b>BEST<br>DEFENSE</b><small>FEWEST CONCEDED · ${isFinal ? `LEAGUE ${leagueNo}` : `THROUGH WEEK ${ww}`}</small></div>
+			<div class="bd-body">${bestDefense
+				.map(
+					(d) => `<div class="bd-team">${bar(d.team.color)}<b>${esc(d.team.name)}</b><span class="bd-ga"><b>${d.ga}</b> CONCEDED</span></div>
+				<div class="bd-names">${d.backs.map((n) => `<span>${esc(n)}</span>`).join("")}</div>`,
+				)
+				.join("")}</div></div>`
+				: ""
 	}${footer}`,
 );
 
@@ -353,6 +381,13 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .spotlight { width: 936px; margin: 34px auto 0; display: grid; grid-template-columns: 300px 1fr; align-items: center; gap: 24px; padding: 26px 34px; background: rgba(10,10,10,.72); border: 2px solid rgba(255,255,255,.25); border-radius: 14px; }
 .sp-head b { display: block; font-size: 44px; font-weight: 700; font-style: italic; line-height: 1; }
 .sp-head small { display: block; margin-top: 10px; font-size: 18px; font-weight: 600; letter-spacing: .14em; color: #ccc; }
+.bd-body { display: grid; gap: 14px; }
+.bd-team { display: flex; align-items: center; gap: 14px; }
+.bd-team > b { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 700; }
+.bd-team .bar { height: 40px; width: 8px; }
+.bd-ga { margin-left: auto; font-size: 24px; font-weight: 600; letter-spacing: .14em; color: #ccc; }
+.bd-ga b { font-size: 52px; font-weight: 700; color: #fff; letter-spacing: 0; margin-right: 6px; }
+.bd-names { display: flex; flex-wrap: wrap; gap: 8px 26px; font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 28px; font-weight: 500; color: #eee; }
 .sp-names { display: flex; justify-content: space-around; }
 .sp-names span { display: flex; align-items: center; gap: 12px; font-size: 32px; font-weight: 500; }
 .race .title { font-size: 150px; margin-top: 124px; }
