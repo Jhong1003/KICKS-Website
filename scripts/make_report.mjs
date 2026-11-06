@@ -159,6 +159,10 @@ const bg = (slide) => {
 const font = dataUrl(join(ROOT, "report/assets/Antonio.ttf"), "font/ttf");
 const ball = dataUrl(join(ROOT, "report/assets/kicks-ball.png"), "image/png");
 const brandFont = dataUrl(join(ROOT, "report/assets/Montserrat.ttf"), "font/ttf");
+// Hangul is embedded too (Noto Sans KR, cut to the 2,350 everyday syllables +
+// Latin), so the slides look the same on any machine and CI needs no font
+// packages; a rarer syllable falls back to the system's CJK font.
+const krFont = dataUrl(join(ROOT, "report/assets/NotoSansKR-subset.ttf"), "font/ttf");
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const pad = (n) => String(n).padStart(2, "0");
@@ -327,10 +331,11 @@ const slides = isFinal
 const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
 @font-face { font-family: Antonio; src: url(${font}) format("truetype"); font-weight: 100 700; }
 @font-face { font-family: Montserrat; src: url(${brandFont}) format("truetype"); font-weight: 100 900; }
+@font-face { font-family: "KICKS KR"; src: url(${krFont}) format("truetype"); font-weight: 100 900; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #111; display: grid; gap: 40px; padding: 40px; justify-content: center; }
 .card { position: relative; width: 1080px; height: 1350px; overflow: hidden; color: #fff; background-size: cover; background-position: center;
-	font-family: Antonio, "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif;
+	font-family: Antonio, "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif;
 	--shade: radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,.25), rgba(0,0,0,.72));
 	--wash-cover: linear-gradient(rgba(6,14,6,.30), rgba(6,14,6,.45)), var(--shade);
 	--wash-results: linear-gradient(rgba(6,14,6,.40), rgba(6,14,6,.55)), var(--shade);
@@ -342,7 +347,7 @@ body { background: #111; display: grid; gap: 40px; padding: 40px; justify-conten
 .mark { position: absolute; top: 40px; right: 46px; display: flex; align-items: center; gap: 12px; }
 .mark img { width: 72px; height: 72px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); }
 .mark span { font-family: Montserrat, sans-serif; font-size: 50px; font-weight: 800; letter-spacing: .01em; color: #fff; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,.35); }
-.ko, .side, .teamcell b, .lname, .sp-names span { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; }
+.ko, .side, .teamcell b, .lname, .sp-names span { font-family: "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; }
 .bar { display: inline-block; width: 7px; height: 1.15em; border-radius: 2px; flex: none; }
 h1, h2, .title, .sub, .kicker, .meta, footer { text-align: center; text-shadow: 0 4px 18px rgba(0,0,0,.45); }
 .title { margin-top: 140px; font-size: 168px; font-weight: 700; line-height: .95; letter-spacing: -.01em; }
@@ -406,18 +411,18 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .sp-head small { display: block; margin-top: 10px; font-size: 18px; font-weight: 600; letter-spacing: .14em; color: #ccc; }
 .bd-body { display: grid; gap: 14px; }
 .bd-team { display: flex; align-items: center; gap: 14px; }
-.bd-team > b { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 700; }
+.bd-team > b { font-family: "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 700; }
 .bd-team .bar { height: 40px; width: 8px; }
 .bd-shared { flex-wrap: wrap; gap: 14px 28px; }
 .bd-chip { display: inline-flex; align-items: center; gap: 14px; }
-.bd-chip b { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 700; }
-.bd-ga { margin-left: auto; font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 30px; font-weight: 500; color: #ddd; }
-.best-defense .ko-sub { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 24px; font-weight: 500; letter-spacing: .02em; }
+.bd-chip b { font-family: "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 700; }
+.bd-ga { margin-left: auto; font-family: "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 30px; font-weight: 500; color: #ddd; }
+.best-defense .ko-sub { font-family: "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 24px; font-weight: 500; letter-spacing: .02em; }
 .bd-ga b { font-family: Antonio, sans-serif; font-size: 52px; font-weight: 700; color: #fff; margin-right: 4px; }
 .best-defense .sp-head b { font-style: normal; }
 .bd-names { display: grid; gap: 8px; }
 .bd-names > div { display: flex; gap: 22px; }
-.bd-names { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 28px; font-weight: 500; color: #eee; }
+.bd-names { font-family: "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 28px; font-weight: 500; color: #eee; }
 .sp-names { display: flex; justify-content: space-around; }
 .sp-names span { display: flex; align-items: center; gap: 12px; font-size: 32px; font-weight: 500; }
 .race .title { font-size: 150px; margin-top: 124px; }
@@ -426,7 +431,7 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .race-panel .grid { stroke: #e6e6e6; stroke-width: 2; }
 .race-panel .tick { font-family: Antonio, sans-serif; font-size: 32px; font-weight: 700; fill: #666; letter-spacing: .06em; }
 .race-panel .band { font-family: Antonio, sans-serif; font-size: 26px; font-weight: 700; fill: #9a7a1c; letter-spacing: .14em; text-anchor: middle; }
-.race-panel .lgname { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 36px; font-weight: 500; dominant-baseline: middle; }
+.race-panel .lgname { font-family: "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 36px; font-weight: 500; dominant-baseline: middle; }
 .race-panel .lgpts { font-family: Antonio, sans-serif; font-size: 44px; font-weight: 600; dominant-baseline: middle; }
 </style></head><body>${slides.map((s) => s.html).join("")}</body></html>`;
 
