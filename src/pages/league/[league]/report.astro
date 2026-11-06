@@ -1,0 +1,171 @@
+---
+// League report slides: /league/<league>/report/?week=N
+// The Instagram post for a week (cover, match results, table, player stats) or,
+// for the final week, the league's final report (cover, final table, title
+// race, player stats), as 1080x1350 JPGs anyone can save and post. The images
+// are drawn by scripts/make_report.mjs --all in the "Make Report Slides"
+// workflow after each data update and listed in src/data/reports.json; this
+// page only shows them. A week shows up once every fixture in it is scored.
+//
+// "Save all" hands the four files to the phone's share sheet (where "Save
+// Images" puts them in Photos) and falls back to downloading each one, the same
+// pattern as the Wrapped card.
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import T from "../../../components/T.astro";
+import reportsData from "../../../data/reports.json";
+import { leagues, type League } from "../../../lib/leagues";
+
+export function getStaticPaths() {
+	return leagues.map((league) => ({ params: { league: league.id }, props: { league } }));
+}
+
+interface Props {
+	league: League;
+}
+
+type Week = { final: boolean; slides: string[] };
+const { league } = Astro.props;
+const weeks = Object.entries(((reportsData as Record<string, unknown>)[league.id] ?? {}) as Record<string, Week>)
+	.map(([week, data]) => ({ week: Number(week), ...data }))
+	.sort((a, b) => a.week - b.week);
+const latest = weeks.at(-1)?.week;
+const pad = (n: number) => String(n).padStart(2, "0");
+---
+
+<BaseLayout title={`Report · ${league.id} | KICKS`} description={`${league.id} Instagram report slides — save and share.`}>
+	<main class="report-page">
+		<section class="content-section" aria-labelledby="report-title">
+			<a class="back-link" href={`/league/${league.id}#results`}>
+				← <T en={`${league.id} league`} ko={`${league.id} 리그`} />
+			</a>
+			<p class="section-label">{league.id}</p>
+			<h1 id="report-title"><T en="League Report" ko="리그 리포트" /></h1>
+
+			{weeks.length === 0 ? (
+				<T as="p" class="about-description" en="The first report appears once a week's results are all in." ko="한 주 결과가 다 들어오면 첫 리포트가 생겨요." />
+			) : (
+				<>
+					<T
+						as="p"
+						class="about-description"
+						en="Instagram-size slides, made from the league's results. Save them and share away."
+						ko="리그 결과로 자동으로 만든 인스타용 이미지예요. 저장해서 스토리나 피드에 올려주세요."
+					/>
+					<div class="report-weeks" role="tablist" aria-label="Week">
+						{weeks.map((w) => (
+							<button type="button" role="tab" class="report-week" data-report-week={w.week} aria-selected={w.week === latest ? "true" : "false"}>
+								{w.final ? <T en="Final" ko="결산" /> : <T en={`Week ${w.week}`} ko={`${w.week}주차`} />}
+							</button>
+						))}
+					</div>
+
+					{weeks.map((w) => (
+						<div class="report-set" data-report-set={w.week} hidden={w.week !== latest}>
+							<button type="button" class="report-save" data-report-save>
+								<T en={`Save all ${w.slides.length}`} ko={`${w.slides.length}장 모두 저장`} />
+							</button>
+							<div class="report-grid">
+								{w.slides.map((src, i) => (
+									<a href={src} target="_blank" rel="noopener" class="report-slide">
+										<img src={src} alt={`${league.id} ${w.final ? "final" : `week ${w.week}`} report, slide ${i + 1}`} width="1080" height="1350" loading={w.week === latest ? "eager" : "lazy"} decoding="async" data-file={`kicks-${league.id}-${w.final ? "final" : `w${pad(w.week)}`}-${i + 1}.jpg`} />
+									</a>
+								))}
+							</div>
+						</div>
+					))}
+				</>
+			)}
+		</section>
+	</main>
+</BaseLayout>
+
+<script>
+	const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-report-week]"));
+	const sets = Array.from(document.querySelectorAll<HTMLElement>("[data-report-set]"));
+	const show = (week: string) => {
+		if (!sets.some((s) => s.dataset.reportSet === week)) return;
+		tabs.forEach((t) => t.setAttribute("aria-selected", String(t.dataset.reportWeek === week)));
+		sets.forEach((s) => (s.hidden = s.dataset.reportSet !== week));
+	};
+	const fromUrl = new URLSearchParams(location.search).get("week");
+	if (fromUrl) show(fromUrl);
+	tabs.forEach((t) =>
+		t.addEventListener("click", () => {
+			const week = t.dataset.reportWeek ?? "";
+			show(week);
+			const url = new URL(location.href);
+			url.searchParams.set("week", week);
+			history.replaceState(null, "", url);
+		}),
+	);
+
+	document.querySelectorAll<HTMLButtonElement>("[data-report-save]").forEach((button) =>
+		button.addEventListener("click", async () => {
+			const imgs = Array.from(button.closest("[data-report-set]")?.querySelectorAll<HTMLImageElement>("img") ?? []);
+			button.disabled = true;
+			try {
+				const files = await Promise.all(
+					imgs.map(async (img) => new File([await (await fetch(img.src)).blob()], img.dataset.file ?? "kicks-report.jpg", { type: "image/jpeg" })),
+				);
+				const nav = navigator as Navigator & { canShare?: (data: { files: File[] }) => boolean };
+				if (nav.canShare?.({ files }) && matchMedia("(pointer: coarse)").matches) {
+					try {
+						await navigator.share({ files });
+						return;
+					} catch (error) {
+						if ((error as DOMException).name === "AbortError") return;
+					}
+				}
+				for (const file of files) {
+					const url = URL.createObjectURL(file);
+					const link = document.createElement("a");
+					link.href = url;
+					link.download = file.name;
+					link.click();
+					setTimeout(() => URL.revokeObjectURL(url), 1000);
+					await new Promise((r) => setTimeout(r, 250));
+				}
+			} finally {
+				button.disabled = false;
+			}
+		}),
+	);
+</script>
+
+<style>
+	.report-weeks { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 16px; }
+	.report-week {
+		padding: 8px 16px;
+		border: 1px solid var(--color-green);
+		border-radius: 999px;
+		background: transparent;
+		color: var(--color-green);
+		font: inherit;
+		font-size: 0.9rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.report-week[aria-selected="true"] { background: var(--color-green); color: var(--color-background); }
+	.report-week:focus-visible, .report-save:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
+	.report-save {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin-bottom: 16px;
+		padding: 10px 22px;
+		border: 0;
+		border-radius: 999px;
+		background: var(--color-green);
+		color: var(--color-background);
+		font: inherit;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.report-save:disabled { opacity: 0.6; cursor: progress; }
+	.report-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+	.report-slide { display: block; border-radius: 6px; overflow: hidden; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); }
+	.report-slide img { display: block; width: 100%; height: auto; }
+	@media (max-width: 640px) {
+		.report-grid { grid-template-columns: 1fr; }
+	}
+</style>

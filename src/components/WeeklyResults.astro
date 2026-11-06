@@ -2,6 +2,7 @@
 import T from "./T.astro";
 import { formatShortDate, weekLabel } from "../lib/i18n";
 import type { TimelineEntry } from "../lib/match-timeline";
+import reportsData from "../data/reports.json";
 
 interface Match {
 	week: number;
@@ -48,9 +49,12 @@ interface Props {
 	teamColor?: (teamId: string | null) => string;
 	/** Match length, so a goal's minute places the dot along the bar. */
 	matchMinutes?: number;
+	/** When set, a week whose Instagram report slides exist links to them (src/data/reports.json). */
+	reportLeague?: string;
 }
 
-const { weeks, defaultWeek, raceDialogId, timelines, teamColor, matchMinutes = 12 } = Astro.props;
+const { weeks, defaultWeek, raceDialogId, timelines, teamColor, matchMinutes = 12, reportLeague } = Astro.props;
+const reportWeeks = (reportLeague && (reportsData as Record<string, Record<string, { final: boolean }>>)[reportLeague]) || {};
 const goalsOf = (match: Match) => (match.match_id && timelines?.get(match.match_id)) || [];
 const ROLE_MARK: Record<string, { en: string; ko: string }> = {
 	winner: { en: "winning goal", ko: "결승골" },
@@ -130,6 +134,17 @@ const REACTIONS = [
 					<button class="week-race-link" type="button" aria-haspopup="dialog" data-race-open={raceDialogId}>
 						<span aria-hidden="true">📈</span> <T en="Points by week chart" ko="주차별 승점 그래프 보기" /> →
 					</button>
+				)}
+				{reportWeeks[String(week.week)] && (
+					<a class="week-race-link week-report-link" href={`/league/${reportLeague}/report/?week=${week.week}`}>
+						<span aria-hidden="true">📸</span>{" "}
+						{reportWeeks[String(week.week)].final ? (
+							<T en="League final report (Instagram)" ko="리그 결산 리포트 (인스타용)" />
+						) : (
+							<T en="This week's report (Instagram)" ko="이번 주 리포트 (인스타용)" />
+						)}{" "}
+						→
+					</a>
 				)}
 
 				<div class="week-rounds">

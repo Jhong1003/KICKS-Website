@@ -756,6 +756,23 @@ change.
 
 ### Instagram league report
 
+**On the site**: `/league/<league>/report/?week=N` ([src/pages/league/[league]/report.astro](src/pages/league/[league]/report.astro))
+shows each week's slides with week tabs ("결산" for the final) and a "save all"
+button (phone share sheet → Save Images, else downloads), linked from each week
+in Match Results ("📸 이번 주 리포트" / "리그 결산 리포트"). Open to every member.
+The images are **generated, not hand-made**: the "Make Report Slides" workflow
+([.github/workflows/make-report.yml](.github/workflows/make-report.yml)) runs
+`node scripts/make_report.mjs --all` after every successful data update and
+commits `public/report/<league>/W<nn>/*.jpg` + `src/data/reports.json` (the
+manifest the page reads — never hand-edit) when something changed. A week is
+drawn only once all its fixtures are scored; each week keeps a hash of its
+HTML, so it's redrawn only when its numbers, names, photos or styles change.
+`--all` covers the latest league and any already in the manifest (FA26-L1,
+posted by hand, isn't). Run the workflow by hand after editing
+`report/spotlight.json` or a league's backgrounds.
+
+**By hand**:
+
 `node scripts/make_report.mjs --league FA26-L2 --week 4` (no `--week` = latest
 scored week) writes four 1080×1350 PNGs to `report/out/<league>-W<nn>/`. The
 club posts only the **final** report (cover, final table, "Title Race" —

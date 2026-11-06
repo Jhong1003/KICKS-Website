@@ -216,6 +216,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 						weeks={weeks}
 						defaultWeek={defaultWeek}
 						raceDialogId={hasRaceHistory ? pointsRaceDialogId(league.id) : undefined}
+						reportLeague={league.id}
 						timelines={timelines}
 						teamColor={goalTeamColor}
 						matchMinutes={matchMinutes}
