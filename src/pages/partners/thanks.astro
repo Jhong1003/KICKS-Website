@@ -1,0 +1,15 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+---
+
+<BaseLayout title="Thank you | KICKS" noindex>
+	<main>
+		<section class="content-section" aria-labelledby="inquiry-thanks-title">
+			<p class="section-label"><T en="PARTNERSHIP INQUIRY" ko="파트너십 문의" /></p>
+			<h1 id="inquiry-thanks-title"><T en="Thank you for reaching out" ko="문의해주셔서 감사합니다" /></h1>
+			<T as="p" class="about-description" en="Your inquiry has been submitted. We'll review your message and reply to the email address you provided." ko="문의가 제출됐어요. 내용을 확인한 뒤 남겨주신 이메일로 답변드리겠습니다." />
+			<a class="section-link" href="/partners/"><T en="Back to partners →" ko="파트너 페이지로 돌아가기 →" /></a>
+		</section>
+	</main>
+</BaseLayout>
