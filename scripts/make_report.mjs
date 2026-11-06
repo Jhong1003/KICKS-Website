@@ -41,6 +41,7 @@ const leagues = read("src/data/leagues.json");
 const matches = read("src/data/matches.json");
 const history = read("src/data/standings_history.json");
 const profiles = read("src/data/player_profiles.json");
+const goalEvents = read("src/data/goal_events.json");
 
 const leagueId = arg("league") ?? leagues.find((l) => l.latest)?.id;
 const league = leagues.find((l) => l.id === leagueId);
@@ -115,6 +116,38 @@ function top(key, tiebreak) {
 const scorers = top("goals", (a, b) => b.assists - a.assists);
 const assisters = top("assists", (a, b) => b.goals - a.goals);
 const contributors = top("ga", (a, b) => b.goals - a.goals);
+
+// ---- highlights under the leaderboards ----------------------------------------
+// Best duo and hat-tricks through this week, from goal_events (so FA26-L2 on;
+// a league recorded as weekly totals gets no box). Duo = an unordered pair, one
+// assisting the other, the same count as the team page's Duos (src/lib/duos.ts):
+// A→B and B→A are one partnership. Own goals count for neither.
+const nameOf = new Map(profiles.map((p) => [p.player_id, p.name]));
+const inactive = new Set(profiles.filter((p) => p.status === "inactive").map((p) => p.player_id));
+const evs = goalEvents.filter((e) => e.league === leagueId && e.week <= week && !e.own_goal);
+const playerColor = (id) => players.find((p) => p.name === nameOf.get(id))?.color ?? "#8a8a8a";
+const duoCount = new Map();
+for (const e of evs) {
+	if (!e.assist_id || e.assist_id === e.scorer_id || inactive.has(e.scorer_id) || inactive.has(e.assist_id)) continue;
+	const key = [e.scorer_id, e.assist_id].sort().join("|");
+	duoCount.set(key, (duoCount.get(key) ?? 0) + 1);
+}
+const bestDuoGoals = Math.max(0, ...duoCount.values());
+// A tie for the top shows both pairs, never a coin-flip pick; three-way and up is cut to two.
+const bestDuos = bestDuoGoals >= 2 ? [...duoCount].filter(([, n]) => n === bestDuoGoals).slice(0, 2).map(([k]) => k.split("|")) : [];
+const perMatch = new Map();
+for (const e of evs) perMatch.set(`${e.match_id}|${e.scorer_id}`, (perMatch.get(`${e.match_id}|${e.scorer_id}`) ?? 0) + 1);
+const hatTricks = [...perMatch]
+	.filter(([k, n]) => n >= 3 && !inactive.has(k.split("|")[1]))
+	.map(([k, n]) => {
+		const [matchId, id] = k.split("|");
+		const m = matches.find((x) => x.match_id === matchId);
+		const ev = evs.find((e) => e.match_id === matchId && e.scorer_id === id);
+		const opp = m.home_team_id === ev.scorer_team_id ? m.away_team_id : m.home_team_id;
+		return { name: nameOf.get(id), color: team(ev.scorer_team_id).color, week: m.week, opp: team(opp).name, goals: n, matchId };
+	})
+	.sort((a, b) => a.matchId.localeCompare(b.matchId));
+const hasHighlights = evs.length > 0 && (bestDuos.length > 0 || hatTricks.length > 0);
 
 const spotlightFile = join(ROOT, "report/spotlight.json");
 const spotlightNames = existsSync(spotlightFile) ? JSON.parse(readFileSync(spotlightFile, "utf8"))[leagueId]?.[String(week)] ?? [] : [];
@@ -217,7 +250,20 @@ const stats = card(
 		spotlight.length
 			? `<div class="spotlight"><div class="sp-head"><b>DEFENSIVE<br>SPOTLIGHT</b><small>WEEK ${ww} · SELECTED BY KICKS</small></div>
 			<div class="sp-names">${spotlight.map((s) => `<span>${bar(s.color)}${esc(s.name)}</span>`).join("")}</div></div>`
-			: ""
+			: hasHighlights
+				? `<div class="highlights">
+				<div class="hl"><div class="hl-head"><b>BEST DUO</b><small>GOALS TOGETHER</small></div>
+					${bestDuos.length
+						? bestDuos.map(([a, b]) => `<div class="duo"><span>${bar(playerColor(a))}${esc(nameOf.get(a))}</span><em>↔</em><span>${bar(playerColor(b))}${esc(nameOf.get(b))}</span></div>`).join("") + `<b class="duo-n">${bestDuoGoals}<small> GOALS</small></b>`
+						: `<p class="hl-none">—</p>`}
+				</div>
+				<div class="hl"><div class="hl-head"><b>HAT-TRICK HEROES</b><small>3+ GOALS IN ONE MATCH</small></div>
+					${hatTricks.length
+						? hatTricks.slice(0, 3).map((h) => `<div class="ht"><span>${bar(h.color)}${esc(h.name)}${h.goals > 3 ? ` <b>×${h.goals}</b>` : ""}</span><small>W${h.week} vs ${esc(h.opp)}</small></div>`).join("")
+						: `<p class="hl-none">NONE THIS LEAGUE</p>`}
+				</div>
+			</div>`
+				: ""
 	}${footer}`,
 );
 
@@ -350,6 +396,20 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .lname { font-weight: 500; white-space: nowrap; overflow: hidden; }
 .lrow .bar { height: 30px; }
 .lval { text-align: right; font-size: 30px; font-weight: 700; }
+.highlights { width: 936px; margin: 34px auto 0; display: grid; grid-template-columns: 1fr 1fr; background: rgba(10,10,10,.72); border: 2px solid rgba(255,255,255,.25); border-radius: 14px; }
+.hl { padding: 24px 30px 26px; display: flex; flex-direction: column; gap: 12px; }
+.hl + .hl { border-left: 2px solid rgba(255,255,255,.2); }
+.hl-head b { display: block; font-size: 40px; font-weight: 700; font-style: italic; line-height: 1; }
+.hl-head small { display: block; margin-top: 6px; font-size: 17px; font-weight: 600; letter-spacing: .16em; color: #ccc; }
+.duo { display: flex; align-items: center; gap: 12px; font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 30px; font-weight: 500; }
+.duo span { display: flex; align-items: center; gap: 10px; }
+.duo em { font-style: normal; color: #bbb; font-size: 26px; }
+.duo-n { font-size: 46px; font-weight: 700; line-height: 1; }
+.duo-n small { font-size: 22px; font-weight: 600; letter-spacing: .14em; color: #ccc; }
+.ht { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.ht span { display: flex; align-items: center; gap: 10px; font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 30px; font-weight: 500; }
+.ht small { font-size: 22px; font-weight: 600; letter-spacing: .08em; color: #ccc; font-family: Antonio, "Noto Sans CJK KR", sans-serif; }
+.hl-none { font-size: 26px; font-weight: 600; letter-spacing: .14em; color: #aaa; }
 .spotlight { width: 936px; margin: 34px auto 0; display: grid; grid-template-columns: 300px 1fr; align-items: center; gap: 24px; padding: 26px 34px; background: rgba(10,10,10,.72); border: 2px solid rgba(255,255,255,.25); border-radius: 14px; }
 .sp-head b { display: block; font-size: 44px; font-weight: 700; font-style: italic; line-height: 1; }
 .sp-head small { display: block; margin-top: 10px; font-size: 18px; font-weight: 600; letter-spacing: .14em; color: #ccc; }
