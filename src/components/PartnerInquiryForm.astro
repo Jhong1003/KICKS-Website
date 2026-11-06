@@ -1,29 +1,41 @@
 ---
 import T from "./T.astro";
+const nextUrl = new URL("/partners/thanks/", Astro.site).toString();
 ---
 
-<!-- TODO: connect real submit handling here (e.g. a form service or serverless endpoint). -->
-<!-- The form has no `action`/`method` yet, so submitting it currently does nothing. -->
-<form class="inquiry-form">
+<form class="inquiry-form" action="https://formsubmit.co/kicks.uiuc@gmail.com" method="POST">
+	<input type="hidden" name="_subject" value="KICKS · Partnership inquiry / 파트너십 문의" />
+	<input type="hidden" name="_next" value={nextUrl} />
+	<input type="hidden" name="_template" value="table" />
+	<input type="text" name="_honey" class="inquiry-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
 	<div class="form-field">
 		<label for="brand-name"><T en="Brand Name" ko="브랜드명" /></label>
-		<input type="text" id="brand-name" name="brand-name" required />
+		<input type="text" id="brand-name" name="brand-name" autocomplete="organization" maxlength="200" required />
 	</div>
 
 	<div class="form-field">
 		<label for="contact-name"><T en="Contact Person" ko="담당자 이름" /></label>
-		<input type="text" id="contact-name" name="contact-name" required />
+		<input type="text" id="contact-name" name="contact-name" autocomplete="name" maxlength="100" required />
 	</div>
 
 	<div class="form-field">
 		<label for="email"><T en="Email" ko="이메일" /></label>
-		<input type="email" id="email" name="email" required />
+		<input type="email" id="email" name="email" autocomplete="email" maxlength="254" required />
 	</div>
 
 	<div class="form-field">
 		<label for="proposal"><T en="Proposal Details" ko="제안 내용" /></label>
-		<textarea id="proposal" name="proposal" rows="5" required></textarea>
+		<textarea id="proposal" name="proposal" rows="5" maxlength="10000" required></textarea>
 	</div>
 
+	<T as="p" class="inquiry-note" en="Your contact details and message will be sent to KICKS through FormSubmit. You may be asked to complete a spam check after continuing." ko="입력한 연락처와 문의 내용은 FormSubmit을 통해 KICKS로 전달됩니다. 다음 화면에서 스팸 방지 확인이 진행될 수 있어요." />
 	<button class="form-submit" type="submit"><T en="Send Inquiry" ko="문의 보내기" /></button>
 </form>
+
+<p class="inquiry-note"><T en="Having trouble sending? Email us directly: " ko="전송이 안 되면 이메일로 직접 문의해주세요: " /><a href="mailto:kicks.uiuc@gmail.com">kicks.uiuc@gmail.com</a></p>
+
+<style>
+	.inquiry-honeypot { display: none; }
+	.inquiry-note { max-width: 680px; line-height: 1.7; font-size: 0.9rem; }
+	.inquiry-note a { text-decoration: underline; text-underline-offset: 3px; }
+</style>
