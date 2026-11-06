@@ -238,9 +238,19 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 	    title chances and the week-by-week chart all come from the same model,
 	    and side by side as separate h2s they read as three of the same thing. */}
 	<section class="content-section league-forecasts" aria-labelledby="league-forecasts-title">
-		<h2 id="league-forecasts-title"><T en="Forecasts" ko="예측" /></h2>
-		<MatchForecasts league={league} />
-		<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
+		{finished ? (
+			<details class="past-forecasts">
+				<summary><h2 id="league-forecasts-title"><T en="Revisit past forecasts" ko="지난 예측 돌아보기" /></h2></summary>
+				<MatchForecasts league={league} />
+				<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
+			</details>
+		) : (
+			<>
+				<h2 id="league-forecasts-title"><T en="Forecasts" ko="예측" /></h2>
+				<MatchForecasts league={league} />
+				<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
+			</>
+		)}
 	</section>
 
 	</div>
@@ -320,3 +330,8 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		syncFromUrl(true);
 	}
 </script>
+
+<style>
+	.past-forecasts > summary { cursor: pointer; }
+	.past-forecasts > summary h2 { display: inline; }
+</style>
