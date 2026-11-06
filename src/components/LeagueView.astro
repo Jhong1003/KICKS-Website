@@ -59,7 +59,7 @@ const playerNames = new Map(profilesData.map((profile) => [profile.player_id, pr
 const standings = inLeague(leagueTableData).map((row) => ({
 	...row,
 	team: teamName(row.team_id),
-	href: `/league/${league.id}/team/${row.team_id}`,
+	href: `/league/${league.id}/team/${row.team_id}/`,
 }));
 const matches = inLeague(matchesData as MatchRecord[]).map((match) => ({
 	...match,
@@ -96,7 +96,7 @@ const placeholderStandings = league.teams.map((team) => ({
 	goal_difference: 0,
 	points: 0,
 	participation_rate: 0,
-	href: `/league/${league.id}/team/${team.team_id}`,
+	href: `/league/${league.id}/team/${team.team_id}/`,
 }));
 
 // Goals under each result. Empty for a league recorded without goal minutes,
@@ -140,7 +140,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 					{leagues.map((entry) => (
 						<a
 							class="league-switcher-link"
-							href={`/league/${entry.id}`}
+							href={`/league/${entry.id}/`}
 							aria-current={entry.id === league.id ? "page" : undefined}
 						>
 							{entry.id}

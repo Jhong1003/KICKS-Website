@@ -33,7 +33,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 >
 	<main>
 		<section class="content-section player-detail-head" aria-labelledby="player-detail-title">
-			<a class="back-link" href="/players">
+			<a class="back-link" href="/players/">
 				<T en="← All players" ko="← 전체 선수" />
 			</a>
 			<h1 id="player-detail-title">{player.name}</h1>
@@ -76,13 +76,13 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 								<p class="section-label" id={`player-league-${section.league}`}>
 									{section.league} ·{" "}
 									{section.current_team_id ? (
-										<a class="player-team-link" href={`/league/${section.league}/team/${section.current_team_id}`}>{teamName}</a>
+										<a class="player-team-link" href={`/league/${section.league}/team/${section.current_team_id}/`}>{teamName}</a>
 									) : (
 										teamName
 									)}
 								</p>
 								{isLeagueFinished(section.league) && isShownInLeague(player, section.league) && (
-									<a class="wrapped-entry" href={`/wrapped/${section.league}/${player.id}`}>
+									<a class="wrapped-entry" href={`/wrapped/${section.league}/${player.id}/`}>
 										<span aria-hidden="true">🎁</span>
 										<T en={`My ${section.league} Wrapped`} ko={`나의 ${section.league} Wrapped 보기`} />
 										<span aria-hidden="true">→</span>

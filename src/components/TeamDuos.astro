@@ -23,7 +23,7 @@ interface Props {
 }
 
 const { duos, leagueId, color } = Astro.props;
-const href = (player: DuoPlayer) => `/players/${player.id}?league=${leagueId}`;
+const href = (player: DuoPlayer) => `/players/${player.id}/?league=${leagueId}`;
 ---
 
 {

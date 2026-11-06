@@ -79,12 +79,12 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 						<nav class="players-teams" aria-label={`${league.id} teams`}>
 							<span class="players-teams-label"><T en="By team →" ko="팀별로 보기 →" /></span>
 							{teams.map((team) => (
-								<a class="players-team-chip" href={`/league/${league.id}/team/${team.team_id}`}>
+								<a class="players-team-chip" href={`/league/${league.id}/team/${team.team_id}/`}>
 									<span class="player-group-dot" style={`background-color: ${getTeamColor(team.team_id, league)}`} aria-hidden="true" />
 									{team.name}
 								</a>
 							))}
-							<a class="dream-team-link players-dream-team" href="/dream-team">
+							<a class="dream-team-link players-dream-team" href="/dream-team/">
 								<span aria-hidden="true">⭐</span>
 								<T en="Build My Dream Team" ko="나만의 드림팀 만들기" />
 								<span aria-hidden="true">→</span>
@@ -98,7 +98,7 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 									section={section}
 									teamName={getTeamName(section.current_team_id, league)}
 									teamColor={getTeamColor(section.current_team_id, league)}
-									href={`/players/${player.id}?league=${league.id}`}
+									href={`/players/${player.id}/?league=${league.id}`}
 									avatarPhoto={getPlayerPhotos(player.id).card}
 								/>
 							))}

@@ -129,7 +129,7 @@ export function eventHref(event: ScheduleEvent): string | null {
 	// load; ?week picks the tab (see WeeklyResults.astro's deep-link script).
 	// Weeks restart at 1 in every league, so the link names the league too.
 	if (event.type === "league" && event.league && event.week) {
-		return `/league/${event.league}?week=${event.week}#results`;
+		return `/league/${event.league}/?week=${event.week}#results`;
 	}
 	return null;
 }

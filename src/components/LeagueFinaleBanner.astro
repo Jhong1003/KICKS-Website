@@ -27,7 +27,7 @@ const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: st
 		<div class="finale-banner-list">
 			{
 				finale.championTeamIds.map((teamId) => (
-					<a class="finale-chip finale-chip--champion" href={`/league/${league.id}`}>
+					<a class="finale-chip finale-chip--champion" href={`/league/${league.id}/`}>
 						<span aria-hidden="true">🏆</span>
 						<span class="finale-chip-title"><T en="Champion" ko="우승" /></span>
 						<span class="finale-chip-name" style={`color: ${getReadableAccentColor(getTeamColor(teamId, league))}`}>
@@ -45,7 +45,7 @@ const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: st
 							{award.winners.map((winner, index) => (
 								<>
 									{index > 0 && <span class="finale-chip-sep">·</span>}
-									<a class="finale-chip-name" href={`/players/${winner.id}?league=${league.id}`}>{winner.name}</a>
+									<a class="finale-chip-name" href={`/players/${winner.id}/?league=${league.id}`}>{winner.name}</a>
 								</>
 							))}
 							<span class="finale-chip-count">
@@ -55,7 +55,7 @@ const awards: { icon: string; en: string; ko: string; unitEn: string; unitKo: st
 					) : null,
 				)
 			}
-			<a class="finale-chip finale-chip--wrapped" href="/players">
+			<a class="finale-chip finale-chip--wrapped" href="/players/">
 				<span aria-hidden="true">🎁</span>
 				<T en="Find your Wrapped on your player page →" ko="선수 페이지에서 나의 Wrapped 보기 →" />
 			</a>

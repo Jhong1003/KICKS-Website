@@ -34,7 +34,7 @@ const currentPath = Astro.url.pathname;
 		{
 			navLinks.map((link) => (
 				<a
-						href={link.href}
+						href={`${link.href}/`}
 						class={link.cta ? "nav-cta" : undefined}
 						aria-current={[link.href, ...(link.also ?? [])].some((path) => currentPath === path || currentPath.startsWith(`${path}/`)) ? "page" : undefined}
 					>

@@ -25,7 +25,7 @@ const monthLabel = (iso: string, lang: "en" | "ko") => {
 				) : (
 					<div class="album-grid">
 						{albums.map((album) => (
-							<a class="album-card" href={`/gallery/${album.id}`}>
+							<a class="album-card" href={`/gallery/${album.id}/`}>
 								<span class="album-cover">
 									<Image src={album.cover.src} alt="" width={640} loading="lazy" />
 								</span>

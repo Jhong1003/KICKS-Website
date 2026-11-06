@@ -19,7 +19,7 @@ const { album } = Astro.props;
 <BaseLayout title={`${album.title} | KICKS Gallery`} description={`Photos from ${album.title} at KICKS.`}>
 	<main>
 		<section class="content-section" aria-labelledby="album-title">
-			<a class="album-back" href="/gallery">← <T en="All albums" ko="전체 앨범" /></a>
+			<a class="album-back" href="/gallery/">← <T en="All albums" ko="전체 앨범" /></a>
 			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>
 			<h1 id="album-title"><T en={album.title} ko={album.titleKo} /></h1>
 			<PhotoGallery images={album.images} />

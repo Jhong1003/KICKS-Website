@@ -24,7 +24,7 @@ const teamTextColor = (teamId: string) => getReadableAccentColor(getTeamColor(te
 			{
 				transfers.map((transfer) => (
 					<div class="transfer-chip">
-						<a class="transfer-chip-name" href={`/players/${transfer.playerId}`}>
+						<a class="transfer-chip-name" href={`/players/${transfer.playerId}/`}>
 							{transfer.playerName}
 						</a>
 						<span class="transfer-chip-team" style={`color: ${teamTextColor(transfer.fromTeamId)}`}>
