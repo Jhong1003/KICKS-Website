@@ -1,0 +1,17 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import T from "../components/T.astro";
+---
+<BaseLayout title="Page not found | KICKS" noindex>
+    <main><section class="content-section" aria-labelledby="not-found-title">
+        <p class="section-label">404</p>
+        <h1 id="not-found-title"><T en="Page not found" ko="페이지를 찾을 수 없어요" /></h1>
+        <T as="p" class="about-description" en="The link may be outdated, or the address may be incorrect. Find your way back below." ko="페이지 주소가 바뀌었거나 잘못된 링크일 수 있어요. 아래에서 원하는 페이지로 이동해주세요." />
+        <div class="cta-card-grid">
+            <a class="cta-card" href="/"><T en="Home →" ko="홈 →" /></a>
+            <a class="cta-card" href="/league/"><T en="League →" ko="리그 →" /></a>
+            <a class="cta-card" href="/players/"><T en="Players →" ko="선수 →" /></a>
+            <a class="cta-card" href="/seasons/"><T en="Season archive →" ko="시즌별 둘러보기 →" /></a>
+        </div>
+    </section></main>
+</BaseLayout>

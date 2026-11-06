@@ -1,0 +1,36 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+import { seasons, seasonLeagues, seasonAlbums } from "../../lib/seasons";
+export function getStaticPaths() { return seasons.map((season) => ({ params: { season } })); }
+const season = Astro.params.season!;
+const leagues = seasonLeagues(season);
+const albums = seasonAlbums(season);
+---
+<BaseLayout title={`${season} Season | KICKS`} description={`Explore ${season} leagues, player records, and photos from KICKS.`}>
+    <main>
+        <section class="content-section" aria-labelledby="season-title">
+            <a class="album-back" href="/seasons/"><T en="← All seasons" ko="← 전체 시즌" /></a>
+            <h1 id="season-title"><T en={`${season} Season`} ko={`${season} 시즌`} /></h1>
+            <h2><T en="Leagues & Players" ko="리그와 선수 기록" /></h2>
+            <div class="cta-card-grid">{leagues.map((league) => (
+                <div class="cta-card"><h3 class="cta-card-title">{league.id}</h3>
+                    <a class="section-link" href={`/league/${league.id}/`}><T en="Standings & results →" ko="순위·경기 결과 →" /></a>
+                    <a class="section-link" href={`/players/?league=${league.id}`}><T en="Players & records →" ko="선수·기록 →" /></a>
+                </div>
+            ))}</div>
+        </section>
+        <section class="content-section" aria-labelledby="season-photos-title">
+            <h2 id="season-photos-title"><T en="Photos" ko="사진" /></h2>
+            {albums.length ? <div class="album-grid">{albums.map((album) => (
+                <a class="album-card" href={`/gallery/${album.id}/`}>
+                    <span class="album-cover"><Image src={album.cover.src} alt="" width={640} loading="lazy" /></span>
+                    <span class="album-info"><span class="album-title"><T en={album.title} ko={album.titleKo} /></span>
+                        <span class="album-meta">{album.date && <time datetime={album.date}>{album.date} · </time>}<T en={`${album.images.length} photos`} ko={`사진 ${album.images.length}장`} /></span>
+                    </span>
+                </a>
+            ))}</div> : <T as="p" en="No albums for this season yet." ko="아직 이 시즌의 사진 앨범이 없어요." />}
+        </section>
+    </main>
+</BaseLayout>

@@ -29,6 +29,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from data_updates import update_metadata
+
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
@@ -1508,6 +1510,8 @@ def main() -> None:
             player_stats, players, league_order, matches, league_table, sheets["goal_events"], goal_rows
         ),
     )
+
+    update_metadata(DATA_DIR)
 
 
 if __name__ == "__main__":

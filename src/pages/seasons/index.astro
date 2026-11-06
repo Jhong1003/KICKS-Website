@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+import { seasons, seasonLeagues, seasonAlbums } from "../../lib/seasons";
+---
+<BaseLayout title="Seasons | KICKS" description="Explore KICKS leagues, players, and photos by season.">
+    <main><section class="content-section" aria-labelledby="seasons-title">
+        <p class="section-label"><T en="KICKS ARCHIVE" ko="KICKS 아카이브" /></p>
+        <h1 id="seasons-title"><T en="Explore seasons" ko="시즌별 둘러보기" /></h1>
+        <T as="p" class="about-description" en="Find each season's leagues, player records, and photo albums." ko="시즌별 리그와 선수 기록, 사진 앨범을 모아봤어요." />
+        <div class="cta-card-grid">{seasons.map((season) => (
+            <a class="cta-card" href={`/seasons/${season}/`}>
+                <h2 class="cta-card-title">{season}</h2>
+                <T as="p" class="cta-card-description" en={`${seasonLeagues(season).length} leagues · ${seasonAlbums(season).length} albums`} ko={`리그 ${seasonLeagues(season).length}개 · 앨범 ${seasonAlbums(season).length}개`} />
+                <T en="Explore season →" ko="시즌 둘러보기 →" />
+            </a>
+        ))}</div>
+    </section></main>
+</BaseLayout>
