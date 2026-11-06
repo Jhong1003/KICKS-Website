@@ -147,6 +147,18 @@ const fullSize = await Promise.all(images.map((image) => getImage({ src: image.s
 
 	document.addEventListener("keydown", (event) => {
 		if (!lightbox?.open) return;
+		if (event.key === "Tab") {
+			const controls = [...lightbox.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")];
+			const first = controls[0];
+			const last = controls.at(-1);
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last?.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first?.focus();
+			}
+		}
 		if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
 			event.preventDefault();
 			slideTo(event.key === "ArrowLeft" ? -1 : 1);
