@@ -221,40 +221,43 @@ const stats = card(
 );
 
 // ---- points race (final report) ---------------------------------------------
-// Cumulative points after each week, from standings_history (official), drawn
-// from a zero start so the climb reads. End labels are pushed apart so a 1-point
-// finish (L2: 31 vs 30) never prints one label over another.
+// Cumulative points after each week, from standings_history (official). The
+// weeks span the full width (W1 at the left edge, the last week at the right),
+// and the teams are named in a legend in the chart's empty top-left corner —
+// in their colour, final rank order, with final points — instead of labels at
+// the line ends, which ate a quarter of the width.
 function raceSvg() {
-	const W = 900, H = 720, L = 90, R = 250, T = 40, B = 80;
+	const W = 900, H = 730, L = 70, R = 34, T = 24, B = 66;
 	const weeks = Array.from({ length: week }, (_, i) => i + 1);
 	const lines = league.teams.map((t) => ({
 		t,
-		pts: [0, ...weeks.map((w) => history.find((h) => h.league === leagueId && h.week === w && h.team_id === t.team_id)?.points ?? 0)],
+		pts: weeks.map((w) => history.find((h) => h.league === leagueId && h.week === w && h.team_id === t.team_id)?.points ?? 0),
 	}));
 	const maxP = Math.max(...lines.flatMap((l) => l.pts));
 	const step = maxP > 40 ? 10 : 5;
 	const top = Math.ceil(maxP / step) * step;
-	const x = (i) => L + (i * (W - L - R)) / week;
+	const x = (i) => L + (week > 1 ? (i * (W - L - R)) / (week - 1) : (W - L - R) / 2);
 	const y = (p) => T + (H - T - B) * (1 - p / top);
 	let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">`;
 	const fw = league.rules.final_week;
-	if (fw && fw <= week) {
-		svg += `<rect x="${x(fw - 1)}" y="${T}" width="${x(week) - x(fw - 1)}" height="${H - T - B}" fill="#f4e7bf"/>`;
-		svg += `<text x="${(x(fw - 1) + x(week)) / 2}" y="${T + 34}" class="band">WIN = ${league.rules.final_win_points} PTS</text>`;
+	if (fw && fw <= week && fw > 1) {
+		svg += `<rect x="${x(fw - 2)}" y="${T}" width="${x(week - 1) - x(fw - 2)}" height="${H - T - B}" fill="#f4e7bf"/>`;
+		svg += `<text x="${(x(fw - 2) + x(week - 1)) / 2}" y="${H - B - 22}" class="band">WIN = ${league.rules.final_win_points} PTS</text>`;
 	}
 	for (let p = 0; p <= top; p += step)
-		svg += `<line x1="${L}" x2="${W - R}" y1="${y(p)}" y2="${y(p)}" class="grid"/><text x="${L - 18}" y="${y(p) + 9}" class="tick" text-anchor="end">${p}</text>`;
-	["START", ...weeks.map((w) => `W${w}`)].forEach((label, i) => (svg += `<text x="${x(i)}" y="${H - B + 48}" class="tick" text-anchor="middle">${label}</text>`));
+		svg += `<line x1="${L}" x2="${W - R}" y1="${y(p)}" y2="${y(p)}" class="grid"/><text x="${L - 16}" y="${y(p) + 10}" class="tick" text-anchor="end">${p}</text>`;
+	weeks.forEach((w, i) => (svg += `<text x="${x(i)}" y="${H - B + 50}" class="tick" text-anchor="${i === 0 ? "start" : i === week - 1 ? "end" : "middle"}">W${w}</text>`));
 	for (const { t, pts } of lines) {
-		svg += `<polyline points="${pts.map((p, i) => `${x(i)},${y(p)}`).join(" ")}" fill="none" stroke="${t.color}" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>`;
-		pts.forEach((p, i) => i && (svg += `<circle cx="${x(i)}" cy="${y(p)}" r="9" fill="#fff" stroke="${t.color}" stroke-width="6"/>`));
+		svg += `<polyline points="${pts.map((p, i) => `${x(i)},${y(p)}`).join(" ")}" fill="none" stroke="${t.color}" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"/>`;
+		pts.forEach((p, i) => (svg += `<circle cx="${x(i)}" cy="${y(p)}" r="12" fill="#fff" stroke="${t.color}" stroke-width="7"/>`));
 	}
-	const ends = lines.map(({ t, pts }) => ({ t, p: pts.at(-1), ly: y(pts.at(-1)) })).sort((a, b) => a.ly - b.ly);
-	for (let i = 1; i < ends.length; i++) if (ends[i].ly - ends[i - 1].ly < 62) ends[i].ly = ends[i - 1].ly + 62;
-	for (const e of ends) {
-		const ex = x(week) + 26;
-		svg += `<text x="${ex}" y="${e.ly + 4}" class="endpts" fill="${e.t.color}">${e.p}</text><text x="${ex + 70}" y="${e.ly + 2}" class="endname">${esc(e.t.name)}</text>`;
-	}
+	const ranked = [...lines].sort((a, b) => b.pts.at(-1) - a.pts.at(-1));
+	ranked.forEach(({ t, pts }, i) => {
+		const ly = T + 46 + i * 66;
+		svg += `<line x1="${L + 28}" x2="${L + 84}" y1="${ly}" y2="${ly}" stroke="${t.color}" stroke-width="11" stroke-linecap="round"/>`;
+		svg += `<text x="${L + 104}" y="${ly}" class="lgname" fill="${t.color}">${esc(t.name)}</text>`;
+		svg += `<text x="${L + 104 + 230}" y="${ly}" class="lgpts" fill="${t.color}">${pts.at(-1)}</text>`;
+	});
 	return svg + "</svg>";
 }
 const race = card(
@@ -344,14 +347,14 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .sp-head small { display: block; margin-top: 10px; font-size: 18px; font-weight: 600; letter-spacing: .14em; color: #ccc; }
 .sp-names { display: flex; justify-content: space-around; }
 .sp-names span { display: flex; align-items: center; gap: 12px; font-size: 32px; font-weight: 500; }
-.race .title { font-size: 150px; }
-.race-panel { width: 960px; margin: 64px auto 0; padding: 40px 30px 20px; background: #fff; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-.race-panel svg { display: block; width: 900px; height: 720px; }
+.race .title { font-size: 150px; margin-top: 124px; }
+.race-panel { width: 960px; margin: 40px auto 0; padding: 30px 30px 16px; background: #fff; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.race-panel svg { display: block; width: 900px; height: 730px; }
 .race-panel .grid { stroke: #e6e6e6; stroke-width: 2; }
-.race-panel .tick { font-family: Antonio, sans-serif; font-size: 28px; font-weight: 600; fill: #777; letter-spacing: .06em; }
-.race-panel .band { font-family: Antonio, sans-serif; font-size: 24px; font-weight: 700; fill: #9a7a1c; letter-spacing: .14em; text-anchor: middle; }
-.race-panel .endpts { font-family: Antonio, sans-serif; font-size: 52px; font-weight: 700; dominant-baseline: middle; }
-.race-panel .endname { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 30px; font-weight: 700; fill: #1b1b1b; dominant-baseline: middle; }
+.race-panel .tick { font-family: Antonio, sans-serif; font-size: 32px; font-weight: 700; fill: #666; letter-spacing: .06em; }
+.race-panel .band { font-family: Antonio, sans-serif; font-size: 26px; font-weight: 700; fill: #9a7a1c; letter-spacing: .14em; text-anchor: middle; }
+.race-panel .lgname { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 800; dominant-baseline: middle; }
+.race-panel .lgpts { font-family: Antonio, sans-serif; font-size: 46px; font-weight: 700; dominant-baseline: middle; }
 </style></head><body>${slides.map((s) => s.html).join("")}</body></html>`;
 
 const outDir = join(ROOT, "report/out", `${leagueId}-W${ww}`);
