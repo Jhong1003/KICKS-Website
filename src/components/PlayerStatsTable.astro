@@ -20,7 +20,7 @@ interface Props {
 }
 
 const { players, leagueId } = Astro.props;
-const playerHref = (id: string) => (leagueId ? `/players/${id}?league=${leagueId}` : `/players/${id}`);
+const playerHref = (id: string) => (leagueId ? `/players/${id}/?league=${leagueId}` : `/players/${id}/`);
 
 const columns = [
 	{ key: "rank", label: "Rank", labelKo: "순위", type: "number" },

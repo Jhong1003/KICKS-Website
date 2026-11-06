@@ -37,7 +37,7 @@ const standings = leagueTable
 	.map((row) => ({
 		...row,
 		team: getTeamName(row.team_id, latestLeague),
-		href: `/league/${latestLeague.id}/team/${row.team_id}`,
+		href: `/league/${latestLeague.id}/team/${row.team_id}/`,
 	}));
 // Once the latest league is finished, its results banner takes over the top
 // slot and the (now stale) transfer news steps aside.
@@ -141,11 +141,11 @@ const titleFavourite = latestTitle
 						ko="매주 치열하게 맞붙는 시즌 리그를 치르며, 필드 안팎에서 우정을 쌓아갑니다."
 					/>
 					<div class="hero-buttons">
-						<a class="hero-button" href="/join">
+						<a class="hero-button" href="/join/">
 							<T en="Join KICKS" ko="KICKS 가입하기" />
 							<span aria-hidden="true">→</span>
 						</a>
-						<a class="hero-button hero-button--secondary" href="/league">
+						<a class="hero-button hero-button--secondary" href="/league/">
 							<T en="View Standings" ko="순위 보기" />
 							<span aria-hidden="true">→</span>
 						</a>
@@ -153,7 +153,7 @@ const titleFavourite = latestTitle
 							/* While the latest league's results are up (same window as the finale
 							   banner), point people to their Wrapped from the first screen. */
 							finale && (
-								<a class="hero-button hero-button--wrapped" href="/players">
+								<a class="hero-button hero-button--wrapped" href="/players/">
 									<span>
 										<span aria-hidden="true">🎁 </span>
 										<T en={`${latestLeague.id} Wrapped is here`} ko={`${latestLeague.id} Wrapped가 나왔어요`} />
@@ -166,7 +166,7 @@ const titleFavourite = latestTitle
 					<a
 						class="hero-next-up"
 						id="hero-next-up"
-						href="/schedule"
+						href="/schedule/"
 						data-schedule-events={JSON.stringify(scheduleData)}
 						hidden={!nextUpEvent}
 					>
@@ -209,7 +209,7 @@ const titleFavourite = latestTitle
 										{milestoneHero ? (
 											<>
 												{goalCountdown.lastMilestone}th goal by{" "}
-												<a class="hero-goal-counter-hero" href={`/players/${milestoneHero.id}`}>{milestoneHero.name}</a>
+												<a class="hero-goal-counter-hero" href={`/players/${milestoneHero.id}/`}>{milestoneHero.name}</a>
 											</>
 										) : (
 											<>{goalCountdown.total} so far</>
@@ -220,7 +220,7 @@ const titleFavourite = latestTitle
 										{milestoneHero ? (
 											<>
 												{goalCountdown.lastMilestone}호 골{" "}
-												<a class="hero-goal-counter-hero" href={`/players/${milestoneHero.id}`}>{milestoneHero.name}</a>
+												<a class="hero-goal-counter-hero" href={`/players/${milestoneHero.id}/`}>{milestoneHero.name}</a>
 											</>
 										) : (
 											<>지금까지 {goalCountdown.total}골</>
@@ -236,7 +236,7 @@ const titleFavourite = latestTitle
 								class="season-only season-only--halloween hero-season-note"
 								id="hero-season-note"
 								data-date={halloweenFinalWeek.date}
-								href={`/league/${currentLeague.id}?week=${currentLeague.rules.final_week}#results`}
+								href={`/league/${currentLeague.id}/?week=${currentLeague.rules.final_week}#results`}
 							>
 								<span class="hero-season-note-icon" aria-hidden="true">🎃</span>
 								<T
@@ -269,7 +269,7 @@ const titleFavourite = latestTitle
 				{finale ? <T en="Final Standings" ko="최종 순위" /> : <T en="Current League" ko="현재 리그" />}
 			</h2>
 			<StandingsTable rows={standings} />
-			<a class="section-link" href={`/league/${latestLeague.id}`}><T en="View full league page →" ko="리그 페이지 전체 보기 →" /></a>
+			<a class="section-link" href={`/league/${latestLeague.id}/`}><T en="View full league page →" ko="리그 페이지 전체 보기 →" /></a>
 		</section>
 	</main>
 </BaseLayout>

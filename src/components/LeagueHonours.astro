@@ -58,7 +58,7 @@ const chosen = manualAwards(league.id);
 						<p class="honours-card-winner" style={`color: ${team.color}`}>{team.name}</p>
 						<ul class="honours-roster">
 							{team.roster.map((player) => (
-								<li><a href={`/players/${player.id}?league=${league.id}`}>{player.name}</a></li>
+								<li><a href={`/players/${player.id}/?league=${league.id}`}>{player.name}</a></li>
 							))}
 						</ul>
 					</div>

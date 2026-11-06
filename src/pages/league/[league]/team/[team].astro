@@ -188,7 +188,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 <BaseLayout title={`${team.name} · ${league.id} | KICKS`} description={`${team.name} in KICKS ${league.id}: record, squad, and results.`}>
 	<main>
 		<section class="team-hero" style={`--team-color: ${color}; --team-text: ${headerText};`} aria-labelledby="team-title">
-			<a class="team-back" href={`/league/${league.id}`}>
+			<a class="team-back" href={`/league/${league.id}/`}>
 				← <T en={`${league.id} league`} ko={`${league.id} 리그`} />
 			</a>
 			<p class="team-league">{league.id}</p>
@@ -220,7 +220,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 					<p class="team-captain">
 						<span class="team-captain-mark" aria-hidden="true">C</span>
 						<T en="Captain" ko="주장" />{" "}
-						{captain ? <a href={`/players/${captain.id}?league=${league.id}`}>{captain.name}</a> : info.captain}
+						{captain ? <a href={`/players/${captain.id}/?league=${league.id}`}>{captain.name}</a> : info.captain}
 					</p>
 				)
 			}
@@ -349,7 +349,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 										<li>
 											<span class="team-match-opponent">
 												<span class="team-dot" style={`background-color: ${getTeamColor(entry.opponentId, league)}`} aria-hidden="true" />
-												<a href={`/league/${league.id}/team/${entry.opponentId}`}>{getTeamName(entry.opponentId, league)}</a>
+												<a href={`/league/${league.id}/team/${entry.opponentId}/`}>{getTeamName(entry.opponentId, league)}</a>
 											</span>
 											<span class="team-h2h-record">
 												<T en={`${entry.W}W ${entry.D}D ${entry.L}L`} ko={`${entry.W}승 ${entry.D}무 ${entry.L}패`} />
@@ -418,7 +418,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 													{leaderPlayers(entry.playerIds).map((player, index) => (
 														<>
 															{index > 0 && ", "}
-															<a href={`/players/${player.id}?league=${league.id}`}>{player.name}</a>
+															<a href={`/players/${player.id}/?league=${league.id}`}>{player.name}</a>
 														</>
 													))}
 													<span class="team-record-week"> · {entry.value}</span>
@@ -470,7 +470,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 								section={section}
 								teamName={team.name}
 								teamColor={color}
-								href={`/players/${player.id}?league=${league.id}`}
+								href={`/players/${player.id}/?league=${league.id}`}
 								avatarPhoto={getPlayerPhotos(player.id).card}
 							/>
 							</div>
@@ -487,7 +487,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 						{formerPlayers.map(({ player }, index) => (
 							<>
 								{index > 0 && ", "}
-								<a href={`/players/${player.id}?league=${league.id}`}>{player.name}</a>
+								<a href={`/players/${player.id}/?league=${league.id}`}>{player.name}</a>
 							</>
 						))}
 					</p>
@@ -505,7 +505,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 						{weeks.map((week) => (
 							<div class="team-week">
 								<div class="team-week-head">
-									<a href={`/league/${league.id}?week=${week.week}#results`}>
+									<a href={`/league/${league.id}/?week=${week.week}#results`}>
 										<T en={weekLabel(week.week, "en")} ko={weekLabel(week.week, "ko")} />
 									</a>
 									<span class="team-week-date">
@@ -534,7 +534,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 												<span class="team-dot" style={`background-color: ${getTeamColor(match.opponentId, league)}`} aria-hidden="true" />
 												<T en="vs" ko="vs" />{" "}
 												{match.opponentId ? (
-													<a href={`/league/${league.id}/team/${match.opponentId}`}>{getTeamName(match.opponentId, league)}</a>
+													<a href={`/league/${league.id}/team/${match.opponentId}/`}>{getTeamName(match.opponentId, league)}</a>
 												) : (
 													"TBD"
 												)}
@@ -558,7 +558,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 					<p class="section-label"><T en={`OTHER ${league.id} TEAMS`} ko={`${league.id} 다른 팀`} /></p>
 					<div class="team-others">
 						{otherTeams.map((other) => (
-							<a class="team-other" href={`/league/${league.id}/team/${other.team_id}`}>
+							<a class="team-other" href={`/league/${league.id}/team/${other.team_id}/`}>
 								<span class="team-dot" style={`background-color: ${getTeamColor(other.team_id, league)}`} aria-hidden="true" />
 								{other.name}
 							</a>

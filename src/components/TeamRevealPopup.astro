@@ -51,7 +51,7 @@ const revealKey = `kicks-team-reveal-${league.id}`;
 				<T as="p" class="reveal-subtitle" en={`Meet the ${teams.length} teams of ${league.id}. Find yours!`} ko={`${league.id}의 ${teams.length}팀을 소개합니다. 내 팀을 찾아보세요!`} />
 				<div class="reveal-cards">
 					{teams.map((team) => (
-						<a class="reveal-card" href={`/league/${league.id}/team/${team.team_id}`} style={`--team-color: ${team.color}; --team-text: ${team.text}`}>
+						<a class="reveal-card" href={`/league/${league.id}/team/${team.team_id}/`} style={`--team-color: ${team.color}; --team-text: ${team.text}`}>
 							<span class="reveal-card-head">
 								<span class="reveal-card-name">{team.name}</span>
 								<span class="reveal-card-count"><T en={`${team.squad.length} players`} ko={`${team.squad.length}명`} /><span class="reveal-card-chevron" aria-hidden="true"> ›</span></span>

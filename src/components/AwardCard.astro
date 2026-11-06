@@ -18,7 +18,7 @@ interface Props {
 }
 
 const { icon, en, ko, winners, photo, leagueId, detailEn, detailKo } = Astro.props;
-const profileHref = (id: string) => (leagueId ? `/players/${id}?league=${leagueId}` : `/players/${id}`);
+const profileHref = (id: string) => (leagueId ? `/players/${id}/?league=${leagueId}` : `/players/${id}/`);
 ---
 
 <div class:list={["honours-card", { "honours-card--photo": photo }]}>

@@ -19,7 +19,7 @@ interface Props {
 }
 
 const { league, mode, kickoffDate, summary, halloween } = Astro.props;
-const teamHref = (teamId: string) => `/league/${league.id}/team/${teamId}`;
+const teamHref = (teamId: string) => `/league/${league.id}/team/${teamId}/`;
 const accent = (teamId: string) => getReadableAccentColor(getTeamColor(teamId, league));
 const pct = (p: number) => (p > 0.999 ? ">99.9%" : p < 0.001 ? "<0.1%" : `${Math.round(p * 100)}%`);
 const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 0}`;
@@ -43,7 +43,7 @@ const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 
 									<span class="finale-chip-name">{team.name}</span>
 								</a>
 							))}
-							<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}`}>
+							<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}/`}>
 								<T en="Matches →" ko="경기 일정 보기 →" />
 							</a>
 						</div>
@@ -82,7 +82,7 @@ const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 
 										{summary.topScorers.players.map((player, index) => (
 											<>
 												{index > 0 && <span class="finale-chip-sep">·</span>}
-												<a class="finale-chip-name" href={`/players/${player.id}?league=${league.id}`}>{player.name}</a>
+												<a class="finale-chip-name" href={`/players/${player.id}/?league=${league.id}`}>{player.name}</a>
 											</>
 										))}
 										<span class="finale-chip-count">
@@ -90,7 +90,7 @@ const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 
 										</span>
 									</div>
 								)}
-								<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}?week=${summary.week}#results`}>
+								<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}/?week=${summary.week}#results`}>
 									<T en="Full results →" ko="전체 결과 보기 →" />
 								</a>
 							</div>
@@ -118,7 +118,7 @@ const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 
 							<T en={`Wins are worth ${league.rules.final_win_points} points!`} ko={`승리하면 승점 ${league.rules.final_win_points}점!`} />
 						</div>
 						{halloween.favourite && (
-							<a class="finale-chip league-chip" href={`/league/${league.id}#title-race`}>
+							<a class="finale-chip league-chip" href={`/league/${league.id}/#title-race`}>
 								<span class="finale-chip-title"><T en="Title favourite" ko="우승 확률 1위" /></span>
 								<span class="finale-chip-name" style={`color: ${accent(halloween.favourite.teamId)}`}>
 									{getTeamName(halloween.favourite.teamId, league)}
@@ -126,7 +126,7 @@ const dismissKey = `kicks-league-banner-${league.id}-${mode}-${summary?.week ?? 
 								<span class="finale-chip-count">{pct(halloween.favourite.p)}</span>
 							</a>
 						)}
-						<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}`}>
+						<a class="finale-chip league-chip league-chip--link" href={`/league/${league.id}/`}>
 							<T en="League page →" ko="리그 페이지 →" />
 						</a>
 					</div>

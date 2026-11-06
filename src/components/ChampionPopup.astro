@@ -67,7 +67,7 @@ const storageKey = `kicks-champion-${league.id}`;
 				)}
 				<div class="champ-cards">
 					{champions.map((team) => (
-						<a class="champ-card" href={`/league/${league.id}/team/${team.team_id}`} style={`--team-color: ${team.color}; --team-text: ${team.text}`}>
+						<a class="champ-card" href={`/league/${league.id}/team/${team.team_id}/`} style={`--team-color: ${team.color}; --team-text: ${team.text}`}>
 							<span class="champ-card-head">
 								<span class="champ-card-name">{team.name}</span>
 								<span class="champ-card-record">
