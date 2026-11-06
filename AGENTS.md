@@ -777,8 +777,11 @@ update. Not part of the site build; nothing under `report/` is deployed.
   through that week, so an old week can be remade later and still be right.
 - **Leaders**: top 5 by goals / assists / G+A, ranks shared on the stat itself
   (01, 02, 02, 04), inactive players left out.
-- **Defensive Spotlight** is the board's pick: `report/spotlight.json`
-  `{ "<league>": { "<week>": [three names] } }`; no entry, no box.
+- **Under the leaderboards** goes one box: the board's **Defensive Spotlight**
+  when `report/spotlight.json` has `{ "<league>": { "<week>": [three names] } }`,
+  otherwise **Best Duo + Hat-trick Heroes** from `goal_events.json` (duo = an
+  unordered scorer/assister pair, as on the team page; hat-trick = 3+ goals in
+  one match, with week and opponent). A league without goal events gets neither.
 - PNGs need Playwright (`import("playwright")`, or a global install found via
   `NODE_PATH`); `--html-only` writes just `report.html`. The team colour word
   under a team name (RED / ORANGE / BLUE …) comes from the hue, with yellows
