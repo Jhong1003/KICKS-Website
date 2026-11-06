@@ -805,6 +805,31 @@ update. Not part of the site build; nothing under `report/` is deployed.
   under a team name (RED / ORANGE / BLUE …) comes from the hue, with yellows
   called ORANGE as the club does.
 
+### Link-preview cards (og:image)
+
+What KakaoTalk, iMessage etc. show when a link is shared. Player pages
+(`/players/<id>/`) and league pages (`/league/<id>/`, and `/league/` for the
+current league) get their own 1200×630 card; every other page keeps
+`public/og-image.png`. [scripts/make_og.mjs](scripts/make_og.mjs) draws them with
+the report's fonts, photos (`report/backgrounds/<league>/cover.jpg`) and
+Playwright, as `public/og/players/<id>.jpg` and `public/og/league/<league>.jpg`,
+and writes `src/data/og.json` (a hash per card — never hand-edit). Pages pick a
+card through [src/lib/og.ts](src/lib/og.ts) → `ogImage` on `BaseLayout`, with
+`?v=<hash>` in the URL so a redrawn card isn't hidden behind a chat app's cache;
+no entry falls back to the default image. The "Make Report Slides" workflow runs
+it after every data update and commits only cards whose HTML changed.
+
+- **Player card** = the player's newest league section (what their page opens
+  on): name, team colour and name, primary position, play-style tag, that
+  league's goals / assists / weeks attended, badges rarest-first (icons read from
+  `BADGES` in `src/lib/players.ts`), a real photo if `player-photos.json` has
+  one. **No rank or rating**, same rule as the player pages.
+- **League card** = top three of `league_table.json` (W-D-L, points), "AFTER WEEK
+  n OF m" while it runs, "FINAL STANDINGS" + 🏆 champion once every fixture is
+  scored.
+- KakaoTalk caches previews per URL: an old share can keep its old picture; the
+  Kakao developers "공유 디버거" clears it.
+
 ### Member perks
 
 `/benefits` is the members-only coupon screen ("Member Benefits", linked from

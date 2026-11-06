@@ -10,6 +10,8 @@ interface Props {
 	header?: "default" | "custom";
 	/** Keep link-only pages (e.g. member perks) out of search results. */
 	noindex?: boolean;
+	/** Link-preview image for this page (a path under public/, e.g. from src/lib/og.ts); the site-wide /og-image.png otherwise. */
+	ogImage?: string;
 }
 
 const {
@@ -17,11 +19,12 @@ const {
 	description = "UIUC Korean-inspired futsal community · 리그 순위, 선수 기록, 경기 일정",
 	header = "default",
 	noindex = false,
+	ogImage: ogImagePath = "/og-image.png",
 } = Astro.props;
 
 // Astro.site (set in astro.config.mjs) makes these absolute regardless of
 // how deep the current route is (e.g. /players/[id]).
-const ogImage = new URL("/og-image.png", Astro.site).toString();
+const ogImage = new URL(ogImagePath, Astro.site).toString();
 // Built pages are served as /path/ (directory format), so the canonical URL
 // always ends in "/" — otherwise Google sees a redirect instead of the page.
 const canonicalPath = /\/$|\.[a-z0-9]+$/i.test(Astro.url.pathname) ? Astro.url.pathname : `${Astro.url.pathname}/`;

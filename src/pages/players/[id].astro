@@ -6,6 +6,7 @@ import T from "../../components/T.astro";
 import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
 import { getPlayerPhotos } from "../../lib/player-photos";
+import { playerOgImage } from "../../lib/og";
 import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 import { isLeagueFinished, isShownInLeague } from "../../lib/finale";
@@ -30,6 +31,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 <BaseLayout
 	title={`${player.name} | KICKS Players`}
 	description={`${player.name}'s KICKS player profile — league stats, play style, and badges.`}
+	ogImage={playerOgImage(player.id)}
 >
 	<main>
 		<section class="content-section player-detail-head" aria-labelledby="player-detail-title">
