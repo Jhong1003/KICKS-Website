@@ -2,8 +2,9 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import LeagueView from "../components/LeagueView.astro";
 import { currentLeague } from "../lib/leagues";
+import { leagueOgImage } from "../lib/og";
 ---
 
-<BaseLayout title="League | KICKS" description="KICKS league standings, match results, and player stats.">
+<BaseLayout title="League | KICKS" description="KICKS league standings, match results, and player stats." ogImage={leagueOgImage(currentLeague.id)}>
 	<LeagueView league={currentLeague} />
 </BaseLayout>

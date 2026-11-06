@@ -29,3 +29,4 @@ pnpm-debug.log*
 
 # report slides (scripts/make_report.mjs output)
 report/out/
+og/out/
