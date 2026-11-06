@@ -241,8 +241,8 @@ const stats = card(
 				? `<div class="spotlight best-defense"><div class="sp-head"><b>BEST<br>DEFENSE</b><small>FEWEST CONCEDED · ${isFinal ? `LEAGUE ${leagueNo}` : `THROUGH WEEK ${ww}`}</small></div>
 			<div class="bd-body">${bestDefense
 				.map(
-					(d) => `<div class="bd-team">${bar(d.team.color)}<b>${esc(d.team.name)}</b><span class="bd-ga"><b>${d.ga}</b> CONCEDED</span></div>
-				<div class="bd-names">${d.backs.map((n) => `<span>${esc(n)}</span>`).join("")}</div>`,
+					(d) => `<div class="bd-team">${bar(d.team.color)}<b>${esc(d.team.name)}</b><span class="bd-ga"><b>${d.ga}</b> GOALS CONCEDED</span></div>
+				<div class="bd-names" style="--cols:${d.backs.length > 4 ? Math.ceil(d.backs.length / 2) : Math.max(d.backs.length, 1)}">${d.backs.map((n) => `<span>${esc(n)}</span>`).join("")}</div>`,
 				)
 				.join("")}</div></div>`
 				: ""
@@ -387,7 +387,8 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .bd-team .bar { height: 40px; width: 8px; }
 .bd-ga { margin-left: auto; font-size: 24px; font-weight: 600; letter-spacing: .14em; color: #ccc; }
 .bd-ga b { font-size: 52px; font-weight: 700; color: #fff; letter-spacing: 0; margin-right: 6px; }
-.bd-names { display: flex; flex-wrap: wrap; gap: 8px 26px; font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 28px; font-weight: 500; color: #eee; }
+.best-defense .sp-head b { font-style: normal; }
+.bd-names { display: grid; grid-template-columns: repeat(var(--cols), auto); justify-content: start; gap: 8px 30px; font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 28px; font-weight: 500; color: #eee; }
 .sp-names { display: flex; justify-content: space-around; }
 .sp-names span { display: flex; align-items: center; gap: 12px; font-size: 32px; font-weight: 500; }
 .race .title { font-size: 150px; margin-top: 124px; }
