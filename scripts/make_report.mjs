@@ -118,9 +118,9 @@ const contributors = top("ga", (a, b) => b.goals - a.goals);
 
 const spotlightFile = join(ROOT, "report/spotlight.json");
 const spotlightNames = existsSync(spotlightFile) ? JSON.parse(readFileSync(spotlightFile, "utf8"))[leagueId]?.[String(week)] ?? [] : [];
-// Best Defense: the team(s) that conceded fewest through this week, with their
-// DF/GK (primary position) named — so defenders get a spot under three
-// attacking leaderboards even when the board hasn't picked a Spotlight. The
+// Best Defense: the team(s) that conceded fewest through this week, with the
+// whole squad named. Not just DF/GK: there's no fixed keeper (everyone takes a
+// turn in goal) and it's 7v7, so a clean sheet is the whole team's. The
 // board's Spotlight, when entered, takes this box instead.
 const conceded = new Map();
 for (const m of scored.filter((m) => m.week <= week)) {
@@ -130,10 +130,10 @@ for (const m of scored.filter((m) => m.week <= week)) {
 const fewest = Math.min(...conceded.values());
 const bestDefense = [...conceded].filter(([, ga]) => ga === fewest).map(([id]) => {
 	const backs = profiles
-		.filter((p) => p.status !== "inactive" && ["GK", "DF"].includes(p.positions?.[0]))
+		.filter((p) => p.status !== "inactive")
 		.map((p) => ({ p, w: p.leagues.find((s) => s.league === leagueId)?.weekly_stats.filter((x) => x.week <= week && x.games > 0).at(-1) }))
 		.filter(({ w }) => w?.team_id === id)
-		.sort((a, b) => (a.p.positions[0] === "GK" ? -1 : 0) - (b.p.positions[0] === "GK" ? -1 : 0) || a.p.name.localeCompare(b.p.name, "ko"))
+		.sort((a, b) => a.p.name.localeCompare(b.p.name, "ko"))
 		.map(({ p }) => p.name);
 	return { team: team(id), ga: fewest, backs };
 });
@@ -242,7 +242,7 @@ const stats = card(
 			<div class="bd-body">${bestDefense
 				.map(
 					(d) => `<div class="bd-team">${bar(d.team.color)}<b>${esc(d.team.name)}</b><span class="bd-ga"><b>${d.ga}</b>실점</span></div>
-				<div class="bd-names" style="--cols:${d.backs.length > 4 ? Math.ceil(d.backs.length / 2) : Math.max(d.backs.length, 1)}">${d.backs.map((n) => `<span>${esc(n)}</span>`).join("")}</div>`,
+				<div class="bd-names" style="--cols:${Math.max(1, Math.ceil(d.backs.length / Math.ceil(d.backs.length / 4)))}">${d.backs.map((n) => `<span>${esc(n)}</span>`).join("")}</div>`,
 				)
 				.join("")}</div></div>`
 				: ""
