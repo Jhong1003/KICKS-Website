@@ -754,6 +754,33 @@ in that script must stay in sync with `src/pages/full-matches.astro`.
 Commit and push the updated `.enc.json` file afterward like any other
 change.
 
+### Instagram league report
+
+`node scripts/make_report.mjs --league FA26-L2 --week 4` (no `--week` = latest
+scored week) writes four 1080×1350 PNGs to `report/out/<league>-W<nn>/`:
+cover, match results, league table, player stats — the club's L1 post design
+rebuilt (Antonio for Latin text, Noto Sans CJK KR / Apple SD Gothic for Hangul,
+white panels on a darkened pitch photo, the league's team colours as the cover
+rule). It reads the committed `src/data/*.json`, so run it after the data
+update. Not part of the site build; nothing under `report/` is deployed.
+
+- **Backgrounds change per league**: `report/backgrounds/<league>/{cover,results,table,stats}.jpg`
+  (1080×1350). A league without a folder borrows the newest one that exists.
+- **Final vs weekly** is automatic: "LEAGUE n FINAL", a 🏆 for the champion and
+  "FINAL STANDINGS" only when the week is the league's last and every fixture
+  is scored; otherwise "WEEK nn" titles and "WEEK nn STANDINGS".
+- **The table is the one after that week** (`standings_history.json` for rank
+  and points, P/W/D/L from matches up to that week) and player totals run
+  through that week, so an old week can be remade later and still be right.
+- **Leaders**: top 5 by goals / assists / G+A, ranks shared on the stat itself
+  (01, 02, 02, 04), inactive players left out.
+- **Defensive Spotlight** is the board's pick: `report/spotlight.json`
+  `{ "<league>": { "<week>": [three names] } }`; no entry, no box.
+- PNGs need Playwright (`import("playwright")`, or a global install found via
+  `NODE_PATH`); `--html-only` writes just `report.html`. The team colour word
+  under a team name (RED / ORANGE / BLUE …) comes from the hue, with yellows
+  called ORANGE as the club does.
+
 ### Member perks
 
 `/benefits` is the members-only coupon screen ("Member Benefits", linked from
