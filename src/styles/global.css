@@ -1018,6 +1018,14 @@ button.league-switcher-link {
 
 }
 
+/* Beside it: that week's Instagram report slides (/league/<id>/report/). */
+.week-report-link {
+
+	margin-left: 18px;
+	text-decoration: none;
+
+}
+
 .week-race-link:hover {
 
 	border-bottom-style: solid;

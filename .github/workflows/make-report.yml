@@ -1,0 +1,67 @@
+# Draws the Instagram league report slides for the site's report page
+# (/league/<league>/report/?week=N): runs scripts/make_report.mjs --all after
+# every successful "Update League Data" run, and commits
+# public/report/<league>/W<nn>/*.jpg plus src/data/reports.json to main if
+# anything changed. Cloudflare deploys on that push.
+#
+# A week is drawn only once all its fixtures are scored, and redrawn only when
+# something that goes into it changed (the script keeps a hash per week), so a
+# quiet data run makes no commit. Can also be run by hand from the Actions tab,
+# e.g. after editing report/spotlight.json or a league's backgrounds.
+name: Make Report Slides
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Update League Data"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - "scripts/make_report.mjs"
+      - "report/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: make-report
+  cancel-in-progress: false
+
+jobs:
+  draw:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Playwright Chromium and Korean / emoji fonts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q fonts-noto-cjk fonts-noto-color-emoji
+          npm install --no-save --no-package-lock playwright@1.49.1
+          npx playwright install --with-deps chromium
+
+      - name: Draw the slides
+        run: node scripts/make_report.mjs --all
+
+      - name: Commit and push if anything changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A public/report src/data/reports.json
+          if git diff --cached --quiet; then
+            echo "No report changes."
+          else
+            git commit -m "Update report slides (automatic)"
+            git pull --rebase origin main
+            git push
+          fi
