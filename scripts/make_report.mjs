@@ -137,7 +137,8 @@ const bg = (slide) => {
 	return dataUrl(existsSync(own) ? own : join(bgDir, "results.jpg"), "image/jpeg");
 };
 const font = dataUrl(join(ROOT, "report/assets/Antonio.ttf"), "font/ttf");
-const mark = dataUrl(join(ROOT, "report/assets/kicks-mark.png"), "image/png");
+const ball = dataUrl(join(ROOT, "report/assets/kicks-ball.png"), "image/png");
+const brandFont = dataUrl(join(ROOT, "report/assets/Montserrat.ttf"), "font/ttf");
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const pad = (n) => String(n).padStart(2, "0");
@@ -145,7 +146,7 @@ const bar = (color) => `<i class="bar" style="background:${color}"></i>`;
 
 const footer = `<footer><span>${dateText}</span><span>KICKS ${season} LEAGUE ${leagueNo} REPORT</span></footer>`;
 const card = (slide, inner, extra = "") =>
-	`<section class="card ${slide} ${extra}" style="background-image:var(--wash-${slide}),url(${bg(slide)})"><img class="mark" src="${mark}" alt="">${inner}</section>`;
+	`<section class="card ${slide} ${extra}" style="background-image:var(--wash-${slide}),url(${bg(slide)})"><div class="mark"><img src="${ball}" alt=""><span>KICKS</span></div>${inner}</section>`;
 
 const cover = card(
 	"cover",
@@ -276,6 +277,7 @@ const slides = isFinal
 
 const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
 @font-face { font-family: Antonio; src: url(${font}) format("truetype"); font-weight: 100 700; }
+@font-face { font-family: Montserrat; src: url(${brandFont}) format("truetype"); font-weight: 100 900; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #111; display: grid; gap: 40px; padding: 40px; justify-content: center; }
 .card { position: relative; width: 1080px; height: 1350px; overflow: hidden; color: #fff; background-size: cover; background-position: center;
@@ -286,7 +288,11 @@ body { background: #111; display: grid; gap: 40px; padding: 40px; justify-conten
 	--wash-table: linear-gradient(rgba(6,14,6,.40), rgba(6,14,6,.55)), var(--shade);
 	--wash-race: linear-gradient(rgba(6,14,6,.40), rgba(6,14,6,.55)), var(--shade);
 	--wash-stats: linear-gradient(rgba(6,14,6,.42), rgba(6,14,6,.60)), var(--shade); }
-.mark { position: absolute; top: 42px; right: 46px; height: 66px; }
+/* The KICKS mark: the logo's ball plus the wordmark set in type (the logo
+   file's wordmark carries a print texture that looks like noise at this size). */
+.mark { position: absolute; top: 40px; right: 46px; display: flex; align-items: center; gap: 12px; }
+.mark img { width: 72px; height: 72px; filter: drop-shadow(0 2px 6px rgba(0,0,0,.35)); }
+.mark span { font-family: Montserrat, sans-serif; font-size: 50px; font-weight: 800; letter-spacing: .01em; color: #fff; line-height: 1; text-shadow: 0 2px 10px rgba(0,0,0,.35); }
 .ko, .side, .teamcell b, .lname, .sp-names span { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; }
 .bar { display: inline-block; width: 7px; height: 1.15em; border-radius: 2px; flex: none; }
 h1, h2, .title, .sub, .kicker, .meta, footer { text-align: center; text-shadow: 0 4px 18px rgba(0,0,0,.45); }
