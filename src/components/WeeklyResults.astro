@@ -54,7 +54,10 @@ interface Props {
 }
 
 const { weeks, defaultWeek, raceDialogId, timelines, teamColor, matchMinutes = 12, reportLeague } = Astro.props;
-const reportWeeks = (reportLeague && (reportsData as Record<string, Record<string, { final: boolean }>>)[reportLeague]) || {};
+// The JSON also contains a string-valued _readme; only objects contain weekly reports.
+const reports: Record<string, string | Record<string, { final: boolean }>> = reportsData;
+const leagueReports = reportLeague ? reports[reportLeague] : undefined;
+const reportWeeks = leagueReports && typeof leagueReports === "object" ? leagueReports : {};
 const goalsOf = (match: Match) => (match.match_id && timelines?.get(match.match_id)) || [];
 const ROLE_MARK: Record<string, { en: string; ko: string }> = {
 	winner: { en: "winning goal", ko: "결승골" },
@@ -266,11 +269,15 @@ const REACTIONS = [
 <script>
 	const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".week-tab"));
 	const panels = Array.from(document.querySelectorAll<HTMLDivElement>(".week-panel"));
+	const defaultWeek = tabs.find((tab) => tab.getAttribute("aria-selected") === "true")?.dataset.week;
 
 	tabs.forEach((tab) => {
 		tab.addEventListener("click", () => {
 			const week = tab.dataset.week;
 			if (tab.getAttribute("aria-selected") === "true") return;
+			const url = new URL(location.href);
+			url.searchParams.set("week", week!);
+			history.replaceState(history.state, "", url);
 
 			tabs.forEach((otherTab) => otherTab.setAttribute("aria-selected", String(otherTab === tab)));
 
@@ -362,9 +369,12 @@ const REACTIONS = [
 	// week's tab on load if it exists. No-op if the week isn't in the sheet
 	// yet (future weeks are only added once the Google Sheet has rows for
 	// them).
-	const requestedWeek = new URLSearchParams(location.search).get("week");
-	const requestedTab = requestedWeek && tabs.find((tab) => tab.dataset.week === requestedWeek);
-	if (requestedTab && requestedTab.getAttribute("aria-selected") !== "true") {
-		requestedTab.click();
+	function syncWeekFromUrl() {
+		const requestedWeek = new URLSearchParams(location.search).get("week") ?? defaultWeek;
+		const requestedTab = tabs.find((tab) => tab.dataset.week === requestedWeek);
+		if (requestedTab && requestedTab.getAttribute("aria-selected") !== "true") requestedTab.click();
 	}
+	syncWeekFromUrl();
+	window.addEventListener("popstate", syncWeekFromUrl);
+	window.addEventListener("pageshow", syncWeekFromUrl);
 </script>

@@ -8,7 +8,6 @@ import profiles from "../data/player_profiles.json";
 import { leagues } from "../lib/leagues";
 import { albums } from "../lib/gallery";
 
-import { seasons } from "../lib/seasons";
 
 const STATIC_PATHS = [
 	"/",
@@ -23,13 +22,11 @@ const STATIC_PATHS = [
 	"/join/",
 	"/dream-team/",
 	"/app/",
-	"/seasons/",
 ];
 
 export const GET: APIRoute = ({ site }) => {
 	const paths = [
 		...STATIC_PATHS,
-		...seasons.map((season) => `/seasons/${season}/`),
 		...leagues.flatMap((league) => [`/league/${league.id}/`, ...league.teams.map((team) => `/league/${league.id}/team/${team.team_id}/`)]),
 		...profiles.map((player) => `/players/${player.id}/`),
 		...albums.map((album) => `/gallery/${album.id}/`),

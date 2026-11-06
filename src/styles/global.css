@@ -116,7 +116,7 @@ html[lang="ko"] [data-lang="en"] {
 .lang-toggle-option,
 .lang-toggle-divider {
 
-	opacity: 0.45;
+	opacity: 0.8;
 
 }
 
@@ -5370,4 +5370,64 @@ html[data-season] .hero-season-note--past {
 	color: #4b2391;
 	opacity: 0.85;
 
+}
+
+/* Shared readability and keyboard cues; keep the existing palette and layout. */
+:where(a, button, input, textarea, select, summary):focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 4px;
+}
+
+.hero-highlights {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 18px;
+	margin: 20px 0 0;
+	padding: 0;
+	list-style: none;
+	color: var(--color-sage);
+	font-size: 0.9rem;
+	line-height: 1.6;
+}
+.hero-highlights li::before { content: "✓"; margin-right: 6px; }
+
+/* Supporting text has about 7.2:1 contrast on the cream background. */
+.album-meta { opacity: 0.8; color: var(--color-dark); }
+.player-card-stat { min-width: 0; }
+.player-card-stat-label {
+	font-size: 0.75rem;
+	opacity: 0.8;
+	color: var(--color-dark);
+	letter-spacing: 0;
+	line-height: 1.4;
+	text-transform: none;
+}
+
+@media (max-width: 1200px) {
+	.lang-toggle { min-height: 44px; }
+	.nav-toggle { width: 44px; height: 44px; padding: 6px; flex-shrink: 0; }
+	.nav-list a { min-height: 44px; }
+}
+@media (max-width: 600px) {
+	.week-tab, .league-switcher-link, .league-subnav a, .players-team-chip, .button-primary {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.section-link, .album-back {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+	}
+	.player-card { padding-inline: 10px; }
+	.player-card-stat { padding-inline: 2px; }
+	.player-card-stat-label { overflow-wrap: normal; word-break: normal; }
+	.hero-text { width: 100%; max-width: 100%; }
+	.hero-button { max-width: 100%; }
+}
+@media (max-width: 380px) {
+	.site-header { gap: 12px; }
+	.brand-logo { width: calc(100vw - 190px); }
+	.eyebrow-part { white-space: normal; }
 }
