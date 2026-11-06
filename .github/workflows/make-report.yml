@@ -32,6 +32,10 @@ jobs:
   draw:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    # A normal run takes about two minutes. One hung in the apt/Playwright
+    # install for 15+ minutes and held the queue (cancel-in-progress is off),
+    # so give up early instead and let the next run take over.
+    timeout-minutes: 12
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -44,6 +48,7 @@ jobs:
           node-version: "22"
 
       - name: Install Playwright Chromium and Korean / emoji fonts
+        timeout-minutes: 8
         run: |
           sudo apt-get update -q
           sudo apt-get install -y -q fonts-noto-cjk fonts-noto-color-emoji
