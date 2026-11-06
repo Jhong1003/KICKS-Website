@@ -242,12 +242,26 @@ const stats = card(
 			<div class="bd-body">${bestDefense
 				.map(
 					(d) => `<div class="bd-team">${bar(d.team.color)}<b>${esc(d.team.name)}</b><span class="bd-ga"><b>${d.ga}</b>실점</span></div>
-				<div class="bd-names" style="--cols:${Math.max(1, Math.ceil(d.backs.length / Math.ceil(d.backs.length / 4)))}">${d.backs.map((n) => `<span>${esc(n)}</span>`).join("")}</div>`,
+				<div class="bd-names">${nameRows(d.backs).map((row) => `<div>${row.map((n) => `<span>${esc(n)}</span>`).join("")}</div>`).join("")}</div>`,
 				)
 				.join("")}</div></div>`
 				: ""
 	}${footer}`,
 );
+
+// Up to five names a row, as few rows as that allows, the shorter rows first
+// (nine names = 4 + 5).
+function nameRows(names) {
+	const rows = Math.max(1, Math.ceil(names.length / 5));
+	const out = [];
+	let i = 0;
+	for (let r = 0; r < rows; r++) {
+		const size = Math.floor((names.length - i) / (rows - r));
+		out.push(names.slice(i, i + size));
+		i += size;
+	}
+	return out;
+}
 
 // ---- points race (final report) ---------------------------------------------
 // Cumulative points after each week, from standings_history (official). Every
@@ -389,7 +403,9 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .best-defense .ko-sub { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 24px; font-weight: 500; letter-spacing: .02em; }
 .bd-ga b { font-family: Antonio, sans-serif; font-size: 52px; font-weight: 700; color: #fff; margin-right: 4px; }
 .best-defense .sp-head b { font-style: normal; }
-.bd-names { display: grid; grid-template-columns: repeat(var(--cols), auto); justify-content: start; gap: 8px 30px; font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 28px; font-weight: 500; color: #eee; }
+.bd-names { display: grid; gap: 8px; }
+.bd-names > div { display: flex; gap: 22px; }
+.bd-names { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 28px; font-weight: 500; color: #eee; }
 .sp-names { display: flex; justify-content: space-around; }
 .sp-names span { display: flex; align-items: center; gap: 12px; font-size: 32px; font-weight: 500; }
 .race .title { font-size: 150px; margin-top: 124px; }
