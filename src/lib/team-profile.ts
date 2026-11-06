@@ -57,11 +57,11 @@ export interface AxisInfo {
 
 /** Clockwise from the top. */
 export const AXES: AxisInfo[] = [
-	{ key: "attack", icon: "⚔️", en: "Attack", ko: "공격", noteEn: "Goals per match (full at 1.5)", noteKo: "경기당 득점 (1.5골이면 만점)" },
-	{ key: "linkup", icon: "🔗", en: "Link-up", ko: "연계", noteEn: "Share of goals that had an assist", noteKo: "어시스트가 붙은 골의 비율" },
-	{ key: "oneteam", icon: "🤝", en: "One team", ko: "한 팀", noteEn: "Share of the squad who scored", noteKo: "골을 넣어본 선수의 비율" },
+	{ key: "attack", icon: "⚔️", en: "Attack", ko: "공격", noteEn: "Goals per match (maximum score at 1.5)", noteKo: "경기당 득점 (1.5골이면 만점)" },
+	{ key: "linkup", icon: "🔗", en: "Link-up", ko: "연계", noteEn: "Share of goals that had an assist", noteKo: "도움을 받아 넣은 골의 비율" },
+	{ key: "oneteam", icon: "🤝", en: "One team", ko: "한 팀", noteEn: "Share of the squad who scored", noteKo: "팀 내 득점 선수 비율" },
 	{ key: "attendance", icon: "📋", en: "Attendance", ko: "출석", noteEn: "Participation rate (league table)", noteKo: "팀 참여율 (순위표와 같은 값)" },
-	{ key: "defense", icon: "🛡️", en: "Defense", ko: "수비", noteEn: "Fewer goals conceded per match (0 = full)", noteKo: "경기당 실점이 적을수록 (0실점이면 만점)" },
+	{ key: "defense", icon: "🛡️", en: "Defense", ko: "수비", noteEn: "Goals conceded per match (maximum score at 0)", noteKo: "경기당 실점이 적을수록 높은 점수 (0실점이면 만점)" },
 	{ key: "late", icon: "⏱️", en: "Late goals", ko: "뒷심", noteEn: "Share of goals in minutes 9–12", noteKo: "9~12분에 넣은 골의 비율" },
 ];
 

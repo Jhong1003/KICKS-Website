@@ -20,7 +20,7 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 	<main>
 		<section class="content-section" aria-labelledby="full-matches-title">
 			<p class="section-label"><T en="MEMBERS ONLY" ko="멤버 전용" /></p>
-			<h1 id="full-matches-title"><T en="Full Matches" ko="풀영상" /></h1>
+			<h1 id="full-matches-title"><T en="Full Matches" ko="전체 경기 영상" /></h1>
 			<MediaTabs current="videos" />
 
 			<div id="lock-screen" class="lock-screen">
@@ -35,7 +35,7 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 					as="p"
 					class="lock-screen-text"
 					en="Enter the club password to watch full match videos."
-					ko="풀경기 영상을 보려면 동아리 비밀번호를 입력하세요."
+					ko="전체 경기 영상을 보려면 동아리 비밀번호를 입력하세요."
 				/>
 
 				<form id="unlock-form" class="unlock-form">
@@ -126,7 +126,7 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		return {
 			...meta,
 			titleEn: `${weekLabel(week, "en")} Full Match`,
-			titleKo: `${weekLabel(week, "ko")} 풀영상`,
+			titleKo: `${weekLabel(week, "ko")} 전체 경기 영상`,
 		};
 	}
 

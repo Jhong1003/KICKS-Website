@@ -183,7 +183,7 @@ export function conditionText(outlook: TeamOutlook): { en: string; ko: string }[
 	if (clinchWins !== null) {
 		lines.push(clinchWins === games
 			? { en: `Win all ${games} and the title is yours, whatever else happens.`, ko: `${games}경기 전승하면 다른 결과와 상관없이 자력 우승이에요.` }
-			: { en: `${clinchWins}+ wins from ${games} clinches it, whatever else happens.`, ko: `${games}경기 중 ${clinchWins}승 이상이면 다른 결과와 상관없이 자력 우승이에요.` });
+			: { en: `At least ${clinchWins} win${clinchWins === 1 ? "" : "s"} from ${games} matches will clinch the title, regardless of other results.`, ko: `${games}경기 중 ${clinchWins}승 이상이면 다른 결과와 상관없이 자력 우승이에요.` });
 		if (minWins !== null && minWins < clinchWins) {
 			lines.push(minWins === 0
 				? { en: "With help from other results it could finish top even without a win.", ko: "다른 경기 결과에 따라서는 1승도 못 해도 1위가 될 수 있어요." }
@@ -191,14 +191,14 @@ export function conditionText(outlook: TeamOutlook): { en: string; ko: string }[
 		}
 	} else {
 		lines.push({
-			en: `Can't do it alone — even ${games} wins needs help from the other match-up.`,
-			ko: `자력 우승은 안 돼요 — 전승해도 다른 팀 경기 결과가 도와줘야 해요.`,
+			en: `Even winning all ${games} matches won't guarantee the title — other results also need to go your way.`,
+			ko: `자력 우승은 안 돼요 — 전승해도 다른 팀의 경기 결과도 유리하게 나와야 해요.`,
 		});
 		if (minWins !== null) lines.push(minWins === 0
 			? { en: "With the right results elsewhere, even no wins could be enough.", ko: "결과가 잘 맞으면 1승도 못 해도 가능해요." }
 			: { en: `Needs at least ${minWins} win${minWins === 1 ? "" : "s"}.`, ko: `최소 ${minWins}승은 해야 해요.` });
 	}
-	if (outlook.shared > 0) lines.push({ en: "Could also end level on points — then participation decides.", ko: "승점 동점으로 끝날 수도 있어요 — 그때는 참여율로 결정돼요." });
+	if (outlook.shared > 0) lines.push({ en: "Could also end level on points — then participation decides.", ko: "최종 승점이 같아질 수도 있어요 — 그때는 참여율로 결정돼요." });
 	return lines;
 }
 
