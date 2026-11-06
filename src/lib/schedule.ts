@@ -37,6 +37,8 @@ export interface ScheduleEvent {
 	image?: string;
 	/** Optional run of show for the popup, in order. */
 	agenda?: { time: string; time_ko?: string; en: string; ko?: string }[];
+	/** Optional menu for the popup (e.g. a fundraiser): item names with a price shown as written. */
+	menu?: { en: string; ko?: string; price: string }[];
 	/** Optional extra line for the popup (what to bring, RSVP, …). */
 	note?: string;
 	note_ko?: string;

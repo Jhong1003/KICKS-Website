@@ -66,6 +66,21 @@ const mapUrl = (place: string) => `https://www.google.com/maps/search/?api=1&que
 							</dd>
 						</div>
 					)}
+					{event.menu && event.menu.length > 0 && (
+						<div>
+							<dt><T en="Menu" ko="메뉴" /></dt>
+							<dd>
+								<ul class="event-agenda">
+									{event.menu.map((item) => (
+										<li>
+											<span class="event-agenda-time">{item.price}</span>
+											<T en={item.en} ko={item.ko ?? item.en} />
+										</li>
+									))}
+								</ul>
+							</dd>
+						</div>
+					)}
 				</dl>
 				{(event.note || event.note_ko) && <T as="p" class="event-note" en={event.note ?? event.note_ko} ko={event.note_ko ?? event.note} />}
 				<div class="event-actions">
