@@ -371,7 +371,9 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .thead span:nth-child(2) { text-align: left; padding-left: 26px; }
 .row { background: #fff; color: #1b1b1b; height: 168px; border-radius: 6px; font-size: 40px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 .rank { font-size: 110px; font-weight: 700; }
-.trophy { font-size: 92px; font-family: "Noto Color Emoji", sans-serif; }
+.trophy { display: block; font-size: 88px; line-height: 1; font-family: "Noto Color Emoji", sans-serif; }
+/* The rank cell centres whatever it holds — the trophy emoji sat low on the text baseline. */
+.row .rank { display: flex; align-items: center; justify-content: center; height: 100%; }
 .teamcell { display: flex; align-items: center; gap: 20px; text-align: left; padding-left: 4px; }
 .teamcell .bar { height: 74px; width: 9px; }
 .teamcell b { display: block; font-size: 46px; font-weight: 700; line-height: 1.15; }
