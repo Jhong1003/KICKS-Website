@@ -779,7 +779,7 @@ club posts only the **final** report (cover, final table, "Title Race" —
 cumulative points by week from `standings_history.json`, with the final week's
 3-point band — and player stats); a mid-league week still renders the weekly
 set (cover, match results, table, stats). The look is the club's L1 post design
-rebuilt (Antonio for Latin text, Noto Sans CJK KR / Apple SD Gothic for Hangul,
+rebuilt (Antonio for Latin text, Noto Sans KR embedded as a 2,350-syllable subset for Hangul — so CI needs no font packages —
 white panels on a darkened pitch photo, the league's team colours as the cover
 rule). It reads the committed `src/data/*.json`, so run it after the data
 update. Not part of the site build; nothing under `report/` is deployed.

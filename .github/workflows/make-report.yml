@@ -32,6 +32,10 @@ jobs:
   draw:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    # A normal run takes about two minutes. One hung in the apt/Playwright
+    # install for 15+ minutes and held the queue (cancel-in-progress is off),
+    # so give up early instead and let the next run take over.
+    timeout-minutes: 12
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -43,15 +47,17 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install Playwright Chromium and Korean / emoji fonts
+      # No apt: the fonts are embedded in the slides (report/assets), and the
+      # runner already has Chromium's libraries and colour emoji. apt from the
+      # Azure mirror once crawled for 15+ minutes and held the queue.
+      - name: Install Playwright Chromium
+        timeout-minutes: 6
         run: |
-          sudo apt-get update -q
-          sudo apt-get install -y -q fonts-noto-cjk fonts-noto-color-emoji
-          npm install --no-save --no-package-lock playwright@1.49.1
-          npx playwright install --with-deps chromium
+          npm install -g playwright@1.49.1
+          npx -y playwright@1.49.1 install chromium
 
       - name: Draw the slides
-        run: node scripts/make_report.mjs --all
+        run: NODE_PATH="$(npm root -g)" node scripts/make_report.mjs --all
 
       - name: Commit and push if anything changed
         run: |

@@ -2,7 +2,7 @@
 	"FA26-L2": {
 		"1": {
 			"final": false,
-			"hash": "66ff5424dcc126ad",
+			"hash": "fcef79c838131ac4",
 			"slides": [
 				"/report/FA26-L2/W01/1-cover.jpg",
 				"/report/FA26-L2/W01/2-results.jpg",
@@ -12,7 +12,7 @@
 		},
 		"2": {
 			"final": false,
-			"hash": "7c67e47f8ae094ad",
+			"hash": "8205671db0db96ff",
 			"slides": [
 				"/report/FA26-L2/W02/1-cover.jpg",
 				"/report/FA26-L2/W02/2-results.jpg",
@@ -22,7 +22,7 @@
 		},
 		"3": {
 			"final": false,
-			"hash": "d20768ee126035de",
+			"hash": "0570daee2c8897cf",
 			"slides": [
 				"/report/FA26-L2/W03/1-cover.jpg",
 				"/report/FA26-L2/W03/2-results.jpg",
@@ -32,7 +32,7 @@
 		},
 		"4": {
 			"final": true,
-			"hash": "f0bc687c702787e3",
+			"hash": "00ce8bf8530a7ddf",
 			"slides": [
 				"/report/FA26-L2/W04/1-cover.jpg",
 				"/report/FA26-L2/W04/2-table.jpg",
