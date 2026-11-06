@@ -93,7 +93,7 @@ const teamMatches = (matchesData as MatchRecord[])
 		const scored = match.home_score !== null && match.away_score !== null;
 		const ours = scored ? (home ? match.home_score! : match.away_score!) : null;
 		const theirs = scored ? (home ? match.away_score! : match.home_score!) : null;
-		const result = ours === null || theirs === null ? null : ours > theirs ? "W" : ours < theirs ? "L" : "D";
+		const result: "W" | "L" | "D" | null = ours === null || theirs === null ? null : ours > theirs ? "W" : ours < theirs ? "L" : "D";
 		return { ...match, opponentId, ours, theirs, result };
 	})
 	.sort((a, b) => a.week - b.week || a.round - b.round || a.match_id.localeCompare(b.match_id));

@@ -32,7 +32,7 @@ const latest = forecastWeek && {
 // Said once, here, while fewer than half the league's matches are played —
 // Title Chances runs the same model, and two copies of the warning next to
 // each other was most of what made this part of the page feel heavy.
-const leagueFixtures = (matchesData as Fixture[]).filter((fixture) => fixture.league === league.id);
+const leagueFixtures = matchesData.filter((fixture) => fixture.league === league.id);
 const played = leagueFixtures.filter((fixture) => fixture.status === "completed").length;
 const smallSample = played > 0 && played * 2 < leagueFixtures.length;
 

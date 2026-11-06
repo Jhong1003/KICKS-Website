@@ -11,10 +11,12 @@
 // `as` picks the wrapping element (span by default); use a block element
 // like "p" or "li" when the text is a whole paragraph, so each language
 // version is a real paragraph instead of a span inside one.
+import type { HTMLTag } from "astro/types";
+
 interface Props {
 	en?: string;
 	ko?: string;
-	as?: string;
+	as?: HTMLTag;
 	class?: string;
 }
 

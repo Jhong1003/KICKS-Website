@@ -19,6 +19,7 @@ import matchesData from "../data/matches.json";
 import goalEventsData from "../data/goal_events.json";
 import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";
 import { formatShortDate } from "../lib/i18n";
+import { albums } from "../lib/gallery";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
 import { latestLeague, currentLeague, getTeamName } from "../lib/leagues";
 import { halloweenFinal } from "../lib/season-theme";
@@ -28,6 +29,7 @@ import { getLeagueFinale } from "../lib/finale";
 import { buildGoalCountdown, isCelebratingMilestone, milestoneScorer, type MatchScore, type MilestoneGoalEvent } from "../lib/goals";
 
 const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
+const recentAlbums = albums.slice(0, 3);
 // Transfers only make sense within one league (teams are reshuffled between
 // leagues), so the banner is tied to the league named in transfer-news.json and
 // goes away by itself once a newer league becomes the latest.
@@ -271,6 +273,34 @@ const titleFavourite = latestTitle
 			<StandingsTable rows={standings} />
 			<a class="section-link" href={`/league/${latestLeague.id}/`}><T en="View full league page →" ko="리그 페이지 전체 보기 →" /></a>
 		</section>
+		{recentAlbums.length > 0 && (
+			<section class="content-section" aria-labelledby="recent-photos-title">
+				<p class="section-label"><T en="LATEST PHOTOS" ko="최근 사진" /></p>
+				<h2 id="recent-photos-title"><T en="Moments together" ko="함께한 순간들" /></h2>
+				<div class="album-grid">
+					{recentAlbums.map((album) => (
+						<a class="album-card" href={`/gallery/${album.id}/`}>
+							<span class="album-cover">
+								<Image src={album.cover.src} alt="" width={640} loading="lazy" />
+							</span>
+							<span class="album-info">
+								<span class="album-title"><T en={album.title} ko={album.titleKo} /></span>
+								<span class="album-meta">
+									{album.date && (
+										<>
+											<time datetime={album.date}><T en={formatShortDate(album.date, "en")} ko={formatShortDate(album.date, "ko")} /></time>
+											<span aria-hidden="true"> · </span>
+										</>
+									)}
+									<T en={`${album.images.length} photos`} ko={`사진 ${album.images.length}장`} />
+								</span>
+							</span>
+						</a>
+					))}
+				</div>
+				<a class="section-link" href="/gallery/"><T en="View all photos →" ko="사진 전체 보기 →" /></a>
+			</section>
+		)}
 	</main>
 </BaseLayout>
 
