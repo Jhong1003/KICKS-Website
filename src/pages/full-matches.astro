@@ -154,14 +154,14 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		togglePasswordButton.setAttribute("aria-label", showing ? "Show password" : "Hide password");
 	});
 
-	function base64ToBytes(b64: string): Uint8Array {
+	function base64ToBytes(b64: string): Uint8Array<ArrayBuffer> {
 		const binary = atob(b64);
 		const bytes = new Uint8Array(binary.length);
 		for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 		return bytes;
 	}
 
-	async function deriveKey(password: string, salt: Uint8Array, iterations: number): Promise<CryptoKey> {
+	async function deriveKey(password: string, salt: Uint8Array<ArrayBuffer>, iterations: number): Promise<CryptoKey> {
 		const keyMaterial = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, [
 			"deriveKey",
 		]);

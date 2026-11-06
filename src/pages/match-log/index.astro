@@ -233,7 +233,7 @@ const data = {
 					match.away,
 					log.state === "done" ? 1 : 0,
 					[...log.goals].sort((x, y) => x.minute - y.minute).map((g) => [g.team === match.home ? 0 : 1, g.scorer, g.assist ?? "", g.own ? 1 : 0, g.minute]),
-				];
+				] as const;
 			}),
 		] as const;
 		const bytes = new TextEncoder().encode(JSON.stringify(payload));

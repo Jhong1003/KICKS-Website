@@ -4,23 +4,48 @@ import T from "../components/T.astro";
 
 const applications = [
 	{
-		title: "Player Application",
-		titleKo: "선수 지원",
-		description: "Join a team and compete in our weekly league. Some prior game experience is recommended.",
-		descriptionKo: "팀에 소속되어 매주 열리는 리그에서 함께 뛰어요. 어느 정도 경기 경험이 있으면 좋아요.",
+		title: "SP27 Player Application",
+		titleKo: "SP27 선수 지원",
+		status: "Applications open · Spring 2027",
+		statusKo: "2027 봄학기 선수 모집 중",
+		description: "We're looking for people with soccer or futsal game experience who enjoy competing alongside their teammates.",
+		descriptionKo: "축구·풋살 경기 경험이 있고, 팀원들과 함께 경쟁하는 재미를 즐기는 분을 기다립니다.",
 		href: "https://docs.google.com/forms/d/e/1FAIpQLSeAsTpI1HfyPwalSO6fJGyN9qXU2k6ALMtHRKj8RfnM89bzqQ/viewform",
 	},
 	{
 		title: "Manager Application",
 		titleKo: "매니저 지원",
+		status: "Applications always open",
+		statusKo: "상시 모집",
 		description: "Help run the club behind the scenes: match operations, stats, media, and events.\nAnyone who wants to help KICKS grow is welcome.",
 		descriptionKo: "경기 운영, 기록, 미디어, 이벤트 등 동아리를 뒤에서 함께 운영해요. KICKS를 함께 키워가고 싶은 분이라면 누구든 환영해요.",
 		href: "https://docs.google.com/forms/d/e/1FAIpQLSe41sRKsCnZyOgq9njgD-TwpBY8TLlDSh8JDZ4_Hz_VF-yqaA/viewform",
 	},
 ];
+
+const faqs = [
+	{
+		question: "When do you play?",
+		questionKo: "정기 활동은 언제 하나요?",
+		answer: "Our regular sessions are on Saturdays, 4–6 PM.",
+		answerKo: "정기 활동은 매주 토요일 오후 4–6시입니다.",
+	},
+	{
+		question: "How much are membership dues?",
+		questionKo: "회비는 얼마인가요?",
+		answer: "Membership dues will be announced at the start-of-semester General Meeting (GM).",
+		answerKo: "회비는 학기 초 제너럴 미팅(GM)에서 안내할 예정입니다.",
+	},
+	{
+		question: "Can I join during the semester?",
+		questionKo: "학기 중에도 가입할 수 있나요?",
+		answer: "Players are recruited before the semester. During the semester, players may join from the waitlist when a spot opens up. Manager applications are welcome year-round.",
+		answerKo: "선수는 학기 시작 전 모집하며, 학기 중에는 결원이 생길 경우 대기명단을 통해 합류를 안내합니다. 매니저는 학기 중에도 언제든 지원할 수 있어요.",
+	},
+];
 ---
 
-<BaseLayout title="Join | KICKS" description="Apply to join KICKS as a player or manager.">
+<BaseLayout title="Join | KICKS" description="SP27 player applications are open. Manager applications are welcome year-round. Learn about our schedule, dues, and how to join KICKS.">
 	<main>
 		<section class="content-section" aria-labelledby="join-title">
 			<p class="section-label"><T en="JOIN KICKS" ko="KICKS 가입" /></p>
@@ -37,6 +62,7 @@ const applications = [
 					applications.map((application) => (
 						<div class="cta-card">
 							<T class="cta-card-title" en={application.title} ko={application.titleKo} />
+							<T as="p" class="application-status" en={application.status} ko={application.statusKo} />
 							<T as="p" class="cta-card-description" en={application.description} ko={application.descriptionKo} />
 							<a class="button-primary" href={application.href} target="_blank" rel="noopener noreferrer">
 								<T en="Apply" ko="지원하기" />
@@ -45,6 +71,28 @@ const applications = [
 					))
 				}
 			</div>
+
+			<section class="join-faq" aria-labelledby="join-faq-title">
+				<h2 id="join-faq-title"><T en="Before you apply" ko="지원 전 알아두세요" /></h2>
+				<dl>
+					{faqs.map((faq) => (
+						<div class="join-faq-item">
+							<dt><T en={faq.question} ko={faq.questionKo} /></dt>
+							<dd><T en={faq.answer} ko={faq.answerKo} /></dd>
+						</div>
+					))}
+				</dl>
+			</section>
 		</section>
 	</main>
 </BaseLayout>
+
+<style>
+	.application-status { margin: 0; font-size: 0.85rem; font-weight: 600; }
+	.join-faq { margin-top: 48px; max-width: 760px; }
+	.join-faq h2 { font-size: 1.5rem; }
+	.join-faq dl { margin: 24px 0 0; }
+	.join-faq-item { padding: 20px 0; border-top: 1px solid var(--color-sage); }
+	.join-faq dt { font-weight: 600; }
+	.join-faq dd { margin: 8px 0 0; line-height: 1.7; }
+</style>
