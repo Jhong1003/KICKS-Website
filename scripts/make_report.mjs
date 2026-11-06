@@ -239,12 +239,19 @@ const stats = card(
 			<div class="sp-names">${spotlight.map((s) => `<span>${bar(s.color)}${esc(s.name)}</span>`).join("")}</div></div>`
 			: bestDefense.length
 				? `<div class="spotlight best-defense"><div class="sp-head"><b>BEST<br>DEFENSE</b><small class="ko-sub">${isFinal ? "리그 최소 실점 팀" : `${week}주차까지 최소 실점 팀`}</small></div>
-			<div class="bd-body">${bestDefense
-				.map(
-					(d) => `<div class="bd-team">${bar(d.team.color)}<b>${esc(d.team.name)}</b><span class="bd-ga"><b>${d.ga}</b>실점</span></div>
+			<div class="bd-body">${
+				// A tie (two teams on the same fewest) lists the teams side by side
+				// with no squads: two full squads don't fit the box, and picking one
+				// by some other tiebreak would hide a team that did just as well.
+				bestDefense.length > 1
+					? `<div class="bd-team bd-shared">${bestDefense.map((d) => `<span class="bd-chip">${bar(d.team.color)}<b>${esc(d.team.name)}</b></span>`).join("")}<span class="bd-ga"><b>${fewest}</b>실점 · 공동</span></div>`
+					: bestDefense
+							.map(
+								(d) => `<div class="bd-team">${bar(d.team.color)}<b>${esc(d.team.name)}</b><span class="bd-ga"><b>${d.ga}</b>실점</span></div>
 				<div class="bd-names">${nameRows(d.backs).map((row) => `<div>${row.map((n) => `<span>${esc(n)}</span>`).join("")}</div>`).join("")}</div>`,
-				)
-				.join("")}</div></div>`
+							)
+							.join("")
+			}</div></div>`
 				: ""
 	}${footer}`,
 );
@@ -401,6 +408,9 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .bd-team { display: flex; align-items: center; gap: 14px; }
 .bd-team > b { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 700; }
 .bd-team .bar { height: 40px; width: 8px; }
+.bd-shared { flex-wrap: wrap; gap: 14px 28px; }
+.bd-chip { display: inline-flex; align-items: center; gap: 14px; }
+.bd-chip b { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 38px; font-weight: 700; }
 .bd-ga { margin-left: auto; font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 30px; font-weight: 500; color: #ddd; }
 .best-defense .ko-sub { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 24px; font-weight: 500; letter-spacing: .02em; }
 .bd-ga b { font-family: Antonio, sans-serif; font-size: 52px; font-weight: 700; color: #fff; margin-right: 4px; }
