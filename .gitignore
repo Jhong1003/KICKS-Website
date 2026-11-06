@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# report slides (scripts/make_report.mjs output)
+report/out/
