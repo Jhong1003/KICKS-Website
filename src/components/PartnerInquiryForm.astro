@@ -1,13 +1,9 @@
 ---
 import T from "./T.astro";
-const nextUrl = new URL("/partners/thanks/", Astro.site).toString();
 ---
 
-<form class="inquiry-form" action="https://formsubmit.co/kicks.uiuc@gmail.com" method="POST">
-	<input type="hidden" name="_subject" value="KICKS · Partnership inquiry / 파트너십 문의" />
-	<input type="hidden" name="_next" value={nextUrl} />
-	<input type="hidden" name="_template" value="table" />
-	<input type="text" name="_honey" class="inquiry-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+<form class="inquiry-form" id="partner-inquiry" action="https://formspree.io/f/xvkkyerv" method="POST">
+	<input type="hidden" name="subject" value="KICKS · Partnership inquiry / 파트너십 문의" />
 	<div class="form-field">
 		<label for="brand-name"><T en="Brand Name" ko="브랜드명" /></label>
 		<input type="text" id="brand-name" name="brand-name" autocomplete="organization" maxlength="200" required />
@@ -15,7 +11,7 @@ const nextUrl = new URL("/partners/thanks/", Astro.site).toString();
 
 	<div class="form-field">
 		<label for="contact-name"><T en="Contact Person" ko="담당자 이름" /></label>
-		<input type="text" id="contact-name" name="contact-name" autocomplete="name" maxlength="100" required />
+		<input type="text" id="contact-name" name="name" autocomplete="name" maxlength="100" required />
 	</div>
 
 	<div class="form-field">
@@ -25,17 +21,60 @@ const nextUrl = new URL("/partners/thanks/", Astro.site).toString();
 
 	<div class="form-field">
 		<label for="proposal"><T en="Proposal Details" ko="제안 내용" /></label>
-		<textarea id="proposal" name="proposal" rows="5" maxlength="10000" required></textarea>
+		<textarea id="proposal" name="message" rows="5" maxlength="10000" required></textarea>
 	</div>
 
-	<T as="p" class="inquiry-note" en="Your contact details and message will be sent to KICKS through FormSubmit. You may be asked to complete a spam check after continuing." ko="입력한 연락처와 문의 내용은 FormSubmit을 통해 KICKS로 전달됩니다. 다음 화면에서 스팸 방지 확인이 진행될 수 있어요." />
-	<button class="form-submit" type="submit"><T en="Send Inquiry" ko="문의 보내기" /></button>
+	<T as="p" class="inquiry-note" en="Your contact details and message will be sent to KICKS through Formspree." ko="입력한 연락처와 문의 내용은 Formspree를 통해 KICKS로 전달됩니다." />
+	<button class="form-submit" type="submit"><span data-inquiry-idle><T en="Send Inquiry" ko="문의 보내기" /></span><span data-inquiry-sending hidden><T en="Sending…" ko="보내는 중…" /></span></button>
+	<div class="inquiry-note" role="status" aria-live="polite">
+		<p data-inquiry-success hidden><T en="Your inquiry has been submitted. We’ll reply to the email address you provided." ko="문의가 접수됐어요. 남겨주신 이메일로 답변드리겠습니다." /></p>
+		<p data-inquiry-error hidden><T en="We couldn’t confirm your submission. Your message is still here. Please try again later or email us directly below." ko="문의 접수를 확인하지 못했어요. 입력한 내용은 그대로 남아 있어요. 잠시 후 다시 시도하거나 아래 이메일로 직접 문의해주세요." /></p>
+	</div>
 </form>
 
 <p class="inquiry-note"><T en="Having trouble sending? Email us directly: " ko="전송이 안 되면 이메일로 직접 문의해주세요: " /><a href="mailto:kicks.uiuc@gmail.com">kicks.uiuc@gmail.com</a></p>
 
 <style>
-	.inquiry-honeypot { display: none; }
 	.inquiry-note { max-width: 680px; line-height: 1.7; font-size: 0.9rem; }
 	.inquiry-note a { text-decoration: underline; text-underline-offset: 3px; }
 </style>
+
+<script>
+ const form = document.querySelector<HTMLFormElement>("#partner-inquiry");
+ if (form) {
+  const submit = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+  const idle = form.querySelector<HTMLElement>("[data-inquiry-idle]")!;
+  const sending = form.querySelector<HTMLElement>("[data-inquiry-sending]")!;
+  const success = form.querySelector<HTMLElement>("[data-inquiry-success]")!;
+  const error = form.querySelector<HTMLElement>("[data-inquiry-error]")!;
+  form.addEventListener("submit", async (event) => {
+   event.preventDefault();
+   if (submit.disabled || !form.reportValidity()) return;
+   success.hidden = true;
+   error.hidden = true;
+   const data = new FormData(form);
+   submit.disabled = true;
+   idle.hidden = true;
+   sending.hidden = false;
+   form.setAttribute("aria-busy", "true");
+   const controller = new AbortController();
+   const timer = setTimeout(() => controller.abort(), 15000);
+   try {
+    const response = await fetch(form.action, {
+     method: "POST", body: data, headers: { Accept: "application/json" }, signal: controller.signal,
+    });
+    if (!response.ok) throw new Error("Submission not accepted");
+    form.reset();
+    success.hidden = false;
+   } catch {
+    error.hidden = false;
+   } finally {
+    clearTimeout(timer);
+    submit.disabled = false;
+    idle.hidden = false;
+    sending.hidden = true;
+    form.removeAttribute("aria-busy");
+   }
+  });
+ }
+</script>
