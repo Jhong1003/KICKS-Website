@@ -24,4 +24,17 @@ try {
  console.log('Menu closes on Escape, outside click, and nested link text; active league is marked');
  await page.evaluate(()=>scrollTo(0,450));await page.waitForTimeout(100);const galleryY=await page.evaluate(()=>scrollY);await page.locator('.album-card').first().evaluate(e=>e.click());await page.waitForURL(/\/gallery\/[^/?]+\//);await page.goBack();await page.waitForTimeout(200);assert.ok(Math.abs(await page.evaluate(()=>scrollY)-galleryY)<5);
  console.log('Gallery scroll survives album navigation');
+ await page.locator('.album-card').first().click();await page.waitForURL(/\/gallery\/[^/?]+\//);
+ const thumbnail=page.locator('.gallery-item').nth(3);await thumbnail.click();
+ assert.ok(await page.locator('.lightbox-close').evaluate(e=>e===document.activeElement));
+ for(const key of ['Tab','Tab','Tab','Tab','Shift+Tab','Shift+Tab','Shift+Tab','Shift+Tab']) {
+  await page.keyboard.press(key);
+  assert.ok(await page.evaluate(()=>document.getElementById('lightbox').contains(document.activeElement)),'Focus must stay inside the photo viewer');
+ }
+ const counter=await page.locator('.lightbox-counter').innerText();await page.keyboard.press('ArrowRight');await page.waitForTimeout(400);
+ assert.notEqual(await page.locator('.lightbox-counter').innerText(),counter);
+ await page.keyboard.press('Escape');await page.waitForTimeout(100);assert.ok(!await page.locator('#lightbox').isVisible());
+ assert.ok(await thumbnail.evaluate(e=>e===document.activeElement));
+ console.log('Photo viewer traps forward/reverse Tab and restores thumbnail focus');
+
 }finally{await browser?.close();server.close();}
