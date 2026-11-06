@@ -104,7 +104,7 @@ const cardData = {
 					as="p"
 					class="wrapped-lead wrapped-lead--strong"
 					en={`And you were out there for ${plural(data.games, "game")}.`}
-					ko={`그중 당신은 ${data.games}경기를 함께 뛰었어요.`}
+					ko={`그중 ${data.games}경기에 함께했어요.`}
 				/>
 				<T as="p" class="wrapped-hint" en="Tap to continue →" ko="탭해서 넘기기 →" />
 			</section>
@@ -132,7 +132,7 @@ const cardData = {
 
 			<!-- 3. Highlights -->
 			<section class="wrapped-slide">
-				<T as="p" class="wrapped-eyebrow" en="Your highlights" ko="당신의 하이라이트" />
+				<T as="p" class="wrapped-eyebrow" en="Your highlights" ko="나의 주요 활약" />
 				<ol class="wrapped-highlights">
 					{
 						data.highlights.map((highlight) => (
@@ -152,7 +152,7 @@ const cardData = {
 			{
 				best && (
 					<section class="wrapped-slide">
-						<T as="p" class="wrapped-eyebrow" en="Your best week" ko="당신의 최고의 주" />
+						<T as="p" class="wrapped-eyebrow" en="Your best week" ko="가장 빛났던 주" />
 						<T as="p" class="wrapped-hero" en={`Week ${best.week}`} ko={`${best.week}주차`} />
 						<T
 							as="p"
@@ -172,7 +172,7 @@ const cardData = {
 
 			<!-- 5. Style + badges -->
 			<section class="wrapped-slide">
-				<T as="p" class="wrapped-eyebrow" en="Your style" ko="당신의 스타일" />
+				<T as="p" class="wrapped-eyebrow" en="Your style" ko="나의 플레이 스타일" />
 				<p class="wrapped-hero wrapped-hero--tag">{section.play_style_tag}</p>
 				<T
 					as="p"
@@ -194,7 +194,7 @@ const cardData = {
 
 			<!-- 6. Team -->
 			<section class:list={["wrapped-slide", { "wrapped-slide--champion": data.team.champion }]}>
-				<T as="p" class="wrapped-eyebrow" en="Your team" ko="당신의 팀" />
+				<T as="p" class="wrapped-eyebrow" en="Your team" ko="함께한 팀" />
 				{
 					data.team.champion ? (
 						<>

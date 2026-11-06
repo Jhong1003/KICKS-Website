@@ -285,7 +285,7 @@ export function buildWrapped(player: PlayerProfile, section: PlayerLeagueSection
 				kind: "defense",
 			icon: "🧱",
 				title: { en: `${cleanSheets} clean sheets`, ko: `무실점 ${cleanSheets}경기` },
-				sub: { en: "kept by your team in the weeks you played", ko: "함께한 주에 팀이 기록" },
+				sub: { en: "kept by your team in the weeks you played", ko: "출석한 주에 팀이 기록한 무실점 경기예요." },
 				score: 58,
 			});
 		}
@@ -299,7 +299,7 @@ export function buildWrapped(player: PlayerProfile, section: PlayerLeagueSection
 			icon: "⏱️",
 			title: { en: "Delivered in the final week", ko: "가장 중요한 마지막 주에 해냈어요" },
 			sub: {
-				en: `${STAT_UNIT.attacking_points(pointsOf(finalWeek)).en} when a win was worth ${league.rules.final_win_points}`,
+				en: `${STAT_UNIT.attacking_points(pointsOf(finalWeek)).en} in the final week, with ${league.rules.final_win_points} points awarded per win.`,
 				ko: `승리가 ${league.rules.final_win_points}점인 ${league.rules.final_week}주차에 공격포인트 ${pointsOf(finalWeek)}개`,
 			},
 			score: 50 + pointsOf(finalWeek),
@@ -316,8 +316,8 @@ export function buildWrapped(player: PlayerProfile, section: PlayerLeagueSection
 			icon: "📈",
 				title: { en: "Heated up as the league went on", ko: "갈수록 뜨거워졌어요" },
 				sub: {
-					en: `Best week saved for last: ${STAT_UNIT.attacking_points(pointsOf(last)).en} in week ${last.week}`,
-					ko: `마지막으로 뛴 ${last.week}주차가 최고의 주 (공격포인트 ${pointsOf(last)}개)`,
+					en: `Your best performance came in your final week: ${STAT_UNIT.attacking_points(pointsOf(last)).en} in week ${last.week}`,
+					ko: `마지막으로 출전한 ${last.week}주차에 최고의 활약을 펼쳤어요. (공격포인트 ${pointsOf(last)}개)`,
 				},
 				score: 48,
 			});
@@ -332,7 +332,7 @@ export function buildWrapped(player: PlayerProfile, section: PlayerLeagueSection
 			icon: "🦾",
 			title:
 				joinedWeek === 1
-					? { en: `Every week, all ${weeks.length}`, ko: `${weeks.length}주 개근` }
+					? { en: `Played all ${weeks.length} weeks`, ko: `${weeks.length}주 개근` }
 					: { en: "Never missed a week since joining", ko: "합류한 뒤 한 주도 빠지지 않았어요" },
 			sub: { en: `${gamesPlayed} games played`, ko: `${gamesPlayed}경기 출전` },
 			score: 45,
@@ -448,7 +448,7 @@ export function buildWrapped(player: PlayerProfile, section: PlayerLeagueSection
 			kind: "team-week",
 			icon: "🔥",
 			title: { en: `Week ${week}: ${wins}W ${draws}D ${losses}L`, ko: `${week}주차 ${wins}승 ${draws}무 ${losses}패` },
-			sub: { en: "your team's best week with you on it", ko: "함께 뛴 주 중 팀 최고의 주" },
+			sub: { en: "your team's best week with you on it", ko: "출석한 주 중 팀 성적이 가장 좋았던 주예요." },
 			score: 25,
 		});
 	}

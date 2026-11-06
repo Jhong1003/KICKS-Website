@@ -288,7 +288,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 						<T
 							as="p"
 							class="about-description"
-							en={`The team's shape appears after ${MIN_MATCHES} matches (two weeks).`}
+							en={`The team style chart appears after ${MIN_MATCHES} matches (two weeks).`}
 							ko={`${MIN_MATCHES}경기(2주차)가 지나면 팀 스타일이 나타나요.`}
 						/>
 					)}
@@ -304,7 +304,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 						as="p"
 						class="about-description"
 						en={`Pairs who have combined for the most goals in this league — whichever way round the pass went. Shown once a team has ${DUO_MIN_TEAM_GOALS} assisted goals.`}
-						ko={`이번 리그에서 가장 많이 합작한 짝이에요. 누가 넣고 누가 줬는지는 가리지 않아요. 팀이 도움 받은 골 ${DUO_MIN_TEAM_GOALS}개를 넘기면 나타나요.`}
+						ko={`이번 리그에서 골과 도움을 가장 많이 합작한 듀오예요. 두 선수 중 누가 득점하고 도움을 줬는지와 관계없이 합산해요. 팀의 도움을 동반한 득점이 ${DUO_MIN_TEAM_GOALS}골 이상이면 표시돼요.`}
 					/>
 					<TeamDuos duos={duos} leagueId={league.id} color={color} />
 				</section>
@@ -367,7 +367,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 								<dl class="team-records">
 									{records.biggestWins.length > 0 && (
 										<div>
-											<dt><T en="Biggest win" ko="최다 점수차 승리" /></dt>
+											<dt><T en="Biggest win" ko="최다 점수 차 승리" /></dt>
 											<dd>
 												{records.biggestWins.map((match, index) => (
 													<span class="team-record-line">
@@ -390,7 +390,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 									)}
 									{records.longestUnbeaten > 1 && (
 										<div>
-											<dt><T en="Longest unbeaten run" ko="최다 연속 무패" /></dt>
+											<dt><T en="Longest unbeaten run" ko="최장 무패 기록" /></dt>
 											<dd><T en={`${records.longestUnbeaten} matches`} ko={`${records.longestUnbeaten}경기`} /></dd>
 										</div>
 									)}
@@ -426,7 +426,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 											</div>
 										))}
 								</dl>
-								<T as="p" class="team-panel-note" en="Only matches played for this team count" ko="이 팀에서 뛴 기록만 셉니다" />
+								<T as="p" class="team-panel-note" en="Only matches played for this team count" ko="이 팀 소속으로 뛴 기록만 반영해요." />
 							</div>
 						)}
 
@@ -444,7 +444,7 @@ const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 										</li>
 									))}
 								</ol>
-								<T as="p" class="team-panel-note" en="Published before each week's matches" ko="매주 경기 전에 미리 공개한 숫자예요" />
+								<T as="p" class="team-panel-note" en="Published before each week's matches" ko="각 주차 경기 전에 공개한 우승 확률이에요." />
 							</div>
 						)}
 					</div>

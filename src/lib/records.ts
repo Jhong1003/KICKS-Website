@@ -110,7 +110,7 @@ export function buildClubRecords(): ClubRecord[] {
 		records.push({
 			key: "biggest-win",
 			icon: "💥",
-			label: { en: "Biggest win", ko: "최다 점수차 승리" },
+			label: { en: "Biggest win", ko: "최다 점수 차 승리" },
 			value: margin.value,
 			unit: { en: margin.value === 1 ? "goal margin" : "goal margin", ko: "점차" },
 			holders: margin.items.map((m) => {

@@ -68,7 +68,7 @@ const pct = (p: number) => `${Math.round(p * 100)}%`;
 	history.length >= 2 && (
 		<>
 		<button class="week-race-link title-history-open" type="button" aria-haspopup="dialog" data-race-open={dialogId}>
-			<span aria-hidden="true">📈</span> <T en="Title chances by week" ko="주차별 변화 그래프 보기" /> →
+			<span aria-hidden="true">📈</span> <T en="Title chances by week" ko="주차별 우승 확률 보기" /> →
 		</button>
 		<ChartDialog id={dialogId} label="Title chances by week" labelKo="주차별 우승 확률">
 		<div class="title-history" aria-labelledby="title-history-title">

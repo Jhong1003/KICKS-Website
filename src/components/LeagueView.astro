@@ -201,7 +201,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 			<li>
 				<T
 					en={`Tiebreakers: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].en).join(" → ")}`}
-					ko={`동점일 때: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].ko).join(" → ")}`}
+					ko={`승점이 같을 때: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].ko).join(" → ")}`}
 				/>
 			</li>
 		</ul>
@@ -250,7 +250,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		{
 			leaderboard.length > 0 ? (
 				<>
-					<T as="p" class="about-description" en="Click a column header to sort." ko="열 제목을 누르면 정렬돼요." />
+					<T as="p" class="about-description" en="Click a column header to sort." ko="항목 제목을 누르면 해당 기록순으로 정렬돼요." />
 					<PlayerStatsTable players={leaderboard} leagueId={league.id} />
 				</>
 			) : (
