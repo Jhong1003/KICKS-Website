@@ -130,7 +130,12 @@ const bgRoot = join(ROOT, "report/backgrounds");
 const bgDir = existsSync(join(bgRoot, leagueId))
 	? join(bgRoot, leagueId)
 	: join(bgRoot, readdirSync(bgRoot).sort().at(-1));
-const bg = (slide) => dataUrl(join(bgDir, `${slide}.jpg`), "image/jpeg");
+// The race slide has no photo of its own: it takes the results photo, since a
+// final report shows the race where a weekly one shows the results.
+const bg = (slide) => {
+	const own = join(bgDir, `${slide}.jpg`);
+	return dataUrl(existsSync(own) ? own : join(bgDir, "results.jpg"), "image/jpeg");
+};
 const font = dataUrl(join(ROOT, "report/assets/Antonio.ttf"), "font/ttf");
 const mark = dataUrl(join(ROOT, "report/assets/kicks-mark.png"), "image/png");
 
@@ -215,6 +220,55 @@ const stats = card(
 	}${footer}`,
 );
 
+// ---- points race (final report) ---------------------------------------------
+// Cumulative points after each week, from standings_history (official), drawn
+// from a zero start so the climb reads. End labels are pushed apart so a 1-point
+// finish (L2: 31 vs 30) never prints one label over another.
+function raceSvg() {
+	const W = 900, H = 720, L = 90, R = 250, T = 40, B = 80;
+	const weeks = Array.from({ length: week }, (_, i) => i + 1);
+	const lines = league.teams.map((t) => ({
+		t,
+		pts: [0, ...weeks.map((w) => history.find((h) => h.league === leagueId && h.week === w && h.team_id === t.team_id)?.points ?? 0)],
+	}));
+	const maxP = Math.max(...lines.flatMap((l) => l.pts));
+	const step = maxP > 40 ? 10 : 5;
+	const top = Math.ceil(maxP / step) * step;
+	const x = (i) => L + (i * (W - L - R)) / week;
+	const y = (p) => T + (H - T - B) * (1 - p / top);
+	let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">`;
+	const fw = league.rules.final_week;
+	if (fw && fw <= week) {
+		svg += `<rect x="${x(fw - 1)}" y="${T}" width="${x(week) - x(fw - 1)}" height="${H - T - B}" fill="#f4e7bf"/>`;
+		svg += `<text x="${(x(fw - 1) + x(week)) / 2}" y="${T + 34}" class="band">WIN = ${league.rules.final_win_points} PTS</text>`;
+	}
+	for (let p = 0; p <= top; p += step)
+		svg += `<line x1="${L}" x2="${W - R}" y1="${y(p)}" y2="${y(p)}" class="grid"/><text x="${L - 18}" y="${y(p) + 9}" class="tick" text-anchor="end">${p}</text>`;
+	["START", ...weeks.map((w) => `W${w}`)].forEach((label, i) => (svg += `<text x="${x(i)}" y="${H - B + 48}" class="tick" text-anchor="middle">${label}</text>`));
+	for (const { t, pts } of lines) {
+		svg += `<polyline points="${pts.map((p, i) => `${x(i)},${y(p)}`).join(" ")}" fill="none" stroke="${t.color}" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>`;
+		pts.forEach((p, i) => i && (svg += `<circle cx="${x(i)}" cy="${y(p)}" r="9" fill="#fff" stroke="${t.color}" stroke-width="6"/>`));
+	}
+	const ends = lines.map(({ t, pts }) => ({ t, p: pts.at(-1), ly: y(pts.at(-1)) })).sort((a, b) => a.ly - b.ly);
+	for (let i = 1; i < ends.length; i++) if (ends[i].ly - ends[i - 1].ly < 62) ends[i].ly = ends[i - 1].ly + 62;
+	for (const e of ends) {
+		const ex = x(week) + 26;
+		svg += `<text x="${ex}" y="${e.ly + 4}" class="endpts" fill="${e.t.color}">${e.p}</text><text x="${ex + 70}" y="${e.ly + 2}" class="endname">${esc(e.t.name)}</text>`;
+	}
+	return svg + "</svg>";
+}
+const race = card(
+	"race",
+	`<h1 class="title">HOW IT UNFOLDED</h1><p class="sub">POINTS BY WEEK</p>
+	<div class="race-panel">${raceSvg()}</div>${footer}`,
+);
+
+// A final report is the season recap: cover, final table, how it unfolded,
+// player stats. The last week's nine scores belong to a weekly post, not here.
+const slides = isFinal
+	? [{ name: "1-cover", html: cover }, { name: "2-table", html: tableCard }, { name: "3-race", html: race }, { name: "4-stats", html: stats }]
+	: [{ name: "1-cover", html: cover }, { name: "2-results", html: results }, { name: "3-table", html: tableCard }, { name: "4-stats", html: stats }];
+
 const html = `<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>
 @font-face { font-family: Antonio; src: url(${font}) format("truetype"); font-weight: 100 700; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -225,6 +279,7 @@ body { background: #111; display: grid; gap: 40px; padding: 40px; justify-conten
 	--wash-cover: linear-gradient(rgba(6,14,6,.30), rgba(6,14,6,.45)), var(--shade);
 	--wash-results: linear-gradient(rgba(6,14,6,.40), rgba(6,14,6,.55)), var(--shade);
 	--wash-table: linear-gradient(rgba(6,14,6,.40), rgba(6,14,6,.55)), var(--shade);
+	--wash-race: linear-gradient(rgba(6,14,6,.40), rgba(6,14,6,.55)), var(--shade);
 	--wash-stats: linear-gradient(rgba(6,14,6,.42), rgba(6,14,6,.60)), var(--shade); }
 .mark { position: absolute; top: 42px; right: 46px; height: 66px; }
 .ko, .side, .teamcell b, .lname, .sp-names span { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; }
@@ -289,7 +344,15 @@ footer { position: absolute; left: 0; right: 0; bottom: 52px; display: grid; gap
 .sp-head small { display: block; margin-top: 10px; font-size: 18px; font-weight: 600; letter-spacing: .14em; color: #ccc; }
 .sp-names { display: flex; justify-content: space-around; }
 .sp-names span { display: flex; align-items: center; gap: 12px; font-size: 32px; font-weight: 500; }
-</style></head><body>${cover}${results}${tableCard}${stats}</body></html>`;
+.race .title { font-size: 150px; }
+.race-panel { width: 960px; margin: 64px auto 0; padding: 40px 30px 20px; background: #fff; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.race-panel svg { display: block; width: 900px; height: 720px; }
+.race-panel .grid { stroke: #e6e6e6; stroke-width: 2; }
+.race-panel .tick { font-family: Antonio, sans-serif; font-size: 28px; font-weight: 600; fill: #777; letter-spacing: .06em; }
+.race-panel .band { font-family: Antonio, sans-serif; font-size: 24px; font-weight: 700; fill: #9a7a1c; letter-spacing: .14em; text-anchor: middle; }
+.race-panel .endpts { font-family: Antonio, sans-serif; font-size: 52px; font-weight: 700; dominant-baseline: middle; }
+.race-panel .endname { font-family: "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; font-size: 30px; font-weight: 700; fill: #1b1b1b; dominant-baseline: middle; }
+</style></head><body>${slides.map((s) => s.html).join("")}</body></html>`;
 
 const outDir = join(ROOT, "report/out", `${leagueId}-W${ww}`);
 mkdirSync(outDir, { recursive: true });
@@ -305,7 +368,7 @@ const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1200, height: 1500 }, deviceScaleFactor: 1 });
 await page.setContent(html, { waitUntil: "load" });
 await page.evaluate(() => document.fonts.ready);
-const names = ["1-cover", "2-results", "3-table", "4-stats"];
+const names = slides.map((s) => s.name);
 const cards = await page.$$(".card");
 for (const [i, el] of cards.entries()) {
 	const file = join(outDir, `${names[i]}.png`);

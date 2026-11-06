@@ -757,8 +757,11 @@ change.
 ### Instagram league report
 
 `node scripts/make_report.mjs --league FA26-L2 --week 4` (no `--week` = latest
-scored week) writes four 1080×1350 PNGs to `report/out/<league>-W<nn>/`:
-cover, match results, league table, player stats — the club's L1 post design
+scored week) writes four 1080×1350 PNGs to `report/out/<league>-W<nn>/`. The
+club posts only the **final** report (cover, final table, "How it unfolded" —
+cumulative points by week from `standings_history.json`, with the final week's
+3-point band — and player stats); a mid-league week still renders the weekly
+set (cover, match results, table, stats). The look is the club's L1 post design
 rebuilt (Antonio for Latin text, Noto Sans CJK KR / Apple SD Gothic for Hangul,
 white panels on a darkened pitch photo, the league's team colours as the cover
 rule). It reads the committed `src/data/*.json`, so run it after the data
