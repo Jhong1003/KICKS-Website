@@ -69,10 +69,12 @@
 
 ## 파트너 문의 이메일
 
-파트너 문의는 `src/components/PartnerInquiryForm.astro`에서 FormSubmit을 통해 `kicks.uiuc@gmail.com`으로 POST 전송합니다. 별도 API 키는 사용하지 않습니다. 문의자 이메일은 `email` 필드로 보내므로 수신한 문의 메일에서 답장할 수 있습니다.
+파트너 문의는 `src/components/PartnerInquiryForm.astro`에서 Formspree의 `https://formspree.io/f/xvkkyerv`로 POST 전송합니다. 수신 주소는 Formspree 대시보드에서 `kicks.uiuc@gmail.com`으로 관리합니다. 폼 주소는 공개 연결 주소이며 비밀 API 키가 아닙니다.
 
-**최초 활성화:** 배포된 `/partners/`에서 직접 테스트 문의를 한 번 제출하고, 수신함(스팸함 포함)에 도착한 FormSubmit 활성화 메일에서 확인 링크를 누릅니다. 활성화 전에는 정상 수신이 완료되지 않습니다. 활성화 후 다시 테스트해 실제 수신과 답장 주소를 확인해주세요. 이 작업은 이메일 소유자가 해야 합니다.
+문의자 이메일은 `email`, 담당자는 `name`, 문의 내용은 `message` 필드로 보냅니다. 메일에서 문의자에게 답장할 수 있습니다. 전송 중에는 버튼을 비활성화합니다. 성공 응답을 받으면 사이트 안에서 접수 안내를 표시하고 입력을 비웁니다. 실패·15초 시간 초과 시 입력 내용을 유지하며 재시도와 직접 이메일 문의를 안내합니다. 시간 초과는 실제 접수 여부가 불분명할 수 있으므로 운영자는 대시보드에서도 확인해주세요.
 
-성공 후 `/partners/thanks/`로 돌아옵니다. 스팸 방지 확인은 서비스 기본 설정을 유지합니다. 전송 장애 시에는 페이지에 표시된 이메일로 직접 문의할 수 있습니다. 수신 주소를 바꾸면 form의 `action`, 직접 문의 이메일 링크, 이 안내를 함께 변경하고 새 주소의 활성화도 확인합니다.
+JavaScript가 꺼져 있으면 기본 HTML 폼으로 전송하고 Formspree 기본 안내 화면을 사용합니다. FormSubmit 전용 활성화 절차는 더 이상 사용하지 않습니다. 스팸 방지·허용 도메인·수신 주소는 Formspree 설정에서 관리합니다. 수신 주소 변경 시 직접 이메일 링크도 함께 수정해주세요.
 
-서비스 안내: https://formsubmit.co/documentation · https://formsubmit.co/help
+배포 후 테스트 문의를 보내 Formspree의 **Submissions**와 Gmail(스팸함 포함)에서 실제 수신을 확인합니다. 무료 플랜 한도는 Formspree 대시보드에서 확인해주세요.
+
+서비스 안내: https://help.formspree.io/articles/building-your-form/submit-forms-with-javascript-ajax/
