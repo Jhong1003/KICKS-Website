@@ -115,11 +115,18 @@ const columns = [
 		.standings-table th:nth-child(2), .standings-table td:nth-child(2) {
 			position: sticky;
 			left: 56px;
-			min-width: 135px;
+			/* Just wide enough for the longest team name, so the divider sits by
+			   the names rather than out by the points. */
+			width: 1%;
+			min-width: 0;
+			white-space: nowrap;
+			padding-right: 16px;
 			background: var(--color-background);
 			z-index: 2;
 			box-shadow: 2px 0 0 var(--color-sage);
 		}
 		.standings-table tr.standings-champion td:nth-child(-n+2) { background: #f6edcd; }
+		/* A little room between the divider and the points column. */
+		.standings-table th:nth-child(3), .standings-table td:nth-child(3) { padding-left: 18px; }
 	}
 </style>
