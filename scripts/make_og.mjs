@@ -12,7 +12,7 @@
 // entry keeps the site-wide /og-image.png.
 //
 // Run by the "Make Report Slides" workflow after every data update, same
-// Playwright and fonts as scripts/make_report.mjs. A card is redrawn only when
+// Playwright and fonts as scripts/make_report.mjs (club-green background, no photo). A card is redrawn only when
 // its HTML changed, so a quiet data run makes no commit.
 //
 // Player card = the player's newest league (the section /players/<id>/ opens
@@ -51,13 +51,9 @@ const antonio = dataUrl(join(ROOT, "report/assets/Antonio.ttf"), "font/ttf");
 const montserrat = dataUrl(join(ROOT, "report/assets/Montserrat.ttf"), "font/ttf");
 const kr = dataUrl(join(ROOT, "report/assets/NotoSansKR-subset.ttf"), "font/ttf");
 const ball = dataUrl(join(ROOT, "report/assets/kicks-ball.png"), "image/png");
-const bgRoot = join(ROOT, "report/backgrounds");
-const bgFor = (leagueId) => {
-	const dir = existsSync(join(bgRoot, leagueId)) ? join(bgRoot, leagueId) : join(bgRoot, readdirSync(bgRoot).sort().at(-1));
-	return dataUrl(join(dir, "cover.jpg"), "image/jpeg");
-};
-const bgCache = new Map();
-const bg = (leagueId) => bgCache.get(leagueId) ?? bgCache.set(leagueId, bgFor(leagueId)).get(leagueId);
+// Background: the club green of the site-wide preview (public/og-image.png), so a
+// shared player or league link looks like the rest of KICKS — no photo.
+const GREEN = "#3f5128";
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const leagueById = new Map(leagues.map((l) => [l.id, l]));
@@ -88,7 +84,6 @@ function playerCard(p) {
 	const badges = [...s.badges].sort((a, b) => badgeRank(a) - badgeRank(b)).map((k) => BADGES[k]?.icon).filter(Boolean).slice(0, 6);
 	const position = p.positions?.[0];
 	return `<section class="card player">
-		<div class="shade"></div>
 		<div class="stripe" style="background:${team.color}"></div>
 		${avatar}
 		<div class="info">
@@ -116,7 +111,6 @@ function leagueCard(league) {
 	const status = done ? "FINAL STANDINGS" : `AFTER WEEK ${week} OF ${league.rules.weeks}`;
 	const champion = done ? teamOf(league.id, rows[0].team_id) : null;
 	return `<section class="card league">
-		<div class="shade"></div>
 		<div class="lhead">
 			<div class="kicker">KICKS LEAGUE</div>
 			<h1>${esc(league.id)}</h1>
@@ -140,15 +134,14 @@ const css = `
 @font-face { font-family: "KICKS KR"; src: url(${kr}) format("truetype"); font-weight: 100 900; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #222; }
-.card { position: relative; width: 1200px; height: 630px; overflow: hidden; color: #fff; background-size: cover; background-position: center;
+.card { position: relative; width: 1200px; height: 630px; overflow: hidden; color: #fff; background: ${GREEN};
 	font-family: "KICKS KR", "Noto Sans CJK KR", "Apple SD Gothic Neo", sans-serif; }
-.shade { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(8,12,9,.92) 0%, rgba(8,12,9,.82) 55%, rgba(8,12,9,.55) 100%); }
-.card > *:not(.shade) { position: relative; }
-.kicker { font-family: Antonio, sans-serif; font-size: 30px; font-weight: 700; letter-spacing: .18em; color: #c9d4c9; }
+.card > * { position: relative; }
+.kicker { font-family: Antonio, sans-serif; font-size: 30px; font-weight: 700; letter-spacing: .18em; color: #d6dfcf; }
 .brand { position: absolute !important; left: 64px; bottom: 44px; display: flex; align-items: center; gap: 14px; }
 .brand img { width: 46px; height: 46px; }
 .brand span { font-family: Montserrat, sans-serif; font-size: 32px; font-weight: 900; letter-spacing: .04em; }
-.brand small { font-family: Montserrat, sans-serif; font-size: 22px; font-weight: 600; color: #b9c3b9; margin-left: 10px; }
+.brand small { font-family: Montserrat, sans-serif; font-size: 22px; font-weight: 600; color: #c3cdbb; margin-left: 10px; }
 /* player */
 .player .brand { left: auto; right: 84px; }
 .player .stripe { position: absolute !important; left: 0; top: 0; bottom: 0; width: 18px; }
@@ -162,8 +155,8 @@ body { background: #222; }
 .player .pos, .player .tag { font-family: Antonio, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: .1em; padding: 4px 14px; border-radius: 8px; background: rgba(255,255,255,.14); }
 .player .stats { display: flex; gap: 56px; margin-top: 30px; }
 .player .stats b { display: block; font-family: Antonio, sans-serif; font-size: 96px; font-weight: 700; line-height: 1; }
-.player .stats em { font-style: normal; font-size: 52px; color: #b9c3b9; }
-.player .stats small { display: block; margin-top: 6px; font-family: Antonio, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: .2em; color: #c9d4c9; }
+.player .stats em { font-style: normal; font-size: 52px; color: #c3cdbb; }
+.player .stats small { display: block; margin-top: 6px; font-family: Antonio, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: .2em; color: #d6dfcf; }
 .player .badges { display: flex; gap: 12px; margin-top: 26px; font-size: 44px; }
 /* league */
 .league .lhead { position: absolute !important; left: 64px; top: 58px; width: 440px; }
@@ -193,7 +186,7 @@ for (const l of leagues) {
 }
 const pageHtml = (cards) =>
 	`<!doctype html><html><head><meta charset="utf-8"><style>${css}</style></head><body>${cards
-		.map((j) => j.html.replace('class="card', `style="background-image:url(${bg(j.league)})" class="card`))
+		.map((j) => j.html)
 		.join("")}</body></html>`;
 
 if (process.argv.includes("--html-only")) {

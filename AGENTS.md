@@ -811,7 +811,7 @@ What KakaoTalk, iMessage etc. show when a link is shared. Player pages
 (`/players/<id>/`) and league pages (`/league/<id>/`, and `/league/` for the
 current league) get their own 1200×630 card; every other page keeps
 `public/og-image.png`. [scripts/make_og.mjs](scripts/make_og.mjs) draws them with
-the report's fonts, photos (`report/backgrounds/<league>/cover.jpg`) and
+the report's fonts on the club green of `og-image.png` (`#3f5128`, no photo) and
 Playwright, as `public/og/players/<id>.jpg` and `public/og/league/<league>.jpg`,
 and writes `src/data/og.json` (a hash per card — never hand-edit). Pages pick a
 card through [src/lib/og.ts](src/lib/og.ts) → `ogImage` on `BaseLayout`, with
