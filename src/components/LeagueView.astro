@@ -13,10 +13,16 @@ import leaderboardData from "../data/player_leaderboard.json";
 import profilesData from "../data/player_profiles.json";
 import goalEventsData from "../data/goal_events.json";
 import historyData from "../data/standings_history.json";
+import updatesData from "../data/data-updates.json";
 import { leagues, getTeamColor, getTeamName, type League } from "../lib/leagues";
 import { matchTimelines, type TimelineGoal } from "../lib/match-timeline";
 import { pointsRaceDialogId } from "../lib/points-race";
 import { isRowShown } from "../lib/finale";
+
+const updates = updatesData as Record<string, { updated_at: string }>;
+const updateLabel = (iso: string, lang: string) => new Intl.DateTimeFormat(lang === "ko" ? "ko-KR" : "en-US", {
+    timeZone: "America/Chicago", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+}).format(new Date(iso));
 
 interface Props {
 	league: League;
@@ -133,6 +139,12 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 	<section class="content-section" aria-labelledby="league-title">
 		<p class="section-label">{league.id}</p>
 		<h1 id="league-title"><T en="Standings & Results" ko="순위 & 경기 결과" /></h1>
+        {updates[league.id] ? (
+            <p class="league-table-note"><T en="Records updated: " ko="기록 업데이트: " /><time datetime={updates[league.id].updated_at}><T en={updateLabel(updates[league.id].updated_at, "en")} ko={updateLabel(updates[league.id].updated_at, "ko")} /></time> <T en="(Central Time)" ko="(미 중부시간)" /></p>
+        ) : (
+            matchesData.filter((m) => m.league === league.id && m.status === "completed" && m.date).length > 0 &&
+            <p class="league-table-note"><T en="Latest recorded match: " ko="최근 기록된 경기일: " /><time>{matchesData.filter((m) => m.league === league.id && m.status === "completed" && m.date).map((m) => m.date).sort().at(-1)}</time></p>
+        )}
 
 		{
 			leagues.length > 1 && (
@@ -154,6 +166,7 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 				</nav>
 			)
 		}
+		<a class="section-link" href="/seasons/"><T en="Explore seasons →" ko="시즌별 둘러보기 →" /></a>
 		<nav class="league-subnav" aria-label="League sections">
 			<a id="overview-tab" href="#overview" data-league-tab="overview"><T en="OVERVIEW" ko="개요" /></a>
 			<a id="player-stats-tab" href="#player-stats" data-league-tab="player-stats"><T en="PLAYER STATS" ko="선수 기록" /></a>

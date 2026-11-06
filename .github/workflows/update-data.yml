@@ -54,7 +54,8 @@ jobs:
             src/data/week_summaries.json \
             src/data/goal_events.json \
             src/data/player_leaderboard.json \
-            src/data/player_profiles.json
+            src/data/player_profiles.json \
+            src/data/data-updates.json
           if git diff --cached --quiet; then
             echo "No data changes — nothing to commit."
           else

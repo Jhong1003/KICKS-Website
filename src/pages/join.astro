@@ -1,18 +1,25 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import T from "../components/T.astro";
+import recruitment from "../data/recruitment.json";
+
+const waitlist = recruitment.player_status === "waitlist";
 
 const applications = [
 	{
-		title: "SP27 Player Application",
-		titleKo: "SP27 선수 지원",
-		status: "Applications open · Spring 2027",
-		statusKo: "2027 봄학기 선수 모집 중",
+		title: `${recruitment.season} ${waitlist ? "Player Waitlist" : "Player Application"}`,
+		titleKo: `${recruitment.season} 선수 ${waitlist ? "대기명단" : "지원"}`,
+		status: waitlist ? "Recruitment closed · Waitlist open" : "Player applications open",
+		statusKo: waitlist ? "선수 모집 마감 · 대기명단 접수 중" : `${recruitment.season} 선수 모집 중`,
 		description: "We're looking for people with soccer or futsal game experience who enjoy competing alongside their teammates.",
 		descriptionKo: "축구·풋살 경기 경험이 있고, 팀원들과 함께 경쟁하는 재미를 즐기는 분을 기다립니다.",
-		href: "https://docs.google.com/forms/d/e/1FAIpQLSeAsTpI1HfyPwalSO6fJGyN9qXU2k6ALMtHRKj8RfnM89bzqQ/viewform",
+		href: recruitment.player_form_url,
+		action: waitlist ? "Join waitlist" : "Apply",
+		actionKo: waitlist ? "대기명단 등록" : "지원하기",
 	},
 	{
+		action: "Apply",
+		actionKo: "지원하기",
 		title: "Manager Application",
 		titleKo: "매니저 지원",
 		status: "Applications always open",
@@ -45,7 +52,7 @@ const faqs = [
 ];
 ---
 
-<BaseLayout title="Join | KICKS" description="SP27 player applications are open. Manager applications are welcome year-round. Learn about our schedule, dues, and how to join KICKS.">
+<BaseLayout title="Join | KICKS" description={`${recruitment.season} player ${waitlist ? "waitlist" : "applications"} open. Manager applications welcome year-round. Learn how to join KICKS.`}>
 	<main>
 		<section class="content-section" aria-labelledby="join-title">
 			<p class="section-label"><T en="JOIN KICKS" ko="KICKS 가입" /></p>
@@ -57,6 +64,8 @@ const faqs = [
 				ko="선수와 매니저 중 원하는 역할을 선택해 지원해주세요. 둘 다 간단한 구글 폼으로 연결돼요."
 			/>
 
+			{waitlist && <T as="p" class="about-description" en="Player recruitment has closed. Join the waitlist to be contacted when a spot opens up. Manager applications remain open." ko="선수 모집이 마감됐어요. 대기명단에 등록하면 빈자리가 생길 때 합류를 안내해요. 매니저는 계속 모집 중이에요." />}
+
 			<div class="cta-card-grid">
 				{
 					applications.map((application) => (
@@ -65,7 +74,7 @@ const faqs = [
 							<T as="p" class="application-status" en={application.status} ko={application.statusKo} />
 							<T as="p" class="cta-card-description" en={application.description} ko={application.descriptionKo} />
 							<a class="button-primary" href={application.href} target="_blank" rel="noopener noreferrer">
-								<T en="Apply" ko="지원하기" />
+								<T en={application.action} ko={application.actionKo} />
 							</a>
 						</div>
 					))

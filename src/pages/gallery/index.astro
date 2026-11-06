@@ -19,6 +19,7 @@ const monthLabel = (iso: string, lang: "en" | "ko") => {
 			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>
 			<h1 id="gallery-title"><T en="Moments from the pitch." ko="KICKS의 순간들" /></h1>
 			<MediaTabs current="photos" />
+			<a class="section-link" href="/seasons/"><T en="Explore seasons →" ko="시즌별 둘러보기 →" /></a>
 			{
 				albums.length === 0 ? (
 					<T as="p" class="gallery-empty" en="No photos yet." ko="아직 사진이 없어요." />
