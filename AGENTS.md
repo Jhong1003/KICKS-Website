@@ -758,7 +758,7 @@ change.
 
 `node scripts/make_report.mjs --league FA26-L2 --week 4` (no `--week` = latest
 scored week) writes four 1080×1350 PNGs to `report/out/<league>-W<nn>/`. The
-club posts only the **final** report (cover, final table, "How it unfolded" —
+club posts only the **final** report (cover, final table, "Title Race" —
 cumulative points by week from `standings_history.json`, with the final week's
 3-point band — and player stats); a mid-league week still renders the weekly
 set (cover, match results, table, stats). The look is the club's L1 post design

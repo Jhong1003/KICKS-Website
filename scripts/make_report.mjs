@@ -221,8 +221,9 @@ const stats = card(
 );
 
 // ---- points race (final report) ---------------------------------------------
-// Cumulative points after each week, from standings_history (official). The
-// weeks span the full width (W1 at the left edge, the last week at the right),
+// Cumulative points after each week, from standings_history (official). Every
+// line starts from one shared 0 at the left edge (every team starts level, so
+// the start is a single dot, not three), the last week sits at the right edge,
 // and the teams are named in a legend in the chart's empty top-left corner —
 // in their colour, final rank order, with final points — instead of labels at
 // the line ends, which ate a quarter of the width.
@@ -231,30 +232,31 @@ function raceSvg() {
 	const weeks = Array.from({ length: week }, (_, i) => i + 1);
 	const lines = league.teams.map((t) => ({
 		t,
-		pts: weeks.map((w) => history.find((h) => h.league === leagueId && h.week === w && h.team_id === t.team_id)?.points ?? 0),
+		pts: [0, ...weeks.map((w) => history.find((h) => h.league === leagueId && h.week === w && h.team_id === t.team_id)?.points ?? 0)],
 	}));
 	const maxP = Math.max(...lines.flatMap((l) => l.pts));
 	const step = maxP > 40 ? 10 : 5;
 	const top = Math.ceil(maxP / step) * step;
-	const x = (i) => L + (week > 1 ? (i * (W - L - R)) / (week - 1) : (W - L - R) / 2);
+	const x = (i) => L + (i * (W - L - R)) / week;
 	const y = (p) => T + (H - T - B) * (1 - p / top);
 	let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">`;
 	const fw = league.rules.final_week;
-	if (fw && fw <= week && fw > 1) {
-		svg += `<rect x="${x(fw - 2)}" y="${T}" width="${x(week - 1) - x(fw - 2)}" height="${H - T - B}" fill="#f4e7bf"/>`;
-		svg += `<text x="${(x(fw - 2) + x(week - 1)) / 2}" y="${H - B - 22}" class="band">WIN = ${league.rules.final_win_points} PTS</text>`;
+	if (fw && fw <= week) {
+		svg += `<rect x="${x(fw - 1)}" y="${T}" width="${x(week) - x(fw - 1)}" height="${H - T - B}" fill="#f4e7bf"/>`;
+		svg += `<text x="${(x(fw - 1) + x(week)) / 2}" y="${H - B - 22}" class="band">WIN = ${league.rules.final_win_points} PTS</text>`;
 	}
 	for (let p = 0; p <= top; p += step)
 		svg += `<line x1="${L}" x2="${W - R}" y1="${y(p)}" y2="${y(p)}" class="grid"/><text x="${L - 16}" y="${y(p) + 10}" class="tick" text-anchor="end">${p}</text>`;
-	weeks.forEach((w, i) => (svg += `<text x="${x(i)}" y="${H - B + 50}" class="tick" text-anchor="${i === 0 ? "start" : i === week - 1 ? "end" : "middle"}">W${w}</text>`));
+	weeks.forEach((w) => (svg += `<text x="${x(w)}" y="${H - B + 50}" class="tick" text-anchor="${w === week ? "end" : "middle"}">W${w}</text>`));
 	for (const { t, pts } of lines) {
-		svg += `<polyline points="${pts.map((p, i) => `${x(i)},${y(p)}`).join(" ")}" fill="none" stroke="${t.color}" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"/>`;
-		pts.forEach((p, i) => (svg += `<circle cx="${x(i)}" cy="${y(p)}" r="12" fill="#fff" stroke="${t.color}" stroke-width="7"/>`));
+		svg += `<polyline points="${pts.map((p, i) => `${x(i)},${y(p)}`).join(" ")}" fill="none" stroke="${t.color}" stroke-width="8" stroke-linejoin="round" stroke-linecap="round"/>`;
+		pts.forEach((p, i) => i && (svg += `<circle cx="${x(i)}" cy="${y(p)}" r="10" fill="#fff" stroke="${t.color}" stroke-width="5"/>`));
 	}
+	svg += `<circle cx="${x(0)}" cy="${y(0)}" r="10" fill="#fff" stroke="#444" stroke-width="5"/>`;
 	const ranked = [...lines].sort((a, b) => b.pts.at(-1) - a.pts.at(-1));
 	ranked.forEach(({ t, pts }, i) => {
 		const ly = T + 46 + i * 66;
-		svg += `<line x1="${L + 28}" x2="${L + 84}" y1="${ly}" y2="${ly}" stroke="${t.color}" stroke-width="11" stroke-linecap="round"/>`;
+		svg += `<line x1="${L + 28}" x2="${L + 84}" y1="${ly}" y2="${ly}" stroke="${t.color}" stroke-width="8" stroke-linecap="round"/>`;
 		svg += `<text x="${L + 104}" y="${ly}" class="lgname" fill="${t.color}">${esc(t.name)}</text>`;
 		svg += `<text x="${L + 104 + 230}" y="${ly}" class="lgpts" fill="${t.color}">${pts.at(-1)}</text>`;
 	});
@@ -262,7 +264,7 @@ function raceSvg() {
 }
 const race = card(
 	"race",
-	`<h1 class="title">HOW IT UNFOLDED</h1><p class="sub">POINTS BY WEEK</p>
+	`<h1 class="title">TITLE RACE</h1><p class="sub">POINTS BY WEEK</p>
 	<div class="race-panel">${raceSvg()}</div>${footer}`,
 );
 
