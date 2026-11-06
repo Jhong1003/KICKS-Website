@@ -5390,6 +5390,11 @@ html[data-season] .hero-season-note--past {
 	line-height: 1.6;
 }
 .hero-highlights li::before { content: "✓"; margin-right: 6px; }
+/* On a phone the three wrapped as one line + two, which read as two groups;
+   one per line keeps them even. */
+@media (max-width: 640px) {
+	.hero-highlights { flex-direction: column; gap: 2px; }
+}
 
 /* Supporting text has about 7.2:1 contrast on the cream background. */
 .album-meta { opacity: 0.8; color: var(--color-dark); }
