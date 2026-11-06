@@ -799,7 +799,7 @@ update. Not part of the site build; nothing under `report/` is deployed.
   `{ "<league>": { "<week>": [three names] } }`), otherwise an automatic
   **Best Defense** — the team(s) with the fewest goals conceded through that
   week, with the whole squad (non-inactive) by name — not only DF/GK, since
-  everyone takes a turn in goal and it's 7v7. Up to five names a row, shorter rows first (9 = 4 + 5).
+  everyone takes a turn in goal and it's 7v7. Up to five names a row, shorter rows first (9 = 4 + 5). A tie for fewest conceded shows the teams side by side, "n실점 · 공동", with no squads (two squads don't fit, and no hidden tiebreak picks one).
 - PNGs need Playwright (`import("playwright")`, or a global install found via
   `NODE_PATH`); `--html-only` writes just `report.html`. The team colour word
   under a team name (RED / ORANGE / BLUE …) comes from the hue, with yellows
