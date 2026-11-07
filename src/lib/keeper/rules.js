@@ -10,7 +10,7 @@ export function shotsFor(seed) {
   let state = seed >>> 0, start = 0;
   return Array.from({ length: MAX_SHOTS }, (_, index) => {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-    const flight = Math.max(780, 1600 - index * 28);
+    const flight = Math.max(520, 1100 - index * 24);
     const impact = start + 350 + flight;
     const shot = { index, start, impact, end: impact + 650, flight, direction: DIRECTIONS[state % 5] };
     start = shot.end;
