@@ -572,22 +572,28 @@ import T from "../components/T.astro";
 				if (t < launch) {
 					ball = [SPOT[0], SPOT[1], 1, 1, 0, SPOT[1] + 15];
 				} else if (t < shot.impact) {
-					const p = (t - launch) / shot.flight, e = p; // steady speed: it reaches the goal exactly at impact
-					const arc = (ty < 200 ? 46 : 22) * Math.sin(Math.PI * p);
-					ball = [SPOT[0] + (tx - SPOT[0]) * e, SPOT[1] + (ty - SPOT[1]) * e - arc, 1 - 0.42 * e, 1, (t - launch) / 70, SPOT[1] + 15 + (GROUND + 4 - SPOT[1] - 15) * e];
+					// Steady speed toward the middle of the goal, then the shot bends to its
+					// corner late (p^2.5), so the direction can't be read off the first
+					// part of the flight. It still lands exactly on the target at impact.
+					const p = (t - launch) / shot.flight, bend = p ** 2.5;
+					const [cx, cy] = TARGET.center;
+					const arc = (ty < 200 ? 30 : 14) * Math.sin(Math.PI * p);
+					const bx = SPOT[0] + (cx - SPOT[0]) * p + (tx - cx) * bend;
+					const by = SPOT[1] + (cy - SPOT[1]) * p + (ty - cy) * bend - arc;
+					ball = [bx, by, 1 - 0.42 * p, 1, (t - launch) / 45, SPOT[1] + 15 + (GROUND + 4 - SPOT[1] - 15) * p];
 				} else if (!outcome || resolved == null) {
-					ball = [tx, ty, 0.58, 1, shot.flight / 70, 0];
+					ball = [tx, ty, 0.58, 1, shot.flight / 45, 0];
 				} else {
 					const since = t - resolved;
 					if (outcome.kind === "goal") {
 						const p = clamp(since / 260);
-						ball = [tx + (320 - tx) * 0.06 * p, ty + 8 * p, 0.58 - 0.1 * p, 1, shot.flight / 70 + p, 0];
+						ball = [tx + (320 - tx) * 0.06 * p, ty + 8 * p, 0.58 - 0.1 * p, 1, shot.flight / 45 + p, 0];
 						netFlash = 1 - clamp(since / 500);
 						inNet = true;
 					} else {
 						const [gx, gy] = glove(keeper);
 						const p = clamp(since / 120);
-						ball = [tx + (gx - tx) * p, ty + (gy - ty) * p, 0.58, 1 - clamp((since - 200) / 220), shot.flight / 70, 0];
+						ball = [tx + (gx - tx) * p, ty + (gy - ty) * p, 0.58, 1 - clamp((since - 200) / 220), shot.flight / 45, 0];
 					}
 				}
 			}
