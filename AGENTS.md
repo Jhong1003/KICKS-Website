@@ -1042,8 +1042,11 @@ the run (at most 30 shots, each a little faster).
 Judging is the same from the first shot, in
 [src/lib/keeper/rules.js](src/lib/keeper/rules.js) (shared by the page and the
 Worker): right corner within ±`PERFECT_WINDOW` (85 ms) of the ball arriving =
-**perfect save** (200), within ±`SAVE_WINDOW` (240 ms) = **save** (100), otherwise
-or the wrong way = **goal**. Middle shot: a tap within ±85 ms = perfect, any other
+**perfect save** (200), the right corner at any other time in the shot's window
+(from the shot starting until `SAVE_WINDOW`, 240 ms, after the ball arrives) =
+**save** (100), the wrong way or no dive = **goal**. An early dive to the right
+corner is a save on purpose: the keeper is drawn there, so calling it a goal looked
+broken. Middle shot: a tap within ±85 ms = perfect, any other
 tap or no move at all = save, diving to a corner = goal. A streak adds +10 per three
 saves in a row (capped at +100). One move per shot: a second move on the same shot
 is ignored by the page and rejected by the Worker.

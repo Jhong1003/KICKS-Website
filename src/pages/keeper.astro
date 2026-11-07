@@ -322,6 +322,11 @@ import T from "../components/T.astro";
 		save: L("Save", "선방"),
 		goal: L("Goal", "실점"),
 	};
+	// Say why a shot went in, so the timing can be learned.
+	const GOAL_TEXT: Record<string, string> = {
+		late: L("Goal · too late", "실점 · 늦었어요"),
+		direction: L("Goal · wrong way", "실점 · 방향이 달라요"),
+	};
 
 	// ---------- drawing ----------
 	function resize() {
@@ -392,7 +397,9 @@ import T from "../components/T.astro";
 		Object.fromEntries(Object.keys(a).map((k) => [k, [a[k as keyof Body][0] + (b[k as keyof Body][0] - a[k as keyof Body][0]) * p, a[k as keyof Body][1] + (b[k as keyof Body][1] - a[k as keyof Body][1]) * p]])) as Body;
 
 	// Where the keeper stands, how far it leans and which pose it is in.
-	function pose(direction: string | null, p: number, t = 0): Pose {
+	// `fall` (0..1) brings a corner dive down to the grass once the stretch has
+	// been held for SAVE_WINDOW, like a real keeper landing.
+	function pose(direction: string | null, p: number, t = 0, fall = 0): Pose {
 		if (!direction) {
 			const bob = Math.sin(t / 180) * 1.2; // small ready-stance bounce
 			return { x: HOME[0], y: HOME[1] + bob, angle: 0, reach: 0, body: READY, lift: 0 };
@@ -410,9 +417,11 @@ import T from "../components/T.astro";
 		const [hx, hy] = [(DIVE.haL[0] + DIVE.haR[0]) / 2 * SCALE, DIVE.haL[1] * SCALE * 0.95];
 		const rootX = tx - (hx * Math.cos(angle) - hy * Math.sin(angle));
 		const rootY = Math.min(ty - (hx * Math.sin(angle) + hy * Math.cos(angle)), GROUND - 22);
+		const f = fall * fall; // gravity: slow, then fast
+		const y = HOME[1] + (rootY - HOME[1]) * e;
 		return {
-			x: HOME[0] + (rootX - HOME[0]) * e, y: HOME[1] + (rootY - HOME[1]) * e,
-			angle: angle * e, reach: e, body: blend(READY, DIVE, ease(clamp(p * 1.3))), lift: high ? e : e * 0.4,
+			x: HOME[0] + (rootX - HOME[0]) * e, y: y + (GROUND - 20 - y) * f,
+			angle: angle * e + (side * 1.45 - angle) * f, reach: e, body: blend(READY, DIVE, ease(clamp(p * 1.3))), lift: (high ? e : e * 0.4) * (1 - f),
 		};
 	}
 	const toWorld = (k: Pose, [x, y]: Pt): Pt => { x *= SCALE; y *= SCALE; return [k.x + x * Math.cos(k.angle) - y * Math.sin(k.angle), k.y + x * Math.sin(k.angle) + y * Math.cos(k.angle)]; };
@@ -547,7 +556,7 @@ import T from "../components/T.astro";
 			for (const outcome of result.outcomes) {
 				if (current.resolvedAt.has(outcome.index)) continue;
 				current.resolvedAt.set(outcome.index, t);
-				flash(OUTCOME_TEXT[outcome.kind], outcome.kind);
+				flash(outcome.kind === "goal" ? GOAL_TEXT[outcome.reason] ?? OUTCOME_TEXT.goal : OUTCOME_TEXT[outcome.kind], outcome.kind, outcome.kind === "goal" ? 900 : 650);
 			}
 			updateHud(result.score, result.combo, result.lives);
 			if (result.finished && !current.done) { current.lastResolved = result.finishedAt; finish(current, result); }
@@ -555,7 +564,7 @@ import T from "../components/T.astro";
 			const shot = current.shots.find((s) => t >= s.start && t < s.end) ?? (current.done ? current.shots[result.resolved - 1] : null);
 			if (shot) {
 				const input = current.inputs.find((i) => i.at >= shot.start && i.at <= shot.impact + SAVE_WINDOW);
-				keeper = input ? pose(input.direction, clamp((t - input.at) / DIVE_MS)) : pose(null, 0, now);
+				keeper = input ? pose(input.direction, clamp((t - input.at) / DIVE_MS), now, clamp((t - input.at - SAVE_WINDOW) / 260)) : pose(null, 0, now);
 				const launch = shot.impact - shot.flight;
 				const [tx, ty] = TARGET[shot.direction];
 				const resolved = current.resolvedAt.get(shot.index);
@@ -563,7 +572,7 @@ import T from "../components/T.astro";
 				if (t < launch) {
 					ball = [SPOT[0], SPOT[1], 1, 1, 0, SPOT[1] + 15];
 				} else if (t < shot.impact) {
-					const p = (t - launch) / shot.flight, e = 1 - (1 - p) ** 1.6;
+					const p = (t - launch) / shot.flight, e = p; // steady speed: it reaches the goal exactly at impact
 					const arc = (ty < 200 ? 46 : 22) * Math.sin(Math.PI * p);
 					ball = [SPOT[0] + (tx - SPOT[0]) * e, SPOT[1] + (ty - SPOT[1]) * e - arc, 1 - 0.42 * e, 1, (t - launch) / 70, SPOT[1] + 15 + (GROUND + 4 - SPOT[1] - 15) * e];
 				} else if (!outcome || resolved == null) {

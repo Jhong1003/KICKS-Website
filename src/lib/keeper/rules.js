@@ -29,11 +29,12 @@ export function judge(shot, input) {
       ? { kind: 'perfect', reason: 'perfect', points: 200 }
       : { kind: 'save', reason: 'save', points: 100 };
   }
+  // Corner shots: diving the right way at any point in the shot's window puts
+  // the gloves where the ball goes, so it is a save; timing it to the moment
+  // the ball arrives makes it perfect. The wrong way, or no dive, concedes.
   if (!input) return { kind: 'goal', reason: 'late', points: 0 };
-  const offset = input.at - shot.impact;
   if (input.direction !== shot.direction) return { kind: 'goal', reason: 'direction', points: 0 };
-  if (Math.abs(offset) > SAVE_WINDOW) return { kind: 'goal', reason: offset < 0 ? 'early' : 'late', points: 0 };
-  return Math.abs(offset) <= PERFECT_WINDOW
+  return Math.abs(input.at - shot.impact) <= PERFECT_WINDOW
     ? { kind: 'perfect', reason: 'perfect', points: 200 }
     : { kind: 'save', reason: 'save', points: 100 };
 }

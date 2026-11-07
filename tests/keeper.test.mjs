@@ -59,13 +59,14 @@ test('shots are deterministic, get faster and never overlap', () => {
   assert.notDeepEqual(shotsFor(1).map((s) => s.direction), shotsFor(2).map((s) => s.direction));
 });
 
-test('corner shots: right corner and timing decide save, perfect or goal', () => {
+test('corner shots: the right corner saves, timing it makes it perfect', () => {
   const shot = firstShot('tl');
   assert.equal(judge(shot, { at: shot.impact, direction: 'tl' }).kind, 'perfect');
   assert.equal(judge(shot, { at: shot.impact + PERFECT_WINDOW, direction: 'tl' }).kind, 'perfect');
   assert.equal(judge(shot, { at: shot.impact - PERFECT_WINDOW - 1, direction: 'tl' }).kind, 'save');
   assert.equal(judge(shot, { at: shot.impact + SAVE_WINDOW, direction: 'tl' }).kind, 'save');
-  assert.deepEqual(judge(shot, { at: shot.impact - SAVE_WINDOW - 1, direction: 'tl' }), { kind: 'goal', reason: 'early', points: 0 });
+  // Diving the right way early still puts the gloves on the ball.
+  assert.equal(judge(shot, { at: shot.start, direction: 'tl' }).kind, 'save');
   assert.deepEqual(judge(shot, { at: shot.impact, direction: 'tr' }), { kind: 'goal', reason: 'direction', points: 0 });
   assert.deepEqual(judge(shot, { at: shot.impact, direction: 'center' }), { kind: 'goal', reason: 'direction', points: 0 });
   assert.deepEqual(judge(shot, undefined), { kind: 'goal', reason: 'late', points: 0 });
