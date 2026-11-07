@@ -120,7 +120,8 @@ import T from "../components/T.astro";
 		tl: [158, 118], tr: [482, 118], bl: [158, 268], br: [482, 268], center: [320, 196],
 	};
 	const SPOT: [number, number] = [320, 436];
-	const HOME: [number, number] = [320, 262];
+	const HOME: [number, number] = [320, 246];
+	const SCALE = 1.3; // keeper size: a real keeper fills most of a futsal goal's height
 	const DIVE_MS = 170;
 
 	type Input = { at: number; direction: string };
@@ -222,7 +223,12 @@ import T from "../components/T.astro";
 		stage.focus({ preventScroll: true });
 		let n = 3;
 		const tick = () => {
-			if (n > 0) { countdown.textContent = String(n--); setTimeout(tick, 600); return; }
+			if (n > 0) {
+				countdown.textContent = String(n--);
+				countdown.classList.remove("pop"); void countdown.offsetWidth; countdown.classList.add("pop"); // replay the pop per number
+				setTimeout(tick, 600);
+				return;
+			}
 			countdown.textContent = "";
 			run!.t0 = performance.now();
 		};
@@ -329,73 +335,204 @@ import T from "../components/T.astro";
 	const ease = (p: number) => 1 - (1 - p) ** 3;
 	const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
 
+	// KICKS logo colours: navy, red and blue; the pitch keeps the site green.
+	const K = { navy: "#141b2d", red: "#e31b23", blue: "#1d3f9e", skin: "#e2b48c", hair: "#201a17", glove: "#f5f5f2" };
+	const GROUND = GOAL.bottom;
+
 	function drawScene(netFlash: number) {
 		ctx.fillStyle = C.cream; ctx.fillRect(0, 0, 640, 480);
-		// pitch
-		ctx.fillStyle = C.green; ctx.fillRect(0, GOAL.bottom, 640, 480 - GOAL.bottom);
-		ctx.strokeStyle = "rgba(247,246,242,0.7)"; ctx.lineWidth = 3;
-		ctx.beginPath(); ctx.moveTo(0, GOAL.bottom); ctx.lineTo(640, GOAL.bottom); ctx.stroke();
-		ctx.beginPath(); ctx.moveTo(176, GOAL.bottom); ctx.lineTo(140, 380); ctx.lineTo(500, 380); ctx.lineTo(464, GOAL.bottom); ctx.stroke();
-		ctx.fillStyle = "rgba(247,246,242,0.8)"; ctx.beginPath(); ctx.ellipse(SPOT[0], SPOT[1] + 14, 7, 3, 0, 0, Math.PI * 2); ctx.fill();
-		// net
-		ctx.fillStyle = C.sage; ctx.fillRect(GOAL.left, GOAL.top, GOAL.right - GOAL.left, GOAL.bottom - GOAL.top);
-		if (netFlash > 0) { ctx.fillStyle = `rgba(63,81,40,${0.18 * netFlash})`; ctx.fillRect(GOAL.left, GOAL.top, GOAL.right - GOAL.left, GOAL.bottom - GOAL.top); }
-		ctx.strokeStyle = "rgba(63,81,40,0.16)"; ctx.lineWidth = 1;
+		// stadium board behind the goal
+		ctx.fillStyle = K.navy; ctx.fillRect(0, 16, 640, 40);
+		ctx.fillStyle = K.red; ctx.fillRect(0, 52, 640, 2);
+		ctx.fillStyle = K.blue; ctx.fillRect(0, 54, 640, 2);
+		ctx.font = "800 17px -apple-system, 'Segoe UI', sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+		for (let x = -30, i = 0; x < 640; x += 160, i++) {
+			ctx.fillStyle = "#ffffff"; ctx.fillText("KICKS", x, 36);
+			ctx.fillStyle = i % 2 ? K.red : K.blue; ctx.beginPath(); ctx.arc(x + 80, 36, 4, 0, Math.PI * 2); ctx.fill();
+			ctx.fillStyle = "rgba(255,255,255,0.55)"; ctx.font = "700 11px -apple-system, 'Segoe UI', sans-serif"; ctx.fillText("UIUC", x + 96, 37);
+			ctx.font = "800 17px -apple-system, 'Segoe UI', sans-serif";
+		}
+		// pitch with mowing stripes that widen toward the viewer
+		let y = GROUND, h = 16, light = false;
+		while (y < 480) { ctx.fillStyle = light ? "#4a5f30" : C.green; ctx.fillRect(0, y, 640, h); y += h; h *= 1.28; light = !light; }
+		ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 3;
+		ctx.beginPath(); ctx.moveTo(0, GROUND); ctx.lineTo(640, GROUND); ctx.stroke();
+		ctx.beginPath(); ctx.moveTo(176, GROUND); ctx.lineTo(140, 380); ctx.lineTo(500, 380); ctx.lineTo(464, GROUND); ctx.stroke();
+		ctx.fillStyle = "rgba(255,255,255,0.85)"; ctx.beginPath(); ctx.ellipse(SPOT[0], SPOT[1] + 15, 7, 3, 0, 0, Math.PI * 2); ctx.fill();
+		// net, slightly darker toward the back corners
+		const net = ctx.createLinearGradient(0, GOAL.top, 0, GOAL.bottom);
+		net.addColorStop(0, "#d3dac8"); net.addColorStop(1, C.sage);
+		ctx.fillStyle = net; ctx.fillRect(GOAL.left, GOAL.top, GOAL.right - GOAL.left, GOAL.bottom - GOAL.top);
+		if (netFlash > 0) { ctx.fillStyle = `rgba(20,27,45,${0.16 * netFlash})`; ctx.fillRect(GOAL.left, GOAL.top, GOAL.right - GOAL.left, GOAL.bottom - GOAL.top); }
+		ctx.strokeStyle = "rgba(20,27,45,0.13)"; ctx.lineWidth = 1;
 		ctx.beginPath();
-		for (let x = GOAL.left + 19; x < GOAL.right; x += 19) { ctx.moveTo(x, GOAL.top); ctx.lineTo(x, GOAL.bottom); }
-		for (let y = GOAL.top + 19; y < GOAL.bottom; y += 19) { ctx.moveTo(GOAL.left, y); ctx.lineTo(GOAL.right, y); }
+		for (let x = GOAL.left + 16; x < GOAL.right; x += 16) { ctx.moveTo(x, GOAL.top); ctx.lineTo(x, GOAL.bottom); }
+		for (let yy = GOAL.top + 16; yy < GOAL.bottom; yy += 16) { ctx.moveTo(GOAL.left, yy); ctx.lineTo(GOAL.right, yy); }
 		ctx.stroke();
-		// posts and bar
-		ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 10; ctx.lineJoin = "round";
-		ctx.beginPath(); ctx.moveTo(GOAL.left, GOAL.bottom + 2); ctx.lineTo(GOAL.left, GOAL.top); ctx.lineTo(GOAL.right, GOAL.top); ctx.lineTo(GOAL.right, GOAL.bottom + 2); ctx.stroke();
-		ctx.strokeStyle = "rgba(41,41,41,0.18)"; ctx.lineWidth = 1.5; ctx.stroke();
+		// posts and bar with a little depth
+		ctx.lineJoin = "round"; ctx.lineCap = "butt";
+		ctx.strokeStyle = "rgba(20,27,45,0.25)"; ctx.lineWidth = 12;
+		ctx.beginPath(); ctx.moveTo(GOAL.left + 2, GROUND + 2); ctx.lineTo(GOAL.left + 2, GOAL.top + 2); ctx.lineTo(GOAL.right + 2, GOAL.top + 2); ctx.lineTo(GOAL.right + 2, GROUND + 2); ctx.stroke();
+		ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 10;
+		ctx.beginPath(); ctx.moveTo(GOAL.left, GROUND + 2); ctx.lineTo(GOAL.left, GOAL.top); ctx.lineTo(GOAL.right, GOAL.top); ctx.lineTo(GOAL.right, GROUND + 2); ctx.stroke();
 	}
 
-	// Keeper pose for a direction and dive progress: where it stands, how far it leans.
-	function pose(direction: string | null, p: number) {
-		if (!direction) return { x: HOME[0], y: HOME[1], angle: 0, reach: 0 };
-		if (direction === "center") return { x: HOME[0], y: HOME[1] - 18 * Math.sin(Math.PI * clamp(p * 1.4)), angle: 0, reach: p };
+	// ----- keeper: a jointed figure blended between three poses -----
+	type Pt = [number, number];
+	type Body = Record<"head" | "neck" | "shL" | "shR" | "elL" | "elR" | "haL" | "haR" | "hipL" | "hipR" | "knL" | "knR" | "ftL" | "ftR", Pt>;
+	const READY: Body = { head: [0, -66], neck: [0, -54], shL: [-15, -47], shR: [15, -47], elL: [-27, -31], elR: [27, -31], haL: [-35, -18], haR: [35, -18],
+		hipL: [-8, 0], hipR: [8, 0], knL: [-15, 21], knR: [15, 21], ftL: [-18, 46], ftR: [18, 46] };
+	const DIVE: Body = { head: [0, -67], neck: [0, -54], shL: [-13, -48], shR: [13, -48], elL: [-11, -73], elR: [11, -73], haL: [-7, -95], haR: [7, -95],
+		hipL: [-7, 0], hipR: [7, 0], knL: [-5, 24], knR: [9, 21], ftL: [-7, 48], ftR: [16, 42] };
+	const JUMP: Body = { head: [0, -66], neck: [0, -54], shL: [-15, -48], shR: [15, -48], elL: [-24, -71], elR: [24, -71], haL: [-22, -93], haR: [22, -93],
+		hipL: [-8, 0], hipR: [8, 0], knL: [-13, 17], knR: [13, 17], ftL: [-12, 40], ftR: [12, 40] };
+
+	type Pose = { x: number; y: number; angle: number; reach: number; body: Body; lift: number };
+	const blend = (a: Body, b: Body, p: number) =>
+		Object.fromEntries(Object.keys(a).map((k) => [k, [a[k as keyof Body][0] + (b[k as keyof Body][0] - a[k as keyof Body][0]) * p, a[k as keyof Body][1] + (b[k as keyof Body][1] - a[k as keyof Body][1]) * p]])) as Body;
+
+	// Where the keeper stands, how far it leans and which pose it is in.
+	function pose(direction: string | null, p: number, t = 0): Pose {
+		if (!direction) {
+			const bob = Math.sin(t / 180) * 1.2; // small ready-stance bounce
+			return { x: HOME[0], y: HOME[1] + bob, angle: 0, reach: 0, body: READY, lift: 0 };
+		}
+		if (direction === "center") {
+			const up = Math.sin(Math.PI * clamp(p * 1.3));
+			return { x: HOME[0], y: HOME[1] - 20 * up, angle: 0, reach: p, body: blend(READY, JUMP, ease(clamp(p * 1.6))), lift: up };
+		}
 		const [tx, ty] = TARGET[direction];
 		const side = direction.endsWith("l") ? -1 : 1;
 		const high = direction.startsWith("t");
 		const e = ease(p);
-		return { x: HOME[0] + (tx - HOME[0]) * 0.72 * e, y: HOME[1] + (ty - HOME[1]) * 0.6 * e + (high ? -6 : 18) * e, angle: side * (high ? 0.85 : 1.25) * e, reach: e };
+		// Full stretch: place the body so the gloves end on the target.
+		const angle = side * (high ? 0.8 : 1.32);
+		const [hx, hy] = [(DIVE.haL[0] + DIVE.haR[0]) / 2 * SCALE, DIVE.haL[1] * SCALE * 0.95];
+		const rootX = tx - (hx * Math.cos(angle) - hy * Math.sin(angle));
+		const rootY = Math.min(ty - (hx * Math.sin(angle) + hy * Math.cos(angle)), GROUND - 22);
+		return {
+			x: HOME[0] + (rootX - HOME[0]) * e, y: HOME[1] + (rootY - HOME[1]) * e,
+			angle: angle * e, reach: e, body: blend(READY, DIVE, ease(clamp(p * 1.3))), lift: high ? e : e * 0.4,
+		};
 	}
-	function glove(k: ReturnType<typeof pose>): [number, number] {
-		const len = 38 + 30 * k.reach; // matches the arm length drawn in drawKeeper
-		return [k.x + Math.sin(k.angle) * len, k.y - Math.cos(k.angle) * len];
+	const toWorld = (k: Pose, [x, y]: Pt): Pt => { x *= SCALE; y *= SCALE; return [k.x + x * Math.cos(k.angle) - y * Math.sin(k.angle), k.y + x * Math.sin(k.angle) + y * Math.cos(k.angle)]; };
+	function glove(k: Pose): Pt {
+		const [lx, ly] = toWorld(k, k.body.haL), [rx, ry] = toWorld(k, k.body.haR);
+		return [(lx + rx) / 2, (ly + ry) / 2];
 	}
 
-	function drawKeeper(k: ReturnType<typeof pose>) {
+	function limb(a: Pt, b: Pt, width: number, colour: string, outline?: string) {
+		ctx.lineCap = "round";
+		if (outline) { ctx.strokeStyle = outline; ctx.lineWidth = width + 2.4; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); }
+		ctx.strokeStyle = colour; ctx.lineWidth = width;
+		ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+	}
+	const mid = (a: Pt, b: Pt, f = 0.5): Pt => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+
+	function drawKeeper(k: Pose) {
+		const b = k.body;
+		// ground shadow
+		ctx.fillStyle = `rgba(20,27,45,${0.22 - 0.12 * k.lift})`;
+		ctx.beginPath(); ctx.ellipse(k.x, GROUND + 2, (30 + 16 * Math.abs(Math.sin(k.angle))) * SCALE, 6, 0, 0, Math.PI * 2); ctx.fill();
+
 		ctx.save();
 		ctx.translate(k.x, k.y);
 		ctx.rotate(k.angle);
-		// shadow-free flat figure: legs, body, head, arms
-		ctx.fillStyle = C.dark;
-		ctx.fillRect(-15, 18, 11, 30); ctx.fillRect(4, 18, 11, 30);
-		ctx.fillStyle = C.green;
-		ctx.beginPath(); ctx.roundRect(-22, -30, 44, 54, 12); ctx.fill();
-		ctx.fillStyle = C.cream; ctx.font = "700 16px -apple-system, 'Segoe UI', sans-serif"; ctx.textAlign = "center"; ctx.fillText("1", 0, 2);
-		ctx.fillStyle = "#e9c9a6";
-		ctx.beginPath(); ctx.arc(0, -44, 13, 0, Math.PI * 2); ctx.fill();
-		const spread = 30 - 20 * k.reach, up = -38 - 30 * k.reach;
-		ctx.strokeStyle = C.green; ctx.lineWidth = 10; ctx.lineCap = "round";
-		ctx.beginPath(); ctx.moveTo(-18, -22); ctx.lineTo(-spread, up); ctx.moveTo(18, -22); ctx.lineTo(spread, up); ctx.stroke();
-		ctx.fillStyle = C.cream; ctx.strokeStyle = C.dark; ctx.lineWidth = 2;
-		for (const x of [-spread, spread]) { ctx.beginPath(); ctx.arc(x, up, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+		ctx.scale(SCALE, SCALE);
+		// legs: skin thigh under the shorts, socks, boots
+		for (const [hip, knee, foot] of [[b.hipL, b.knL, b.ftL], [b.hipR, b.knR, b.ftR]] as Pt[][]) {
+			limb(hip, knee, 10, K.skin, "#b98a66");
+			limb(mid(knee, foot, 0.12), foot, 9, "#ffffff", "rgba(20,27,45,0.35)");
+			limb(mid(knee, foot, 0.12), mid(knee, foot, 0.3), 9, K.red);
+			ctx.fillStyle = "#111318";
+			ctx.beginPath(); ctx.ellipse(foot[0] + (foot[0] < 0 ? -3 : 3), foot[1] + 2, 8, 4.5, 0, 0, Math.PI * 2); ctx.fill();
+			limb(hip, mid(hip, knee, 0.55), 14, K.navy); // shorts
+		}
+		// torso (jersey) with the logo's red/blue swoosh
+		const torso = new Path2D();
+		torso.moveTo(b.shL[0] - 4, b.shL[1] - 1); torso.lineTo(b.shR[0] + 4, b.shR[1] - 1);
+		torso.lineTo(b.hipR[0] + 5, b.hipR[1] + 4); torso.lineTo(b.hipL[0] - 5, b.hipL[1] + 4); torso.closePath();
+		ctx.fillStyle = K.navy; ctx.strokeStyle = K.navy; ctx.lineWidth = 6; ctx.lineJoin = "round";
+		ctx.stroke(torso); ctx.fill(torso);
+		ctx.save(); ctx.clip(torso);
+		ctx.lineCap = "butt";
+		ctx.strokeStyle = K.red; ctx.lineWidth = 6;
+		ctx.beginPath(); ctx.moveTo(-24, -10); ctx.quadraticCurveTo(0, -18, 24, -36); ctx.stroke();
+		ctx.strokeStyle = K.blue;
+		ctx.beginPath(); ctx.moveTo(-24, -4); ctx.quadraticCurveTo(0, -12, 24, -30); ctx.stroke();
+		ctx.restore();
+		ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(-7, -40, 2.6, 0, Math.PI * 2); ctx.fill(); // crest
+		// neck and head
+		limb(b.neck, [b.neck[0], b.neck[1] + 6], 8, K.skin);
+		const [hx, hy] = b.head;
+		ctx.fillStyle = K.skin;
+		ctx.beginPath(); ctx.ellipse(hx - 11, hy + 1, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.ellipse(hx + 11, hy + 1, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+		ctx.beginPath(); ctx.ellipse(hx, hy, 11, 12.5, 0, 0, Math.PI * 2); ctx.fill();
+		ctx.fillStyle = K.hair;
+		ctx.beginPath(); ctx.ellipse(hx, hy - 4, 11.6, 9.5, 0, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill();
+		ctx.beginPath(); ctx.ellipse(hx, hy - 6, 11.4, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+		ctx.fillStyle = "#2a211c";
+		ctx.beginPath(); ctx.arc(hx - 4, hy + 1, 1.4, 0, Math.PI * 2); ctx.arc(hx + 4, hy + 1, 1.4, 0, Math.PI * 2); ctx.fill();
+		// arms: long keeper sleeves and gloves with KICKS cuffs
+		for (const [sh, el, ha] of [[b.shL, b.elL, b.haL], [b.shR, b.elR, b.haR]] as Pt[][]) {
+			limb(sh, el, 9.5, "#26345a", "#0b0f1a");
+			limb(el, ha, 8.5, "#26345a", "#0b0f1a");
+			const cuff = mid(el, ha, 0.78);
+			limb(cuff, mid(el, ha, 0.9), 9.5, K.red);
+			ctx.fillStyle = K.glove; ctx.strokeStyle = "rgba(20,27,45,0.55)"; ctx.lineWidth = 1.5;
+			ctx.beginPath(); ctx.arc(ha[0], ha[1], 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+		}
 		ctx.restore();
 	}
 
-	function drawBall(x: number, y: number, scale: number, alpha = 1) {
+	// ----- ball: classic black-and-white panels, spinning in flight -----
+	const PENT = (cx: number, cy: number, r: number, rot: number): Pt[] =>
+		Array.from({ length: 5 }, (_, i) => { const a = rot + i * (Math.PI * 2 / 5); return [cx + Math.cos(a) * r, cy + Math.sin(a) * r] as Pt; });
+	function drawBall(x: number, y: number, scale: number, alpha = 1, spin = 0, groundY = 0) {
+		const R = 17;
+		if (groundY && alpha > 0) {
+			ctx.fillStyle = `rgba(20,27,45,${0.25 * alpha})`;
+			ctx.beginPath(); ctx.ellipse(x, groundY, R * scale * 0.9, R * scale * 0.28, 0, 0, Math.PI * 2); ctx.fill();
+		}
 		ctx.save();
 		ctx.globalAlpha = alpha;
 		ctx.translate(x, y); ctx.scale(scale, scale);
-		ctx.fillStyle = "#ffffff"; ctx.strokeStyle = C.dark; ctx.lineWidth = 2;
-		ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-		ctx.fillStyle = C.dark;
+		const body = ctx.createRadialGradient(-5, -6, 2, 0, 0, R);
+		body.addColorStop(0, "#ffffff"); body.addColorStop(0.7, "#f1f2f3"); body.addColorStop(1, "#c9ced6");
+		ctx.fillStyle = body;
+		ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+		ctx.save();
+		ctx.clip();
+		ctx.rotate(spin);
+		// Face-on view of a real ball: a centre pentagon, five white hexagons
+		// around it, and five more pentagons beyond its corners, cut by the rim.
+		const step = Math.PI * 2 / 5;
+		const centre = PENT(0, 0, R * 0.31, -Math.PI / 2);
+		const outer = Array.from({ length: 5 }, (_, i) => {
+			const a = -Math.PI / 2 + i * step;
+			return PENT(Math.cos(a) * R * 0.8, Math.sin(a) * R * 0.8, R * 0.27, a + Math.PI);
+		});
+		ctx.fillStyle = K.navy;
+		for (const pent of [centre, ...outer]) { ctx.beginPath(); pent.forEach((pt, i) => ctx[i ? "lineTo" : "moveTo"](...pt)); ctx.closePath(); ctx.fill(); }
+		ctx.strokeStyle = "rgba(20,27,45,0.7)"; ctx.lineWidth = 1;
 		ctx.beginPath();
-		for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * (Math.PI * 2 / 5); ctx[i ? "lineTo" : "moveTo"](Math.cos(a) * 6, Math.sin(a) * 6); }
-		ctx.closePath(); ctx.fill();
+		for (let i = 0; i < 5; i++) {
+			// centre corner → the inner tip of the pentagon beyond it
+			ctx.moveTo(...centre[i]); ctx.lineTo(...outer[i][0]);
+			// between two outer pentagons, the hexagon's outer corner and the seam to the rim
+			const m = -Math.PI / 2 + (i + 0.5) * step;
+			const joint: Pt = [Math.cos(m) * R * 0.86, Math.sin(m) * R * 0.86];
+			ctx.moveTo(...outer[i][3]); ctx.lineTo(...joint); ctx.lineTo(...outer[(i + 1) % 5][2]);
+			ctx.moveTo(...joint); ctx.lineTo(Math.cos(m) * R * 1.1, Math.sin(m) * R * 1.1);
+		}
+		ctx.stroke();
+		ctx.restore();
+		// light from the top left, shade bottom right
+		const shade = ctx.createRadialGradient(-6, -7, 3, 0, 0, R);
+		shade.addColorStop(0, "rgba(255,255,255,0.35)"); shade.addColorStop(0.6, "rgba(255,255,255,0)"); shade.addColorStop(1, "rgba(20,27,45,0.28)");
+		ctx.fillStyle = shade; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+		ctx.strokeStyle = K.navy; ctx.lineWidth = 1.6 / scale;
+		ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.stroke();
 		ctx.restore();
 	}
 
@@ -403,7 +540,7 @@ import T from "../components/T.astro";
 		requestAnimationFrame(frame);
 		const current = run;
 		const t = current && Number.isFinite(current.t0) ? now - current.t0 : -1;
-		let netFlash = 0, keeper = pose(null, 0), ball: [number, number, number, number] | null = [...SPOT, 1, 1], inNet = false;
+		let netFlash = 0, keeper = pose(null, 0, now), ball: [number, number, number, number, number, number] | null = [SPOT[0], SPOT[1], 1, 1, 0, SPOT[1] + 15], inNet = false;
 
 		if (current && t >= 0) {
 			const result = replay(current.seed, current.inputs, current.done ? current.lastResolved : t);
@@ -418,30 +555,30 @@ import T from "../components/T.astro";
 			const shot = current.shots.find((s) => t >= s.start && t < s.end) ?? (current.done ? current.shots[result.resolved - 1] : null);
 			if (shot) {
 				const input = current.inputs.find((i) => i.at >= shot.start && i.at <= shot.impact + SAVE_WINDOW);
-				keeper = input ? pose(input.direction, clamp((t - input.at) / DIVE_MS)) : pose(null, 0);
+				keeper = input ? pose(input.direction, clamp((t - input.at) / DIVE_MS)) : pose(null, 0, now);
 				const launch = shot.impact - shot.flight;
 				const [tx, ty] = TARGET[shot.direction];
 				const resolved = current.resolvedAt.get(shot.index);
 				const outcome = result.outcomes.find((o) => o.index === shot.index);
 				if (t < launch) {
-					ball = [SPOT[0], SPOT[1] - 3 * Math.sin((t - shot.start) / 40), 1, 1];
+					ball = [SPOT[0], SPOT[1], 1, 1, 0, SPOT[1] + 15];
 				} else if (t < shot.impact) {
 					const p = (t - launch) / shot.flight, e = 1 - (1 - p) ** 1.6;
 					const arc = (ty < 200 ? 46 : 22) * Math.sin(Math.PI * p);
-					ball = [SPOT[0] + (tx - SPOT[0]) * e, SPOT[1] + (ty - SPOT[1]) * e - arc, 1 - 0.42 * e, 1];
+					ball = [SPOT[0] + (tx - SPOT[0]) * e, SPOT[1] + (ty - SPOT[1]) * e - arc, 1 - 0.42 * e, 1, (t - launch) / 70, SPOT[1] + 15 + (GROUND + 4 - SPOT[1] - 15) * e];
 				} else if (!outcome || resolved == null) {
-					ball = [tx, ty, 0.58, 1];
+					ball = [tx, ty, 0.58, 1, shot.flight / 70, 0];
 				} else {
 					const since = t - resolved;
 					if (outcome.kind === "goal") {
 						const p = clamp(since / 260);
-						ball = [tx + (320 - tx) * 0.06 * p, ty + 8 * p, 0.58 - 0.1 * p, 1];
+						ball = [tx + (320 - tx) * 0.06 * p, ty + 8 * p, 0.58 - 0.1 * p, 1, shot.flight / 70 + p, 0];
 						netFlash = 1 - clamp(since / 500);
 						inNet = true;
 					} else {
 						const [gx, gy] = glove(keeper);
 						const p = clamp(since / 120);
-						ball = [tx + (gx - tx) * p, ty + (gy - ty) * p, 0.58, 1 - clamp((since - 200) / 220)];
+						ball = [tx + (gx - tx) * p, ty + (gy - ty) * p, 0.58, 1 - clamp((since - 200) / 220), shot.flight / 70, 0];
 					}
 				}
 			}
@@ -515,23 +652,52 @@ import T from "../components/T.astro";
 		pointer-events: none;
 		font-weight: 800;
 	}
+	/* A white pill just under the KICKS board, readable over the net. */
 	.keeper-toast {
-		top: 3%;
-		font-size: clamp(1.1rem, 4.5vw, 1.6rem);
-		color: var(--color-dark);
+		top: 14%;
+		width: fit-content;
+		margin: 0 auto;
+		padding: 4px 14px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.95);
+		box-shadow: 0 2px 8px rgba(20, 27, 45, 0.18);
+		font-size: clamp(1rem, 4.2vw, 1.45rem);
+		color: #141b2d;
 		opacity: 0;
 		transform: translateY(-6px);
 		transition: opacity 0.15s, transform 0.15s;
 	}
 	.keeper-toast.show { opacity: 1; transform: none; }
-	.keeper-toast[data-kind="perfect"] { color: var(--color-green); }
-	.keeper-toast[data-kind="goal"] { color: #b3412e; }
+	.keeper-toast[data-kind="perfect"] { color: #ffffff; background: #1d3f9e; }
+	.keeper-toast[data-kind="goal"] { color: #ffffff; background: #e31b23; }
 	.keeper-toast[data-kind="neutral"] { font-size: 0.95rem; font-weight: 700; }
+	/* A navy badge with the logo's red/blue ring, so it never blends into the kit or pitch. */
 	.keeper-countdown {
-		top: 34%;
-		font-size: clamp(3rem, 14vw, 5rem);
-		color: var(--color-green);
+		top: 24%;
+		left: 50%;
+		right: auto;
+		width: clamp(64px, 18vw, 96px);
+		aspect-ratio: 1;
+		display: grid;
+		place-items: center;
+		border: clamp(4px, 1.2vw, 6px) solid transparent;
+		border-radius: 50%;
+		background: linear-gradient(#141b2d, #141b2d) padding-box, linear-gradient(135deg, #e31b23 50%, #1d3f9e 50%) border-box;
+		box-shadow: 0 6px 18px rgba(20, 27, 45, 0.35);
+		color: #ffffff;
+		font-size: clamp(2rem, 9vw, 3.2rem);
+		line-height: 1;
+		font-variant-numeric: tabular-nums;
+		transform: translate(-50%, -50%);
 	}
+	.keeper-countdown:empty { display: none; }
+	.keeper-countdown.pop { animation: keeper-pop 0.6s ease-out; }
+	@keyframes keeper-pop {
+		0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+		25% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+		100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+	}
+	@media (prefers-reduced-motion: reduce) { .keeper-countdown.pop { animation: none; } }
 
 	.keeper-panel {
 		grid-area: 1 / 1;
