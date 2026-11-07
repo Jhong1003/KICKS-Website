@@ -1030,6 +1030,42 @@ counts load, so nothing shows if the API or table is missing. One-time setup:
 `npx wrangler d1 migrations apply kicks-visits --remote`. Tests:
 `node --test tests/reactions.test.mjs`.
 
+### Keeper game
+
+`/keeper` ([src/pages/keeper.astro](src/pages/keeper.astro), linked from the footer as
+"골키퍼 게임") is a small goalkeeper reaction game in the site's flat 2D colours
+(canvas). Shots go to one of five spots — four corners and the middle. **Corners
+are a swipe toward that corner; the middle is a tap, or simply staying put**, since
+the keeper starts there. Keyboard: Q E Z C corners, Space/S middle. Three goals end
+the run (at most 30 shots, each a little faster).
+
+Judging is the same from the first shot, in
+[src/lib/keeper/rules.js](src/lib/keeper/rules.js) (shared by the page and the
+Worker): right corner within ±`PERFECT_WINDOW` (85 ms) of the ball arriving =
+**perfect save** (200), within ±`SAVE_WINDOW` (240 ms) = **save** (100), otherwise
+or the wrong way = **goal**. Middle shot: a tap within ±85 ms = perfect, any other
+tap or no move at all = save, diving to a corner = goal. A streak adds +10 per three
+saves in a row (capped at +100). One move per shot: a second move on the same shot
+is ignored by the page and rejected by the Worker.
+
+**Scores are replayed, never trusted.** [functions/api/keeper.js](functions/api/keeper.js)
+(`/api/keeper`, Worker-first, same-origin + `X-Kicks-Keeper: 1`) hands out a seed
+on `POST {action:"start", name}`; the browser sends only its moves on
+`POST {action:"finish", id, version, inputs}` and the Worker replays them with the
+same rules. A run is single-use, tied to the browser's `kicks-keeper` cookie (an
+HttpOnly random id, no account), refused if finished faster than it could have been
+played or more than 130 s after starting. `GET` returns the top 20 and this browser's
+best + rank. Tables `keeper_runs` / `keeper_scores` in
+[migrations/0004_keeper_arcade.sql](migrations/0004_keeper_arcade.sql) (same
+`VISITS_DB`); **one best per browser**, kept only when beaten. Names are typed
+nicknames (1–16 letters/numbers/space . _ -), not verified identities. Changing the
+rules changes every replay: bump `VERSION` and treat old scores as a separate board.
+If the API is down the game still plays as an unranked practice run.
+
+One-time setup before deploying: `npx wrangler d1 migrations apply kicks-visits --remote`.
+Tests: `node --test tests/keeper.test.mjs` (rules, plus the API against real SQLite
+via `node:sqlite` with the migration applied).
+
 ### Match Forecasts
 
 `MatchForecasts.astro` (League page Overview, between Match Results and Title

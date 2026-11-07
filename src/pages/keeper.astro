@@ -1,0 +1,617 @@
+---
+// /keeper — KICKS Keeper, a small goalkeeper reaction game.
+//
+// Shots come from a server-issued seed (src/lib/keeper/rules.js, shared with
+// functions/api/keeper.js). The browser plays the run and sends only the
+// inputs; the Worker replays them to score the run, so a typed-in score never
+// reaches the leaderboard. Names are self-chosen nicknames, not identities.
+//
+// Controls: swipe toward a corner to dive there; tap (or just stay put) for a
+// shot down the middle. Keyboard: Q E Z C for the corners, Space or S for the
+// middle. Without the API the game still plays as practice, unranked.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import T from "../components/T.astro";
+---
+
+<BaseLayout title="Keeper Challenge | KICKS" description="Save as many shots as you can and climb the KICKS keeper leaderboard.">
+	<main class="keeper-page">
+		<section class="content-section" aria-labelledby="keeper-title">
+			<p class="section-label">KICKS KEEPER</p>
+			<h1 id="keeper-title"><T en="Keeper Challenge" ko="골키퍼 챌린지" /></h1>
+			<T
+				as="p"
+				class="about-description keeper-intro"
+				en="Read the shot, dive at the right moment. Three goals and you're out."
+				ko="슈팅 방향을 읽고 타이밍에 맞춰 막아보세요. 3골 먹으면 끝이에요."
+			/>
+
+			<div class="keeper-game">
+				<div class="keeper-hud" aria-live="off">
+					<span class="keeper-hud-item"><span class="keeper-hud-label"><T en="Score" ko="점수" /></span> <strong data-hud-score>0</strong></span>
+					<span class="keeper-hud-item"><span class="keeper-hud-label"><T en="Combo" ko="콤보" /></span> <strong data-hud-combo>0</strong></span>
+					<span class="keeper-hud-item keeper-lives" data-hud-lives aria-label="3"><span></span><span></span><span></span></span>
+				</div>
+
+				<div class="keeper-stage" data-stage tabindex="-1">
+					<canvas width="640" height="480" data-canvas aria-hidden="true"></canvas>
+					<p class="keeper-toast" data-toast aria-live="assertive"></p>
+					<p class="keeper-countdown" data-countdown aria-live="assertive"></p>
+
+					<form class="keeper-panel" data-start-panel novalidate>
+						<T as="h2" en="Ready to keep?" ko="골문을 지켜볼까요?" />
+						<ul class="keeper-howto">
+							<T as="li" en="Corners: swipe toward the corner" ko="네 모서리: 그 방향으로 스와이프" />
+							<T as="li" en="Middle: tap, or just stay put" ko="가운데: 탭하거나 그대로 서 있기" />
+							<T as="li" en="Dive as the ball arrives for a perfect save" ko="공이 도착하는 순간에 맞추면 완벽한 선방" />
+							<T as="li" class="keeper-keys" en="Keyboard: Q E Z C corners, Space middle" ko="키보드: Q E Z C 모서리, Space 가운데" />
+						</ul>
+						<label class="keeper-name">
+							<T en="Name on the leaderboard" ko="랭킹에 표시할 이름" />
+							<input
+								type="text"
+								name="name"
+								maxlength="16"
+								autocomplete="nickname"
+								required
+								data-name
+								placeholder="Nickname"
+								data-i18n-attrs={JSON.stringify({ placeholder: { en: "Nickname", ko: "닉네임" } })}
+							/>
+						</label>
+						<p class="keeper-error" data-start-error role="alert"></p>
+						<button type="submit" class="button-primary keeper-button" data-start><T en="Start" ko="시작" /></button>
+					</form>
+
+					<div class="keeper-panel" data-result-panel hidden>
+						<T as="h2" en="Full time" ko="경기 종료" />
+						<p class="keeper-final" data-final-score>0</p>
+						<p class="keeper-final-detail" data-final-detail></p>
+						<p class="keeper-final-note" data-final-note role="status"></p>
+						<button type="button" class="button-primary keeper-button" data-again><T en="Play again" ko="다시 하기" /></button>
+					</div>
+				</div>
+			</div>
+
+			<div class="keeper-board">
+				<T as="h2" en="Leaderboard" ko="랭킹" />
+				<p class="keeper-board-me" data-board-me hidden></p>
+				<ol class="keeper-board-list" data-board-list></ol>
+				<p class="keeper-board-empty" data-board-empty><T en="No scores yet — be the first." ko="아직 기록이 없어요. 첫 번째 주인공이 되어보세요." /></p>
+				<T as="p" class="keeper-board-note" en="Each browser keeps its best score. Names are nicknames anyone can pick." ko="브라우저마다 최고 기록 하나가 남아요. 이름은 누구나 정할 수 있는 닉네임이에요." />
+			</div>
+		</section>
+	</main>
+</BaseLayout>
+
+<script>
+	import { VERSION, SAVE_WINDOW, shotsFor, replay } from "../lib/keeper/rules.js";
+	import { bilingualHtml as L } from "../lib/i18n";
+
+	const $ = <E extends Element>(selector: string) => document.querySelector<E>(selector)!;
+	const canvas = $<HTMLCanvasElement>("[data-canvas]");
+	const ctx = canvas.getContext("2d")!;
+	const stage = $<HTMLElement>("[data-stage]");
+	const toast = $<HTMLElement>("[data-toast]");
+	const countdown = $<HTMLElement>("[data-countdown]");
+	const startPanel = $<HTMLFormElement>("[data-start-panel]");
+	const resultPanel = $<HTMLElement>("[data-result-panel]");
+	const nameInput = $<HTMLInputElement>("[data-name]");
+	const startError = $<HTMLElement>("[data-start-error]");
+	const startButton = $<HTMLButtonElement>("[data-start]");
+	const hudScore = $<HTMLElement>("[data-hud-score]");
+	const hudCombo = $<HTMLElement>("[data-hud-combo]");
+	const hudLives = $<HTMLElement>("[data-hud-lives]");
+
+	const API = "/api/keeper";
+	const NAME_KEY = "kicks-keeper-name";
+	const NAME_RULE = /^[\p{L}\p{N} ._-]{1,16}$/u;
+	const css = getComputedStyle(document.documentElement);
+	const color = (name: string, fallback: string) => css.getPropertyValue(name).trim() || fallback;
+	const C = {
+		cream: color("--color-background", "#f7f6f2"),
+		green: color("--color-green", "#3f5128"),
+		dark: color("--color-dark", "#292929"),
+		sage: color("--color-sage", "#dce2d3"),
+	};
+
+	// Scene geometry in canvas units (640 × 480).
+	const GOAL = { left: 92, right: 548, top: 70, bottom: 312 };
+	const TARGET: Record<string, [number, number]> = {
+		tl: [158, 118], tr: [482, 118], bl: [158, 268], br: [482, 268], center: [320, 196],
+	};
+	const SPOT: [number, number] = [320, 436];
+	const HOME: [number, number] = [320, 262];
+	const DIVE_MS = 170;
+
+	type Input = { at: number; direction: string };
+	type Run = {
+		id: string | null; seed: number; shots: ReturnType<typeof shotsFor>; inputs: Input[];
+		t0: number; resolvedAt: Map<number, number>; done: boolean; lastResolved: number;
+	};
+	let run: Run | null = null;
+
+	// ---------- storage + API ----------
+	const store = {
+		get(key: string) { try { return localStorage.getItem(key); } catch { return null; } },
+		set(key: string, value: string) { try { localStorage.setItem(key, value); } catch {} },
+	};
+	nameInput.value = store.get(NAME_KEY) ?? "";
+
+	async function api(body?: object) {
+		const response = await fetch(API, body ? {
+			method: "POST",
+			headers: { "Content-Type": "application/json", "X-Kicks-Keeper": "1" },
+			body: JSON.stringify(body),
+		} : { cache: "no-store" });
+		const data = await response.json().catch(() => ({}));
+		return { ok: response.ok, status: response.status, data };
+	}
+
+	async function loadBoard() {
+		const list = $<HTMLOListElement>("[data-board-list]");
+		const empty = $<HTMLElement>("[data-board-empty]");
+		const me = $<HTMLElement>("[data-board-me]");
+		try {
+			const { ok, data } = await api();
+			if (!ok) throw Error();
+			list.replaceChildren(...data.entries.map((entry: any, i: number) => {
+				const li = document.createElement("li");
+				const rank = document.createElement("span"); rank.className = "keeper-rank"; rank.textContent = String(i + 1);
+				const name = document.createElement("span"); name.className = "keeper-row-name"; name.textContent = entry.name;
+				const detail = document.createElement("span"); detail.className = "keeper-row-detail";
+				detail.innerHTML = L(`${entry.saves} saves · ${entry.perfect} perfect`, `선방 ${entry.saves} · 완벽 ${entry.perfect}`);
+				const score = document.createElement("strong"); score.textContent = entry.score.toLocaleString();
+				li.append(rank, name, detail, score);
+				return li;
+			}));
+			empty.hidden = data.entries.length > 0;
+			me.hidden = data.best == null;
+			if (data.best != null) me.innerHTML = L(`Your best: ${data.best.toLocaleString()} · #${data.rank}`, `내 최고 기록: ${data.best.toLocaleString()}점 · ${data.rank}위`);
+		} catch {
+			list.replaceChildren();
+			empty.innerHTML = L("The leaderboard is unavailable right now.", "지금은 랭킹을 불러올 수 없어요.");
+			empty.hidden = false;
+		}
+	}
+
+	// ---------- game flow ----------
+	startPanel.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		const name = nameInput.value.normalize("NFKC").trim().replace(/\s+/gu, " ");
+		if (!NAME_RULE.test(name)) {
+			startError.innerHTML = L("Use 1–16 letters, numbers, spaces, . _ -", "이름은 1–16자, 글자·숫자·공백·. _ - 만 쓸 수 있어요.");
+			nameInput.focus();
+			return;
+		}
+		startError.textContent = "";
+		store.set(NAME_KEY, name);
+		startButton.disabled = true;
+		let id: string | null = null, seed: number;
+		try {
+			const { ok, status, data } = await api({ action: "start", name });
+			if (status === 429) {
+				startError.innerHTML = L("Hold on a second and try again.", "잠시 후 다시 시작해주세요.");
+				startButton.disabled = false;
+				return;
+			}
+			if (status === 400 && data.error === "name") {
+				startError.innerHTML = L("That name can't be used.", "사용할 수 없는 이름이에요.");
+				startButton.disabled = false;
+				return;
+			}
+			if (!ok || data.version !== VERSION) throw Error();
+			id = data.id; seed = data.seed;
+		} catch {
+			seed = crypto.getRandomValues(new Uint32Array(1))[0];
+		}
+		startButton.disabled = false;
+		begin(id, seed);
+	});
+
+	$("[data-again]").addEventListener("click", () => {
+		resultPanel.hidden = true;
+		startPanel.hidden = false;
+		startButton.focus();
+	});
+
+	function begin(id: string | null, seed: number) {
+		startPanel.hidden = true;
+		resultPanel.hidden = true;
+		run = { id, seed, shots: shotsFor(seed), inputs: [], t0: Infinity, resolvedAt: new Map(), done: false, lastResolved: 0 };
+		updateHud(0, 0, 3);
+		stage.focus({ preventScroll: true });
+		let n = 3;
+		const tick = () => {
+			if (n > 0) { countdown.textContent = String(n--); setTimeout(tick, 600); return; }
+			countdown.textContent = "";
+			run!.t0 = performance.now();
+		};
+		if (!id) flash(L("Practice — not ranked", "연습 모드 · 기록 저장 안 됨"), "neutral", 1600);
+		tick();
+	}
+
+	async function finish(current: Run, result: ReturnType<typeof replay>) {
+		current.done = true;
+		$("[data-final-score]").textContent = result.score.toLocaleString();
+		$("[data-final-detail]").innerHTML = L(
+			`${result.saves} saves · ${result.perfect} perfect · best combo ${result.bestCombo}`,
+			`선방 ${result.saves} · 완벽한 선방 ${result.perfect} · 최고 콤보 ${result.bestCombo}`,
+		);
+		const note = $<HTMLElement>("[data-final-note]");
+		note.innerHTML = current.id ? L("Saving…", "기록 저장 중…") : L("Practice run — not ranked.", "연습 기록이라 랭킹에 올라가지 않아요.");
+		setTimeout(() => { resultPanel.hidden = false; $<HTMLButtonElement>("[data-again]").focus(); }, 700);
+		if (!current.id) return;
+		try {
+			const { ok, data } = await api({ action: "finish", id: current.id, version: VERSION, inputs: current.inputs });
+			if (!ok) throw Error();
+			note.innerHTML = data.newBest ? L("New personal best! 🎉", "새 최고 기록! 🎉") : L("Saved. Your best still stands.", "저장 완료 · 최고 기록은 그대로예요.");
+			loadBoard();
+		} catch {
+			note.innerHTML = L("Couldn't save this run.", "기록을 저장하지 못했어요.");
+		}
+	}
+
+	// ---------- input ----------
+	function press(direction: string, timeStamp: number) {
+		const current = run;
+		if (!current || current.done || !Number.isFinite(current.t0)) return;
+		const at = Math.max(Math.round(timeStamp - current.t0), (current.inputs.at(-1)?.at ?? -1) + 1);
+		const shot = current.shots.find((s) => at >= s.start && at <= s.impact + SAVE_WINDOW);
+		// One move per shot, and only while a shot is live (the rules reject anything else).
+		if (!shot || current.inputs.some((input) => input.at >= shot.start && input.at <= shot.impact + SAVE_WINDOW)) return;
+		if (current.resolvedAt.has(shot.index)) return;
+		current.inputs.push({ at, direction });
+	}
+
+	const SWIPE_PX = 24;
+	// A swipe counts the moment it passes SWIPE_PX; a tap counts from when the finger went down.
+	let gesture: { id: number; x: number; y: number; at: number; used: boolean } | null = null;
+	stage.addEventListener("pointerdown", (event) => {
+		if (!run || run.done || (event.target as Element).closest(".keeper-panel")) return;
+		gesture = { id: event.pointerId, x: event.clientX, y: event.clientY, at: event.timeStamp, used: false };
+		stage.setPointerCapture?.(event.pointerId);
+		event.preventDefault();
+	});
+	stage.addEventListener("pointermove", (event) => {
+		if (!gesture || gesture.used || event.pointerId !== gesture.id) return;
+		const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
+		if (Math.hypot(dx, dy) < SWIPE_PX) return;
+		gesture.used = true;
+		press((dy < 0 ? "t" : "b") + (dx < 0 ? "l" : "r"), event.timeStamp);
+	});
+	const release = (event: PointerEvent) => {
+		if (!gesture || event.pointerId !== gesture.id) return;
+		if (!gesture.used && event.type === "pointerup") press("center", gesture.at);
+		gesture = null;
+	};
+	stage.addEventListener("pointerup", release);
+	stage.addEventListener("pointercancel", release);
+
+	const KEYS: Record<string, string> = { KeyQ: "tl", KeyE: "tr", KeyZ: "bl", KeyC: "br", KeyS: "center", Space: "center",
+		Numpad7: "tl", Numpad9: "tr", Numpad1: "bl", Numpad3: "br", Numpad5: "center" };
+	document.addEventListener("keydown", (event) => {
+		const direction = KEYS[event.code];
+		if (!direction || event.repeat || !run || run.done || (event.target as Element).closest?.("input, textarea, button")) return;
+		event.preventDefault();
+		press(direction, event.timeStamp);
+	});
+
+	// ---------- HUD + toast ----------
+	function updateHud(score: number, combo: number, lives: number) {
+		hudScore.textContent = score.toLocaleString();
+		hudCombo.textContent = String(combo);
+		hudLives.setAttribute("aria-label", String(lives));
+		[...hudLives.children].forEach((dot, i) => dot.classList.toggle("lost", i >= lives));
+	}
+	let toastTimer = 0;
+	function flash(html: string, kind: string, ms = 650) {
+		toast.innerHTML = html;
+		toast.dataset.kind = kind;
+		toast.classList.add("show");
+		clearTimeout(toastTimer);
+		toastTimer = window.setTimeout(() => toast.classList.remove("show"), ms);
+	}
+	const OUTCOME_TEXT: Record<string, string> = {
+		perfect: L("Perfect save!", "완벽한 선방!"),
+		save: L("Save", "선방"),
+		goal: L("Goal", "실점"),
+	};
+
+	// ---------- drawing ----------
+	function resize() {
+		const ratio = Math.min(window.devicePixelRatio || 1, 2);
+		canvas.width = 640 * ratio; canvas.height = 480 * ratio;
+		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+	}
+	resize();
+	window.addEventListener("resize", resize);
+
+	const ease = (p: number) => 1 - (1 - p) ** 3;
+	const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
+
+	function drawScene(netFlash: number) {
+		ctx.fillStyle = C.cream; ctx.fillRect(0, 0, 640, 480);
+		// pitch
+		ctx.fillStyle = C.green; ctx.fillRect(0, GOAL.bottom, 640, 480 - GOAL.bottom);
+		ctx.strokeStyle = "rgba(247,246,242,0.7)"; ctx.lineWidth = 3;
+		ctx.beginPath(); ctx.moveTo(0, GOAL.bottom); ctx.lineTo(640, GOAL.bottom); ctx.stroke();
+		ctx.beginPath(); ctx.moveTo(176, GOAL.bottom); ctx.lineTo(140, 380); ctx.lineTo(500, 380); ctx.lineTo(464, GOAL.bottom); ctx.stroke();
+		ctx.fillStyle = "rgba(247,246,242,0.8)"; ctx.beginPath(); ctx.ellipse(SPOT[0], SPOT[1] + 14, 7, 3, 0, 0, Math.PI * 2); ctx.fill();
+		// net
+		ctx.fillStyle = C.sage; ctx.fillRect(GOAL.left, GOAL.top, GOAL.right - GOAL.left, GOAL.bottom - GOAL.top);
+		if (netFlash > 0) { ctx.fillStyle = `rgba(63,81,40,${0.18 * netFlash})`; ctx.fillRect(GOAL.left, GOAL.top, GOAL.right - GOAL.left, GOAL.bottom - GOAL.top); }
+		ctx.strokeStyle = "rgba(63,81,40,0.16)"; ctx.lineWidth = 1;
+		ctx.beginPath();
+		for (let x = GOAL.left + 19; x < GOAL.right; x += 19) { ctx.moveTo(x, GOAL.top); ctx.lineTo(x, GOAL.bottom); }
+		for (let y = GOAL.top + 19; y < GOAL.bottom; y += 19) { ctx.moveTo(GOAL.left, y); ctx.lineTo(GOAL.right, y); }
+		ctx.stroke();
+		// posts and bar
+		ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 10; ctx.lineJoin = "round";
+		ctx.beginPath(); ctx.moveTo(GOAL.left, GOAL.bottom + 2); ctx.lineTo(GOAL.left, GOAL.top); ctx.lineTo(GOAL.right, GOAL.top); ctx.lineTo(GOAL.right, GOAL.bottom + 2); ctx.stroke();
+		ctx.strokeStyle = "rgba(41,41,41,0.18)"; ctx.lineWidth = 1.5; ctx.stroke();
+	}
+
+	// Keeper pose for a direction and dive progress: where it stands, how far it leans.
+	function pose(direction: string | null, p: number) {
+		if (!direction) return { x: HOME[0], y: HOME[1], angle: 0, reach: 0 };
+		if (direction === "center") return { x: HOME[0], y: HOME[1] - 18 * Math.sin(Math.PI * clamp(p * 1.4)), angle: 0, reach: p };
+		const [tx, ty] = TARGET[direction];
+		const side = direction.endsWith("l") ? -1 : 1;
+		const high = direction.startsWith("t");
+		const e = ease(p);
+		return { x: HOME[0] + (tx - HOME[0]) * 0.72 * e, y: HOME[1] + (ty - HOME[1]) * 0.6 * e + (high ? -6 : 18) * e, angle: side * (high ? 0.85 : 1.25) * e, reach: e };
+	}
+	function glove(k: ReturnType<typeof pose>): [number, number] {
+		const len = 38 + 30 * k.reach; // matches the arm length drawn in drawKeeper
+		return [k.x + Math.sin(k.angle) * len, k.y - Math.cos(k.angle) * len];
+	}
+
+	function drawKeeper(k: ReturnType<typeof pose>) {
+		ctx.save();
+		ctx.translate(k.x, k.y);
+		ctx.rotate(k.angle);
+		// shadow-free flat figure: legs, body, head, arms
+		ctx.fillStyle = C.dark;
+		ctx.fillRect(-15, 18, 11, 30); ctx.fillRect(4, 18, 11, 30);
+		ctx.fillStyle = C.green;
+		ctx.beginPath(); ctx.roundRect(-22, -30, 44, 54, 12); ctx.fill();
+		ctx.fillStyle = C.cream; ctx.font = "700 16px -apple-system, 'Segoe UI', sans-serif"; ctx.textAlign = "center"; ctx.fillText("1", 0, 2);
+		ctx.fillStyle = "#e9c9a6";
+		ctx.beginPath(); ctx.arc(0, -44, 13, 0, Math.PI * 2); ctx.fill();
+		const spread = 30 - 20 * k.reach, up = -38 - 30 * k.reach;
+		ctx.strokeStyle = C.green; ctx.lineWidth = 10; ctx.lineCap = "round";
+		ctx.beginPath(); ctx.moveTo(-18, -22); ctx.lineTo(-spread, up); ctx.moveTo(18, -22); ctx.lineTo(spread, up); ctx.stroke();
+		ctx.fillStyle = C.cream; ctx.strokeStyle = C.dark; ctx.lineWidth = 2;
+		for (const x of [-spread, spread]) { ctx.beginPath(); ctx.arc(x, up, 8.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+		ctx.restore();
+	}
+
+	function drawBall(x: number, y: number, scale: number, alpha = 1) {
+		ctx.save();
+		ctx.globalAlpha = alpha;
+		ctx.translate(x, y); ctx.scale(scale, scale);
+		ctx.fillStyle = "#ffffff"; ctx.strokeStyle = C.dark; ctx.lineWidth = 2;
+		ctx.beginPath(); ctx.arc(0, 0, 16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+		ctx.fillStyle = C.dark;
+		ctx.beginPath();
+		for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * (Math.PI * 2 / 5); ctx[i ? "lineTo" : "moveTo"](Math.cos(a) * 6, Math.sin(a) * 6); }
+		ctx.closePath(); ctx.fill();
+		ctx.restore();
+	}
+
+	function frame(now: number) {
+		requestAnimationFrame(frame);
+		const current = run;
+		const t = current && Number.isFinite(current.t0) ? now - current.t0 : -1;
+		let netFlash = 0, keeper = pose(null, 0), ball: [number, number, number, number] | null = [...SPOT, 1, 1], inNet = false;
+
+		if (current && t >= 0) {
+			const result = replay(current.seed, current.inputs, current.done ? current.lastResolved : t);
+			for (const outcome of result.outcomes) {
+				if (current.resolvedAt.has(outcome.index)) continue;
+				current.resolvedAt.set(outcome.index, t);
+				flash(OUTCOME_TEXT[outcome.kind], outcome.kind);
+			}
+			updateHud(result.score, result.combo, result.lives);
+			if (result.finished && !current.done) { current.lastResolved = result.finishedAt; finish(current, result); }
+
+			const shot = current.shots.find((s) => t >= s.start && t < s.end) ?? (current.done ? current.shots[result.resolved - 1] : null);
+			if (shot) {
+				const input = current.inputs.find((i) => i.at >= shot.start && i.at <= shot.impact + SAVE_WINDOW);
+				keeper = input ? pose(input.direction, clamp((t - input.at) / DIVE_MS)) : pose(null, 0);
+				const launch = shot.impact - shot.flight;
+				const [tx, ty] = TARGET[shot.direction];
+				const resolved = current.resolvedAt.get(shot.index);
+				const outcome = result.outcomes.find((o) => o.index === shot.index);
+				if (t < launch) {
+					ball = [SPOT[0], SPOT[1] - 3 * Math.sin((t - shot.start) / 40), 1, 1];
+				} else if (t < shot.impact) {
+					const p = (t - launch) / shot.flight, e = 1 - (1 - p) ** 1.6;
+					const arc = (ty < 200 ? 46 : 22) * Math.sin(Math.PI * p);
+					ball = [SPOT[0] + (tx - SPOT[0]) * e, SPOT[1] + (ty - SPOT[1]) * e - arc, 1 - 0.42 * e, 1];
+				} else if (!outcome || resolved == null) {
+					ball = [tx, ty, 0.58, 1];
+				} else {
+					const since = t - resolved;
+					if (outcome.kind === "goal") {
+						const p = clamp(since / 260);
+						ball = [tx + (320 - tx) * 0.06 * p, ty + 8 * p, 0.58 - 0.1 * p, 1];
+						netFlash = 1 - clamp(since / 500);
+						inNet = true;
+					} else {
+						const [gx, gy] = glove(keeper);
+						const p = clamp(since / 120);
+						ball = [tx + (gx - tx) * p, ty + (gy - ty) * p, 0.58, 1 - clamp((since - 200) / 220)];
+					}
+				}
+			}
+			if (current.done && t > current.lastResolved + 900) ball = null;
+		}
+
+		drawScene(netFlash);
+		// A ball that went in sits in the net behind the keeper; otherwise it is in front.
+		if (ball && inNet) drawBall(...ball);
+		drawKeeper(keeper);
+		if (ball && !inNet) drawBall(...ball);
+	}
+	requestAnimationFrame(frame);
+	loadBoard();
+</script>
+
+<style>
+	.keeper-intro { margin-top: 16px; }
+
+	.keeper-game {
+		max-width: 640px;
+		margin: 28px 0 0;
+	}
+
+	.keeper-hud {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		margin-bottom: 10px;
+		font-size: 0.95rem;
+	}
+	.keeper-hud-label {
+		color: rgba(41, 41, 41, 0.6);
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+	.keeper-hud strong { font-variant-numeric: tabular-nums; }
+	.keeper-lives { display: inline-flex; gap: 6px; margin-left: auto; }
+	.keeper-lives span {
+		width: 12px; height: 12px; border-radius: 50%;
+		background: var(--color-green);
+		transition: background-color 0.2s;
+	}
+	.keeper-lives span.lost { background: transparent; box-shadow: inset 0 0 0 2px rgba(41, 41, 41, 0.25); }
+
+	/* Canvas and panels share one grid cell, so a tall panel (small phones)
+	   grows the stage instead of being clipped by the 4:3 field. */
+	.keeper-stage {
+		position: relative;
+		display: grid;
+		overflow: hidden;
+		border-radius: 12px;
+		background: var(--color-background);
+		box-shadow: 0 0 0 1px rgba(41, 41, 41, 0.1);
+		touch-action: none;
+		user-select: none;
+		-webkit-user-select: none;
+		-webkit-touch-callout: none;
+		outline: none;
+	}
+	.keeper-stage canvas { grid-area: 1 / 1; align-self: center; display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; }
+
+	.keeper-toast,
+	.keeper-countdown {
+		position: absolute;
+		left: 0; right: 0;
+		margin: 0;
+		text-align: center;
+		pointer-events: none;
+		font-weight: 800;
+	}
+	.keeper-toast {
+		top: 3%;
+		font-size: clamp(1.1rem, 4.5vw, 1.6rem);
+		color: var(--color-dark);
+		opacity: 0;
+		transform: translateY(-6px);
+		transition: opacity 0.15s, transform 0.15s;
+	}
+	.keeper-toast.show { opacity: 1; transform: none; }
+	.keeper-toast[data-kind="perfect"] { color: var(--color-green); }
+	.keeper-toast[data-kind="goal"] { color: #b3412e; }
+	.keeper-toast[data-kind="neutral"] { font-size: 0.95rem; font-weight: 700; }
+	.keeper-countdown {
+		top: 34%;
+		font-size: clamp(3rem, 14vw, 5rem);
+		color: var(--color-green);
+	}
+
+	.keeper-panel {
+		grid-area: 1 / 1;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		padding: 20px;
+		background: rgba(247, 246, 242, 0.94);
+		text-align: center;
+		user-select: text;
+		-webkit-user-select: text;
+		touch-action: auto;
+		overflow-y: auto;
+	}
+	.keeper-panel[hidden] { display: none; }
+	.keeper-panel h2 { margin: 0; font-size: clamp(1.25rem, 4vw, 1.6rem); }
+	.keeper-howto {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		font-size: 0.9rem;
+		line-height: 1.6;
+		color: rgba(41, 41, 41, 0.78);
+	}
+	.keeper-keys { display: none; }
+	@media (hover: hover) and (pointer: fine) { .keeper-keys { display: list-item; } }
+	.keeper-name {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		width: min(260px, 100%);
+		font-size: 0.8rem;
+		font-weight: 700;
+		color: rgba(41, 41, 41, 0.7);
+	}
+	.keeper-name input {
+		padding: 11px 12px;
+		border: 1px solid rgba(41, 41, 41, 0.25);
+		border-radius: 6px;
+		background: #fff;
+		font: inherit;
+		font-size: 1rem;
+		font-weight: 500;
+		color: var(--color-dark);
+		text-align: center;
+	}
+	.keeper-name input:focus { outline: 2px solid var(--color-green); outline-offset: 1px; }
+	.keeper-error { min-height: 1.2em; margin: 0; font-size: 0.8rem; color: #b3412e; }
+	.keeper-button { border: 0; cursor: pointer; font: inherit; font-weight: 700; }
+	.keeper-button:disabled { opacity: 0.6; cursor: progress; }
+	.keeper-final {
+		margin: 0;
+		font-size: clamp(2.6rem, 11vw, 3.6rem);
+		font-weight: 800;
+		color: var(--color-green);
+		font-variant-numeric: tabular-nums;
+	}
+	.keeper-final-detail, .keeper-final-note { margin: 0; font-size: 0.9rem; }
+	.keeper-final-note { min-height: 1.3em; font-weight: 700; }
+
+	.keeper-board { max-width: 640px; margin-top: 44px; }
+	.keeper-board h2 { font-size: clamp(1.3rem, 3vw, 1.8rem); }
+	.keeper-board-me { margin: 10px 0 0; font-weight: 700; color: var(--color-green); }
+	.keeper-board-list { margin: 16px 0 0; padding: 0; list-style: none; }
+	/* Rows are built by the script, so they need :global to get these styles. */
+	.keeper-board-list :global(li) {
+		display: grid;
+		grid-template-columns: 2.2em minmax(0, 1fr) auto auto;
+		align-items: baseline;
+		gap: 12px;
+		padding: 10px 0;
+		border-bottom: 1px solid rgba(41, 41, 41, 0.08);
+	}
+	.keeper-board-list :global(.keeper-rank) { font-weight: 800; color: var(--color-green); font-variant-numeric: tabular-nums; }
+	.keeper-board-list :global(.keeper-row-name) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+	.keeper-board-list :global(.keeper-row-detail) { font-size: 0.78rem; color: rgba(41, 41, 41, 0.6); }
+	.keeper-board-list :global(strong) { font-variant-numeric: tabular-nums; }
+	.keeper-board-empty, .keeper-board-note { margin: 14px 0 0; font-size: 0.85rem; color: rgba(41, 41, 41, 0.65); }
+	@media (max-width: 420px) { .keeper-board-list :global(.keeper-row-detail) { display: none; } }
+</style>

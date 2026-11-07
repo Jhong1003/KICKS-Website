@@ -1,5 +1,6 @@
 import { onRequest as visits } from '../functions/api/visits.js';
 import { onRequest as perks } from '../functions/api/perks.js';
+import { onRequest as keeper } from '../functions/api/keeper.js';
 import { onRequest as reactions } from '../functions/api/reactions.js';
 
 export default {
@@ -7,6 +8,9 @@ export default {
     const { pathname } = new URL(request.url);
     if (pathname === '/api/visits') {
       return visits({ request, env });
+    }
+    if (pathname === '/api/keeper') {
+      return keeper({ request, env });
     }
     if (pathname === '/api/reactions') {
       return reactions({ request, env });
