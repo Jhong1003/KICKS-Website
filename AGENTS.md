@@ -1069,6 +1069,10 @@ One-time setup before deploying: `npx wrangler d1 migrations apply kicks-visits 
 Tests: `node --test tests/keeper.test.mjs` (rules, plus the API against real SQLite
 via `node:sqlite` with the migration applied).
 
+The keeper's head is a team player's photo, `public/keeper/face.webp` (a square
+face crop, 192 px, drawn as a circle; the page falls back to a drawn head if it
+fails to load). Swap that file to change the face, with the player's agreement.
+
 ### Match Forecasts
 
 `MatchForecasts.astro` (League page Overview, between Match Results and Title

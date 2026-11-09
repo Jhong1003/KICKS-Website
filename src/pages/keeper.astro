@@ -341,6 +341,10 @@ import T from "../components/T.astro";
 	const clamp = (v: number, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
 
 	// KICKS logo colours: navy, red and blue; the pitch keeps the site green.
+	// The keeper's face is a team player's photo (public/keeper/face.webp); until it
+	// loads, or if it fails, the drawn head is used.
+	const FACE = new Image();
+	FACE.src = "/keeper/face.webp";
 	const K = { navy: "#141b2d", red: "#e31b23", blue: "#1d3f9e", skin: "#e2b48c", hair: "#201a17", glove: "#f5f5f2" };
 	const GROUND = GOAL.bottom;
 
@@ -471,17 +475,6 @@ import T from "../components/T.astro";
 		ctx.beginPath(); ctx.moveTo(-24, -4); ctx.quadraticCurveTo(0, -12, 24, -30); ctx.stroke();
 		ctx.restore();
 		ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(-7, -40, 2.6, 0, Math.PI * 2); ctx.fill(); // crest
-		// neck and head
-		limb(b.neck, [b.neck[0], b.neck[1] + 6], 8, K.skin);
-		const [hx, hy] = b.head;
-		ctx.fillStyle = K.skin;
-		ctx.beginPath(); ctx.ellipse(hx - 11, hy + 1, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.ellipse(hx + 11, hy + 1, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
-		ctx.beginPath(); ctx.ellipse(hx, hy, 11, 12.5, 0, 0, Math.PI * 2); ctx.fill();
-		ctx.fillStyle = K.hair;
-		ctx.beginPath(); ctx.ellipse(hx, hy - 4, 11.6, 9.5, 0, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill();
-		ctx.beginPath(); ctx.ellipse(hx, hy - 6, 11.4, 6.5, 0, 0, Math.PI * 2); ctx.fill();
-		ctx.fillStyle = "#2a211c";
-		ctx.beginPath(); ctx.arc(hx - 4, hy + 1, 1.4, 0, Math.PI * 2); ctx.arc(hx + 4, hy + 1, 1.4, 0, Math.PI * 2); ctx.fill();
 		// arms: long keeper sleeves and gloves with KICKS cuffs
 		for (const [sh, el, ha] of [[b.shL, b.elL, b.haL], [b.shR, b.elR, b.haR]] as Pt[][]) {
 			limb(sh, el, 9.5, "#26345a", "#0b0f1a");
@@ -490,6 +483,30 @@ import T from "../components/T.astro";
 			limb(cuff, mid(el, ha, 0.9), 9.5, K.red);
 			ctx.fillStyle = K.glove; ctx.strokeStyle = "rgba(20,27,45,0.55)"; ctx.lineWidth = 1.5;
 			ctx.beginPath(); ctx.arc(ha[0], ha[1], 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+		}
+		// neck and head, drawn over the arms so a dive never hides the face
+		limb(b.neck, [b.neck[0], b.neck[1] + 6], 8, K.skin);
+		const [hx, hy] = b.head;
+		if (FACE.complete && FACE.naturalWidth) {
+			// A KICKS player's photo as the head: a round crop, a little big so the
+			// face reads at game size, ringed in the kit's navy.
+			const r = 17, cy = hy - 5;
+			ctx.save();
+			ctx.beginPath(); ctx.arc(hx, cy, r, 0, Math.PI * 2); ctx.closePath();
+			ctx.clip();
+			ctx.drawImage(FACE, hx - r, cy - r, r * 2, r * 2);
+			ctx.restore();
+			ctx.strokeStyle = K.navy; ctx.lineWidth = 2;
+			ctx.beginPath(); ctx.arc(hx, cy, r, 0, Math.PI * 2); ctx.stroke();
+		} else {
+			ctx.fillStyle = K.skin;
+			ctx.beginPath(); ctx.ellipse(hx - 11, hy + 1, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.ellipse(hx + 11, hy + 1, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+			ctx.beginPath(); ctx.ellipse(hx, hy, 11, 12.5, 0, 0, Math.PI * 2); ctx.fill();
+			ctx.fillStyle = K.hair;
+			ctx.beginPath(); ctx.ellipse(hx, hy - 4, 11.6, 9.5, 0, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill();
+			ctx.beginPath(); ctx.ellipse(hx, hy - 6, 11.4, 6.5, 0, 0, Math.PI * 2); ctx.fill();
+			ctx.fillStyle = "#2a211c";
+			ctx.beginPath(); ctx.arc(hx - 4, hy + 1, 1.4, 0, Math.PI * 2); ctx.arc(hx + 4, hy + 1, 1.4, 0, Math.PI * 2); ctx.fill();
 		}
 		ctx.restore();
 	}
