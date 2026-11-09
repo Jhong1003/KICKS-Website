@@ -661,6 +661,14 @@ import T from "../components/T.astro";
 		ctx.restore();
 	}
 
+	// A small, repeatable variation per shot: how late it bends, a sideways curl
+	// of up to ±16 px mid-flight, and an arc 70–130% of the usual height.
+	function flightStyle(seed: number, index: number) {
+		let h = Math.imul((seed ^ (index + 1) * 0x9e3779b1) >>> 0, 0x85ebca6b) >>> 0;
+		const next = () => { h = (Math.imul(h ^ (h >>> 13), 0xc2b2ae35) + 0x165667b1) >>> 0; return h / 0x100000000; };
+		return { pow: 3.5 + next(), curl: (next() * 2 - 1) * 16, lift: 0.7 + next() * 0.6 };
+	}
+
 	function frame(now: number) {
 		requestAnimationFrame(frame);
 		const current = run;
@@ -693,12 +701,15 @@ import T from "../components/T.astro";
 					ball = [SPOT[0], SPOT[1], 1, 1, 0, SPOT[1] + 15];
 				} else if (t < shot.impact) {
 					// Steady speed toward the middle of the goal, then the shot bends to its
-					// corner late (p^4), so the direction can't be read off the first
-					// part of the flight. It still lands exactly on the target at impact.
-					const p = (t - launch) / shot.flight, bend = p ** 4;
+					// corner late (p^3.5..p^4.5), so the direction can't be read off the
+					// first part of the flight. Each shot gets its own small curl and arc
+					// height (from the seed, so a replay looks the same); every path
+					// still lands exactly on the target at impact.
+					const v = flightStyle(current.seed, shot.index);
+					const p = (t - launch) / shot.flight, bend = p ** v.pow;
 					const [cx, cy] = TARGET.center;
-					const arc = (ty < 200 ? 30 : 14) * Math.sin(Math.PI * p);
-					const bx = SPOT[0] + (cx - SPOT[0]) * p + (tx - cx) * bend;
+					const arc = (ty < 200 ? 30 : 14) * v.lift * Math.sin(Math.PI * p);
+					const bx = SPOT[0] + (cx - SPOT[0]) * p + (tx - cx) * bend + v.curl * Math.sin(Math.PI * p);
 					const by = SPOT[1] + (cy - SPOT[1]) * p + (ty - cy) * bend - arc;
 					ball = [bx, by, 1 - 0.42 * p, 1, (t - launch) / 45, SPOT[1] + 15 + (GROUND + 4 - SPOT[1] - 15) * p];
 				} else if (!outcome || resolved == null) {
