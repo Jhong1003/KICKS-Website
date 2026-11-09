@@ -398,7 +398,7 @@ import T from "../components/T.astro";
 
 	// Where the keeper stands, how far it leans and which pose it is in.
 	// `fall` (0..1) brings a corner dive down to the grass once the stretch has
-	// been held for SAVE_WINDOW, like a real keeper landing.
+	// been held for 300 ms, like a real keeper landing.
 	function pose(direction: string | null, p: number, t = 0, fall = 0): Pose {
 		if (!direction) {
 			const bob = Math.sin(t / 180) * 1.2; // small ready-stance bounce
@@ -564,7 +564,7 @@ import T from "../components/T.astro";
 			const shot = current.shots.find((s) => t >= s.start && t < s.end) ?? (current.done ? current.shots[result.resolved - 1] : null);
 			if (shot) {
 				const input = current.inputs.find((i) => i.at >= shot.start && i.at <= shot.impact + SAVE_WINDOW);
-				keeper = input ? pose(input.direction, clamp((t - input.at) / DIVE_MS), now, clamp((t - input.at - SAVE_WINDOW) / 260)) : pose(null, 0, now);
+				keeper = input ? pose(input.direction, clamp((t - input.at) / DIVE_MS), now, clamp((t - input.at - 300) / 260)) : pose(null, 0, now);
 				const launch = shot.impact - shot.flight;
 				const [tx, ty] = TARGET[shot.direction];
 				const resolved = current.resolvedAt.get(shot.index);
@@ -573,9 +573,9 @@ import T from "../components/T.astro";
 					ball = [SPOT[0], SPOT[1], 1, 1, 0, SPOT[1] + 15];
 				} else if (t < shot.impact) {
 					// Steady speed toward the middle of the goal, then the shot bends to its
-					// corner late (p^2.5), so the direction can't be read off the first
+					// corner late (p^4), so the direction can't be read off the first
 					// part of the flight. It still lands exactly on the target at impact.
-					const p = (t - launch) / shot.flight, bend = p ** 2.5;
+					const p = (t - launch) / shot.flight, bend = p ** 4;
 					const [cx, cy] = TARGET.center;
 					const arc = (ty < 200 ? 30 : 14) * Math.sin(Math.PI * p);
 					const bx = SPOT[0] + (cx - SPOT[0]) * p + (tx - cx) * bend;

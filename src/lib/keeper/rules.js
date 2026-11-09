@@ -2,15 +2,15 @@
 export const VERSION = 1;
 export const DIRECTIONS = ['tl', 'tr', 'bl', 'br', 'center'];
 export const MAX_SHOTS = 30;
-export const SAVE_WINDOW = 240;
-export const PERFECT_WINDOW = 85;
+export const SAVE_WINDOW = 100;
+export const PERFECT_WINDOW = 50;
 export const MAX_DURATION = 100000;
 
 export function shotsFor(seed) {
   let state = seed >>> 0, start = 0;
   return Array.from({ length: MAX_SHOTS }, (_, index) => {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-    const flight = Math.max(300, 650 - index * 12);
+    const flight = Math.max(260, 500 - index * 10);
     const impact = start + 350 + flight;
     const shot = { index, start, impact, end: impact + 650, flight, direction: DIRECTIONS[state % 5] };
     start = shot.end;
