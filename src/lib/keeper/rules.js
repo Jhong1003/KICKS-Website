@@ -10,7 +10,9 @@ export function shotsFor(seed) {
   let state = seed >>> 0, start = 0;
   return Array.from({ length: MAX_SHOTS }, (_, index) => {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-    const flight = Math.max(260, 500 - index * 10);
+    // Starts gentle (0.9 s) and gets 28 ms quicker every shot, reaching the
+    // fastest 0.26 s from about the 24th shot.
+    const flight = Math.max(260, 900 - index * 28);
     const impact = start + 350 + flight;
     const shot = { index, start, impact, end: impact + 650, flight, direction: DIRECTIONS[state % 5] };
     start = shot.end;

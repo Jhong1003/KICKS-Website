@@ -662,11 +662,14 @@ import T from "../components/T.astro";
 	}
 
 	// A small, repeatable variation per shot: how late it bends, a sideways curl
-	// of up to ±16 px mid-flight, and an arc 70–130% of the usual height.
+	// of up to ±16 px mid-flight, and an arc 70–130% of the usual height. Early
+	// shots bend sooner and curl less, so the direction shows earlier; by the
+	// 20th shot they bend at the last moment.
 	function flightStyle(seed: number, index: number) {
 		let h = Math.imul((seed ^ (index + 1) * 0x9e3779b1) >>> 0, 0x85ebca6b) >>> 0;
 		const next = () => { h = (Math.imul(h ^ (h >>> 13), 0xc2b2ae35) + 0x165667b1) >>> 0; return h / 0x100000000; };
-		return { pow: 3.5 + next(), curl: (next() * 2 - 1) * 16, lift: 0.7 + next() * 0.6 };
+		const ramp = Math.min(1, index / 20);
+		return { pow: 2.2 + 1.8 * ramp + (next() - 0.5) * 0.8, curl: (next() * 2 - 1) * 16 * (0.4 + 0.6 * ramp), lift: 0.7 + next() * 0.6 };
 	}
 
 	function frame(now: number) {
@@ -701,7 +704,7 @@ import T from "../components/T.astro";
 					ball = [SPOT[0], SPOT[1], 1, 1, 0, SPOT[1] + 15];
 				} else if (t < shot.impact) {
 					// Steady speed toward the middle of the goal, then the shot bends to its
-					// corner late (p^3.5..p^4.5), so the direction can't be read off the
+					// corner late (up to p^4.4 on later shots), so the direction can't be read off the
 					// first part of the flight. Each shot gets its own small curl and arc
 					// height (from the seed, so a replay looks the same); every path
 					// still lands exactly on the target at impact.
