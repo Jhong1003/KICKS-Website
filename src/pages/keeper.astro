@@ -345,6 +345,10 @@ import T from "../components/T.astro";
 	// loads, or if it fails, the drawn head is used.
 	const FACE = new Image();
 	FACE.src = "/keeper/face.webp";
+	const CREST = new Image();
+	CREST.src = "/keeper/crest.webp"; // the KICKS ball emblem, cut from kicks-logo.jpg
+	// KICKS home kit: cream shirt, olive trim and shorts, white socks with olive hoops.
+	const KIT = { cream: "#f1ebdd", creamShade: "#ddd4c0", seam: "#b8ad96", olive: "#3f5128", oliveDark: "#2c3a1b" };
 	const K = { navy: "#141b2d", red: "#e31b23", blue: "#1d3f9e", skin: "#e2b48c", hair: "#201a17", glove: "#f5f5f2" };
 	const GROUND = GOAL.bottom;
 
@@ -463,7 +467,7 @@ import T from "../components/T.astro";
 		ctx.fillStyle = K.glove; ctx.strokeStyle = "rgba(20,27,45,0.6)"; ctx.lineWidth = 1.2;
 		ctx.beginPath(); ctx.ellipse(1.5, 0, 8.5, 6.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); // palm and fingers
 		ctx.beginPath(); ctx.ellipse(-2, 5.5, 3.6, 2.4, 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); // thumb
-		ctx.fillStyle = K.navy; ctx.fillRect(-6.5, -5, 3, 10); // wrist strap
+		ctx.fillStyle = KIT.olive; ctx.fillRect(-6.5, -5, 3, 10); // wrist strap
 		ctx.strokeStyle = "rgba(20,27,45,0.25)"; ctx.lineWidth = 0.8; // finger lines
 		for (const y of [-2.2, 0.4, 3]) { ctx.beginPath(); ctx.moveTo(4, y); ctx.lineTo(9, y); ctx.stroke(); }
 		ctx.restore();
@@ -485,9 +489,11 @@ import T from "../components/T.astro";
 			const out = foot[0] < 0 ? -1 : 1;
 			taper(hip, knee, 15, 10, K.skin, SKIN_LINE);
 			taper(knee, mid(knee, foot, 0.4), 10, 11, K.skin, SKIN_LINE); // calf
-			// sock over the shin pad, with a thin red band below the knee
-			taper(mid(knee, foot, 0.2), foot, 11, 7, "#ffffff", "rgba(20,27,45,0.35)");
-			taper(mid(knee, foot, 0.3), mid(knee, foot, 0.38), 10.2, 9.7, K.red, undefined, false);
+			// white sock over the shin pad: two olive hoops at the top, olive foot
+			taper(mid(knee, foot, 0.2), foot, 11, 7, "#ffffff", "rgba(20,27,45,0.3)");
+			taper(mid(knee, foot, 0.22), mid(knee, foot, 0.27), 10.8, 10.6, KIT.olive, undefined, false);
+			taper(mid(knee, foot, 0.31), mid(knee, foot, 0.36), 10.4, 10.1, KIT.olive, undefined, false);
+			taper(mid(knee, foot, 0.84), foot, 7.6, 7, KIT.olive);
 			// boot: toe points out a little, studs under the sole
 			ctx.fillStyle = "#111318";
 			ctx.beginPath();
@@ -496,9 +502,9 @@ import T from "../components/T.astro";
 			ctx.lineTo(foot[0] - 5 * out, foot[1] + 3);
 			ctx.quadraticCurveTo(foot[0] - 7 * out, foot[1], foot[0] - 4 * out, foot[1] - 3);
 			ctx.fill();
-			ctx.fillStyle = K.red; ctx.fillRect(Math.min(foot[0] + 2 * out, foot[0] + 6 * out), foot[1] - 1, 4, 1.5); // stripe
+			ctx.fillStyle = "#ffffff"; ctx.fillRect(Math.min(foot[0] + 2 * out, foot[0] + 6 * out), foot[1] - 1, 4, 1.2); // boot stripe
 		}
-		// shorts: one piece over both hips, legs ending mid-thigh with a white hem
+		// olive shorts with cream side stripes, a cream hem and the crest on the left leg
 		const shorts = new Path2D();
 		const hemL = mid(b.hipL, b.knL, 0.42), hemR = mid(b.hipR, b.knR, 0.42);
 		const legDir = (h: Pt, k: Pt): Pt => { const l = Math.hypot(k[0] - h[0], k[1] - h[1]) || 1; return [-(k[1] - h[1]) / l, (k[0] - h[0]) / l]; };
@@ -508,9 +514,16 @@ import T from "../components/T.astro";
 		shorts.lineTo(0, 9);
 		shorts.lineTo(hemL[0] - nLx * 8, hemL[1] - nLy * 8); shorts.lineTo(hemL[0] + nLx * 8, hemL[1] + nLy * 8);
 		shorts.closePath();
-		ctx.fillStyle = "#1b2440"; ctx.strokeStyle = "#0b0f1a"; ctx.lineWidth = 1.2; ctx.lineJoin = "round";
+		ctx.fillStyle = KIT.olive; ctx.strokeStyle = KIT.oliveDark; ctx.lineWidth = 1.2; ctx.lineJoin = "round";
 		ctx.fill(shorts); ctx.stroke(shorts);
-		ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.6;
+		ctx.strokeStyle = KIT.cream; ctx.lineWidth = 1;
+		for (const [h, nx, ny, top] of [[hemL, nLx, nLy, [b.hipL[0] - 6.4, b.hipL[1] - 5]], [hemR, nRx, nRy, [b.hipR[0] + 6.4, b.hipR[1] - 5]]] as [Pt, number, number, Pt][]) {
+			const side = h[0] < 0 ? -1 : 1; // the stripe runs down the outside of the leg
+			const outer: Pt = Math.abs(h[0] - nx * 7) > Math.abs(h[0] + nx * 7) ? [h[0] - nx * 7, h[1] - ny * 7] : [h[0] + nx * 7, h[1] + ny * 7];
+			for (const o of [0, 1.8]) { ctx.beginPath(); ctx.moveTo(top[0] - side * o, top[1]); ctx.lineTo(outer[0] - side * o, outer[1] - 1); ctx.stroke(); }
+		}
+		if (CREST.complete && CREST.naturalWidth) { const c = mid(b.hipL, hemL, 0.62); ctx.drawImage(CREST, c[0] - 1.5, c[1] - 3, 5, 5); }
+		ctx.strokeStyle = KIT.cream; ctx.lineWidth = 1.6;
 		for (const [h, nx, ny] of [[hemL, nLx, nLy], [hemR, nRx, nRy]] as [Pt, number, number][]) {
 			ctx.beginPath(); ctx.moveTo(h[0] - nx * 7.4, h[1] - ny * 7.4); ctx.lineTo(h[0] + nx * 7.4, h[1] + ny * 7.4); ctx.stroke();
 		}
@@ -530,35 +543,51 @@ import T from "../components/T.astro";
 		torso.quadraticCurveTo(sr[0] - 3, sr[1] - 4, b.neck[0] + 5, b.neck[1] + 4);
 		torso.closePath();
 		const shade = ctx.createLinearGradient(sl[0] - 6, 0, sr[0] + 6, 0);
-		shade.addColorStop(0, "#26345a"); shade.addColorStop(0.55, K.navy); shade.addColorStop(1, "#0d1220");
+		shade.addColorStop(0, "#fbf7ee"); shade.addColorStop(0.55, KIT.cream); shade.addColorStop(1, KIT.creamShade);
 		ctx.fillStyle = shade; ctx.fill(torso);
 		ctx.save(); ctx.clip(torso);
-		ctx.lineCap = "butt";
-		ctx.strokeStyle = K.red; ctx.lineWidth = 6;
-		ctx.beginPath(); ctx.moveTo(-26, -10); ctx.quadraticCurveTo(0, -18, 26, -36); ctx.stroke();
-		ctx.strokeStyle = K.blue;
-		ctx.beginPath(); ctx.moveTo(-26, -4); ctx.quadraticCurveTo(0, -12, 26, -30); ctx.stroke();
+		// chest: small K mark (left), crest (right), KICKS wordmark and the tagline
+		const chestY = sl[1] + 9, chestX = (sl[0] + sr[0]) / 2;
+		ctx.fillStyle = KIT.olive; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+		ctx.font = "italic 900 6px system-ui, sans-serif";
+		ctx.fillText("K", chestX - 9, chestY + 1);
+		if (CREST.complete && CREST.naturalWidth) ctx.drawImage(CREST, chestX + 5, chestY - 5, 7, 7);
+		ctx.font = "900 10px system-ui, sans-serif";
+		ctx.fillText("KICKS", chestX, chestY + 13, 32);
+		ctx.font = "700 2.2px system-ui, sans-serif";
+		ctx.fillText("KOREAN-INSPIRED COMMUNITY", chestX, chestY + 16.5, 30);
+		ctx.fillText("FOR KICKING SPORTS", chestX, chestY + 19, 24);
 		// a soft fold under the chest and at the waist
-		ctx.strokeStyle = "rgba(0,0,0,0.25)"; ctx.lineWidth = 1;
+		ctx.strokeStyle = "rgba(60,50,30,0.22)"; ctx.lineWidth = 1;
 		ctx.beginPath(); ctx.moveTo(waistL[0] + 3, waistL[1] + 2); ctx.quadraticCurveTo(0, waistL[1] + 5, waistR[0] - 3, waistR[1] + 2); ctx.stroke();
 		ctx.restore();
-		ctx.strokeStyle = "#0b0f1a"; ctx.lineWidth = 1.2; ctx.stroke(torso);
-		ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(sl[0] + 10, sl[1] + 8, 2.6, 0, Math.PI * 2); ctx.fill(); // crest
+		ctx.strokeStyle = KIT.seam; ctx.lineWidth = 1.2; ctx.stroke(torso);
 		// arms: shoulder to elbow to wrist, tapering, long sleeves; keeper gloves
 		for (const [sh, el, ha] of [[b.shL, b.elL, b.haL], [b.shR, b.elR, b.haR]] as Pt[][]) {
 			const wrist = mid(el, ha, 0.82);
-			taper(mid(sh, el, -0.08), el, 10.5, 8, "#26345a", "#0b0f1a");
-			taper(el, wrist, 8, 6.5, "#26345a", "#0b0f1a");
-			taper(mid(el, ha, 0.7), wrist, 7.6, 7.2, K.red, undefined, false);
+			const top = mid(sh, el, -0.08);
+			taper(top, el, 10.5, 8, KIT.cream, KIT.seam);
+			taper(el, wrist, 8, 6.5, KIT.cream, KIT.seam);
+			// two olive stripes down the sleeve, olive cuff
+			ctx.strokeStyle = KIT.olive; ctx.lineWidth = 1.1; ctx.lineCap = "round";
+			for (const o of [-1.6, 1.6]) {
+				const n = (a: Pt, c: Pt): Pt => { const l = Math.hypot(c[0] - a[0], c[1] - a[1]) || 1; return [-(c[1] - a[1]) / l * o, (c[0] - a[0]) / l * o]; };
+				const [ux, uy] = n(top, el), [fx, fy] = n(el, wrist);
+				ctx.beginPath(); ctx.moveTo(top[0] + ux, top[1] + uy); ctx.lineTo(el[0] + ux, el[1] + uy); ctx.lineTo(mid(el, wrist, 0.82)[0] + fx, mid(el, wrist, 0.82)[1] + fy); ctx.stroke();
+			}
+			taper(mid(el, ha, 0.72), wrist, 7.4, 7, KIT.olive, undefined, false);
 			drawGlove(wrist, ha);
 		}
 		// neck and head, drawn over the arms so a dive never hides the face
 		taper([b.neck[0], b.neck[1] + 6], b.neck, 8, 7, K.skin);
 		ctx.fillStyle = "rgba(0,0,0,0.18)"; // shadow under the chin
 		ctx.beginPath(); ctx.ellipse(b.neck[0], b.neck[1] + 2, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
-		// collar
-		ctx.strokeStyle = K.red; ctx.lineWidth = 2;
-		ctx.beginPath(); ctx.moveTo(b.neck[0] - 5, b.neck[1] + 4); ctx.lineTo(b.neck[0], b.neck[1] + 9); ctx.lineTo(b.neck[0] + 5, b.neck[1] + 4); ctx.stroke();
+		// olive V-neck, with the navy/red/blue tab at the back of the collar
+		ctx.fillStyle = K.navy; ctx.fillRect(b.neck[0] - 1.5, b.neck[1] + 3, 1, 3);
+		ctx.fillStyle = K.red; ctx.fillRect(b.neck[0] - 0.5, b.neck[1] + 3, 1, 3);
+		ctx.fillStyle = K.blue; ctx.fillRect(b.neck[0] + 0.5, b.neck[1] + 3, 1, 3);
+		ctx.strokeStyle = KIT.olive; ctx.lineWidth = 2.2; ctx.lineJoin = "miter";
+		ctx.beginPath(); ctx.moveTo(b.neck[0] - 6, b.neck[1] + 3.5); ctx.lineTo(b.neck[0], b.neck[1] + 10); ctx.lineTo(b.neck[0] + 6, b.neck[1] + 3.5); ctx.stroke();
 		const [hx, hy] = b.head;
 		if (FACE.complete && FACE.naturalWidth) {
 			// A KICKS player's face, cut out (no background), sized a little big so

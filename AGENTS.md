@@ -1072,7 +1072,10 @@ via `node:sqlite` with the migration applied).
 The keeper's head is a team player's photo, `public/keeper/face.webp`: the face
 and hair cut out with a transparent background (made with Apple Vision's
 foreground mask, then trimmed to the head), 200 px tall, drawn with the chin on
-the neck. The page falls back to a drawn head if it fails to load. Swap that file to change the face, with the player's agreement.
+the neck. The page falls back to a drawn head if it fails to load. The keeper
+wears the KICKS home kit (cream shirt with olive V-neck, sleeve stripes and
+cuffs, KICKS wordmark, K mark and crest; olive shorts; white socks with olive
+hoops). The crest is `public/keeper/crest.webp`, cut from `public/kicks-logo.jpg`. Swap that file to change the face, with the player's agreement.
 
 ### Match Forecasts
 
