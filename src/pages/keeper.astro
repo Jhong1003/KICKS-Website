@@ -120,7 +120,7 @@ import T from "../components/T.astro";
 		tl: [158, 118], tr: [482, 118], bl: [158, 268], br: [482, 268], center: [320, 196],
 	};
 	const SPOT: [number, number] = [320, 436];
-	const HOME: [number, number] = [320, 246];
+	const HOME: [number, number] = [320, 228];
 	const SCALE = 1.3; // keeper size: a real keeper fills most of a futsal goal's height
 	const DIVE_MS = 170;
 
@@ -389,12 +389,14 @@ import T from "../components/T.astro";
 	// ----- keeper: a jointed figure blended between three poses -----
 	type Pt = [number, number];
 	type Body = Record<"head" | "neck" | "shL" | "shR" | "elL" | "elR" | "haL" | "haR" | "hipL" | "hipR" | "knL" | "knR" | "ftL" | "ftR", Pt>;
-	const READY: Body = { head: [0, -66], neck: [0, -54], shL: [-15, -47], shR: [15, -47], elL: [-27, -31], elR: [27, -31], haL: [-35, -18], haR: [35, -18],
-		hipL: [-8, 0], hipR: [8, 0], knL: [-15, 21], knR: [15, 21], ftL: [-18, 46], ftR: [18, 46] };
-	const DIVE: Body = { head: [0, -67], neck: [0, -54], shL: [-13, -48], shR: [13, -48], elL: [-11, -73], elR: [11, -73], haL: [-7, -95], haR: [7, -95],
-		hipL: [-7, 0], hipR: [7, 0], knL: [-5, 24], knR: [9, 21], ftL: [-7, 48], ftR: [16, 42] };
-	const JUMP: Body = { head: [0, -66], neck: [0, -54], shL: [-15, -48], shR: [15, -48], elL: [-24, -71], elR: [24, -71], haL: [-22, -93], haR: [22, -93],
-		hipL: [-8, 0], hipR: [8, 0], knL: [-13, 17], knR: [13, 17], ftL: [-12, 40], ftR: [12, 40] };
+	// Joints in body units (×SCALE on screen), hips at the origin. Proportions
+	// follow a real body: legs about half the height, shoulders two heads wide.
+	const READY: Body = { head: [0, -66], neck: [0, -54], shL: [-19, -47], shR: [19, -47], elL: [-30, -29], elR: [30, -29], haL: [-36, -12], haR: [36, -12],
+		hipL: [-9, 0], hipR: [9, 0], knL: [-16, 29], knR: [16, 29], ftL: [-20, 59], ftR: [20, 59] };
+	const DIVE: Body = { head: [0, -67], neck: [0, -54], shL: [-15, -48], shR: [15, -48], elL: [-12, -73], elR: [12, -73], haL: [-8, -95], haR: [8, -95],
+		hipL: [-8, 0], hipR: [8, 0], knL: [-5, 31], knR: [10, 27], ftL: [-7, 61], ftR: [19, 54] };
+	const JUMP: Body = { head: [0, -66], neck: [0, -54], shL: [-17, -48], shR: [17, -48], elL: [-25, -71], elR: [25, -71], haL: [-23, -93], haR: [23, -93],
+		hipL: [-9, 0], hipR: [9, 0], knL: [-14, 24], knR: [14, 24], ftL: [-13, 52], ftR: [13, 52] };
 
 	type Pose = { x: number; y: number; angle: number; reach: number; body: Body; lift: number };
 	const blend = (a: Body, b: Body, p: number) =>
@@ -402,7 +404,7 @@ import T from "../components/T.astro";
 
 	// Where the keeper stands, how far it leans and which pose it is in.
 	// `fall` (0..1) brings a corner dive down to the grass once the stretch has
-	// been held for 300 ms, like a real keeper landing.
+	// been held, like a real keeper landing.
 	function pose(direction: string | null, p: number, t = 0, fall = 0): Pose {
 		if (!direction) {
 			const bob = Math.sin(t / 180) * 1.2; // small ready-stance bounce
@@ -434,11 +436,37 @@ import T from "../components/T.astro";
 		return [(lx + rx) / 2, (ly + ry) / 2];
 	}
 
-	function limb(a: Pt, b: Pt, width: number, colour: string, outline?: string) {
-		ctx.lineCap = "round";
-		if (outline) { ctx.strokeStyle = outline; ctx.lineWidth = width + 2.4; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); }
-		ctx.strokeStyle = colour; ctx.lineWidth = width;
-		ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
+	const SKIN_LINE = "#b98a66";
+	// A limb segment that narrows from wa to wb, with round ends (a joint).
+	function taper(a: Pt, b: Pt, wa: number, wb: number, colour: string, outline?: string, round = true) {
+		const shape = (grow: number) => {
+			const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+			const ra = wa / 2 + grow, rb = wb / 2 + grow, angle = Math.atan2(dy, dx);
+			const path = new Path2D();
+			path.moveTo(a[0] + nx * ra, a[1] + ny * ra);
+			path.lineTo(b[0] + nx * rb, b[1] + ny * rb);
+			if (round) path.arc(b[0], b[1], rb, angle + Math.PI / 2, angle - Math.PI / 2, true);
+			else path.lineTo(b[0] - nx * rb, b[1] - ny * rb);
+			path.lineTo(a[0] - nx * ra, a[1] - ny * ra);
+			if (round) path.arc(a[0], a[1], ra, angle - Math.PI / 2, angle + Math.PI / 2, true);
+			path.closePath();
+			return path;
+		};
+		if (outline) { ctx.fillStyle = outline; ctx.fill(shape(1.1)); }
+		ctx.fillStyle = colour; ctx.fill(shape(0));
+	}
+	// A keeper glove: big padded palm along the forearm, a thumb, a strap.
+	function drawGlove(wrist: Pt, hand: Pt) {
+		const angle = Math.atan2(hand[1] - wrist[1], hand[0] - wrist[0]);
+		ctx.save();
+		ctx.translate(...hand); ctx.rotate(angle);
+		ctx.fillStyle = K.glove; ctx.strokeStyle = "rgba(20,27,45,0.6)"; ctx.lineWidth = 1.2;
+		ctx.beginPath(); ctx.ellipse(1.5, 0, 8.5, 6.5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); // palm and fingers
+		ctx.beginPath(); ctx.ellipse(-2, 5.5, 3.6, 2.4, 0.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); // thumb
+		ctx.fillStyle = K.navy; ctx.fillRect(-6.5, -5, 3, 10); // wrist strap
+		ctx.strokeStyle = "rgba(20,27,45,0.25)"; ctx.lineWidth = 0.8; // finger lines
+		for (const y of [-2.2, 0.4, 3]) { ctx.beginPath(); ctx.moveTo(4, y); ctx.lineTo(9, y); ctx.stroke(); }
+		ctx.restore();
 	}
 	const mid = (a: Pt, b: Pt, f = 0.5): Pt => [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
 
@@ -452,45 +480,90 @@ import T from "../components/T.astro";
 		ctx.translate(k.x, k.y);
 		ctx.rotate(k.angle);
 		ctx.scale(SCALE, SCALE);
-		// legs: skin thigh under the shorts, socks, boots
+		// legs: tapered thighs and calves, shin-padded socks, boots, then shorts
 		for (const [hip, knee, foot] of [[b.hipL, b.knL, b.ftL], [b.hipR, b.knR, b.ftR]] as Pt[][]) {
-			limb(hip, knee, 10, K.skin, "#b98a66");
-			limb(mid(knee, foot, 0.12), foot, 9, "#ffffff", "rgba(20,27,45,0.35)");
-			limb(mid(knee, foot, 0.12), mid(knee, foot, 0.3), 9, K.red);
+			const out = foot[0] < 0 ? -1 : 1;
+			taper(hip, knee, 15, 10, K.skin, SKIN_LINE);
+			taper(knee, mid(knee, foot, 0.4), 10, 11, K.skin, SKIN_LINE); // calf
+			// sock over the shin pad, with a thin red band below the knee
+			taper(mid(knee, foot, 0.2), foot, 11, 7, "#ffffff", "rgba(20,27,45,0.35)");
+			taper(mid(knee, foot, 0.3), mid(knee, foot, 0.38), 10.2, 9.7, K.red, undefined, false);
+			// boot: toe points out a little, studs under the sole
 			ctx.fillStyle = "#111318";
-			ctx.beginPath(); ctx.ellipse(foot[0] + (foot[0] < 0 ? -3 : 3), foot[1] + 2, 8, 4.5, 0, 0, Math.PI * 2); ctx.fill();
-			limb(hip, mid(hip, knee, 0.55), 14, K.navy); // shorts
+			ctx.beginPath();
+			ctx.moveTo(foot[0] - 4 * out, foot[1] - 3);
+			ctx.quadraticCurveTo(foot[0] + 10 * out, foot[1] - 3, foot[0] + 11 * out, foot[1] + 2);
+			ctx.lineTo(foot[0] - 5 * out, foot[1] + 3);
+			ctx.quadraticCurveTo(foot[0] - 7 * out, foot[1], foot[0] - 4 * out, foot[1] - 3);
+			ctx.fill();
+			ctx.fillStyle = K.red; ctx.fillRect(Math.min(foot[0] + 2 * out, foot[0] + 6 * out), foot[1] - 1, 4, 1.5); // stripe
 		}
-		// torso (jersey) with the logo's red/blue swoosh
+		// shorts: one piece over both hips, legs ending mid-thigh with a white hem
+		const shorts = new Path2D();
+		const hemL = mid(b.hipL, b.knL, 0.42), hemR = mid(b.hipR, b.knR, 0.42);
+		const legDir = (h: Pt, k: Pt): Pt => { const l = Math.hypot(k[0] - h[0], k[1] - h[1]) || 1; return [-(k[1] - h[1]) / l, (k[0] - h[0]) / l]; };
+		const [nLx, nLy] = legDir(b.hipL, b.knL), [nRx, nRy] = legDir(b.hipR, b.knR);
+		shorts.moveTo(b.hipL[0] - 7, b.hipL[1] - 6); shorts.lineTo(b.hipR[0] + 7, b.hipR[1] - 6);
+		shorts.lineTo(hemR[0] - nRx * 8, hemR[1] - nRy * 8); shorts.lineTo(hemR[0] + nRx * 8, hemR[1] + nRy * 8);
+		shorts.lineTo(0, 9);
+		shorts.lineTo(hemL[0] - nLx * 8, hemL[1] - nLy * 8); shorts.lineTo(hemL[0] + nLx * 8, hemL[1] + nLy * 8);
+		shorts.closePath();
+		ctx.fillStyle = "#1b2440"; ctx.strokeStyle = "#0b0f1a"; ctx.lineWidth = 1.2; ctx.lineJoin = "round";
+		ctx.fill(shorts); ctx.stroke(shorts);
+		ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.6;
+		for (const [h, nx, ny] of [[hemL, nLx, nLy], [hemR, nRx, nRy]] as [Pt, number, number][]) {
+			ctx.beginPath(); ctx.moveTo(h[0] - nx * 7.4, h[1] - ny * 7.4); ctx.lineTo(h[0] + nx * 7.4, h[1] + ny * 7.4); ctx.stroke();
+		}
+		// torso: rounded shoulders, chest tapering to the waist
+		const [sl, sr, hl, hr] = [b.shL, b.shR, b.hipL, b.hipR];
+		const waistL = mid(sl, hl, 0.68), waistR = mid(sr, hr, 0.68);
 		const torso = new Path2D();
-		torso.moveTo(b.shL[0] - 4, b.shL[1] - 1); torso.lineTo(b.shR[0] + 4, b.shR[1] - 1);
-		torso.lineTo(b.hipR[0] + 5, b.hipR[1] + 4); torso.lineTo(b.hipL[0] - 5, b.hipL[1] + 4); torso.closePath();
-		ctx.fillStyle = K.navy; ctx.strokeStyle = K.navy; ctx.lineWidth = 6; ctx.lineJoin = "round";
-		ctx.stroke(torso); ctx.fill(torso);
+		torso.moveTo(b.neck[0] - 5, b.neck[1] + 4);
+		torso.quadraticCurveTo(sl[0] + 3, sl[1] - 4, sl[0] - 2, sl[1] + 1);
+		torso.quadraticCurveTo(sl[0] - 6, sl[1] + 6, sl[0] - 3, sl[1] + 13); // shoulder cap
+		torso.quadraticCurveTo(waistL[0] - 1, waistL[1] - 8, waistL[0] + 1, waistL[1]);
+		torso.lineTo(hl[0] - 6, hl[1] - 2);
+		torso.lineTo(hr[0] + 6, hr[1] - 2);
+		torso.lineTo(waistR[0] - 1, waistR[1]);
+		torso.quadraticCurveTo(waistR[0] + 1, waistR[1] - 8, sr[0] + 3, sr[1] + 13);
+		torso.quadraticCurveTo(sr[0] + 6, sr[1] + 6, sr[0] + 2, sr[1] + 1);
+		torso.quadraticCurveTo(sr[0] - 3, sr[1] - 4, b.neck[0] + 5, b.neck[1] + 4);
+		torso.closePath();
+		const shade = ctx.createLinearGradient(sl[0] - 6, 0, sr[0] + 6, 0);
+		shade.addColorStop(0, "#26345a"); shade.addColorStop(0.55, K.navy); shade.addColorStop(1, "#0d1220");
+		ctx.fillStyle = shade; ctx.fill(torso);
 		ctx.save(); ctx.clip(torso);
 		ctx.lineCap = "butt";
 		ctx.strokeStyle = K.red; ctx.lineWidth = 6;
-		ctx.beginPath(); ctx.moveTo(-24, -10); ctx.quadraticCurveTo(0, -18, 24, -36); ctx.stroke();
+		ctx.beginPath(); ctx.moveTo(-26, -10); ctx.quadraticCurveTo(0, -18, 26, -36); ctx.stroke();
 		ctx.strokeStyle = K.blue;
-		ctx.beginPath(); ctx.moveTo(-24, -4); ctx.quadraticCurveTo(0, -12, 24, -30); ctx.stroke();
+		ctx.beginPath(); ctx.moveTo(-26, -4); ctx.quadraticCurveTo(0, -12, 26, -30); ctx.stroke();
+		// a soft fold under the chest and at the waist
+		ctx.strokeStyle = "rgba(0,0,0,0.25)"; ctx.lineWidth = 1;
+		ctx.beginPath(); ctx.moveTo(waistL[0] + 3, waistL[1] + 2); ctx.quadraticCurveTo(0, waistL[1] + 5, waistR[0] - 3, waistR[1] + 2); ctx.stroke();
 		ctx.restore();
-		ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(-7, -40, 2.6, 0, Math.PI * 2); ctx.fill(); // crest
-		// arms: long keeper sleeves and gloves with KICKS cuffs
+		ctx.strokeStyle = "#0b0f1a"; ctx.lineWidth = 1.2; ctx.stroke(torso);
+		ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(sl[0] + 10, sl[1] + 8, 2.6, 0, Math.PI * 2); ctx.fill(); // crest
+		// arms: shoulder to elbow to wrist, tapering, long sleeves; keeper gloves
 		for (const [sh, el, ha] of [[b.shL, b.elL, b.haL], [b.shR, b.elR, b.haR]] as Pt[][]) {
-			limb(sh, el, 9.5, "#26345a", "#0b0f1a");
-			limb(el, ha, 8.5, "#26345a", "#0b0f1a");
-			const cuff = mid(el, ha, 0.78);
-			limb(cuff, mid(el, ha, 0.9), 9.5, K.red);
-			ctx.fillStyle = K.glove; ctx.strokeStyle = "rgba(20,27,45,0.55)"; ctx.lineWidth = 1.5;
-			ctx.beginPath(); ctx.arc(ha[0], ha[1], 7.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+			const wrist = mid(el, ha, 0.82);
+			taper(mid(sh, el, -0.08), el, 10.5, 8, "#26345a", "#0b0f1a");
+			taper(el, wrist, 8, 6.5, "#26345a", "#0b0f1a");
+			taper(mid(el, ha, 0.7), wrist, 7.6, 7.2, K.red, undefined, false);
+			drawGlove(wrist, ha);
 		}
 		// neck and head, drawn over the arms so a dive never hides the face
-		limb(b.neck, [b.neck[0], b.neck[1] + 6], 8, K.skin);
+		taper([b.neck[0], b.neck[1] + 6], b.neck, 8, 7, K.skin);
+		ctx.fillStyle = "rgba(0,0,0,0.18)"; // shadow under the chin
+		ctx.beginPath(); ctx.ellipse(b.neck[0], b.neck[1] + 2, 4, 2, 0, 0, Math.PI * 2); ctx.fill();
+		// collar
+		ctx.strokeStyle = K.red; ctx.lineWidth = 2;
+		ctx.beginPath(); ctx.moveTo(b.neck[0] - 5, b.neck[1] + 4); ctx.lineTo(b.neck[0], b.neck[1] + 9); ctx.lineTo(b.neck[0] + 5, b.neck[1] + 4); ctx.stroke();
 		const [hx, hy] = b.head;
 		if (FACE.complete && FACE.naturalWidth) {
 			// A KICKS player's face, cut out (no background), sized a little big so
 			// it reads at game size, with the chin resting on the neck.
-			const h = 40, w = h * FACE.naturalWidth / FACE.naturalHeight, chin = b.neck[1] + 4;
+			const h = 31, w = h * FACE.naturalWidth / FACE.naturalHeight, chin = b.neck[1] + 4;
 			ctx.save();
 			ctx.shadowColor = "rgba(20,27,45,0.45)"; ctx.shadowBlur = 3;
 			ctx.drawImage(FACE, hx - w / 2, chin - h, w, h);
@@ -578,7 +651,11 @@ import T from "../components/T.astro";
 			const shot = current.shots.find((s) => t >= s.start && t < s.end) ?? (current.done ? current.shots[result.resolved - 1] : null);
 			if (shot) {
 				const input = current.inputs.find((i) => i.at >= shot.start && i.at <= shot.impact + SAVE_WINDOW);
-				keeper = input ? pose(input.direction, clamp((t - input.at) / DIVE_MS), now, clamp((t - input.at - 300) / 260)) : pose(null, 0, now);
+				// An early press makes the keeper set off just before the ball arrives
+				// (not seconds ahead), and the stretch is held until the shot is decided,
+				// so the picture always matches the result.
+				const go = input ? Math.max(input.at, shot.impact - DIVE_MS - 150) : 0;
+				keeper = input ? pose(input.direction, clamp((t - go) / DIVE_MS), now, clamp((t - Math.max(go + 300, shot.impact + SAVE_WINDOW)) / 260)) : pose(null, 0, now);
 				const launch = shot.impact - shot.flight;
 				const [tx, ty] = TARGET[shot.direction];
 				const resolved = current.resolvedAt.get(shot.index);
