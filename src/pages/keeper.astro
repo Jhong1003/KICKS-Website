@@ -488,16 +488,13 @@ import T from "../components/T.astro";
 		limb(b.neck, [b.neck[0], b.neck[1] + 6], 8, K.skin);
 		const [hx, hy] = b.head;
 		if (FACE.complete && FACE.naturalWidth) {
-			// A KICKS player's photo as the head: a round crop, a little big so the
-			// face reads at game size, ringed in the kit's navy.
-			const r = 17, cy = hy - 5;
+			// A KICKS player's face, cut out (no background), sized a little big so
+			// it reads at game size, with the chin resting on the neck.
+			const h = 40, w = h * FACE.naturalWidth / FACE.naturalHeight, chin = b.neck[1] + 4;
 			ctx.save();
-			ctx.beginPath(); ctx.arc(hx, cy, r, 0, Math.PI * 2); ctx.closePath();
-			ctx.clip();
-			ctx.drawImage(FACE, hx - r, cy - r, r * 2, r * 2);
+			ctx.shadowColor = "rgba(20,27,45,0.45)"; ctx.shadowBlur = 3;
+			ctx.drawImage(FACE, hx - w / 2, chin - h, w, h);
 			ctx.restore();
-			ctx.strokeStyle = K.navy; ctx.lineWidth = 2;
-			ctx.beginPath(); ctx.arc(hx, cy, r, 0, Math.PI * 2); ctx.stroke();
 		} else {
 			ctx.fillStyle = K.skin;
 			ctx.beginPath(); ctx.ellipse(hx - 11, hy + 1, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.ellipse(hx + 11, hy + 1, 2.5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
