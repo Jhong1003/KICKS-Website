@@ -43,7 +43,7 @@ export function kicksFor(seed) {
     const jumpDelay = 0.04 + r() * 0.12;
     return {
       index, D, x0, side, wall, jump, jumpDelay,
-      keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.38 - 0.01 * index, speed: 1.3 + 0.08 * index },
+      keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.5 - 0.02 * index, speed: 0.6 + 0.12 * index },
     };
   });
 }
@@ -85,9 +85,9 @@ export function shotFromSwipe(kick, points) {
     const dt = Math.max(16, points[i][0] - points[j][0]);
     speed = Math.max(speed, Math.hypot(points[i][1] - points[j][1], points[i][2] - points[j][2]) / dt);
   }
-  // About 4 canvas px/ms is a normal thumb flick on a phone (the canvas is
+  // About 2.5 canvas px/ms is a normal thumb flick on a phone (the canvas is
   // shown at about half size there); power changes gently around it.
-  const v = Math.min(V_MAX, Math.max(V_MIN, V_REF * (speed / 4) ** 0.6));
+  const v = Math.min(V_MAX, Math.max(V_MIN, V_REF * (speed / 2.5) ** 0.5));
   // curl: the largest sideways bow from the straight line, as a share of its length
   const [, x1, y1] = points[0], cx = last[1] - x1, cy = last[2] - y1, len = Math.hypot(cx, cy) || 1;
   let bow = 0;
@@ -98,11 +98,23 @@ export function shotFromSwipe(kick, points) {
   // a thumb swipes in a slight arc anyway, so small bows count for little
   const raw = bow / len, curl = Math.sign(raw) * Math.min(0.25, Math.max(0, Math.abs(raw) - 0.04));
   const ax = -curl * 30; // bowed right (+): the ball sets off right and bends back left
-  // aim on the goal plane
+  // Aim on the goal plane. A thumb swipe on a phone is often short and stops
+  // well below the goal: then the line is carried on in the same direction up
+  // to 1.65 m on the goal, so a short flick still goes toward the top half.
+  // Carrying a line that far also magnifies a small slant, so a carried aim is
+  // kept to just outside the posts.
+  let [ex, ey] = [last[1], last[2]], wideCap = 2.6;
+  const goalFoot = project(cam, 0, 0, 0)[1];
+  if (ey > goalFoot && cy < 0) {
+    const reach = project(cam, 0, 1.65, 0)[1];
+    ex = x1 + (reach - y1) * (cx / cy);
+    ey = reach;
+    wideCap = 1.62;
+  }
   const dg = cam.z;
   // a finger that flies past the goal still aims just around it
-  const aimX = Math.max(-2.6, Math.min(2.6, cam.x + (last[1] - VIEW.w / 2) * dg / cam.F));
-  const aimY = Math.max(BALL_R, Math.min(2.6, cam.y - (last[2] - cam.hor) * dg / cam.F));
+  const aimX = Math.max(-wideCap, Math.min(wideCap, cam.x + (ex - VIEW.w / 2) * dg / cam.F));
+  const aimY = Math.max(BALL_R, Math.min(2.6, cam.y - (ey - cam.hor) * dg / cam.F));
   // Lofted shots dip harder (topspin), low ones skim. The dip scales with the
   // square of the speed, so the path keeps the same shape at any power: a soft
   // shot is just slower (and a little lower), never a loop off the screen.
