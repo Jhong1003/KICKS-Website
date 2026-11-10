@@ -16,8 +16,8 @@ export const WALL_HALF = 0.23; // half a player's width in the wall
 export const JUMP_H = 0.45;
 export const JUMP_TIME = 0.5;
 export const V_REF = 15; // the speed at which the ball goes exactly where the swipe ended
-export const V_MIN = 6;
-export const V_MAX = 30;
+export const V_MIN = 7;
+export const V_MAX = 26;
 export const POINTS = 100;
 const POST = GOAL_W / 2;
 
@@ -43,14 +43,14 @@ export function kicksFor(seed) {
     const jumpDelay = 0.04 + r() * 0.12;
     return {
       index, D, x0, side, wall, jump, jumpDelay,
-      keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.36 - 0.01 * index, speed: 1.6 + 0.06 * index },
+      keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.38 - 0.01 * index, speed: 1.3 + 0.08 * index },
     };
   });
 }
 
 // The camera for a kick and the projection to canvas units.
 export function camera(kick) {
-  return { x: kick.x0 * 0.85, y: 2.6, z: kick.D + 7.5, F: 1400, hor: 30 };
+  return { x: kick.x0 * 0.85, y: 2.6, z: kick.D + 7.5, F: 1400, hor: 55 };
 }
 export function project(cam, x, y, z) {
   const depth = cam.z - z, k = cam.F / depth;
@@ -82,7 +82,9 @@ export function shotFromSwipe(kick, points) {
   while (j > 0 && last[0] - points[j][0] < 90) j--;
   const a = points[j], dt = Math.max(16, last[0] - a[0]);
   const speed = Math.hypot(last[1] - a[1], last[2] - a[2]) / dt;
-  const v = Math.min(V_MAX, Math.max(V_MIN, V_REF * (speed / 2.3) ** 0.8));
+  // 3.2 canvas px/ms is a normal thumb flick on a phone (the canvas is shown
+  // at about half size there); power changes gently around it.
+  const v = Math.min(V_MAX, Math.max(V_MIN, V_REF * (speed / 3.2) ** 0.6));
   // curl: the largest sideways bow from the straight line, as a share of its length
   const [, x1, y1] = points[0], cx = last[1] - x1, cy = last[2] - y1, len = Math.hypot(cx, cy) || 1;
   let bow = 0;
@@ -90,17 +92,19 @@ export function shotFromSwipe(kick, points) {
     const d = (cx * (y - y1) - cy * (x - x1)) / len; // + is to the right of the line on screen
     if (Math.abs(d) > Math.abs(bow)) bow = d;
   }
-  const curl = Math.max(-0.35, Math.min(0.35, bow / len));
-  const ax = -curl * 40; // bowed right (+): the ball sets off right and bends back left
+  // a thumb swipes in a slight arc anyway, so small bows count for little
+  const raw = bow / len, curl = Math.sign(raw) * Math.min(0.25, Math.max(0, Math.abs(raw) - 0.04));
+  const ax = -curl * 30; // bowed right (+): the ball sets off right and bends back left
   // aim on the goal plane
   const dg = cam.z;
-  const aimX = cam.x + (last[1] - VIEW.w / 2) * dg / cam.F;
-  const aimY = Math.max(BALL_R, cam.y - (last[2] - cam.hor) * dg / cam.F);
+  // a finger that flies past the goal still aims just around it
+  const aimX = Math.max(-2.6, Math.min(2.6, cam.x + (last[1] - VIEW.w / 2) * dg / cam.F));
+  const aimY = Math.max(BALL_R, Math.min(2.6, cam.y - (last[2] - cam.hor) * dg / cam.F));
   // lofted shots dip harder (topspin), low ones skim
   const G = 3 + 16 * Math.min(1, aimY / 1.8);
-  // Power moves the ball up or down from the aim: 1.4 m per 100% off V_REF,
+  // Power moves the ball up or down from the aim: 0.8 m per 100% off V_REF,
   // so a bit too hard clips the bar and a bit too soft hits the wall.
-  const T = kick.D / v, y = aimY + 1.4 * (v / V_REF - 1);
+  const T = kick.D / v, y = aimY + 0.8 * (v / V_REF - 1);
   const vx = (aimX - kick.x0 - 0.5 * ax * T * T) / T;
   const vy = (y - BALL_R + 0.5 * G * T * T) / T;
   return { v, power: v / V_MAX, curl, ax, vx, vy, G, aim: [aimX, aimY] };
