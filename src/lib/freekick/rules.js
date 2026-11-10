@@ -34,16 +34,16 @@ export function kicksFor(seed) {
     const D = 9.5 + index * 0.3 + r() * 1.2;
     const x0 = (r() * 2 - 1) * (0.3 + 0.2 * index);
     const side = x0 > 0.05 ? 1 : x0 < -0.05 ? -1 : r() < 0.5 ? -1 : 1; // the wall covers this post
-    const n = index < 2 ? 2 : index < 6 ? 3 : 4;
+    const n = index < 1 ? 2 : index < 5 ? 3 : 4;
     // The wall starts just outside the line from the ball to the near post and
     // runs toward the middle.
     const line = x0 + (side * POST - x0) * (WALL_GAP / D);
     const wall = Array.from({ length: n }, (_, i) => line + side * 0.12 - side * (i * WALL_HALF * 2));
-    const jump = index >= 3 && r() < 0.3 + 0.07 * (index - 3);
+    const jump = index >= 2 && r() < 0.3 + 0.07 * (index - 2);
     const jumpDelay = 0.04 + r() * 0.12;
     return {
       index, D, x0, side, wall, jump, jumpDelay,
-      keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.44 - 0.016 * index, speed: 0.85 + 0.12 * index },
+      keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.42 - 0.016 * index, speed: 1.0 + 0.13 * index },
     };
   });
 }
