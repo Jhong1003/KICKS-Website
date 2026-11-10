@@ -166,8 +166,13 @@ import T from "../components/T.astro";
 		hud();
 		if (last.kind !== "goal") { r.big = false; flash(TEXT[last.kind] ?? "", "miss", 1700); return; }
 		r.big = last.base >= BIG_GOAL;
-		// The toast builds up: GOAL / GOLAZO, each bonus, the multipliers, the total.
-		const parts = [`<strong class="fk-goal-title">${r.big ? "GOLAZO!" : L("GOAL!", "골!!")}</strong>`];
+		// The toast builds up: the headline, each bonus, the multipliers, the total.
+		// The headline climbs with the points scored (after streak, golden and last-kick multipliers).
+		const title = last.points >= 500 ? L("WORLD CLASS!", "월드클래스!")
+			: last.points >= 300 ? L("WONDER GOAL!", "원더골!")
+			: last.points >= 150 ? L("NICE GOAL!", "나이스 골!")
+			: L("GOAL!", "골!");
+		const parts = [`<strong class="fk-goal-title">${title}</strong>`];
 		for (const [key, pts] of last.bonuses) parts.push(`<span class="fk-chip">${L(BONUS_TEXT[key][0], BONUS_TEXT[key][1])} +${pts}</span>`);
 		const mult: string[] = [];
 		const streak = Math.min(3, 1 + 0.5 * (last.combo - 1));
@@ -177,7 +182,7 @@ import T from "../components/T.astro";
 		if (mult.length) parts.push(`<span class="fk-chip fk-mult">${mult.join(" · ")}</span>`);
 		parts.push(`<span class="fk-total">+${last.points}</span>`);
 		parts.forEach((part, i) => parts[i] = part.replace(/^<(\w+) class="/, `<$1 style="animation-delay:${i * 110}ms" class="`));
-		flash(parts.join(""), r.big ? "golazo" : "goal", r.big ? 2600 : 1900);
+		flash(parts.join(""), last.points >= 300 ? "golazo" : "goal", last.points >= 300 ? 2600 : 1900);
 		shake = { until: now + (r.big ? 450 : 280), amp: r.big ? 7 : 4 };
 		if (r.big || kick.golden || kick.last) burst(now);
 	}
