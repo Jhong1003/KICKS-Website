@@ -1577,6 +1577,119 @@ button.league-switcher-link {
 
 }
 
+/* Home: Keeper Challenge card (src/pages/index.astro). The whole card is the
+   link; the "button" is a span styled like one. */
+.keeper-promo {
+
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+	align-items: center;
+	gap: clamp(20px, 4vw, 48px);
+	margin-top: 16px;
+	padding: clamp(20px, 3vw, 32px);
+	border-radius: 14px;
+	background-color: var(--color-sage);
+	color: var(--color-dark);
+	text-decoration: none;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+}
+
+.keeper-promo:hover {
+
+	transform: translateY(-2px);
+	box-shadow: 0 10px 28px rgba(41, 41, 41, 0.12);
+
+}
+
+.keeper-promo-text {
+
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+}
+
+.keeper-promo-title {
+
+	font-size: clamp(1.6rem, 3vw, 2.2rem);
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.1;
+
+}
+
+.keeper-promo-description {
+
+	opacity: 0.75;
+	font-size: 0.95rem;
+	line-height: 1.6;
+
+}
+
+.keeper-promo-leader {
+
+	font-weight: 700;
+	color: var(--color-green);
+
+}
+
+.keeper-promo-leader[hidden] {
+
+	display: none;
+
+}
+
+.keeper-promo .keeper-promo-button {
+
+	align-self: flex-start;
+	margin-top: 6px;
+
+}
+
+.keeper-promo:hover .keeper-promo-button {
+
+	background-color: #2f3d1e;
+
+}
+
+.keeper-promo-image {
+
+	display: block;
+	width: 100%;
+	height: auto;
+	border-radius: 10px;
+
+}
+
+@media (max-width: 720px) {
+
+	.keeper-promo {
+
+		grid-template-columns: 1fr;
+
+	}
+
+	.keeper-promo-image {
+
+		order: -1;
+
+	}
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.keeper-promo,
+	.keeper-promo:hover {
+
+		transition: none;
+		transform: none;
+
+	}
+
+}
+
 /* 갤러리 */
 
 /* Album cards on /gallery (src/pages/gallery/index.astro). */
