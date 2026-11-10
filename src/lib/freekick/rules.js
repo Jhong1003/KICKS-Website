@@ -77,14 +77,17 @@ export function validSwipe(points) {
 export function shotFromSwipe(kick, points) {
   const cam = camera(kick);
   const last = points.at(-1);
-  // speed over the last 90 ms (canvas px per ms)
-  let j = points.length - 2;
-  while (j > 0 && last[0] - points[j][0] < 90) j--;
-  const a = points[j], dt = Math.max(16, last[0] - a[0]);
-  const speed = Math.hypot(last[1] - a[1], last[2] - a[2]) / dt;
-  // 3.2 canvas px/ms is a normal thumb flick on a phone (the canvas is shown
-  // at about half size there); power changes gently around it.
-  const v = Math.min(V_MAX, Math.max(V_MIN, V_REF * (speed / 3.2) ** 0.6));
+  // Power comes from the fastest moment of the swipe (over any 50 ms), so a
+  // finger that slows or pauses before lifting still counts as a hard flick.
+  let speed = 0;
+  for (let i = 1, j = 0; i < points.length; i++) {
+    while (j < i - 1 && points[i][0] - points[j + 1][0] >= 50) j++;
+    const dt = Math.max(16, points[i][0] - points[j][0]);
+    speed = Math.max(speed, Math.hypot(points[i][1] - points[j][1], points[i][2] - points[j][2]) / dt);
+  }
+  // About 4 canvas px/ms is a normal thumb flick on a phone (the canvas is
+  // shown at about half size there); power changes gently around it.
+  const v = Math.min(V_MAX, Math.max(V_MIN, V_REF * (speed / 4) ** 0.6));
   // curl: the largest sideways bow from the straight line, as a share of its length
   const [, x1, y1] = points[0], cx = last[1] - x1, cy = last[2] - y1, len = Math.hypot(cx, cy) || 1;
   let bow = 0;
@@ -100,8 +103,10 @@ export function shotFromSwipe(kick, points) {
   // a finger that flies past the goal still aims just around it
   const aimX = Math.max(-2.6, Math.min(2.6, cam.x + (last[1] - VIEW.w / 2) * dg / cam.F));
   const aimY = Math.max(BALL_R, Math.min(2.6, cam.y - (last[2] - cam.hor) * dg / cam.F));
-  // lofted shots dip harder (topspin), low ones skim
-  const G = 3 + 16 * Math.min(1, aimY / 1.8);
+  // Lofted shots dip harder (topspin), low ones skim. The dip scales with the
+  // square of the speed, so the path keeps the same shape at any power: a soft
+  // shot is just slower (and a little lower), never a loop off the screen.
+  const G = (3 + 16 * Math.min(1, aimY / 1.8)) * (v / V_REF) ** 2;
   // Power moves the ball up or down from the aim: 0.8 m per 100% off V_REF,
   // so a bit too hard clips the bar and a bit too soft hits the wall.
   const T = kick.D / v, y = aimY + 0.8 * (v / V_REF - 1);
