@@ -1032,8 +1032,10 @@ counts load, so nothing shows if the API or table is missing. One-time setup:
 
 ### Keeper game
 
-`/keeper` ([src/pages/keeper.astro](src/pages/keeper.astro), linked from the footer as
-"골키퍼 게임") is a small goalkeeper reaction game in the site's flat 2D colours
+`/keeper` ([src/pages/keeper.astro](src/pages/keeper.astro), reached from a "Keeper
+Challenge" card on the homepage, between the standings and the photos, that shows the
+current #1 from `GET /api/keeper` and a still of the game, `public/keeper/card.webp`;
+not in the main menu or the footer) is a small goalkeeper reaction game in the site's flat 2D colours
 (canvas). Shots go to one of five spots — four corners and the middle. **Corners
 are a swipe toward that corner; the middle is a tap, or simply staying put**, since
 the keeper starts there. Keyboard: Q E Z C corners, Space/S middle. Three goals end

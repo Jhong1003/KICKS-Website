@@ -278,6 +278,18 @@ const titleFavourite = latestTitle
 			<StandingsTable rows={standings} />
 			<a class="section-link" href={`/league/${latestLeague.id}/`}><T en="View full league page →" ko="리그 페이지 전체 보기 →" /></a>
 		</section>
+		<section class="content-section" aria-labelledby="keeper-promo-title">
+			<p class="section-label"><T en="MINI GAME" ko="미니 게임" /></p>
+			<a class="keeper-promo" href="/keeper/">
+				<span class="keeper-promo-text">
+					<span class="keeper-promo-title" id="keeper-promo-title"><T en="Keeper Challenge" ko="골키퍼 챌린지" /></span>
+					<T as="span" class="keeper-promo-description" en="Swipe to the corner the shot is going. It starts easy and gets faster every shot. Three goals and you're out." ko="공이 가는 모서리로 스와이프하세요. 처음엔 쉽고 슛마다 빨라져요. 3골 먹으면 끝이에요." />
+					<span class="keeper-promo-leader" data-keeper-leader hidden></span>
+					<span class="button-primary keeper-promo-button"><T en="Play now →" ko="도전하기 →" /></span>
+				</span>
+				<img class="keeper-promo-image" src="/keeper/card.webp" alt="" width="800" height="600" loading="lazy" />
+			</a>
+		</section>
 		{recentAlbums.length > 0 && (
 			<section class="content-section" aria-labelledby="recent-photos-title">
 				<p class="section-label"><T en="LATEST PHOTOS" ko="최근 사진" /></p>
@@ -324,6 +336,22 @@ const titleFavourite = latestTitle
 	import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";
 	import { isCelebratingMilestone, type GoalCountdown } from "../lib/goals";
 	import { bilingualHtml, formatShortDate } from "../lib/i18n";
+
+	// Keeper Challenge card: show the current #1 from the shared leaderboard.
+	// Silent on any failure (no DB locally, offline): the card works without it.
+	const keeperLeader = document.querySelector<HTMLElement>("[data-keeper-leader]");
+	if (keeperLeader) {
+		fetch("/api/keeper", { headers: { Accept: "application/json" } })
+			.then((response) => (response.ok ? response.json() : null))
+			.then((data: { entries?: { name: string; score: number }[] } | null) => {
+				const top = data?.entries?.[0];
+				if (!top) return;
+				const score = top.score.toLocaleString("en-US");
+				keeperLeader.innerHTML = bilingualHtml(`Top keeper: ${top.name} · ${score}`, `현재 1위 ${top.name} · ${score}점`);
+				keeperLeader.hidden = false;
+			})
+			.catch(() => {});
+	}
 
 	// The link above reflects "today" as of the last build, which goes stale
 	// between deploys. Recompute against the visitor's actual current date
