@@ -392,7 +392,7 @@ export function makeDraw(ctx: CanvasRenderingContext2D) {
 	const PENT = (cx: number, cy: number, r: number, rot: number): Pt[] =>
 		Array.from({ length: 5 }, (_, i) => { const a = rot + i * (Math.PI * 2 / 5); return [cx + Math.cos(a) * r, cy + Math.sin(a) * r] as Pt; });
 	// The ball near the camera is drawn a little smaller than true size, to match the kicker.
-	function ball(kick: Kick, x: number, y: number, z: number, spin: number, alpha = 1) {
+	function ball(kick: Kick, x: number, y: number, z: number, spin: number, alpha = 1, gold = false) {
 		const cam = camera(kick);
 		const [sx, sy, k] = project(cam, x, y, z);
 		const [gx, gy] = project(cam, x, 0, z);
@@ -405,13 +405,14 @@ export function makeDraw(ctx: CanvasRenderingContext2D) {
 		ctx.globalAlpha = alpha;
 		ctx.translate(sx, sy - (r - BALL_R * k)); ctx.scale(scale, scale);
 		const body = ctx.createRadialGradient(-5, -6, 2, 0, 0, R);
-		body.addColorStop(0, "#ffffff"); body.addColorStop(0.7, "#f1f2f3"); body.addColorStop(1, "#c9ced6");
+		if (gold) { body.addColorStop(0, "#fff6cc"); body.addColorStop(0.6, "#f2c94c"); body.addColorStop(1, "#b8860b"); }
+		else { body.addColorStop(0, "#ffffff"); body.addColorStop(0.7, "#f1f2f3"); body.addColorStop(1, "#c9ced6"); }
 		ctx.fillStyle = body; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
 		ctx.save(); ctx.clip(); ctx.rotate(spin);
 		const stepA = Math.PI * 2 / 5;
 		const centre = PENT(0, 0, R * 0.31, -Math.PI / 2);
 		const outer = Array.from({ length: 5 }, (_, i) => { const a = -Math.PI / 2 + i * stepA; return PENT(Math.cos(a) * R * 0.8, Math.sin(a) * R * 0.8, R * 0.27, a + Math.PI); });
-		ctx.fillStyle = K.navy;
+		ctx.fillStyle = gold ? "#7a5600" : K.navy;
 		for (const pent of [centre, ...outer]) { ctx.beginPath(); pent.forEach((pt, i) => ctx[i ? "lineTo" : "moveTo"](...pt)); ctx.closePath(); ctx.fill(); }
 		ctx.strokeStyle = "rgba(20,27,45,0.7)"; ctx.lineWidth = 1;
 		ctx.beginPath();

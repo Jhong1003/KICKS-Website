@@ -77,14 +77,21 @@ import T from "../components/T.astro";
 
 	const RUNUP = 520; // ms from the swipe to the foot meeting the ball
 	const AFTER = 1500; // ms the result stays on screen before the next kick
+	// A big goal gets a slow-motion replay of the last part of its flight.
+	const REPLAY_GAP = 0.7, REPLAY_LEN = 1.6, REPLAY_SPAN = 0.6, REPLAY_AFTER = 0.6; // seconds
+	const BIG_GOAL = 250; // points (before streak/golden/last) that count as a big goal
 
 	type Swipe = [number, number, number][];
 	type Result = ReturnType<typeof judgeKick>;
 	type Run = {
 		seed: number; kicks: ReturnType<typeof kicksFor>; swipes: Swipe[]; index: number;
 		state: "aim" | "kick" | "done"; kickAt: number; result: Result | null; resolved: boolean;
-		score: number; combo: number;
+		score: number; combo: number; big: boolean;
 	};
+	// Effects, all visual only (they never change a result).
+	let shake = { until: 0, amp: 0 };
+	type Bit = { x: number; y: number; vx: number; vy: number; spin: number; colour: string; born: number };
+	let confetti: Bit[] = [];
 	let run: Run | null = null;
 	let preview = kicksFor(7)[0]; // the scene behind the start panel
 
@@ -98,8 +105,8 @@ import T from "../components/T.astro";
 
 	// ---------- flow ----------
 	function start() {
-		const seed = crypto.getRandomValues(new Uint32Array(1))[0];
-		run = { seed, kicks: kicksFor(seed), swipes: [], index: 0, state: "aim", kickAt: 0, result: null, resolved: false, score: 0, combo: 0 };
+		const seed = (import.meta.env.DEV && (window as any).__fkSeed) || crypto.getRandomValues(new Uint32Array(1))[0];
+		run = { seed, kicks: kicksFor(seed), swipes: [], index: 0, state: "aim", kickAt: 0, result: null, resolved: false, score: 0, combo: 0, big: false };
 		startPanel.hidden = true; resultPanel.hidden = true;
 		hud(); showTip();
 	}
@@ -109,8 +116,11 @@ import T from "../components/T.astro";
 	function showTip() {
 		if (!run || run.state !== "aim") { tip.textContent = ""; return; }
 		const kick = run.kicks[run.index];
-		tip.innerHTML = L(`Kick ${run.index + 1}/${KICKS} · ${kick.D.toFixed(1)} m`, `${run.index + 1}/${KICKS}번째 · ${kick.D.toFixed(1)}m`) +
+		const wind = kick.wind ? L(` · wind ${kick.wind < 0 ? "←" : "→"}`, ` · 바람 ${kick.wind < 0 ? "←" : "→"}`) : "";
+		tip.innerHTML = L(`Kick ${run.index + 1}/${KICKS} · ${kick.D.toFixed(1)} m`, `${run.index + 1}/${KICKS}번째 · ${kick.D.toFixed(1)}m`) + wind +
 			(kick.jump ? L(" · the wall may jump", " · 벽이 점프할 수도 있어요") : "");
+		if (kick.last) flash(L("Last chance! Points ×2", "라스트 찬스! 점수 ×2"), "special", 1800);
+		else if (kick.golden) flash(L("Golden ball! Points ×2", "황금공! 점수 ×2"), "special", 1800);
 	}
 	function hud() {
 		const r = run;
@@ -139,14 +149,45 @@ import T from "../components/T.astro";
 		post: tipped("Off the post!", "골대 맞고 나왔어요!", "so close", "아까워요"),
 	};
 
-	function resolve(r: Run) {
+	const BONUS_TEXT: Record<string, [string, string]> = {
+		top: ["🎯 Top corner", "🎯 탑코너"],
+		banana: ["🍌 Banana kick", "🍌 바나나킥"],
+		cannon: ["🚀 Cannon", "🚀 캐논슛"],
+		under: ["🦶 Under the wall", "🦶 벽 밑으로"],
+		long: ["📏 Long range", "📏 장거리"],
+		fingertip: ["🧤 Off his fingertips", "🧤 손끝 스침"],
+	};
+	function resolve(r: Run, now: number) {
 		r.resolved = true;
 		const res = replay(r.seed, r.swipes);
 		const last = res.outcomes.at(-1)!;
+		const kick = r.kicks[last.index];
 		r.score = res.score; r.combo = res.combo;
 		hud();
-		if (last.kind === "goal") flash(L(`GOAL! +${last.points}`, `골!! +${last.points}`) + (last.combo > 1 ? ` <small>×${Math.min(3, 1 + 0.5 * (last.combo - 1))}</small>` : ""), "goal", 1300);
-		else flash(TEXT[last.kind] ?? "", "miss", 1700);
+		if (last.kind !== "goal") { r.big = false; flash(TEXT[last.kind] ?? "", "miss", 1700); return; }
+		r.big = last.base >= BIG_GOAL;
+		// The toast builds up: GOAL / GOLAZO, each bonus, the multipliers, the total.
+		const parts = [`<strong class="fk-goal-title">${r.big ? "GOLAZO!" : L("GOAL!", "골!!")}</strong>`];
+		for (const [key, pts] of last.bonuses) parts.push(`<span class="fk-chip">${L(BONUS_TEXT[key][0], BONUS_TEXT[key][1])} +${pts}</span>`);
+		const mult: string[] = [];
+		const streak = Math.min(3, 1 + 0.5 * (last.combo - 1));
+		if (streak > 1) mult.push(L(`${last.combo} in a row ×${streak}`, `${last.combo}연속 ×${streak}`));
+		if (kick.golden) mult.push(L("golden ×2", "황금공 ×2"));
+		if (kick.last) mult.push(L("last chance ×2", "라스트 찬스 ×2"));
+		if (mult.length) parts.push(`<span class="fk-chip fk-mult">${mult.join(" · ")}</span>`);
+		parts.push(`<span class="fk-total">+${last.points}</span>`);
+		parts.forEach((part, i) => parts[i] = part.replace(/^<(\w+) class="/, `<$1 style="animation-delay:${i * 110}ms" class="`));
+		flash(parts.join(""), r.big ? "golazo" : "goal", r.big ? 2600 : 1900);
+		shake = { until: now + (r.big ? 450 : 280), amp: r.big ? 7 : 4 };
+		if (r.big || kick.golden || kick.last) burst(now);
+	}
+	const CONFETTI = ["#e31b23", "#1d3f9e", "#f1ebdd", "#3f5128", "#f2c94c", "#ffffff"];
+	function burst(now: number) {
+		confetti = Array.from({ length: 90 }, () => ({
+			x: VIEW.w / 2 + (Math.random() - 0.5) * 120, y: 150 + (Math.random() - 0.5) * 40,
+			vx: (Math.random() - 0.5) * 520, vy: -180 - Math.random() * 380, spin: Math.random() * 6,
+			colour: CONFETTI[Math.floor(Math.random() * CONFETTI.length)], born: now,
+		}));
 	}
 	function next(r: Run) {
 		r.index++;
@@ -156,7 +197,7 @@ import T from "../components/T.astro";
 			tip.textContent = "";
 			const res = replay(r.seed, r.swipes);
 			$("[data-final-score]").textContent = res.score.toLocaleString();
-			$("[data-final-detail]").innerHTML = L(`${res.goals}/${KICKS} goals · best streak ${res.bestCombo}`, `${KICKS}개 중 ${res.goals}골 · 최고 연속 ${res.bestCombo}`);
+			$("[data-final-detail]").innerHTML = L(`${res.goals}/${KICKS} goals · best streak ${res.bestCombo} · best kick +${res.bestKick}`, `${KICKS}개 중 ${res.goals}골 · 최고 연속 ${res.bestCombo} · 최고 한 방 +${res.bestKick}`);
 			resultPanel.hidden = false;
 			return;
 		}
@@ -221,8 +262,17 @@ import T from "../components/T.astro";
 		const phase = r && r.state === "kick" ? now - r.kickAt : -1;
 		const res = r?.state === "kick" ? r.result : null;
 		const shot = res?.shot ?? null;
-		const t = shot ? (phase - RUNUP) / 1000 : -1; // seconds since the strike
+		const tReal = shot ? (phase - RUNUP) / 1000 : -1; // seconds since the strike
 		const tEnd = res ? res.t : 0;
+		// During a replay the picture runs again, slowed, over the end of the flight.
+		const replayStart = tEnd + REPLAY_GAP;
+		const replaying = !!(r?.big && res?.kind === "goal" && tReal >= replayStart && tReal < replayStart + REPLAY_LEN);
+		const t = replaying ? Math.max(0.02, tEnd - REPLAY_SPAN) + (tReal - replayStart) * ((REPLAY_SPAN + 0.15) / REPLAY_LEN) : tReal;
+		ctx.save();
+		if (now < shake.until) {
+			const k = (shake.until - now) / 400 * shake.amp;
+			ctx.translate((Math.random() - 0.5) * 2 * k, (Math.random() - 0.5) * 2 * k);
+		}
 
 		// ball position
 		let bp: [number, number, number] = [kick.x0, BALL_R, kick.D], spin = 0, alpha = 1, netFlash = 0;
@@ -248,11 +298,12 @@ import T from "../components/T.astro";
 				}
 				bp[1] = Math.max(BALL_R, bp[1]);
 			}
-			if (!r!.resolved && t >= tEnd) resolve(r!);
+			if (!r!.resolved && tReal >= tEnd) resolve(r!, now);
 		}
 		const after = res && t >= tEnd ? (res.kind === "goal" ? "cheer" : "sad") : null;
 		const afterFor = res ? (t - tEnd) * 1000 : 0;
-		if (r && r.state === "kick" && res && t > tEnd + AFTER / 1000) next(r);
+		const doneAt = r?.big && res?.kind === "goal" ? replayStart + REPLAY_LEN + REPLAY_AFTER : tEnd + AFTER / 1000;
+		if (r && r.state === "kick" && res && tReal > doneAt) next(r);
 
 		// keeper: reacts after his reaction time (later if the wall hid the ball) and
 		// dives toward where the ball crosses, as far as he can reach in time.
@@ -273,14 +324,48 @@ import T from "../components/T.astro";
 
 		// draw back to front
 		draw.scene(kick, netFlash);
+		// the net ripples out from where the ball hit it
+		if (res?.kind === "goal" && t > tEnd) {
+			const since = t - tEnd, [ax, ay] = res.at as number[];
+			const [nx, ny, nk] = project(cam, ax, ay, -0.75);
+			ctx.save();
+			for (let i = 0; i < 3; i++) {
+				const p = since / 0.7 - i * 0.18;
+				if (p <= 0 || p >= 1) continue;
+				ctx.strokeStyle = `rgba(20,27,45,${0.35 * (1 - p)})`; ctx.lineWidth = 2;
+				ctx.beginPath(); ctx.ellipse(nx, ny, nk * (0.15 + 0.9 * p), nk * (0.12 + 0.7 * p), 0, 0, Math.PI * 2); ctx.stroke();
+			}
+			const bulge = ctx.createRadialGradient(nx, ny, 0, nx, ny, nk * 0.6);
+			bulge.addColorStop(0, `rgba(20,27,45,${0.22 * netFlash})`); bulge.addColorStop(1, "rgba(20,27,45,0)");
+			ctx.fillStyle = bulge; ctx.beginPath(); ctx.arc(nx, ny, nk * 0.6, 0, Math.PI * 2); ctx.fill();
+			ctx.restore();
+		}
+		// A trail behind the ball in flight: fire for a cannon or a golden ball.
+		const ballTrail = () => {
+			if (!shot || t <= 0) return;
+			const hot = shot.power >= 0.72 || kick.golden;
+			ctx.save();
+			for (let i = 10; i >= 1; i--) {
+				const tt = Math.min(t, tEnd) - i * 0.018;
+				if (tt <= 0 || (t > tEnd + 0.15)) continue;
+				const [x, y, z] = ballAt(kick, shot, tt);
+				const [sx, sy, k] = project(cam, x, y, z);
+				const f = 1 - i / 11, size = BALL_R * k * (0.35 + 0.6 * f);
+				ctx.fillStyle = hot ? `hsla(${20 + 30 * f}, 100%, ${55 + 10 * f}%, ${0.55 * f})` : `rgba(255,255,255,${0.28 * f})`;
+				ctx.beginPath(); ctx.arc(sx, sy, size, 0, Math.PI * 2); ctx.fill();
+			}
+			ctx.restore();
+		};
 		const wallZ = kick.D - WALL_GAP;
-		if (bp[2] < 0) draw.ball(kick, ...bp, spin, alpha);
+		const gold = !!kick.golden;
+		if (bp[2] < 0) draw.ball(kick, ...bp, spin, alpha, gold);
 		draw.keeper(kp);
-		if (bp[2] >= 0 && bp[2] < wallZ) draw.ball(kick, ...bp, spin, alpha);
+		if (bp[2] < wallZ) ballTrail();
+		if (bp[2] >= 0 && bp[2] < wallZ) draw.ball(kick, ...bp, spin, alpha, gold);
 		const lift = shot && t > 0 ? jumpAt(kick, t) : 0;
 		const order = kick.wall.map((x, i) => ({ x, i })).sort((a, b) => Math.abs(b.x - cam.x) - Math.abs(a.x - cam.x));
 		for (const { x, i } of order) draw.wallMan(kick, x, lift, i, [4, 7, 8, 5, 11][i]);
-		if (bp[2] >= wallZ) draw.ball(kick, ...bp, spin, alpha);
+		if (bp[2] >= wallZ) { ballTrail(); draw.ball(kick, ...bp, spin, alpha, gold); }
 		draw.kicker(kick, phase, RUNUP, after, afterFor);
 
 		// the swipe line, fading after the kick
@@ -296,6 +381,39 @@ import T from "../components/T.astro";
 				ctx.restore();
 			}
 		}
+		// wind: a badge with chevrons showing which way and how strong
+		if (kick.wind) {
+			const dir = Math.sign(kick.wind), n = Math.abs(kick.wind) >= 1.4 ? 3 : Math.abs(kick.wind) >= 1.1 ? 2 : 1;
+			ctx.save();
+			ctx.fillStyle = "rgba(20,27,45,0.6)"; ctx.beginPath(); ctx.roundRect(14, 12, 112, 30, 15); ctx.fill();
+			ctx.fillStyle = "#ffffff"; ctx.font = "700 15px system-ui, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+			ctx.fillText("💨", 24, 28);
+			ctx.lineWidth = 3; ctx.strokeStyle = "#ffffff"; ctx.lineCap = "round"; ctx.lineJoin = "round";
+			for (let i = 0; i < n; i++) {
+				const cx = dir > 0 ? 66 + i * 14 : 104 - i * 14, cy = 27;
+				ctx.beginPath(); ctx.moveTo(cx - 5 * dir, cy - 7); ctx.lineTo(cx + 3 * dir, cy); ctx.lineTo(cx - 5 * dir, cy + 7); ctx.stroke();
+			}
+			ctx.restore();
+		}
+		if (replaying) {
+			ctx.save();
+			ctx.fillStyle = "rgba(20,27,45,0.18)"; ctx.fillRect(0, 0, VIEW.w, 26); ctx.fillRect(0, VIEW.h - 26, VIEW.w, 26);
+			ctx.fillStyle = "#e31b23"; ctx.beginPath(); ctx.arc(VIEW.w - 104, 50, 6, 0, Math.PI * 2); ctx.fill();
+			ctx.fillStyle = "#ffffff"; ctx.font = "800 18px system-ui, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+			ctx.shadowColor = "rgba(20,27,45,0.6)"; ctx.shadowBlur = 4; ctx.fillText("REPLAY", VIEW.w - 92, 51);
+			ctx.restore();
+		}
+		// confetti, in screen space, for a big goal, a golden ball or the last kick
+		if (confetti.length) {
+			const age = (now - confetti[0].born) / 1000;
+			if (age > 2.4) confetti = [];
+			for (const c of confetti) {
+				const x = c.x + c.vx * age, y = c.y + c.vy * age + 420 * age * age;
+				ctx.save(); ctx.translate(x, y); ctx.rotate(c.spin + age * 8);
+				ctx.globalAlpha = Math.max(0, 1 - age / 2.4); ctx.fillStyle = c.colour; ctx.fillRect(-4, -2.5, 8, 5);
+				ctx.restore();
+			}
+		}
 		// a hint arrow over the ball while waiting
 		if (r && r.state === "aim" && !swipe) {
 			const [bx, by] = project(cam, kick.x0, BALL_R, kick.D);
@@ -305,6 +423,7 @@ import T from "../components/T.astro";
 			ctx.beginPath(); ctx.moveTo(bx, by - 46 + bob); ctx.lineTo(bx - 10, by - 32 + bob); ctx.lineTo(bx + 10, by - 32 + bob); ctx.closePath(); ctx.fill();
 			ctx.restore();
 		}
+		ctx.restore(); // shake
 	}
 	requestAnimationFrame(frame);
 	hud();
@@ -335,7 +454,20 @@ import T from "../components/T.astro";
 		opacity: 0; transform: translateY(-6px); transition: opacity 0.15s, transform 0.15s;
 	}
 	.fk-toast.show { opacity: 1; transform: none; }
-	.fk-toast[data-kind="goal"] { color: #ffffff; background: #e31b23; font-size: clamp(1.3rem, 6vw, 2rem); }
+	.fk-toast[data-kind="special"] { color: #3a2a00; background: #f2c94c; }
+	.fk-toast[data-kind="goal"], .fk-toast[data-kind="golazo"] {
+		display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 18px; border-radius: 16px;
+		color: #ffffff; background: rgba(227, 27, 35, 0.94);
+	}
+	.fk-toast[data-kind="golazo"] { background: linear-gradient(135deg, #e31b23, #1d3f9e); }
+	.fk-toast :global(.fk-goal-title) { font-size: clamp(1.4rem, 6.5vw, 2.2rem); letter-spacing: 0.02em; }
+	.fk-toast[data-kind="golazo"] :global(.fk-goal-title) { font-size: clamp(1.8rem, 9vw, 2.9rem); font-style: italic; }
+	.fk-toast :global(.fk-chip) { font-size: clamp(0.8rem, 3.4vw, 1rem); font-weight: 700; }
+	.fk-toast :global(.fk-mult) { opacity: 0.85; }
+	.fk-toast :global(.fk-total) { font-size: clamp(1.1rem, 5vw, 1.6rem); font-weight: 900; font-variant-numeric: tabular-nums; }
+	.fk-toast.show > :global(*) { animation: fk-in 0.35s ease-out both; }
+	@keyframes fk-in { from { opacity: 0; transform: translateY(6px) scale(0.9); } to { opacity: 1; transform: none; } }
+	@media (prefers-reduced-motion: reduce) { .fk-toast.show > :global(*) { animation: none; } }
 	.fk-toast[data-kind="neutral"] { font-size: 0.95rem; font-weight: 700; }
 	.fk-toast :global(small) { font-size: 0.7em; font-weight: 700; opacity: 0.75; }
 	.fk-tip {

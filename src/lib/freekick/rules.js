@@ -41,8 +41,12 @@ export function kicksFor(seed) {
     const wall = Array.from({ length: n }, (_, i) => line + side * 0.12 - side * (i * WALL_HALF * 2));
     const jump = index >= 2 && r() < 0.3 + 0.07 * (index - 2);
     const jumpDelay = 0.04 + r() * 0.12;
+    // Specials: a golden ball now and then (×2), wind from the 4th kick (it
+    // pushes the ball sideways and isn't aimed for), the last kick ×2.
+    const golden = index >= 1 && index < KICKS - 1 && r() < 0.2;
+    const wind = index >= 3 && r() < 0.5 ? Math.round((r() < 0.5 ? -1 : 1) * (0.8 + r() * 1.0) * 10) / 10 : 0;
     return {
-      index, D, x0, side, wall, jump, jumpDelay,
+      index, D, x0, side, wall, jump, jumpDelay, golden, wind, last: index === KICKS - 1,
       keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.42 - 0.016 * index, speed: 1.0 + 0.13 * index },
     };
   });
@@ -125,7 +129,8 @@ export function shotFromSwipe(kick, points) {
   const k = v / V_REF, T = kick.D / v, y = aimY + (k >= 1 ? 0.8 : 2) * (k - 1);
   const vx = (aimX - kick.x0 - 0.5 * ax * T * T) / T;
   const vy = (y - BALL_R + 0.5 * G * T * T) / T;
-  return { v, power: v / V_MAX, curl, ax, vx, vy, G, aim: [aimX, aimY] };
+  // wind bends the ball on top of the curl, and the aim doesn't allow for it
+  return { v, power: v / V_MAX, curl, ax: ax + (kick.wind || 0), vx, vy, G, aim: [aimX, aimY] };
 }
 
 export function ballAt(kick, shot, t) {
@@ -152,10 +157,13 @@ export function judgeKick(kick, points) {
   const tw = WALL_GAP / shot.v;
   const [wx, wy] = ballAt(kick, shot, tw);
   const lift = jumpAt(kick, tw);
+  let under = false;
   for (const x of kick.wall) {
-    if (Math.abs(wx - x) < WALL_HALF + BALL_R * 0.5 && wy + BALL_R * 0.5 > lift && wy - BALL_R * 0.5 < lift + WALL_H) {
+    if (Math.abs(wx - x) >= WALL_HALF + BALL_R * 0.5) continue;
+    if (wy + BALL_R * 0.5 > lift && wy - BALL_R * 0.5 < lift + WALL_H) {
       return { kind: 'wall', t: tw, shot, at: [wx, wy, kick.D - WALL_GAP] };
     }
+    if (wy + BALL_R * 0.5 <= lift) under = true; // went under the jumping wall
   }
   const screened = wy > lift + WALL_H - 0.3 && Math.min(...kick.wall) - WALL_HALF < wx && wx < Math.max(...kick.wall) + WALL_HALF;
   const tg = kick.D / shot.v;
@@ -170,26 +178,45 @@ export function judgeKick(kick, points) {
   if (Math.abs(gx) > POST) return { kind: 'wide', t: tg, shot, at };
   const high = gy > 1.6 ? (gy - 1.6) * 1.2 : 0;
   const need = Math.abs(gx - kick.keeper.x) + high;
-  if (need <= keeperReach(kick, tg, screened)) return { kind: 'save', t: tg, shot, at, screened };
-  return { kind: 'goal', t: tg, shot, at, screened };
+  const reach = keeperReach(kick, tg, screened);
+  if (need <= reach) return { kind: 'save', t: tg, shot, at, screened };
+  return { kind: 'goal', t: tg, shot, at, screened, bonuses: bonusesFor(kick, shot, gx, gy, under, need - reach) };
 }
 
-// A whole run: 10 kicks, 100 a goal, a streak multiplies (×1, ×1.5, ×2 … up to ×3).
+// What made a goal special, each worth extra points.
+export const BONUS = { top: 100, banana: 60, cannon: 50, under: 120, fingertip: 40 };
+function bonusesFor(kick, shot, gx, gy, under, margin) {
+  const out = [];
+  if (Math.abs(gx) > 1.05 && gy > 1.35) out.push(['top', BONUS.top]);
+  if (Math.abs(shot.curl) >= 0.13) out.push(['banana', BONUS.banana]);
+  if (shot.power >= 0.72) out.push(['cannon', BONUS.cannon]);
+  if (under) out.push(['under', BONUS.under]);
+  if (kick.D >= 11) out.push(['long', Math.round((kick.D - 10) * 10)]);
+  if (margin <= 0.15) out.push(['fingertip', BONUS.fingertip]);
+  return out;
+}
+
+// A whole run: 10 kicks. A goal is 100 plus its bonuses; a streak multiplies
+// that (×1, ×1.5, ×2 … up to ×3), and a golden ball or the last kick doubles it.
 export function replay(seed, swipes) {
   const kicks = kicksFor(seed);
-  let score = 0, goals = 0, combo = 0, bestCombo = 0;
+  let score = 0, goals = 0, combo = 0, bestCombo = 0, bestKick = 0;
   const outcomes = [];
   for (const kick of kicks) {
     const swipe = swipes[kick.index];
     if (!swipe) break;
     const result = judgeKick(kick, swipe);
-    let points = 0;
+    let points = 0, base = 0, multiplier = 1;
+    const bonuses = result.bonuses ?? [];
     if (result.kind === 'goal') {
       combo++; goals++; bestCombo = Math.max(bestCombo, combo);
-      points = Math.round(POINTS * Math.min(3, 1 + 0.5 * (combo - 1)));
+      base = POINTS + bonuses.reduce((sum, [, p]) => sum + p, 0);
+      multiplier = Math.min(3, 1 + 0.5 * (combo - 1)) * (kick.golden ? 2 : 1) * (kick.last ? 2 : 1);
+      points = Math.round(base * multiplier);
       score += points;
+      bestKick = Math.max(bestKick, points);
     } else combo = 0;
-    outcomes.push({ index: kick.index, kind: result.kind, points, combo });
+    outcomes.push({ index: kick.index, kind: result.kind, points, base, multiplier, bonuses, combo });
   }
-  return { score, goals, combo, bestCombo, outcomes, finished: outcomes.length === KICKS };
+  return { score, goals, combo, bestCombo, bestKick, outcomes, finished: outcomes.length === KICKS };
 }
