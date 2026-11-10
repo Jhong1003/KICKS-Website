@@ -6,6 +6,7 @@ import worker from '../worker/index.js';
 import {
   VERSION, MAX_SHOTS, SAVE_WINDOW, PERFECT_WINDOW, shotsFor, judge, replay, validInputs,
 } from '../src/lib/keeper/rules.js';
+import { rankSQL } from '../functions/api/keeper.js';
 
 // D1's API over a real in-memory SQLite, with the actual migration applied,
 // so the Worker's SQL (upsert, RETURNING, rank) runs for real.
@@ -161,6 +162,24 @@ test('API: start → finish ranks a replayed score, keeps only the personal best
     assert.equal((await other.call()).data.rank, 2);
     assert.equal((await client(env).call()).data.best, null);
   } finally { time.restore(); }
+});
+
+test('API: the board keeps only the best score for each name', async () => {
+  const env = { ASSETS, VISITS_DB: sqliteD1() };
+  const insert = env.VISITS_DB.raw.prepare('INSERT INTO keeper_scores VALUES (?, ?, ?, 0, ?, 0, ?)');
+  const id = (n) => `00000000-0000-4000-8000-00000000000${n}`;
+  insert.run(id(1), '킥스 회장', 4230, 14, 300);
+  insert.run(id(2), '훌리오', 3320, 12, 100);
+  insert.run(id(3), '킥스 회장', 3210, 9, 200);
+  insert.run(id(4), 'Mio', 2000, 5, 400);
+  insert.run(id(5), ' mio', 2500, 5, 500);
+  const board = await client(env).call();
+  assert.deepEqual(board.data.entries.map((e) => [e.name, e.score]), [['킥스 회장', 4230], ['훌리오', 3320], [' mio', 2500]]);
+  assert.deepEqual(Object.keys(board.data.entries[0]), ['name', 'score', 'saves', 'perfect', 'best_combo']);
+  // A browser's rank is where its own best would sit among the other names.
+  const rank = (n) => env.VISITS_DB.raw.prepare(rankSQL).get(id(n));
+  assert.deepEqual({ ...rank(3) }, { score: 3210, rank: 2 });
+  assert.deepEqual({ ...rank(4) }, { score: 2000, rank: 3 });
 });
 
 test('API: refuses bad names, tampered inputs, cross-site posts and rapid restarts', async () => {

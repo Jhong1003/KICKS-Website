@@ -1,8 +1,15 @@
 import { VERSION, MAX_DURATION, replay, validInputs } from '../../src/lib/keeper/rules.js';
-// A player's best and their place in the same order as the leaderboard.
-export const rankSQL = `SELECT me.score, (SELECT COUNT(*) FROM keeper_scores o WHERE o.score > me.score
+// The board shows one row per name: the best score anyone posted under it.
+// Names match after trimming and ignoring ASCII case.
+const BEST_PER_NAME = `WITH ranked AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY lower(trim(name))
+  ORDER BY score DESC, perfect DESC, updated_at ASC) AS rn FROM keeper_scores)
+  SELECT * FROM ranked WHERE rn = 1`;
+export const boardSQL = `${BEST_PER_NAME} ORDER BY score DESC, perfect DESC, updated_at ASC LIMIT 20`;
+// A player's best and their place among the other names on the board.
+export const rankSQL = `WITH best AS (${BEST_PER_NAME})
+  SELECT me.score, (SELECT COUNT(*) FROM best o WHERE lower(trim(o.name)) <> lower(trim(me.name)) AND (o.score > me.score
   OR (o.score = me.score AND o.perfect > me.perfect)
-  OR (o.score = me.score AND o.perfect = me.perfect AND o.updated_at < me.updated_at)) + 1 AS rank
+  OR (o.score = me.score AND o.perfect = me.perfect AND o.updated_at < me.updated_at))) + 1 AS rank
   FROM keeper_scores me WHERE me.player_id = ?1`;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function onRequest({ request, env }) {
@@ -17,9 +24,9 @@ export async function onRequest({ request, env }) {
     const db = env.VISITS_DB;
     if (!db) return respond({ error: 'unavailable' }, 503);
     if (request.method === 'GET') {
-      const rows = await db.prepare('SELECT name, score, saves, perfect, best_combo FROM keeper_scores ORDER BY score DESC, perfect DESC, updated_at ASC LIMIT 20').all();
+      const rows = await db.prepare(boardSQL).all();
       const best = player ? await db.prepare(rankSQL).bind(player).first() : null;
-      return respond({ entries: rows.results, best: best?.score ?? null, rank: best?.rank ?? null, version: VERSION });
+      return respond({ entries: rows.results.map(({ name, score, saves, perfect, best_combo }) => ({ name, score, saves, perfect, best_combo })), best: best?.score ?? null, rank: best?.rank ?? null, version: VERSION });
     }
     const raw = await request.text();
     if (raw.length > 12000) return respond({ error: 'size' }, 413);
