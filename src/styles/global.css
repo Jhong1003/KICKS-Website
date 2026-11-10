@@ -1577,6 +1577,48 @@ button.league-switcher-link {
 
 }
 
+/* Home: the mini game cards (Keeper Challenge, Free Kick Challenge) side by
+   side; each card stacks its picture over its text. */
+.game-promos {
+
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: clamp(16px, 2.5vw, 28px);
+	margin-top: 16px;
+
+}
+
+.game-promos .keeper-promo {
+
+	grid-template-columns: 1fr;
+	align-items: start;
+	align-content: start;
+	margin-top: 0;
+
+}
+
+.game-promos .keeper-promo-image {
+
+	order: -1;
+
+}
+
+.game-promos .keeper-promo-title {
+
+	font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+
+}
+
+@media (max-width: 720px) {
+
+	.game-promos {
+
+		grid-template-columns: 1fr;
+
+	}
+
+}
+
 /* Home: Keeper Challenge card (src/pages/index.astro). The whole card is the
    link; the "button" is a span styled like one. */
 .keeper-promo {

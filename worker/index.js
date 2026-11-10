@@ -1,6 +1,7 @@
 import { onRequest as visits } from '../functions/api/visits.js';
 import { onRequest as perks } from '../functions/api/perks.js';
 import { onRequest as keeper } from '../functions/api/keeper.js';
+import { onRequest as freekick } from '../functions/api/freekick.js';
 import { onRequest as reactions } from '../functions/api/reactions.js';
 
 export default {
@@ -11,6 +12,9 @@ export default {
     }
     if (pathname === '/api/keeper') {
       return keeper({ request, env });
+    }
+    if (pathname === '/api/freekick') {
+      return freekick({ request, env });
     }
     if (pathname === '/api/reactions') {
       return reactions({ request, env });
