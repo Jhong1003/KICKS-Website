@@ -1583,29 +1583,64 @@ button.league-switcher-link {
 
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
+	max-width: 960px;
 	gap: clamp(16px, 2.5vw, 28px);
 	margin-top: 16px;
 
 }
 
+/* Each card is compact: a short picture strip (cropped, not the whole 4:3
+   still) over the text, so the row doesn't take over the page on wide screens. */
 .game-promos .keeper-promo {
 
 	grid-template-columns: 1fr;
 	align-items: start;
 	align-content: start;
+	gap: 14px;
 	margin-top: 0;
+	padding: clamp(14px, 1.8vw, 20px);
 
 }
 
 .game-promos .keeper-promo-image {
 
 	order: -1;
+	aspect-ratio: 16 / 9;
+	max-height: 230px;
+	object-fit: cover;
+	object-position: center 55%;
+
+}
+
+/* the free kick still has the goal and the ball at the top: keep them in */
+.game-promos .keeper-promo-image.crop-top {
+
+	object-position: center 12%;
 
 }
 
 .game-promos .keeper-promo-title {
 
-	font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+	font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+
+}
+
+.game-promos .keeper-promo-text {
+
+	gap: 6px;
+
+}
+
+.game-promos .keeper-promo-description {
+
+	font-size: 0.9rem;
+	line-height: 1.5;
+
+}
+
+.game-promos .keeper-promo-button {
+
+	margin-top: 4px;
 
 }
 
