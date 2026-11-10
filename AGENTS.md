@@ -1062,7 +1062,10 @@ HttpOnly random id, no account), refused if finished faster than it could have b
 played or more than 130 s after starting. `GET` returns the top 20 and this browser's
 best + rank. Tables `keeper_runs` / `keeper_scores` in
 [migrations/0004_keeper_arcade.sql](migrations/0004_keeper_arcade.sql) (same
-`VISITS_DB`); **one best per browser**, kept only when beaten. Names are typed
+`VISITS_DB`); **one best per browser**, kept only when beaten. The board then shows
+**one row per name** (trimmed, ASCII case ignored): the best score under that name, so
+the same nickname from several browsers appears once. This is done at read time; no rows
+are deleted. Names are typed
 nicknames (1–16 letters/numbers/space . _ -), not verified identities. Changing the
 rules changes every replay: bump `VERSION` and treat old scores as a separate board.
 If the API is down the game still plays as an unranked practice run.
