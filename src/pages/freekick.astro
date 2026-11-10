@@ -273,17 +273,6 @@ import T from "../components/T.astro";
 
 		// draw back to front
 		draw.scene(kick, netFlash);
-		// where the shot was aimed, on the net (behind the keeper and the wall)
-		if (shot) {
-			const [ax, ay] = project(cam, shot.aim[0], shot.aim[1], 0);
-			ctx.save();
-			ctx.globalAlpha = 0.9;
-			ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2.5; ctx.setLineDash([4, 3]);
-			ctx.beginPath(); ctx.arc(ax, ay, 11, 0, Math.PI * 2); ctx.stroke();
-			ctx.setLineDash([]); ctx.fillStyle = "#e31b23";
-			ctx.beginPath(); ctx.arc(ax, ay, 3.5, 0, Math.PI * 2); ctx.fill();
-			ctx.restore();
-		}
 		const wallZ = kick.D - WALL_GAP;
 		if (bp[2] < 0) draw.ball(kick, ...bp, spin, alpha);
 		draw.keeper(kp);

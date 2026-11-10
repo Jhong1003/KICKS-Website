@@ -43,7 +43,7 @@ export function kicksFor(seed) {
     const jumpDelay = 0.04 + r() * 0.12;
     return {
       index, D, x0, side, wall, jump, jumpDelay,
-      keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.5 - 0.02 * index, speed: 0.6 + 0.12 * index },
+      keeper: { x: -side * (n >= 3 ? 0.4 : 0.15), react: 0.44 - 0.016 * index, speed: 0.85 + 0.12 * index },
     };
   });
 }
@@ -119,9 +119,10 @@ export function shotFromSwipe(kick, points) {
   // square of the speed, so the path keeps the same shape at any power: a soft
   // shot is just slower (and a little lower), never a loop off the screen.
   const G = (3 + 16 * Math.min(1, aimY / 1.8)) * (v / V_REF) ** 2;
-  // Power moves the ball up or down from the aim: 0.8 m per 100% off V_REF,
-  // so a bit too hard clips the bar and a bit too soft hits the wall.
-  const T = kick.D / v, y = aimY + 0.8 * (v / V_REF - 1);
+  // Power moves the ball up or down from the aim: harder rises 0.8 m per 100%
+  // over V_REF, softer drops 2 m per 100% under it, so a soft chip doesn't
+  // float up and over the wall.
+  const k = v / V_REF, T = kick.D / v, y = aimY + (k >= 1 ? 0.8 : 2) * (k - 1);
   const vx = (aimX - kick.x0 - 0.5 * ax * T * T) / T;
   const vy = (y - BALL_R + 0.5 * G * T * T) / T;
   return { v, power: v / V_MAX, curl, ax, vx, vy, G, aim: [aimX, aimY] };
