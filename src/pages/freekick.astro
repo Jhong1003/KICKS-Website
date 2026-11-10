@@ -1,11 +1,11 @@
 ---
-// /freekick — KICKS Free Kick, a swipe-to-shoot mini game (prototype: practice
-// only, no leaderboard yet).
+// /freekick — KICKS Free Kick, a swipe-to-shoot mini game with a leaderboard.
 //
-// Swipe up from the ball: the line's end is where the ball goes, its bow is the
-// curl, and how fast the finger is moving at the end is the power. The result
-// of each kick comes from src/lib/freekick/rules.js alone, so the same swipes
-// replay to the same score (for a ranked version later).
+// Swipe up from the ball: the line's end is where the ball goes (a short flick
+// carries on toward the goal), its bow is the curl, and the fastest part of the
+// swipe is the power. Every result comes from src/lib/freekick/rules.js alone:
+// the browser sends only its ten swipes and the Worker (functions/api/freekick.js)
+// replays them for the score. Without the API it plays as unranked practice.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import T from "../components/T.astro";
 ---
@@ -34,31 +34,45 @@ import T from "../components/T.astro";
 					<p class="fk-toast" data-toast aria-live="assertive"></p>
 					<p class="fk-tip" data-tip></p>
 
-					<div class="fk-panel" data-start-panel>
+					<form class="fk-panel" data-start-panel novalidate>
 						<T as="h2" en="Step up and take it" ko="프리킥을 차볼까요?" />
 						<ul class="fk-howto">
 							<T as="li" en="Flick up from the ball toward a corner — a short flick is fine." ko="공에서 골대 구석 쪽으로 휙 쓸어 올리세요. 짧게 쓸어도 돼요." />
 							<T as="li" en="Bend the line to curl it." ko="선을 휘게 그리면 공도 휘어요." />
 							<T as="li" en="Faster swipe = harder shot. Too hard flies over the bar." ko="빠르게 쓸면 강하게, 살살 쓸면 약하게. 너무 세면 크로스바를 넘어가요." />
 						</ul>
-						<button type="button" class="button-primary fk-button" data-start><T en="Start" ko="시작" /></button>
-					</div>
+						<label class="fk-name">
+							<T en="Name on the leaderboard" ko="랭킹에 표시할 이름" />
+							<input type="text" name="name" maxlength="16" autocomplete="nickname" required data-name placeholder="Nickname"
+								data-i18n-attrs={JSON.stringify({ placeholder: { en: "Nickname", ko: "닉네임" } })} />
+						</label>
+						<p class="fk-error" data-start-error role="alert"></p>
+						<button type="submit" class="button-primary fk-button" data-start><T en="Start" ko="시작" /></button>
+					</form>
 
 					<div class="fk-panel" data-result-panel hidden>
 						<T as="h2" en="Full time" ko="경기 종료" />
 						<p class="fk-final" data-final-score>0</p>
 						<p class="fk-final-detail" data-final-detail></p>
+						<p class="fk-final-note" data-final-note role="status"></p>
 						<button type="button" class="button-primary fk-button" data-again><T en="Play again" ko="다시 하기" /></button>
 					</div>
 				</div>
-				<T as="p" class="fk-note" en="Prototype · practice only, scores are not saved yet." ko="시험판 · 연습 모드라 기록은 아직 저장되지 않아요." />
+			</div>
+
+			<div class="fk-board">
+				<T as="h2" en="Leaderboard" ko="랭킹" />
+				<p class="fk-board-me" data-board-me hidden></p>
+				<ol class="fk-board-list" data-board-list></ol>
+				<p class="fk-board-empty" data-board-empty><T en="No scores yet — be the first." ko="아직 기록이 없어요. 첫 번째 주인공이 되어보세요." /></p>
+				<T as="p" class="fk-board-note" en="One row per name, with its best score. Names are nicknames anyone can pick." ko="이름마다 최고 기록 하나가 남아요. 이름은 누구나 정할 수 있는 닉네임이에요." />
 			</div>
 		</section>
 	</main>
 </BaseLayout>
 
 <script>
-	import { KICKS, VIEW, BALL_R, WALL_GAP, kicksFor, judgeKick, ballAt, jumpAt, camera, project, validSwipe, replay } from "../lib/freekick/rules.js";
+	import { VERSION, KICKS, VIEW, BALL_R, WALL_GAP, kicksFor, judgeKick, ballAt, jumpAt, camera, project, validSwipe, replay } from "../lib/freekick/rules.js";
 	import { makeDraw, clamp, type Pt } from "../lib/freekick/draw";
 	import { bilingualHtml as L } from "../lib/i18n";
 
@@ -68,7 +82,10 @@ import T from "../components/T.astro";
 	const stage = $<HTMLElement>("[data-stage]");
 	const toast = $<HTMLElement>("[data-toast]");
 	const tip = $<HTMLElement>("[data-tip]");
-	const startPanel = $<HTMLElement>("[data-start-panel]");
+	const startPanel = $<HTMLFormElement>("[data-start-panel]");
+	const nameInput = $<HTMLInputElement>("[data-name]");
+	const startError = $<HTMLElement>("[data-start-error]");
+	const startButton = $<HTMLButtonElement>("[data-start]");
 	const resultPanel = $<HTMLElement>("[data-result-panel]");
 	const hudScore = $<HTMLElement>("[data-hud-score]");
 	const hudCombo = $<HTMLElement>("[data-hud-combo]");
@@ -84,7 +101,7 @@ import T from "../components/T.astro";
 	type Swipe = [number, number, number][];
 	type Result = ReturnType<typeof judgeKick>;
 	type Run = {
-		seed: number; kicks: ReturnType<typeof kicksFor>; swipes: Swipe[]; index: number;
+		id: string | null; seed: number; kicks: ReturnType<typeof kicksFor>; swipes: Swipe[]; index: number;
 		state: "aim" | "kick" | "done"; kickAt: number; result: Result | null; resolved: boolean;
 		score: number; combo: number; big: boolean;
 	};
@@ -103,15 +120,93 @@ import T from "../components/T.astro";
 	resize();
 	window.addEventListener("resize", resize);
 
+	// ---------- storage + API ----------
+	const API = "/api/freekick";
+	const NAME_KEY = "kicks-freekick-name";
+	const NAME_RULE = /^[\p{L}\p{N} ._-]{1,16}$/u;
+	const store = {
+		get(key: string) { try { return localStorage.getItem(key); } catch { return null; } },
+		set(key: string, value: string) { try { localStorage.setItem(key, value); } catch {} },
+	};
+	nameInput.value = store.get(NAME_KEY) ?? store.get("kicks-keeper-name") ?? "";
+	async function api(body?: object) {
+		const response = await fetch(API, body ? {
+			method: "POST", headers: { "Content-Type": "application/json", "X-Kicks-Freekick": "1" }, body: JSON.stringify(body),
+		} : { cache: "no-store" });
+		return { ok: response.ok, status: response.status, data: await response.json().catch(() => ({})) };
+	}
+	async function loadBoard() {
+		const list = $<HTMLOListElement>("[data-board-list]"), empty = $<HTMLElement>("[data-board-empty]"), me = $<HTMLElement>("[data-board-me]");
+		try {
+			const { ok, data } = await api();
+			if (!ok) throw Error();
+			list.replaceChildren(...data.entries.map((entry: any, i: number) => {
+				const li = document.createElement("li");
+				const rank = document.createElement("span"); rank.className = "fk-rank"; rank.textContent = String(i + 1);
+				const name = document.createElement("span"); name.className = "fk-row-name"; name.textContent = entry.name;
+				const detail = document.createElement("span"); detail.className = "fk-row-detail";
+				detail.innerHTML = L(`${entry.goals} goals · best kick +${entry.best_kick}`, `${entry.goals}골 · 최고 한 방 +${entry.best_kick}`);
+				const score = document.createElement("strong"); score.textContent = entry.score.toLocaleString();
+				li.append(rank, name, detail, score);
+				return li;
+			}));
+			empty.hidden = data.entries.length > 0;
+			me.hidden = data.best == null;
+			if (data.best != null) me.innerHTML = L(`Your best: ${data.best.toLocaleString()} · #${data.rank}`, `내 최고 기록: ${data.best.toLocaleString()}점 · ${data.rank}위`);
+		} catch {
+			list.replaceChildren();
+			empty.innerHTML = L("The leaderboard is unavailable right now.", "지금은 랭킹을 불러올 수 없어요.");
+			empty.hidden = false;
+		}
+	}
+
 	// ---------- flow ----------
-	function start() {
-		const seed = (import.meta.env.DEV && (window as any).__fkSeed) || crypto.getRandomValues(new Uint32Array(1))[0];
-		run = { seed, kicks: kicksFor(seed), swipes: [], index: 0, state: "aim", kickAt: 0, result: null, resolved: false, score: 0, combo: 0, big: false };
+	startPanel.addEventListener("submit", async (event) => {
+		event.preventDefault();
+		const name = nameInput.value.normalize("NFKC").trim().replace(/\s+/gu, " ");
+		if (!NAME_RULE.test(name)) {
+			startError.innerHTML = L("Use 1–16 letters, numbers, spaces, . _ -", "이름은 1–16자, 글자·숫자·공백·. _ - 만 쓸 수 있어요.");
+			nameInput.focus();
+			return;
+		}
+		startError.textContent = "";
+		store.set(NAME_KEY, name);
+		startButton.disabled = true;
+		let id: string | null = null, seed: number;
+		try {
+			const { ok, status, data } = await api({ action: "start", name });
+			if (status === 429) { startError.innerHTML = L("Hold on a second and try again.", "잠시 후 다시 시작해주세요."); startButton.disabled = false; return; }
+			if (status === 400 && data.error === "name") { startError.innerHTML = L("That name can't be used.", "사용할 수 없는 이름이에요."); startButton.disabled = false; return; }
+			if (!ok || data.version !== VERSION) throw Error();
+			id = data.id; seed = data.seed;
+		} catch {
+			seed = (import.meta.env.DEV && (window as any).__fkSeed) || crypto.getRandomValues(new Uint32Array(1))[0];
+		}
+		startButton.disabled = false;
+		begin(id, seed);
+	});
+	$("[data-again]").addEventListener("click", () => { resultPanel.hidden = true; startPanel.hidden = false; startButton.focus(); });
+
+	function begin(id: string | null, seed: number) {
+		run = { id, seed, kicks: kicksFor(seed), swipes: [], index: 0, state: "aim", kickAt: 0, result: null, resolved: false, score: 0, combo: 0, big: false };
 		startPanel.hidden = true; resultPanel.hidden = true;
 		hud(); showTip();
+		if (!id) setTimeout(() => flash(L("Practice — not ranked", "연습 모드 · 기록 저장 안 됨"), "neutral", 1600), 1900);
 	}
-	$("[data-start]").addEventListener("click", start);
-	$("[data-again]").addEventListener("click", start);
+
+	async function finish(r: Run) {
+		const note = $<HTMLElement>("[data-final-note]");
+		note.innerHTML = r.id ? L("Saving…", "기록 저장 중…") : L("Practice run — not ranked.", "연습 기록이라 랭킹에 올라가지 않아요.");
+		if (!r.id) return;
+		try {
+			const { ok, data } = await api({ action: "finish", id: r.id, version: VERSION, swipes: r.swipes });
+			if (!ok) throw Error();
+			note.innerHTML = data.newBest ? L("New personal best! 🎉", "새 최고 기록! 🎉") : L("Saved. Your best still stands.", "저장 완료 · 최고 기록은 그대로예요.");
+			loadBoard();
+		} catch {
+			note.innerHTML = L("Couldn't save this run.", "기록을 저장하지 못했어요.");
+		}
+	}
 
 	function showTip() {
 		if (!run || run.state !== "aim") { tip.textContent = ""; return; }
@@ -204,6 +299,8 @@ import T from "../components/T.astro";
 			$("[data-final-score]").textContent = res.score.toLocaleString();
 			$("[data-final-detail]").innerHTML = L(`${res.goals}/${KICKS} goals · best streak ${res.bestCombo} · best kick +${res.bestKick}`, `${KICKS}개 중 ${res.goals}골 · 최고 연속 ${res.bestCombo} · 최고 한 방 +${res.bestKick}`);
 			resultPanel.hidden = false;
+			$<HTMLButtonElement>("[data-again]").focus();
+			finish(r);
 			return;
 		}
 		r.state = "aim";
@@ -432,6 +529,7 @@ import T from "../components/T.astro";
 	}
 	requestAnimationFrame(frame);
 	hud();
+	loadBoard();
 	if (import.meta.env.DEV) (window as any).__fk = { get run() { return run; }, validSwipe, judgeKick };
 </script>
 
@@ -490,5 +588,28 @@ import T from "../components/T.astro";
 	.fk-button { border: 0; cursor: pointer; font: inherit; font-weight: 700; }
 	.fk-final { margin: 0; font-size: clamp(2.6rem, 11vw, 3.6rem); font-weight: 800; color: var(--color-green); font-variant-numeric: tabular-nums; }
 	.fk-final-detail { margin: 0; font-size: 0.9rem; }
-	.fk-note { margin: 10px 0 0; font-size: 0.8rem; color: rgba(41, 41, 41, 0.6); }
+	.fk-panel { overflow-y: auto; user-select: text; -webkit-user-select: text; }
+	.fk-name { display: flex; flex-direction: column; gap: 6px; width: min(260px, 100%); font-size: 0.8rem; font-weight: 700; color: rgba(41, 41, 41, 0.7); }
+	.fk-name input {
+		padding: 11px 12px; border: 1px solid rgba(41, 41, 41, 0.25); border-radius: 6px; background: #fff;
+		font: inherit; font-size: 1rem; font-weight: 500; color: var(--color-dark); text-align: center;
+	}
+	.fk-name input:focus { outline: 2px solid var(--color-green); outline-offset: 1px; }
+	.fk-error { min-height: 1.2em; margin: 0; font-size: 0.8rem; color: #b3412e; }
+	.fk-button:disabled { opacity: 0.6; cursor: progress; }
+	.fk-final-note { min-height: 1.3em; margin: 0; font-size: 0.9rem; font-weight: 700; }
+	.fk-board { max-width: 640px; margin-top: 44px; }
+	.fk-board h2 { font-size: clamp(1.3rem, 3vw, 1.8rem); }
+	.fk-board-me { margin: 10px 0 0; font-weight: 700; color: var(--color-green); }
+	.fk-board-list { margin: 16px 0 0; padding: 0; list-style: none; }
+	.fk-board-list :global(li) {
+		display: grid; grid-template-columns: 2.2em minmax(0, 1fr) auto auto; align-items: baseline; gap: 12px;
+		padding: 10px 0; border-bottom: 1px solid rgba(41, 41, 41, 0.08);
+	}
+	.fk-board-list :global(.fk-rank) { font-weight: 800; color: var(--color-green); font-variant-numeric: tabular-nums; }
+	.fk-board-list :global(.fk-row-name) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+	.fk-board-list :global(.fk-row-detail) { font-size: 0.78rem; color: rgba(41, 41, 41, 0.6); }
+	.fk-board-list :global(strong) { font-variant-numeric: tabular-nums; }
+	.fk-board-empty, .fk-board-note { margin: 14px 0 0; font-size: 0.85rem; color: rgba(41, 41, 41, 0.65); }
+	@media (max-width: 420px) { .fk-board-list :global(.fk-row-detail) { display: none; } }
 </style>

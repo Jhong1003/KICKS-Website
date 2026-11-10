@@ -1026,8 +1026,9 @@ counts load, so nothing shows if the API or table is missing. One-time setup:
 ### Keeper game
 
 `/keeper` ([src/pages/keeper.astro](src/pages/keeper.astro), reached from a "Keeper
-Challenge" card on the homepage, between the standings and the photos, that shows the
-current #1 from `GET /api/keeper` and a still of the game, `public/keeper/card.webp`;
+Challenge" card in the homepage's MINI GAMES row (between the standings and the photos,
+beside the Free Kick card; each card shows its game's current #1 from the API named in
+its `data-game-leader` and a still of the game, `public/keeper/card.webp`);
 not in the main menu or the footer) is a small goalkeeper reaction game in the site's flat 2D colours
 (canvas). Shots go to one of five spots — four corners and the middle. **Corners
 are a swipe toward that corner; the middle is a tap, or simply staying put**, since
@@ -1074,6 +1075,58 @@ the neck. The page falls back to a drawn head if it fails to load. The keeper
 wears the KICKS home kit (cream shirt with olive V-neck, sleeve stripes and
 cuffs, KICKS wordmark, K mark and crest; olive shorts; white socks with olive
 hoops). The crest is `public/keeper/crest.webp`, cut from `public/kicks-logo.jpg`. Swap that file to change the face, with the player's agreement.
+
+### Free kick game
+
+`/freekick` ([src/pages/freekick.astro](src/pages/freekick.astro), the second card in
+the homepage MINI GAMES row, still `public/freekick/card.webp`) is ten free kicks seen
+from behind the kicker: a wall of opponents (2 → 4 players, jumping from the 3rd
+kick), the same KICKS keeper as `/keeper` (face, kit, figure), and a kicker in the
+home kit with a run-up, strike, follow-through and a cheer or hands-on-head. Drawing
+is in [src/lib/freekick/draw.ts](src/lib/freekick/draw.ts); everything that decides
+a result is in [src/lib/freekick/rules.js](src/lib/freekick/rules.js), shared by the
+page and the Worker.
+
+**Controls are one swipe up from the ball, measured in canvas units** (640 × 560, so a
+phone and a desktop read the same gesture alike):
+
+- **Aim** = where the finger lifts, on the goal plane. A short flick that stops below
+  the goal is carried on in its own direction to 1.65 m, capped just outside the posts
+  — phones mostly get short flicks, and aiming by the end point alone sent them into
+  the wall.
+- **Power** = the fastest 50 ms of the swipe (2.5 canvas px/ms ≈ a normal phone
+  flick), not the last moment: fingers slow or pause before lifting, which read as
+  minimum power. Harder arrives 0.8 m higher per 100% over `V_REF`, softer 2 m lower per
+  100% under it, so a soft chip can't float over the wall.
+- **Curl** = how far the line bows from straight, after ignoring a 4% bow (a thumb
+  arcs anyway); the ball sets off the way it bows and bends back.
+- The dip scales with speed², so **the path keeps its shape at any power** — a soft
+  shot is slower and lower, never a loop off the screen.
+
+A kick ends at the first thing the ball meets: wall (jumping walls can be gone
+**under**), post/bar (a 6 cm band), over, wide, keeper (reach grows after a reaction
+time, later if the wall hid the ball, quicker every kick) or goal. A goal is 100 plus
+**bonuses** (`BONUS`: top corner, banana kick, cannon, under the wall, long range,
+fingertip), times the streak (×1, ×1.5 … ×3), a **golden ball** (×2, now and then) and
+the **last kick** (×2). Wind (from the 4th kick) pushes the ball sideways and isn't
+aimed for; the page shows its direction. The headline climbs with the final points
+(골! / 나이스 골! / 원더골! / 월드클래스!); a goal whose bonuses reach 250 also gets
+confetti and a slow-motion replay. Shake, net ripple, fire trail, confetti and replay
+are visual only.
+
+**Scores are replayed, never trusted**, as for the keeper:
+[functions/api/freekick.js](functions/api/freekick.js) (`/api/freekick`, Worker-first,
+same-origin + `X-Kicks-Freekick: 1`, cookie `kicks-freekick`) hands out a seed on
+`POST {action:"start", name}` and replays `POST {action:"finish", id, version, swipes}`
+— exactly ten swipes of integer `[ms, x, y]` points. A run is single-use, refused under
+20 s or over 30 min. Tables `freekick_runs` / `freekick_scores` in
+[migrations/0005_freekick.sql](migrations/0005_freekick.sql); one best per browser, the
+board one row per name (same read-time rule as the keeper). Changing anything in
+rules.js changes every replay: bump `VERSION`.
+
+One-time setup before deploying: `npx wrangler d1 migrations apply kicks-visits --remote`.
+Tests: `node --test tests/freekick.test.mjs`. In `astro dev` (no Worker) the game plays
+as practice; `window.__fkSeed` fixes the seed there for screenshots.
 
 ### Match Forecasts
 
