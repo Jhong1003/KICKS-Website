@@ -73,3 +73,10 @@ test("no weeks played → no events", () => {
 	const career = buildCareer([{ league: "L1", current_team_id: "T1", weekly_stats: [w(1, 0, 0, 0)] }], ctx());
 	assert.deepEqual(career.events, []);
 });
+
+test("own goals: only the first one, and never in the totals", () => {
+	const og = (week, n) => ({ ...w(week), own_goals: n });
+	const career = buildCareer([{ league: "L1", current_team_id: "T1", weekly_stats: [w(1), og(2, 1), og(3, 2)] }], ctx());
+	assert.deepEqual(kinds(career), ["L1-1-debut", "L1-2-first_own_goal"]);
+	assert.equal(career.totals.goals, 0);
+});
