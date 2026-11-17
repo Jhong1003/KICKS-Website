@@ -521,6 +521,20 @@ because teams are re-drawn every league, which made "first week"/"just
 joined" meaningless. The old week-based `brace`/`hat_trick` became
 `on_fire`, and the Iron Man tag became the `iron_man` badge.)
 
+**Career timeline** (`CareerTimeline.astro` at the bottom of `/players/[id]`, under
+every league panel, over [src/lib/career.ts](src/lib/career.ts), tested by
+`tests/career.test.mjs`): the player's career totals (leagues, goals, assists,
+weeks played, titles) and a newest-first timeline of their own moments across
+leagues — debut, each new league and its team, mid-league moves, first goal and
+first assist, the first brace / hat-trick / poker (from `goal_events`, so FA26-L2
+on), career milestones (goals and assists 5/10/20/30/50/75/100 then every 50;
+weeks played 10/20/…; only the highest crossed in one week), and honours
+(champion, Golden Boot, Playmaker Award — `getLeagueFinale` winners and the
+rank-1 team, with the `isShownInLeague` rule) dated to the league's last week.
+Each line is dated from schedule.json and links to that league week. It sums
+across leagues — the second exception to the rule above — and passes the same
+test: one player, nobody ranked or compared, shown only on that player's page.
+
 **Hall of Fame** (`/hall-of-fame`, in the main menu): season award blocks
 (Ballon d'Or, Puskás from `src/data/awards.json`), then one `LeagueHonours.astro`
 block per finished league, newest first — champion team with its (non-inactive)
@@ -652,15 +666,17 @@ crossed a milestone, it switches to a celebration message instead ("KICKS
 통산 100골 달성! 🎉"). Both constants, plus `GOAL_MILESTONE_STEP` (100),
 are in [src/lib/goals.ts](src/lib/goals.ts).
 
-**This is the only place on the site that sums across leagues, on
-purpose.** The no-cross-league rule exists because teams are re-drawn and
+**This and a player's own Career section (below) are the only places on the
+site that sum across leagues, on purpose.** The no-cross-league rule exists because teams are re-drawn and
 rosters change every league, so adding up standings, player stats or
 badges across leagues would compare things that aren't comparable, and
 would rank someone on numbers from a different setup. The goal total
 doesn't rank or compare anyone: no team, no player, just one number for
 the whole club celebrating how much it has played together. That's the
 test for any future exception: a club-wide number that nobody is ranked
-or compared on. Anything per team or per player stays per league.
+or compared on. Anything per team or per player stays per league — except a
+player's career on their own page (see "Career timeline"), which is about one
+person, never listed, ranked or set next to anyone else's.
 
 It's computed on the frontend from `matches.json` rather than in
 `update_data.py`. It's a plain sum of data that's already generated, and
