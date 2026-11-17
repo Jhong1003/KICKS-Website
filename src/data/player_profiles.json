@@ -27,28 +27,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -82,28 +86,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 4
+            "assists": 4,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 3
+            "assists": 3,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -155,28 +163,32 @@
             "team_id": "T3",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -209,7 +221,8 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -254,28 +267,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -316,14 +333,16 @@
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -368,28 +387,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 3,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -432,28 +455,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -503,28 +530,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 3,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -559,28 +590,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -625,28 +660,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -676,28 +715,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -745,28 +788,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -798,28 +845,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -859,28 +910,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -914,28 +969,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -977,28 +1036,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1030,28 +1093,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 2,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1097,28 +1164,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -1145,28 +1216,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1211,28 +1286,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 2,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1269,28 +1348,32 @@
             "team_id": "T3",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1337,28 +1420,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 5
+            "assists": 5,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1399,28 +1486,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 3
+            "assists": 3,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 3,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 5,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1472,28 +1563,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 3
+            "assists": 3,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1529,14 +1624,16 @@
             "team_id": "T2",
             "games": 6,
             "goals": 3,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 3,
-            "assists": 3
+            "assists": 3,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1587,28 +1684,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 2,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 2,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1648,28 +1749,32 @@
             "team_id": "T3",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1716,28 +1821,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 2,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1774,28 +1883,32 @@
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1841,28 +1954,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 2,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 3,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 2,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1899,28 +2016,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 3,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 2,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -1967,28 +2088,32 @@
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -2015,28 +2140,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -2081,28 +2210,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2148,28 +2281,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 4,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 3,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 2,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 2,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2204,28 +2341,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 2,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 6,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 3,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 4,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2273,28 +2414,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -2322,28 +2467,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -2384,28 +2533,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2439,28 +2592,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 2,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 2,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2508,28 +2665,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2562,28 +2723,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 1
           }
         ],
         "personal_best_week": {
@@ -2628,14 +2793,16 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -2674,14 +2841,16 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -2720,28 +2889,32 @@
             "team_id": "T3",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2777,28 +2950,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2847,28 +3024,32 @@
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -2908,14 +3089,16 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -2957,28 +3140,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -3011,28 +3198,32 @@
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T1",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T1",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -3071,28 +3262,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -3118,14 +3313,16 @@
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -3169,28 +3366,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -3218,28 +3419,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 1
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": null,
@@ -3281,28 +3486,32 @@
             "team_id": "T3",
             "games": 6,
             "goals": 2,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T3",
             "games": 6,
             "goals": 1,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 6,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 5,
-            "assists": 3
+            "assists": 3,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -3350,28 +3559,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 4,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 2,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T3",
             "games": 6,
             "goals": 7,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T3",
             "games": 6,
             "goals": 4,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -3421,28 +3634,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 3
+            "assists": 3,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 0,
             "goals": 0,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
@@ -3476,28 +3693,32 @@
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 0
+            "assists": 0,
+            "own_goals": 0
           },
           {
             "week": 2,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 2
+            "assists": 2,
+            "own_goals": 0
           },
           {
             "week": 3,
             "team_id": "T2",
             "games": 6,
             "goals": 1,
-            "assists": 3
+            "assists": 3,
+            "own_goals": 0
           },
           {
             "week": 4,
             "team_id": "T2",
             "games": 6,
             "goals": 0,
-            "assists": 1
+            "assists": 1,
+            "own_goals": 0
           }
         ],
         "personal_best_week": {
