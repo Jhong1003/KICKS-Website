@@ -807,26 +807,52 @@ update. Not part of the site build; nothing under `report/` is deployed.
 
 ### Link-preview cards (og:image)
 
-What KakaoTalk, iMessage etc. show when a link is shared. Player pages
-(`/players/<id>/`) and league pages (`/league/<id>/`, and `/league/` for the
-current league) get their own 1200×630 card; every other page keeps
-`public/og-image.png`. [scripts/make_og.mjs](scripts/make_og.mjs) draws them with
-the report's fonts on the club green of `og-image.png` (`#3f5128`, no photo) and
-Playwright, as `public/og/players/<id>.jpg` and `public/og/league/<league>.jpg`,
-and writes `src/data/og.json` (a hash per card — never hand-edit). Pages pick a
-card through [src/lib/og.ts](src/lib/og.ts) → `ogImage` on `BaseLayout`, with
-`?v=<hash>` in the URL so a redrawn card isn't hidden behind a chat app's cache;
-no entry falls back to the default image. The "Make Report Slides" workflow runs
-it after every data update and commits only cards whose HTML changed.
+What KakaoTalk, iMessage etc. show when a link is shared. Every page except the
+homepage gets its own 1200×630 card; the homepage keeps `public/og-image.png`.
+[scripts/make_og.mjs](scripts/make_og.mjs) draws them with the report's fonts and
+Playwright into `public/og/<dir>/`, and writes `src/data/og.json` (a hash per card,
+per kind — never hand-edit). Pages pick a card through [src/lib/og.ts](src/lib/og.ts)
+→ `ogImage` on `BaseLayout`, with `?v=<hash>` in the URL so a redrawn card isn't
+hidden behind a chat app's cache; no entry falls back to the default image. The
+"Make Report Slides" workflow runs it after every data update (and on pushes that
+touch the script, gallery photos/albums, partners or team-info) and commits only
+cards whose HTML changed. Locally: `NODE_PATH=<dir with playwright> CHROME_PATH=<chrome> node scripts/make_og.mjs`.
+
+| Kind (og.json) | File | Page | Helper |
+|---|---|---|---|
+| `players` | `players/<id>.jpg` | `/players/<id>/` | `playerOgImage(id)` |
+| `leagues` | `league/<league>.jpg` | `/league/`, `/league/<id>/`, its report and scenarios pages | `leagueOgImage(id)` |
+| `teams` | `team/<league>-<team>.jpg` | `/league/<id>/team/<team>/` | `teamOgImage(league, team)` |
+| `wrapped` | `wrapped/<league>-<id>.jpg` | `/wrapped/<league>/<id>/` (falls back to the player card) | `wrappedOgImage(league, id)` |
+| `albums` | `album/<album>.jpg` | `/gallery/<album>/` | `albumOgImage(id)` |
+| `pages` | `page/<key>.jpg` | about, schedule, players, join, partners, hall-of-fame, gallery, full-matches, dream-team, app, keeper, freekick | `pageOgImage(key)` |
 
 - **Player card** = the player's newest league section (what their page opens
   on): name, team colour and name, primary position, play-style tag, that
   league's goals / assists / weeks attended, badges rarest-first (icons read from
   `BADGES` in `src/lib/players.ts`), a real photo if `player-photos.json` has
   one. **No rank or rating**, same rule as the player pages.
-- **League card** = top three of `league_table.json` (W-D-L, points), "AFTER WEEK
-  n OF m" while it runs, "FINAL STANDINGS" + 🏆 champion once every fixture is
-  scored.
+- **League card** = top three of `league_table.json` (W-D-L, points) with "AFTER
+  WEEK n OF m" while it runs. **Once every fixture is scored it becomes the
+  CHAMPIONS banner** — the club's champion banner design: dark green `#23311a`,
+  KICKS logo (`public/kicks-logo-white.jpg`), "FA26 · LEAGUE 2" between gold rules,
+  the gold CHAMPIONS lettering (an outline, `report/assets/champions-wordmark.svg`,
+  so no slab font is needed), the champion's name between two bars in its team
+  colour (co-champions side by side), and every `partners.json` logo on a cream
+  strip.
+- **Team card** = team name, colour disc, place / points / W-D-L, captain
+  (team-info.json), squad size, 🏆 CHAMPION when the finished league's rank 1.
+  Place is the official standings rank, which the team page shows too.
+- **Wrapped card** = a teaser (KICKS WRAPPED, league, name, team, badges), drawn for
+  the same players as `wrappedPlayers` (finished league, `isShownInLeague` rule
+  repeated as `shownInLeague` in the script) — not the slides' contents.
+- **Album card** = the album cover (same cover rule as `src/lib/gallery.ts`), the
+  Korean and English titles, date and photo count.
+- **Page cards** = label, English title, Korean name, and on the right what shows
+  the page best (game stills, partner logos, Hall of Fame champions, three album
+  covers, the KICKS logo or ball). To add one: add a key in `pageCards()` in the
+  script and pass `pageOgImage("<key>")` on the page. Korean text must be inside
+  the embedded 2,350-syllable subset (CI has no Korean fonts).
 - KakaoTalk caches previews per URL: an old share can keep its old picture; the
   Kakao developers "공유 디버거" clears it.
 

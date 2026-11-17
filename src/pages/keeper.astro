@@ -10,10 +10,11 @@
 // shot down the middle. Keyboard: Q E Z C for the corners, Space or S for the
 // middle. Without the API the game still plays as practice, unranked.
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import T from "../components/T.astro";
 ---
 
-<BaseLayout title="Keeper Challenge | KICKS" description="Save as many shots as you can and climb the KICKS keeper leaderboard.">
+<BaseLayout ogImage={pageOgImage("keeper")} title="Keeper Challenge | KICKS" description="Save as many shots as you can and climb the KICKS keeper leaderboard.">
 	<main class="keeper-page">
 		<section class="content-section" aria-labelledby="keeper-title">
 			<p class="section-label">KICKS KEEPER</p>

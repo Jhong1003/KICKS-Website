@@ -11,6 +11,7 @@
 // with the real results filled in. Any other time it says when it will open.
 // A scenario is shareable: ?s= holds one letter (H/D/A, "-" = open) per match.
 import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { leagueOgImage } from "../../../lib/og";
 import T from "../../../components/T.astro";
 import matchesData from "../../../data/matches.json";
 import leagueTableData from "../../../data/league_table.json";
@@ -65,7 +66,7 @@ const description = view?.mode === "live"
 	: `KICKS ${league.id} title scenarios.`;
 ---
 
-<BaseLayout title={`Title Scenarios · ${league.id} | KICKS`} description={description}>
+<BaseLayout ogImage={leagueOgImage(league.id)} title={`Title Scenarios · ${league.id} | KICKS`} description={description}>
 	<main class="scenarios-page">
 		<section class="content-section" aria-labelledby="scenarios-title">
 			<a class="back-link" href={`/league/${league.id}/#title-race`}>

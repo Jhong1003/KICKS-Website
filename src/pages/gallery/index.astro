@@ -3,6 +3,7 @@
 // opens /gallery/<album-id>, which has the photo grid and lightbox.
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { pageOgImage } from "../../lib/og";
 import T from "../../components/T.astro";
 import MediaTabs from "../../components/MediaTabs.astro";
 import { albums } from "../../lib/gallery";
@@ -13,7 +14,7 @@ const monthLabel = (iso: string, lang: "en" | "ko") => {
 };
 ---
 
-<BaseLayout title="Gallery | KICKS" description="Photos from KICKS matches and events.">
+<BaseLayout ogImage={pageOgImage("gallery")} title="Gallery | KICKS" description="Photos from KICKS matches and events.">
 	<main>
 		<section class="content-section" aria-labelledby="gallery-title">
 			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>

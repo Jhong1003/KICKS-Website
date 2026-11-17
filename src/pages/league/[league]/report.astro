@@ -11,6 +11,7 @@
 // Images" puts them in Photos) and falls back to downloading each one, the same
 // pattern as the Wrapped card.
 import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { leagueOgImage } from "../../../lib/og";
 import T from "../../../components/T.astro";
 import reportsData from "../../../data/reports.json";
 import { leagues, type League } from "../../../lib/leagues";
@@ -32,7 +33,7 @@ const latest = weeks.at(-1)?.week;
 const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
-<BaseLayout title={`Report · ${league.id} | KICKS`} description={`${league.id} Instagram report slides — save and share.`}>
+<BaseLayout ogImage={leagueOgImage(league.id)} title={`Report · ${league.id} | KICKS`} description={`${league.id} Instagram report slides — save and share.`}>
 	<main class="report-page">
 		<section class="content-section" aria-labelledby="report-title">
 			<a class="back-link" href={`/league/${league.id}/#results`}>

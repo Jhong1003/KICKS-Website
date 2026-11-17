@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import T from "../components/T.astro";
 import recruitment from "../data/recruitment.json";
 
@@ -52,7 +53,7 @@ const faqs = [
 ];
 ---
 
-<BaseLayout title="Join | KICKS" description={`${recruitment.season} player ${waitlist ? "waitlist" : "applications"} open. Manager applications welcome year-round. Learn how to join KICKS.`}>
+<BaseLayout ogImage={pageOgImage("join")} title="Join | KICKS" description={`${recruitment.season} player ${waitlist ? "waitlist" : "applications"} open. Manager applications welcome year-round. Learn how to join KICKS.`}>
 	<main>
 		<section class="content-section" aria-labelledby="join-title">
 			<p class="section-label"><T en="JOIN KICKS" ko="KICKS 가입" /></p>

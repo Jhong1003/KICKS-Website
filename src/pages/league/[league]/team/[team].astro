@@ -12,6 +12,7 @@
 // fixtures/results week by week. Captain/motto/photo come from the
 // hand-edited src/data/team-info.json.
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import { teamOgImage } from "../../../../lib/og";
 import PlayerCard from "../../../../components/PlayerCard.astro";
 import T from "../../../../components/T.astro";
 import leagueTableData from "../../../../data/league_table.json";
@@ -185,7 +186,7 @@ const reelId = info.reel ? (info.reel.match(/\/(?:reels?|p)\/([A-Za-z0-9_-]+)/)?
 const reelValid = reelId !== undefined && /^[A-Za-z0-9_-]+$/.test(reelId);
 ---
 
-<BaseLayout title={`${team.name} · ${league.id} | KICKS`} description={`${team.name} in KICKS ${league.id}: record, squad, and results.`}>
+<BaseLayout ogImage={teamOgImage(league.id, team.team_id)} title={`${team.name} · ${league.id} | KICKS`} description={`${team.name} in KICKS ${league.id}: record, squad, and results.`}>
 	<main>
 		<section class="team-hero" style={`--team-color: ${color}; --team-text: ${headerText};`} aria-labelledby="team-title">
 			<a class="team-back" href={`/league/${league.id}/`}>

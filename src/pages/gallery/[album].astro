@@ -1,6 +1,7 @@
 ---
 // One album: /gallery/<album-id>. Same grid + lightbox the gallery always had.
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { albumOgImage } from "../../lib/og";
 import PhotoGallery from "../../components/PhotoGallery.astro";
 import T from "../../components/T.astro";
 import { albums, type GalleryAlbum } from "../../lib/gallery";
@@ -16,7 +17,7 @@ interface Props {
 const { album } = Astro.props;
 ---
 
-<BaseLayout title={`${album.title} | KICKS Gallery`} description={`Photos from ${album.title} at KICKS.`}>
+<BaseLayout ogImage={albumOgImage(album.id)} title={`${album.title} | KICKS Gallery`} description={`Photos from ${album.title} at KICKS.`}>
 	<main>
 		<section class="content-section" aria-labelledby="album-title">
 			<a class="album-back" href="/gallery/">← <T en="All albums" ko="전체 앨범" /></a>
