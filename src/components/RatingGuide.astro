@@ -1,0 +1,78 @@
+---
+// The 1–5 rating scale for team balancing (staff only, /rate). Same wording as
+// the team-balance tool's guide; change both together.
+import T from "./T.astro";
+
+const rows = [
+	{ pt: 5, ko: "팀을 짤 때 <b>제일 먼저 갈라놓는 선수</b>. 두 명이 같은 팀이면 “그 팀 너무 세다”는 말이 바로 나와요.", en: "The first players you <b>split up</b> when making teams. Two of them on one team and everyone says it's too strong.", share: "10–15%" },
+	{ pt: 4, ko: "어느 팀에 가도 제 몫을 확실히 해요. <b>빠지면 팀이 확실히 아쉬운</b> 선수예요.", en: "Pulls their weight on any team. <b>Clearly missed</b> when absent.", share: "20–25%" },
+	{ pt: 3, ko: "KICKS 평균이에요. 경기에서 <b>무난하게 자기 역할을 해요.</b>", en: "KICKS average. <b>Does their job</b> in a match.", share: "~30%" },
+	{ pt: 2, ko: "평균보다 조금 아래예요. 함께 뛰지만 <b>경기에 영향을 주는 장면은 적은</b> 편이에요.", en: "A little below average. Plays along but <b>rarely changes a game</b>.", share: "20–25%" },
+	{ pt: 1, ko: "KICKS 안에서 하위권이에요. 속도, 몸싸움, 위치 선정 중 <b>여러 면에서 밀리는</b> 편이에요.", en: "Lower end within KICKS. <b>Behind in several ways</b> — pace, strength, positioning.", share: "10–15%" },
+];
+---
+
+<details class="rate-guide">
+	<summary><T en="Rating scale (1–5, compared within KICKS)" ko="실력 점수 기준 (1~5점, KICKS 안에서의 위치)" /></summary>
+	<table class="rate-scale">
+		<tbody>
+			{rows.map((r) => (
+				<tr>
+					<td class="rate-pt">{r.pt}</td>
+					<td><span data-lang="en" set:html={r.en} /><span data-lang="ko" lang="ko" set:html={r.ko} /></td>
+					<td class="rate-share">{r.share}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+	<ul class="rate-tips">
+		<T as="li" en="4 vs 5: unfair if on a team with another 4–5? → 5" ko="4 vs 5 · 다른 4~5점 선수와 같은 팀이면 불공평한가? → 그렇다면 5점" />
+		<T as="li" en="3 vs 4: is the team clearly worse without them? → 4" ko="3 vs 4 · 이 사람이 빠지면 팀이 확실히 아쉬운가? → 그렇다면 4점" />
+		<T as="li" en="2 vs 3: do they do their job in a match? → 3" ko="2 vs 3 · 경기에서 무난하게 자기 역할을 하나? → 그렇다면 3점" />
+		<T as="li" en="1 vs 2: behind in many ways, or just one or two? → one or two = 2" ko="1 vs 2 · 여러 면에서 꾸준히 밀리나, 한두 가지만 아쉬운가? → 한두 가지면 2점" />
+		<T as="li" en="Between two? Use halves (e.g. 3.5). Don't know them? Leave it as “Don't know”." ko="고민되면 0.5점 단위로 (예: 3.5), 잘 모르는 선수는 “모름” 그대로 두세요." />
+	</ul>
+</details>
+
+<style>
+	.rate-guide {
+		margin-top: 20px;
+		padding: 14px 16px;
+		border: 1px solid var(--color-sage);
+		border-radius: 16px;
+		background: #fff;
+	}
+	.rate-guide summary {
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.rate-scale {
+		width: 100%;
+		margin-top: 12px;
+		border-collapse: collapse;
+		font-size: 0.9rem;
+	}
+	.rate-scale td {
+		padding: 8px 6px;
+		border-top: 1px solid var(--color-sage);
+		vertical-align: top;
+	}
+	.rate-pt {
+		width: 2em;
+		font-size: 1.1rem;
+		font-weight: 800;
+		color: var(--color-green);
+		text-align: center;
+	}
+	.rate-share {
+		white-space: nowrap;
+		font-size: 0.8rem;
+		opacity: 0.7;
+	}
+	.rate-tips {
+		margin: 12px 0 0;
+		padding-left: 1.1em;
+		font-size: 0.85rem;
+		line-height: 1.6;
+	}
+</style>

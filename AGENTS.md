@@ -893,6 +893,39 @@ Restaurants and offers live in `src/data/perks.json` (`active: false` =
 "Coming soon"). Full details, setup and secrets:
 [docs/member-perks.md](docs/member-perks.md).
 
+### Player ratings (/rate)
+
+Staff rate players for team balancing on their own phones, with no account.
+**Ratings are private**: never shown on the site, never in this repo. Staff
+make teams in a separate private team-balance tool (outside this repo), which
+hands its roster here and takes the results back as text codes.
+
+- `/rate/admin/` (staff key = `PERKS_ADMIN_KEY`, kept for the tab like
+  `/benefits/admin`): paste the tool's `KICKS-RATE1:` code or one name per line
+  (", 신입" marks a newcomer) → "링크 만들기" makes a session and copies its rater
+  link `/rate/?s=<16-char random id>`. The tool can open the page pre-filled as
+  `/rate/admin/#new=<code>`. Per session: raters so far, who rated, "결과 복사"
+  (one `KICKS-RES1:` line per rater — base64url JSON `{v, who, p, s, c}`, the
+  format the tool reads), delete (two taps; deletes its results too).
+- `/rate/?s=<id>`: rater types their name, then either "둘 중 누가 더 잘해?"
+  (pairwise picks: better / about the same / don't know; least-compared player
+  first, about players × 3 picks) or 1–5 scores in halves with "?" = don't know,
+  using the shared scale (`RatingGuide.astro` — same wording as the tool's
+  guide). Saves itself 2.5 s after each change and when the tab is hidden; one
+  row per browser (random token in localStorage `kicks-rate-token`), a resend
+  replaces it. Draft per session in localStorage `kicks-rate-<id>`.
+- API [functions/api/ratings.js](functions/api/ratings.js) (`/api/ratings`,
+  Worker-first): staff calls carry `Authorization: Bearer <PERKS_ADMIN_KEY>`;
+  rater submits need same-origin + `X-Kicks-Rate: 1`. Validation: 2–80 unique
+  names, scores 1–5 in halves keyed by player index, at most 3000 comparisons.
+  Sessions close after `SESSION_DAYS` (180). Tables `rating_sessions` /
+  `rating_results` in [migrations/0006_player_ratings.sql](migrations/0006_player_ratings.sql)
+  (same `VISITS_DB`). Shared client code in [src/lib/rate.ts](src/lib/rate.ts).
+- Link-only: `noindex`, not in the sitemap, `Disallow: /rate/` in robots.txt.
+
+One-time setup before deploying: `npx wrangler d1 migrations apply kicks-visits --remote`.
+Tests: `node --test tests/ratings.test.mjs`.
+
 ### Languages (EN / 한)
 
 The site is bilingual. Every translatable string is rendered in **both**

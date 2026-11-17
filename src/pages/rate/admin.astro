@@ -1,0 +1,323 @@
+---
+// Staff side of player rating (see AGENTS.md "Player ratings"): make a rating
+// link from the team-balance tool's roster, watch raters come in, copy every
+// rater's result into the tool in one paste. Needs the staff key (PERKS_ADMIN_KEY).
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+---
+
+<BaseLayout title="Player Rating Admin | KICKS" description="KICKS staff: player rating links." noindex>
+	<main>
+		<section class="content-section ra" aria-labelledby="ra-title">
+			<p class="section-label"><T en="STAFF ONLY" ko="운영진 전용" /></p>
+			<h1 id="ra-title"><T en="Player Rating Links" ko="선수 평가 링크" /></h1>
+
+			<form id="ra-unlock" class="unlock-form">
+				<input
+					type="password"
+					id="ra-key"
+					class="unlock-input"
+					autocomplete="off"
+					placeholder="Staff key"
+					data-i18n-attrs={JSON.stringify({ placeholder: { en: "Staff key", ko: "운영진 키" } })}
+					required
+				/>
+				<button class="button-primary unlock-button" type="submit"><T en="Open" ko="열기" /></button>
+			</form>
+			<p id="ra-error" class="unlock-error" hidden></p>
+
+			<div id="ra-view" hidden>
+				<div class="ra-card">
+					<h2><T en="New rating link" ko="새 평가 링크 만들기" /></h2>
+					<label class="ra-label">
+						<T en="Title" ko="제목" />
+						<input id="ra-title-in" type="text" maxlength="40" placeholder="예: SP27 L1 팀 짜기" />
+					</label>
+					<label class="ra-label">
+						<T en="Players — paste the team-balance tool's code, or one name per line (add “, 신입” for a newcomer)" ko="선수 명단 — 팀 밸런스 도구의 평가 코드를 붙여넣거나, 한 줄에 한 명씩 (신입은 “, 신입”)" />
+						<textarea id="ra-roster" rows="6" placeholder={"KICKS-RATE1:...\n\n또는\n홍길동\n김철수, 신입"}></textarea>
+					</label>
+					<div class="ra-row">
+						<button type="button" class="button-primary" id="ra-create"><T en="Make link" ko="링크 만들기" /></button>
+						<span id="ra-count" class="ra-note"></span>
+					</div>
+				</div>
+
+				<div class="ra-toolbar">
+					<h2><T en="Links" ko="만든 링크" /></h2>
+					<button type="button" class="ra-small" id="ra-refresh"><T en="Refresh" ko="새로고침" /></button>
+				</div>
+				<ul id="ra-list" class="ra-list"></ul>
+				<T as="p" class="ra-note" en="“Copy results” copies one line per rater; paste them all into the team-balance tool's results box, then press 결과 추가 → 명단에 반영. Links stop working after 180 days." ko="“결과 복사”는 평가자마다 한 줄씩 복사해요. 팀 밸런스 도구의 결과 칸에 통째로 붙여넣고 “결과 추가 → 명단에 반영”을 누르면 돼요. 링크는 180일 뒤에 닫혀요." />
+			</div>
+		</section>
+	</main>
+</BaseLayout>
+
+<script>
+	import { bilingualHtml as L } from "../../lib/i18n";
+	import { parseRoster, resultCode, type RatePlayer } from "../../lib/rate";
+
+	type Session = { id: string; title: string; players: number; raters: number; created_at: number };
+	type Result = { who: string; s: Record<string, number>; c: [number, number, number][]; updated_at: number };
+
+	const KEY = "kicks-perks-staff-key";
+	const $ = <E extends HTMLElement>(id: string) => document.getElementById(id) as E;
+	const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+	const getKey = () => { try { return sessionStorage.getItem(KEY) || ""; } catch { return ""; } };
+	const setKey = (v: string) => { try { v ? sessionStorage.setItem(KEY, v) : sessionStorage.removeItem(KEY); } catch {} };
+	const auth = () => ({ Authorization: `Bearer ${getKey()}` });
+	const linkFor = (id: string) => `${location.origin}/rate/?s=${id}`;
+	const day = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
+	const when = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+	const open = new Map<string, Result[]>();
+	let armed = "";
+
+	function error(en: string, ko: string) {
+		$("ra-error").innerHTML = L(en, ko);
+		$("ra-error").hidden = false;
+	}
+
+	async function copy(text: string, en: string, ko: string, button: HTMLElement) {
+		try { await navigator.clipboard.writeText(text); } catch {
+			const area = document.createElement("textarea");
+			area.value = text; document.body.append(area); area.select(); document.execCommand("copy"); area.remove();
+		}
+		const before = button.innerHTML;
+		button.innerHTML = L(en, ko);
+		window.setTimeout(() => (button.innerHTML = before), 1800);
+	}
+
+	function locked() {
+		setKey("");
+		$("ra-view").hidden = true;
+		$("ra-unlock").hidden = false;
+		error("Wrong staff key.", "운영진 키가 맞지 않아요.");
+	}
+
+	async function results(id: string): Promise<{ players: RatePlayer[]; results: Result[] } | null> {
+		const response = await fetch(`/api/ratings?s=${id}&results=1`, { headers: auth() });
+		if (response.status === 401) { locked(); return null; }
+		if (!response.ok) throw new Error(String(response.status));
+		return response.json();
+	}
+
+	function renderList(sessions: Session[]) {
+		$("ra-list").innerHTML = sessions.length ? sessions.map((s) => {
+			const rows = open.get(s.id);
+			return `<li class="ra-item" data-id="${s.id}">
+				<div class="ra-item-head">
+					<div><p class="ra-item-title">${esc(s.title)}</p>
+					<p class="ra-note">${day.format(new Date(s.created_at))} · ${L(`${s.players} players`, `선수 ${s.players}명`)} · <b>${L(`${s.raters} rater(s)`, `평가 ${s.raters}명 받음`)}</b></p></div>
+				</div>
+				<div class="ra-row">
+					<button type="button" class="ra-small" data-act="link">${L("Copy rater link", "평가 링크 복사")}</button>
+					<button type="button" class="ra-small" data-act="show">${rows ? L("Hide", "접기") : L("Who rated", "누가 했나 보기")}</button>
+					<button type="button" class="ra-small ra-main" data-act="copy" ${s.raters ? "" : "disabled"}>${L("Copy results", "결과 복사")}</button>
+					<button type="button" class="ra-small ra-danger" data-act="delete">${armed === s.id ? L("Tap again to delete", "한 번 더 누르면 삭제") : L("Delete", "삭제")}</button>
+				</div>
+				${rows ? `<ul class="ra-raters">${rows.length ? rows.map((r) => `<li><b>${esc(r.who)}</b> · ${L(`${Object.keys(r.s).length} scored, ${r.c.length} picks`, `점수 ${Object.keys(r.s).length}명, 비교 ${r.c.length}번`)} · ${when.format(new Date(r.updated_at))}</li>`).join("") : `<li>${L("No one yet.", "아직 아무도 안 했어요.")}</li>`}</ul>` : ""}
+			</li>`;
+		}).join("") : `<li class="ra-note">${L("No links yet.", "아직 만든 링크가 없어요.")}</li>`;
+	}
+
+	async function refresh() {
+		if (!getKey()) return;
+		$("ra-error").hidden = true;
+		try {
+			const response = await fetch("/api/ratings?list=1", { headers: auth() });
+			if (response.status === 401) return locked();
+			if (!response.ok) throw new Error(String(response.status));
+			const { sessions } = await response.json();
+			$("ra-unlock").hidden = true;
+			$("ra-view").hidden = false;
+			for (const id of open.keys()) {
+				const data = await results(id);
+				if (data) open.set(id, data.results);
+			}
+			renderList(sessions);
+		} catch {
+			error("Couldn't load. Try again.", "불러오지 못했어요. 다시 시도해주세요.");
+		}
+	}
+
+	function rosterPreview() {
+		const players = parseRoster(($("ra-roster") as HTMLTextAreaElement).value);
+		const newbies = players.filter((p) => p[1]).length;
+		$("ra-count").innerHTML = players.length ? L(`${players.length} players (${newbies} new)`, `선수 ${players.length}명 (신입 ${newbies}명)`) : "";
+		return players;
+	}
+
+	$("ra-roster").addEventListener("input", rosterPreview);
+	$("ra-create").addEventListener("click", async (event) => {
+		const players = rosterPreview();
+		if (players.length < 2) { $("ra-count").innerHTML = L("Add at least two players.", "선수를 두 명 이상 넣어주세요."); return; }
+		if (players.length > 80) { $("ra-count").innerHTML = L("At most 80 players.", "선수는 80명까지예요."); return; }
+		const button = event.currentTarget as HTMLButtonElement;
+		button.disabled = true;
+		try {
+			const response = await fetch("/api/ratings", {
+				method: "POST",
+				headers: { ...auth(), "Content-Type": "application/json" },
+				body: JSON.stringify({ action: "create", title: ($("ra-title-in") as HTMLInputElement).value, players }),
+			});
+			if (response.status === 401) return locked();
+			if (!response.ok) throw new Error(String(response.status));
+			const { id } = await response.json();
+			($("ra-roster") as HTMLTextAreaElement).value = "";
+			($("ra-title-in") as HTMLInputElement).value = "";
+			$("ra-count").innerHTML = "";
+			history.replaceState(null, "", location.pathname);
+			await refresh();
+			const copyButton = document.querySelector<HTMLElement>(`.ra-item[data-id="${id}"] [data-act="link"]`);
+			if (copyButton) copy(linkFor(id), "Link copied — send it on KakaoTalk ✓", "링크 복사됨 — 카톡으로 보내세요 ✓", copyButton);
+		} catch {
+			error("Couldn't make the link. Try again.", "링크를 만들지 못했어요. 다시 시도해주세요.");
+		} finally {
+			button.disabled = false;
+		}
+	});
+
+	$("ra-list").addEventListener("click", async (event) => {
+		const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-act]");
+		const id = button?.closest<HTMLElement>(".ra-item")?.dataset.id;
+		if (!button || !id) return;
+		const act = button.dataset.act;
+		if (act !== "delete") armed = "";
+		try {
+			if (act === "link") return copy(linkFor(id), "Copied ✓", "복사됨 ✓", button);
+			if (act === "show") {
+				if (open.has(id)) open.delete(id);
+				else { const data = await results(id); if (!data) return; open.set(id, data.results); }
+				return refresh();
+			}
+			if (act === "copy") {
+				const data = await results(id);
+				if (!data) return;
+				const text = data.results.map((r) => resultCode(r.who, data.players, r.s, r.c)).join("\n");
+				return copy(text, `Copied ${data.results.length} ✓`, `${data.results.length}명 복사됨 ✓`, button);
+			}
+			if (act === "delete") {
+				if (armed !== id) { armed = id; return refresh(); }
+				armed = "";
+				const response = await fetch("/api/ratings", {
+					method: "POST",
+					headers: { ...auth(), "Content-Type": "application/json" },
+					body: JSON.stringify({ action: "delete", s: id }),
+				});
+				if (response.status === 401) return locked();
+				open.delete(id);
+				return refresh();
+			}
+		} catch {
+			error("Something went wrong. Try again.", "문제가 생겼어요. 다시 시도해주세요.");
+		}
+	});
+
+	$("ra-unlock").addEventListener("submit", (event) => {
+		event.preventDefault();
+		setKey(($("ra-key") as HTMLInputElement).value.trim());
+		($("ra-key") as HTMLInputElement).value = "";
+		refresh();
+	});
+	$("ra-refresh").addEventListener("click", refresh);
+
+	// The team-balance tool opens this page as /rate/admin/#new=KICKS-RATE1:...
+	const fromTool = decodeURIComponent(location.hash.slice(1)).match(/^new=(KICKS-RATE1:.+)$/);
+	if (fromTool) { ($("ra-roster") as HTMLTextAreaElement).value = fromTool[1]; rosterPreview(); }
+
+	refresh();
+</script>
+
+<style>
+	.ra {
+		max-width: 720px;
+	}
+	.ra h2 {
+		margin: 0;
+		font-size: 1.1rem;
+	}
+	.ra-card,
+	.ra-item {
+		margin-top: 20px;
+		padding: 16px;
+		border: 1px solid var(--color-sage);
+		border-radius: 16px;
+		background: #fff;
+	}
+	.ra-label {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		margin-top: 14px;
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+	.ra-label input,
+	.ra-label textarea {
+		padding: 10px 12px;
+		border: 1px solid var(--color-sage);
+		border-radius: 10px;
+		font: inherit;
+		font-weight: 400;
+	}
+	.ra-label textarea {
+		font-family: ui-monospace, monospace;
+		font-size: 0.85rem;
+	}
+	.ra-row,
+	.ra-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 10px;
+		margin-top: 14px;
+	}
+	.ra-toolbar {
+		margin-top: 32px;
+		justify-content: space-between;
+	}
+	.ra-note {
+		margin: 4px 0 0;
+		font-size: 0.85rem;
+		opacity: 0.75;
+	}
+	.ra-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.ra-item-title {
+		margin: 0;
+		font-weight: 700;
+	}
+	.ra-small {
+		padding: 7px 14px;
+		border: 1px solid var(--color-green);
+		border-radius: 999px;
+		background: none;
+		color: var(--color-green);
+		font: inherit;
+		font-size: 0.85rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.ra-small:disabled {
+		opacity: 0.4;
+		cursor: default;
+	}
+	.ra-main {
+		background: var(--color-green);
+		color: #fff;
+	}
+	.ra-danger {
+		border-color: #a33;
+		color: #a33;
+	}
+	.ra-raters {
+		margin: 12px 0 0;
+		padding-left: 1.1em;
+		font-size: 0.85rem;
+		line-height: 1.7;
+	}
+</style>
