@@ -267,7 +267,7 @@ function albumCard(a) {
 // the right whatever shows the page best (game stills, partner logos, champions,
 // album covers). Keys match pageOgImage(<key>) calls in src/pages.
 function pageCard({ kicker, title, ko, side = "", photo = "" }) {
-	return `<section class="card page${side ? " has-side" : ""}${photo ? " has-photo" : ""}">
+	return `<section class="card page${side ? " has-side" : ""}${photo ? " has-photo" : ""}${side.includes('class="side squads"') ? " has-squads" : ""}">
 		${photo ? `<img class="photo" src="${photo}" alt=""><div class="shade"></div>` : ""}
 		<div class="info">
 			<div class="kicker">${esc(kicker)}</div>
@@ -312,20 +312,21 @@ function pageCards() {
 				return `<div class="arow${e.date < today ? " past" : ""}"><span class="adate"><em>${mon}</em><b>${day}</b></span><span class="atitle">${esc(e.title)}</span></div>`;
 			}).join("")}</div>`
 		: "";
-	// Players: the current roster's faces (photo, else initials in the team colour),
-	// in name order like /players — never by a stat.
+	// Players: the current league's roster (used for the team columns below).
 	const current = [...leagues].reverse().find((l) => profiles.some((p) => p.leagues.some((x) => x.league === l.id)));
 	const roster = current
 		? profiles.filter((p) => p.status !== "inactive" && p.leagues.some((x) => x.league === current.id)).sort((a, b) => a.name.localeCompare(b.name, "ko"))
 		: [];
-	const face = (p) => {
-		const team = teamOf(current.id, p.leagues.find((x) => x.league === current.id).current_team_id);
-		const e = photos[p.id];
-		const path = typeof e === "string" ? e : e?.card;
-		const img = path && publicImage(path);
-		return img ? `<span class="face" style="border-color:${team.color}"><img src="${img}" alt=""></span>` : `<span class="face" style="background:${team.color};color:${textOn(team.color)};border-color:${team.color}">${esc(p.avatar_initials)}</span>`;
-	};
-	const rosterSide = roster.length ? `<div class="side faces">${roster.slice(0, 15).map(face).join("")}</div>` : "";
+	// The whole roster, one column per team (team colour, name, captain first with a
+	// C, then everyone else in name order — never by a stat, same as /players).
+	const rosterSide = current && roster.length
+		? `<div class="side squads">${current.teams.map((t) => {
+				const captain = teamInfo[current.id]?.[t.team_id]?.captain;
+				const names = roster.filter((p) => p.leagues.find((x) => x.league === current.id).current_team_id === t.team_id).map((p) => p.name);
+				const ordered = [...names.filter((n) => n === captain), ...names.filter((n) => n !== captain)];
+				return `<div class="squad"><div class="shead" style="background:${t.color};color:${textOn(t.color)}">${esc(t.name)}</div><ul>${ordered.map((n) => `<li>${esc(n)}${n === captain ? "<em>C</em>" : ""}</li>`).join("")}</ul></div>`;
+			}).join("")}</div>`
+		: "";
 	// Dream Team: an empty 7-a-side pitch waiting to be filled.
 	const spots = [[50, 88], [30, 68], [70, 68], [20, 44], [50, 48], [80, 44], [50, 20]];
 	const pitch = `<div class="side pitch"><i class="half"></i><i class="circle"></i><i class="box"></i>${spots.map(([x, y]) => `<span style="left:${x}%;top:${y}%">+</span>`).join("")}</div>`;
@@ -456,9 +457,14 @@ body { background: #222; }
 .page .adate em { display: block; font-style: normal; font-size: 22px; font-weight: 700; letter-spacing: .1em; color: #3f5128; }
 .page .adate b { display: block; font-size: 52px; font-weight: 700; }
 .page .atitle { font-family: Montserrat, sans-serif; font-size: 25px; font-weight: 700; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.page .faces { top: 125px; width: 540px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
-.page .face { width: 96px; height: 96px; border-radius: 50%; border: 5px solid; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
-.page .face img { width: 100%; height: 100%; object-fit: cover; }
+.page .squads { top: 50px; right: 48px; display: flex; gap: 14px; }
+.page .squad { width: 212px; background: #fff; color: #111; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,.45); }
+.page .shead { padding: 12px 16px; font-size: 27px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page .squad ul { list-style: none; padding: 8px 16px 12px; }
+.page .squad li { display: flex; align-items: center; gap: 8px; height: 40px; font-size: 26px; font-weight: 700; border-top: 1px solid #eee; }
+.page .squad li:first-child { border-top: 0; }
+.page .squad em { font-style: normal; font-family: Antonio, sans-serif; font-size: 18px; font-weight: 700; padding: 0 7px; border-radius: 5px; background: #111; color: #fff; }
+.page.has-squads .info { width: 400px; }
 .page .pitch { top: 60px; width: 400px; height: 450px; right: 110px; border: 4px solid rgba(255,255,255,.85); border-radius: 10px; background: repeating-linear-gradient(180deg, #4d6432 0 56px, #46602d 56px 112px); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
 .page .pitch i { position: absolute; border: 3px solid rgba(255,255,255,.7); }
 .page .pitch .half { left: 0; right: 0; top: 50%; border-width: 3px 0 0; }
