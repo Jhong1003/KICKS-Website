@@ -1,0 +1,394 @@
+---
+// Staff player rating for team balancing (link-only, see AGENTS.md "Player ratings").
+// Opened as /rate/?s=<session id>; no account. Ratings go to D1 and only the
+// staff page (/rate/admin/) can read them.
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import T from "../../components/T.astro";
+import RatingGuide from "../../components/RatingGuide.astro";
+---
+
+<BaseLayout title="Player Rating | KICKS" description="KICKS staff: rate players for team balancing." noindex>
+	<main>
+		<section class="content-section rate" aria-labelledby="rate-title">
+			<p class="section-label"><T en="STAFF ONLY" ko="운영진 전용" /></p>
+			<h1 id="rate-title"><T en="Player Rating" ko="선수 평가" /></h1>
+			<p class="rate-sub" id="rate-session"></p>
+			<p class="rate-error" id="rate-error" hidden></p>
+
+			<div id="rate-body" hidden>
+				<T as="p" class="rate-lead" en="Your ratings are seen only by the club's staff page — never by other raters or on the site. They save by themselves as you go." ko="평가는 운영진 관리 화면에서만 보여요. 다른 평가자나 사이트에는 안 보여요. 하는 동안 자동으로 저장돼요." />
+				<label class="rate-name">
+					<T en="Your name" ko="내 이름" />
+					<input id="rate-who" type="text" maxlength="20" autocomplete="name" placeholder="예: 김운영" />
+				</label>
+
+				<RatingGuide />
+
+				<div class="rate-tabs" role="tablist">
+					<button type="button" role="tab" id="tab-pair" aria-selected="true"><T en="Who's better?" ko="둘 중 누가 더 잘해?" /></button>
+					<button type="button" role="tab" id="tab-score" aria-selected="false"><T en="Give scores" ko="점수로 매기기" /></button>
+				</div>
+
+				<div id="pane-pair">
+					<T as="p" class="rate-hint" en="No football expertise needed. Tap whoever you think is better; tap “Don't know” if you don't know one of them. More picks = more accurate." ko="축구를 잘 몰라도 괜찮아요. 더 잘한다고 느끼는 쪽을 누르고, 모르는 사람이 있으면 “모름”을 눌러요. 많이 할수록 정확해져요." />
+					<div class="rate-pair">
+						<button type="button" class="rate-pick" id="pk-a"></button>
+						<span class="rate-vs">vs</span>
+						<button type="button" class="rate-pick" id="pk-b"></button>
+					</div>
+					<div class="rate-row">
+						<button type="button" class="rate-small" id="pk-tie"><T en="About the same" ko="비슷해요" /></button>
+						<button type="button" class="rate-small" id="pk-skip"><T en="Don't know / skip" ko="모름 / 건너뛰기" /></button>
+						<button type="button" class="rate-small" id="pk-undo"><T en="Undo" ko="되돌리기" /></button>
+					</div>
+					<p class="rate-hint" id="pk-count"></p>
+				</div>
+
+				<div id="pane-score" hidden>
+					<T as="p" class="rate-hint" en="Score only the players you know, using the scale above. Leave the rest as “?” (don't know)." ko="위의 기준을 보고 아는 선수만 점수를 골라요. 모르면 “?”(모름) 그대로 두세요." />
+					<ul class="rate-scores" id="sc-list"></ul>
+				</div>
+
+				<div class="rate-send">
+					<button type="button" class="button-primary" id="rate-send"><T en="Send" ko="보내기" /></button>
+					<span id="rate-status" class="rate-status" aria-live="polite"></span>
+				</div>
+			</div>
+		</section>
+	</main>
+</BaseLayout>
+
+<script>
+	import { bilingualHtml as L } from "../../lib/i18n";
+	import { SCALE, nextPair, pairKey, type Comparison, type RatePlayer } from "../../lib/rate";
+
+	const $ = <E extends HTMLElement>(id: string) => document.getElementById(id) as E;
+	const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+	const sid = new URLSearchParams(location.search).get("s") ?? "";
+	const store = `kicks-rate-${sid}`;
+
+	type Draft = { who: string; s: Record<string, number>; c: Comparison[]; sentAt: number | null; dirty: boolean };
+	let players: RatePlayer[] = [];
+	let draft: Draft = { who: "", s: {}, c: [], sentAt: null, dirty: false };
+	let cur: [number, number] | null = null;
+	const skipped = new Set<string>();
+	let timer = 0;
+	let sending = false;
+
+	const token = (() => {
+		try {
+			let t = localStorage.getItem("kicks-rate-token");
+			if (!t) {
+				t = Array.from(crypto.getRandomValues(new Uint8Array(18)), (b) => b.toString(36).padStart(2, "0")).join("").slice(0, 32);
+				localStorage.setItem("kicks-rate-token", t);
+			}
+			return t;
+		} catch {
+			return Array.from(crypto.getRandomValues(new Uint8Array(18)), (b) => b.toString(36).padStart(2, "0")).join("").slice(0, 32);
+		}
+	})();
+
+	function saveDraft() { try { localStorage.setItem(store, JSON.stringify(draft)); } catch {} }
+	function loadDraft() {
+		try {
+			const d = JSON.parse(localStorage.getItem(store) || "null");
+			if (d && Array.isArray(d.c)) draft = { ...draft, ...d };
+		} catch {}
+	}
+
+	function fail(en: string, ko: string) {
+		$("rate-error").innerHTML = L(en, ko);
+		$("rate-error").hidden = false;
+	}
+
+	function status() {
+		const el = $("rate-status");
+		const n = `${Object.keys(draft.s).length}`;
+		const counts = L(`${n} scored · ${draft.c.length} picks`, `점수 ${n}명 · 비교 ${draft.c.length}번`);
+		if (sending) el.innerHTML = L("Saving…", "저장 중…");
+		else if (!draft.who.trim() && (draft.c.length || n !== "0")) el.innerHTML = L("Write your name to save.", "이름을 적어야 저장돼요.");
+		else if (draft.dirty) el.innerHTML = counts + " · " + L("not saved yet", "아직 저장 안 됨");
+		else if (draft.sentAt) {
+			const t = new Date(draft.sentAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+			el.innerHTML = counts + " · " + L(`saved ${t} ✓`, `${t} 저장됨 ✓`);
+		} else el.textContent = "";
+	}
+
+	async function send(manual = false) {
+		window.clearTimeout(timer);
+		const who = draft.who.trim();
+		if (!who) { if (manual) { status(); $("rate-who").focus(); } return; }
+		if (!Object.keys(draft.s).length && !draft.c.length) {
+			if (manual) $("rate-status").innerHTML = L("Nothing rated yet.", "아직 평가한 게 없어요.");
+			return;
+		}
+		if (sending) { timer = window.setTimeout(() => send(), 1500); return; }
+		sending = true; status();
+		try {
+			const response = await fetch("/api/ratings", {
+				method: "POST",
+				keepalive: true,
+				headers: { "Content-Type": "application/json", "X-Kicks-Rate": "1" },
+				body: JSON.stringify({ action: "submit", s: sid, token, who, scores: draft.s, comps: draft.c }),
+			});
+			if (!response.ok) throw new Error(String(response.status));
+			const data = await response.json();
+			draft.sentAt = data.updated_at ?? Date.now();
+			draft.dirty = false;
+			saveDraft();
+		} catch {
+			$("rate-status").innerHTML = L("Couldn't save — check your connection and tap Send.", "저장하지 못했어요. 인터넷을 확인하고 “보내기”를 눌러주세요.");
+			sending = false;
+			return;
+		}
+		sending = false;
+		status();
+	}
+
+	function changed() {
+		draft.dirty = true;
+		saveDraft();
+		status();
+		window.clearTimeout(timer);
+		timer = window.setTimeout(() => send(), 2500);
+	}
+
+	function label(i: number) {
+		return `${esc(players[i][0])}${players[i][1] ? `<small>${L("New", "신입")}</small>` : ""}`;
+	}
+
+	function showPair() {
+		cur = nextPair(players.length, draft.c, skipped);
+		if (!cur) {
+			$("pk-a").innerHTML = L("All pairs done", "다 비교했어요");
+			$("pk-b").textContent = "🎉";
+		} else {
+			$("pk-a").innerHTML = label(cur[0]);
+			$("pk-b").innerHTML = label(cur[1]);
+		}
+		const target = players.length * 3;
+		$("pk-count").innerHTML = draft.c.length >= target
+			? L(`${draft.c.length} picks · enough! More makes it more accurate.`, `${draft.c.length}번 비교했어요 · 충분해요! 더 하면 더 정확해져요.`)
+			: L(`${draft.c.length} picks · about ${target} is ideal`, `${draft.c.length}번 비교했어요 · ${target}번쯤 하면 좋아요`);
+	}
+
+	function pick(result: number) {
+		if (!cur) return;
+		draft.c.push([cur[0], cur[1], result]);
+		changed();
+		showPair();
+	}
+
+	function renderScores() {
+		$("sc-list").innerHTML = players.map(([name, newbie], i) => `
+			<li><span class="rate-score-name">${esc(name)}${newbie ? ` <small>${L("New", "신입")}</small>` : ""}</span>
+			<span class="rate-score-buttons" role="group" aria-label="${esc(name)}">
+				${["?", ...SCALE].map((v) => `<button type="button" data-i="${i}" data-v="${v}" aria-pressed="${String((draft.s[i] ?? "?") == v)}">${v}</button>`).join("")}
+			</span></li>`).join("");
+	}
+
+	function setTab(pair: boolean) {
+		$("tab-pair").setAttribute("aria-selected", String(pair));
+		$("tab-score").setAttribute("aria-selected", String(!pair));
+		$("pane-pair").hidden = !pair;
+		$("pane-score").hidden = pair;
+	}
+
+	async function start() {
+		if (!/^[a-z0-9]{16}$/.test(sid)) {
+			fail("This link is incomplete. Ask the staff for the rating link again.", "링크가 잘못됐어요. 운영진에게 평가 링크를 다시 받아주세요.");
+			return;
+		}
+		try {
+			const response = await fetch(`/api/ratings?s=${sid}`);
+			if (response.status === 404) {
+				fail("This rating has ended or the link is wrong.", "끝난 평가이거나 링크가 맞지 않아요.");
+				return;
+			}
+			if (!response.ok) throw new Error(String(response.status));
+			const data = await response.json();
+			players = data.players;
+			$("rate-session").innerHTML = esc(data.title) + " · " + L(`${players.length} players`, `선수 ${players.length}명`);
+		} catch {
+			fail("Couldn't load the rating. Try again in a moment.", "평가를 불러오지 못했어요. 잠시 후 다시 열어주세요.");
+			return;
+		}
+		loadDraft();
+		draft.c = draft.c.filter(([a, b]) => a < players.length && b < players.length);
+		($("rate-who") as HTMLInputElement).value = draft.who;
+		$("rate-body").hidden = false;
+		renderScores();
+		showPair();
+		status();
+		if (draft.dirty) send();
+	}
+
+	$("pk-a").addEventListener("click", () => pick(0));
+	$("pk-b").addEventListener("click", () => pick(1));
+	$("pk-tie").addEventListener("click", () => pick(2));
+	$("pk-skip").addEventListener("click", () => { if (cur) skipped.add(pairKey(cur[0], cur[1])); showPair(); });
+	$("pk-undo").addEventListener("click", () => { if (draft.c.length) { draft.c.pop(); changed(); showPair(); } });
+	$("tab-pair").addEventListener("click", () => setTab(true));
+	$("tab-score").addEventListener("click", () => setTab(false));
+	$("sc-list").addEventListener("click", (event) => {
+		const button = (event.target as HTMLElement).closest("button");
+		if (!button?.dataset.i) return;
+		const { i, v } = button.dataset;
+		if (v === "?") delete draft.s[i!]; else draft.s[i!] = Number(v);
+		button.parentElement!.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+		changed();
+	});
+	$("rate-who").addEventListener("input", () => { draft.who = ($("rate-who") as HTMLInputElement).value; changed(); });
+	$("rate-send").addEventListener("click", () => send(true));
+	document.addEventListener("visibilitychange", () => { if (document.hidden && draft.dirty) send(); });
+
+	start();
+</script>
+
+<style>
+	.rate {
+		max-width: 640px;
+	}
+	.rate-sub {
+		margin: 4px 0 0;
+		font-weight: 600;
+		opacity: 0.75;
+	}
+	.rate-error {
+		margin-top: 20px;
+		padding: 14px 16px;
+		border-radius: 12px;
+		background: #fbeaea;
+		color: #8a1f1f;
+	}
+	.rate-lead,
+	.rate-hint {
+		font-size: 0.9rem;
+		line-height: 1.6;
+		opacity: 0.85;
+	}
+	.rate-name {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		max-width: 260px;
+		margin-top: 12px;
+		font-weight: 600;
+	}
+	.rate-name input {
+		padding: 10px 12px;
+		border: 1px solid var(--color-sage);
+		border-radius: 10px;
+		font: inherit;
+		background: #fff;
+	}
+	.rate-tabs {
+		display: flex;
+		gap: 8px;
+		margin-top: 24px;
+	}
+	.rate-tabs button,
+	.rate-small,
+	.rate-score-buttons button {
+		padding: 8px 14px;
+		border: 1px solid var(--color-green);
+		border-radius: 999px;
+		background: none;
+		color: var(--color-green);
+		font: inherit;
+		font-size: 0.9rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.rate-tabs button[aria-selected="true"],
+	.rate-score-buttons button[aria-pressed="true"] {
+		background: var(--color-green);
+		color: #fff;
+	}
+	.rate-pair {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		align-items: center;
+		gap: 10px;
+		margin-top: 16px;
+	}
+	.rate-pick {
+		min-height: 110px;
+		padding: 16px 10px;
+		border: 2px solid var(--color-green);
+		border-radius: 18px;
+		background: #fff;
+		color: var(--color-dark);
+		font: inherit;
+		font-size: 1.2rem;
+		font-weight: 800;
+		cursor: pointer;
+		word-break: keep-all;
+	}
+	.rate-pick:active {
+		background: var(--color-sage);
+	}
+	.rate-pick :global(small),
+	.rate-score-name :global(small) {
+		display: inline-block;
+		margin-left: 4px;
+		padding: 1px 6px;
+		border-radius: 6px;
+		background: var(--color-sage);
+		font-size: 0.7rem;
+		font-weight: 700;
+	}
+	.rate-pick :global(small) {
+		display: block;
+		width: fit-content;
+		margin: 6px auto 0;
+	}
+	.rate-vs {
+		font-weight: 800;
+		opacity: 0.5;
+	}
+	.rate-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-top: 12px;
+	}
+	.rate-scores {
+		margin: 12px 0 0;
+		padding: 0;
+		list-style: none;
+	}
+	.rate-scores li {
+		padding: 10px 0;
+		border-top: 1px solid var(--color-sage);
+	}
+	.rate-score-name {
+		display: block;
+		margin-bottom: 6px;
+		font-weight: 700;
+	}
+	.rate-score-buttons {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+	.rate-score-buttons button {
+		min-width: 2.6em;
+		padding: 6px 8px;
+	}
+	.rate-send {
+		position: sticky;
+		bottom: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+		margin-top: 24px;
+		padding: 12px 0;
+		background: var(--color-background);
+	}
+	.rate-status {
+		font-size: 0.85rem;
+		opacity: 0.8;
+	}
+</style>

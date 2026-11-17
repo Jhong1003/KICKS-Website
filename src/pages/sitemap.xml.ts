@@ -1,7 +1,7 @@
 // /sitemap.xml for Google Search Console: every public page, built from the
 // same data the pages are built from, so new leagues, teams, players and
 // gallery albums appear here by themselves. Member-only/link-only pages
-// (/benefits, /benefits/admin) are left out and also disallowed in
+// (/benefits, /benefits/admin, /match-log, /rate) are left out and also disallowed in
 // public/robots.txt. Paths end in "/" to match the built URLs.
 import type { APIRoute } from "astro";
 import profiles from "../data/player_profiles.json";

@@ -1,8 +1,9 @@
 # kicksuiuc.com — everything public is open to search engines.
-# Member benefits pages and the managers' match log are link-only.
+# Member benefits pages the managers' match log and the staff rating page are link-only.
 User-agent: *
 Allow: /
 Disallow: /benefits/
 Disallow: /match-log/
+Disallow: /rate/
 
 Sitemap: https://kicksuiuc.com/sitemap.xml
