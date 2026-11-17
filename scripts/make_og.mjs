@@ -45,6 +45,7 @@ const photos = read("src/data/player-photos.json");
 const partners = read("src/data/partners.json");
 const teamInfo = read("src/data/team-info.json");
 const albumEntries = read("src/data/gallery-albums.json");
+const schedule = read("src/data/schedule.json");
 
 // Badge icons and tiers live in src/lib/players.ts (BADGES); read them from there
 // so a new badge never needs a second copy here.
@@ -265,14 +266,15 @@ function albumCard(a) {
 // One card per page: a label, the page's English title and its Korean name, and on
 // the right whatever shows the page best (game stills, partner logos, champions,
 // album covers). Keys match pageOgImage(<key>) calls in src/pages.
-function pageCard({ kicker, title, ko, side = "" }) {
-	return `<section class="card page${side ? " has-side" : ""}">
+function pageCard({ kicker, title, ko, side = "", photo = "" }) {
+	return `<section class="card page${side ? " has-side" : ""}${photo ? " has-photo" : ""}">
+		${photo ? `<img class="photo" src="${photo}" alt=""><div class="shade"></div>` : ""}
 		<div class="info">
 			<div class="kicker">${esc(kicker)}</div>
 			<h1>${esc(title)}</h1>
 			${ko ? `<div class="ko">${esc(ko)}</div>` : ""}
 		</div>
-		${side || `<img class="ball" src="${ball}" alt="">`}
+		${side}
 		${brand}
 	</section>`;
 }
@@ -292,17 +294,55 @@ function pageCards() {
 		: "";
 	const covers = albums().slice(0, 3);
 	const collage = covers.length ? `<div class="side collage">${covers.map((a) => `<img src="${dataUrl(a.cover, imageMime(a.cover))}" alt="">`).join("")}</div>` : "";
+	const assetPhoto = (p) => (existsSync(join(ROOT, p)) ? dataUrl(join(ROOT, p), imageMime(p)) : "");
+	// Schedule: the next three dates on schedule.json (Chicago date at draw time; the
+	// workflow redraws several times a day, so it moves on by itself), or the last
+	// three once the season is over. English titles: the embedded Korean font is a subset.
+	const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+	const dated = schedule.filter((e) => e.date).sort((a, b) => a.date.localeCompare(b.date));
+	const upcoming = dated.filter((e) => e.date >= today);
+	// Four rows: what's next, with the latest past dates (faded) filling the rest.
+	const next = dated.findIndex((e) => e.date >= today);
+	const from = next === -1 ? Math.max(0, dated.length - 4) : Math.max(0, Math.min(next - 4 + Math.min(upcoming.length, 4), dated.length - 4));
+	const shown = dated.slice(from, from + 4);
+	const md = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).toUpperCase().split(" ");
+	const scheduleSide = shown.length
+		? `<div class="side agenda"><small>${upcoming.length ? "COMING UP" : "SEASON WRAPPED"}</small>${shown.map((e) => {
+				const [mon, day] = md(e.date);
+				return `<div class="arow${e.date < today ? " past" : ""}"><span class="adate"><em>${mon}</em><b>${day}</b></span><span class="atitle">${esc(e.title)}</span></div>`;
+			}).join("")}</div>`
+		: "";
+	// Players: the current roster's faces (photo, else initials in the team colour),
+	// in name order like /players — never by a stat.
+	const current = [...leagues].reverse().find((l) => profiles.some((p) => p.leagues.some((x) => x.league === l.id)));
+	const roster = current
+		? profiles.filter((p) => p.status !== "inactive" && p.leagues.some((x) => x.league === current.id)).sort((a, b) => a.name.localeCompare(b.name, "ko"))
+		: [];
+	const face = (p) => {
+		const team = teamOf(current.id, p.leagues.find((x) => x.league === current.id).current_team_id);
+		const e = photos[p.id];
+		const path = typeof e === "string" ? e : e?.card;
+		const img = path && publicImage(path);
+		return img ? `<span class="face" style="border-color:${team.color}"><img src="${img}" alt=""></span>` : `<span class="face" style="background:${team.color};color:${textOn(team.color)};border-color:${team.color}">${esc(p.avatar_initials)}</span>`;
+	};
+	const rosterSide = roster.length ? `<div class="side faces">${roster.slice(0, 15).map(face).join("")}</div>` : "";
+	// Dream Team: an empty 7-a-side pitch waiting to be filled.
+	const spots = [[50, 88], [30, 68], [70, 68], [20, 44], [50, 48], [80, 44], [50, 20]];
+	const pitch = `<div class="side pitch"><i class="half"></i><i class="circle"></i><i class="box"></i>${spots.map(([x, y]) => `<span style="left:${x}%;top:${y}%">+</span>`).join("")}</div>`;
+	// App: a phone with the home-screen icon.
+	const icon = publicImage("/icons/icon-512.png");
+	const phone = icon ? `<div class="side phone"><div class="screen"><img src="${icon}" alt=""><b>KICKS</b></div></div>` : "";
 	return {
 		about: { kicker: "ABOUT", title: "About KICKS", ko: "UIUC 한인 풋살 동아리", side: logoWhite ? `<img class="side brandmark" src="${logoWhite}" alt="">` : "" },
-		schedule: { kicker: `${season} SEASON`, title: "Schedule", ko: "시즌 일정 · 리그 · 이벤트" },
-		players: { kicker: "PLAYERS", title: "Meet the Roster", ko: "KICKS 선수단" },
-		join: { kicker: "JOIN KICKS", title: "Ready to play?", ko: "멤버 모집" },
+		schedule: { kicker: `${season} SEASON`, title: "Schedule", ko: "시즌 일정", side: scheduleSide },
+		players: { kicker: current ? `${current.id} · PLAYERS` : "PLAYERS", title: "Meet the Roster", ko: "KICKS 선수단", side: rosterSide },
+		join: { kicker: "JOIN KICKS", title: "Ready to play?", ko: "멤버 모집", photo: assetPhoto("src/assets/hero.jpg") },
 		partners: { kicker: "PARTNERS", title: "Our Partners", ko: "KICKS와 함께하는 곳", side: logoGrid },
 		"hall-of-fame": { kicker: "HALL OF FAME", title: "Hall of Fame", ko: "명예의 전당", side: honours },
 		gallery: { kicker: "GALLERY", title: "Moments from the pitch.", ko: "KICKS의 순간들", side: collage },
-		"full-matches": { kicker: "MEMBERS ONLY", title: "Full Matches", ko: "경기 풀영상" },
-		"dream-team": { kicker: "MY KICKS XI", title: "Dream Team", ko: "나만의 드림팀 만들기" },
-		app: { kicker: "KICKS APP", title: "KICKS on your home screen", ko: "KICKS 앱 설치하기" },
+		"full-matches": { kicker: "🔒 MEMBERS ONLY", title: "Full Matches", ko: "경기 풀영상", photo: assetPhoto("src/assets/about.jpg"), side: `<div class="side play">▶</div>` },
+		"dream-team": { kicker: "MY KICKS XI", title: "Dream Team", ko: "나만의 드림팀 만들기", side: pitch },
+		app: { kicker: "KICKS APP", title: "KICKS on your home screen", ko: "KICKS 앱 설치하기", side: phone },
 		keeper: { kicker: "MINI GAME", title: "Keeper Challenge", ko: "골키퍼 챌린지", side: still("/keeper/card.webp") },
 		freekick: { kicker: "MINI GAME", title: "Free Kick Challenge", ko: "프리킥 챌린지", side: still("/freekick/card.webp") },
 	};
@@ -405,7 +445,32 @@ body { background: #222; }
 .page .info { position: absolute !important; left: 64px; top: 40px; bottom: 120px; width: 640px; display: flex; flex-direction: column; justify-content: center; }
 .page.has-side .info { width: 540px; }
 .page.has-side h1 { font-size: 70px; }
-.page .ball { position: absolute !important; right: 110px; top: 115px; width: 330px; height: 330px; filter: drop-shadow(0 12px 30px rgba(0,0,0,.4)); }
+.page .photo { position: absolute !important; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.page .shade { position: absolute !important; inset: 0; background: linear-gradient(90deg, rgba(20,28,12,.9) 0%, rgba(20,28,12,.55) 55%, rgba(20,28,12,.15) 100%); }
+.page .agenda { top: 60px; width: 540px; padding: 18px 30px 10px; background: #fff; color: #111; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.45); }
+.page .agenda small { font-family: Antonio, sans-serif; font-size: 24px; font-weight: 700; letter-spacing: .16em; color: #777; }
+.page .arow { display: flex; align-items: center; gap: 22px; padding: 14px 0; border-top: 2px solid #ececec; }
+.page .agenda small + .arow { border-top: 0; }
+.page .arow.past { opacity: .4; }
+.page .adate { flex: none; width: 76px; text-align: center; font-family: Antonio, sans-serif; line-height: 1; }
+.page .adate em { display: block; font-style: normal; font-size: 22px; font-weight: 700; letter-spacing: .1em; color: #3f5128; }
+.page .adate b { display: block; font-size: 52px; font-weight: 700; }
+.page .atitle { font-family: Montserrat, sans-serif; font-size: 25px; font-weight: 700; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.page .faces { top: 125px; width: 540px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.page .face { width: 96px; height: 96px; border-radius: 50%; border: 5px solid; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.page .face img { width: 100%; height: 100%; object-fit: cover; }
+.page .pitch { top: 60px; width: 400px; height: 450px; right: 110px; border: 4px solid rgba(255,255,255,.85); border-radius: 10px; background: repeating-linear-gradient(180deg, #4d6432 0 56px, #46602d 56px 112px); box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+.page .pitch i { position: absolute; border: 3px solid rgba(255,255,255,.7); }
+.page .pitch .half { left: 0; right: 0; top: 50%; border-width: 3px 0 0; }
+.page .pitch .circle { left: 50%; top: 50%; width: 110px; height: 110px; border-radius: 50%; transform: translate(-50%, -50%); }
+.page .pitch .box { left: 50%; bottom: -3px; width: 190px; height: 70px; transform: translateX(-50%); border-bottom: 0; }
+.page .pitch span { position: absolute; width: 64px; height: 64px; transform: translate(-50%, -50%); border-radius: 50%; border: 3px dashed rgba(255,255,255,.9); background: rgba(0,0,0,.18);
+	display: flex; align-items: center; justify-content: center; font-family: Montserrat, sans-serif; font-size: 36px; font-weight: 700; color: #fff; }
+.page .phone { top: 34px; right: 150px; width: 270px; height: 540px; padding: 14px; border-radius: 44px; background: #111; box-shadow: 0 16px 40px rgba(0,0,0,.5); }
+.page .phone .screen { width: 100%; height: 100%; border-radius: 32px; background: linear-gradient(160deg, #6d8a4a, #2c3b1c); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.page .phone img { width: 120px; height: 120px; border-radius: 28px; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+.page .phone b { font-family: Montserrat, sans-serif; font-size: 26px; font-weight: 700; }
+.page .play { top: 200px; right: 150px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,.95); color: #1d2815; display: flex; align-items: center; justify-content: center; font-size: 88px; padding-left: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
 .page .kicker { color: #e8c766; }
 .page h1 { margin-top: 12px; font-family: Montserrat, sans-serif; font-size: 76px; font-weight: 900; line-height: 1.05; letter-spacing: -.01em; }
 .page .ko { margin-top: 20px; font-size: 40px; font-weight: 700; color: #e6ecdf; }

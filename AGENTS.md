@@ -848,9 +848,14 @@ cards whose HTML changed. Locally: `NODE_PATH=<dir with playwright> CHROME_PATH=
   repeated as `shownInLeague` in the script) — not the slides' contents.
 - **Album card** = the album cover (same cover rule as `src/lib/gallery.ts`), the
   Korean and English titles, date and photo count.
-- **Page cards** = label, English title, Korean name, and on the right what shows
-  the page best (game stills, partner logos, Hall of Fame champions, three album
-  covers, the KICKS logo or ball). To add one: add a key in `pageCards()` in the
+- **Page cards** = label, English title, Korean name, and a picture that fits the
+  page — never the bare ball logo (tried; it looked like filler): game stills
+  (keeper, free kick), partner logos, Hall of Fame champions, three album covers
+  (gallery), the KICKS logo (about), the next dates on schedule.json with the
+  latest past ones faded (schedule — English titles, redrawn as dates pass), the
+  current roster's faces in name order (players), an empty 7-a-side pitch (dream
+  team), a phone with the app icon (app), a club photo behind the text (join;
+  full matches, with a play button). To add one: add a key in `pageCards()` in the
   script and pass `pageOgImage("<key>")` on the page. Korean text must be inside
   the embedded 2,350-syllable subset (CI has no Korean fonts).
 - KakaoTalk caches previews per URL: an old share can keep its old picture; the
