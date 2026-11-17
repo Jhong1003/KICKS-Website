@@ -30,6 +30,8 @@ export interface WeeklyStat {
 	games: number;
 	goals: number;
 	assists: number;
+	/** Own goals that week, never part of goals (read by the career timeline). */
+	own_goals?: number;
 }
 
 export interface PersonalBestWeek {

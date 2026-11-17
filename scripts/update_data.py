@@ -1207,6 +1207,9 @@ def _league_section(
                 "games": int(row["games"]),
                 "goals": int(row["goals"]),
                 "assists": int(row["assists"]),
+                # Kept apart from goals, as everywhere; read only by the
+                # career timeline's "first own goal" line.
+                "own_goals": int(row["own_goals"]),
             }
             for _, row in rows.iterrows()
         ],

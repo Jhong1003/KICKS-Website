@@ -33,6 +33,7 @@ const ICON: Record<CareerEvent["kind"], string> = {
 	transfer: "🔁",
 	first_goal: "🥅",
 	first_assist: "🅰️",
+	first_own_goal: "🪃",
 	brace: "📦",
 	hat_trick: "🎩",
 	poker: "🃏",
@@ -58,6 +59,8 @@ function label(event: CareerEvent): { en: string; ko: string } {
 			return { en: "First KICKS goal", ko: "KICKS 첫 골" };
 		case "first_assist":
 			return { en: "First KICKS assist", ko: "KICKS 첫 어시스트" };
+		case "first_own_goal":
+			return { en: "First own goal", ko: "KICKS 첫 자책골" };
 		case "brace":
 			return { en: "First brace (2 goals in a match)", ko: "첫 멀티골 (한 경기 2골)" };
 		case "hat_trick":

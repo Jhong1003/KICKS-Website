@@ -526,7 +526,8 @@ every league panel, over [src/lib/career.ts](src/lib/career.ts), tested by
 `tests/career.test.mjs`): the player's career totals (leagues, goals, assists,
 weeks played, titles) and a newest-first timeline of their own moments across
 leagues — debut, each new league and its team, mid-league moves, first goal and
-first assist, the first brace / hat-trick / poker (from `goal_events`, so FA26-L2
+first assist, the first own goal (🪃, the first one only — never a count, never in
+the totals or on a link-preview card; from `own_goals` in `weekly_stats`), the first brace / hat-trick / poker (from `goal_events`, so FA26-L2
 on), career milestones (goals and assists 5/10/20/30/50/75/100 then every 50;
 weeks played 10/20/…; only the highest crossed in one week), and honours
 (champion, Golden Boot, Playmaker Award — `getLeagueFinale` winners and the

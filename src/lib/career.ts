@@ -17,6 +17,8 @@ export interface CareerWeek {
 	games: number;
 	goals: number;
 	assists: number;
+	/** Own goals that week (missing in data generated before the field existed = 0). */
+	own_goals?: number;
 }
 
 export interface CareerSection {
@@ -49,6 +51,7 @@ export type CareerEventKind =
 	| "transfer"
 	| "first_goal"
 	| "first_assist"
+	| "first_own_goal"
 	| "brace"
 	| "hat_trick"
 	| "poker"
@@ -108,6 +111,7 @@ const ORDER: CareerEventKind[] = [
 	"transfer",
 	"first_goal",
 	"first_assist",
+	"first_own_goal",
 	"brace",
 	"hat_trick",
 	"poker",
@@ -132,6 +136,10 @@ export function buildCareer(sections: CareerSection[], ctx: CareerContext): Care
 	let leaguesPlayed = 0;
 	let hadGoal = false;
 	let hadAssist = false;
+	// Only the first one, never a count: a single own goal is a funny memory
+	// (the club runs an own-goal award), a running total would read as a jab.
+	// Not in the totals either.
+	let hadOwnGoal = false;
 	let bestMatch = 1; // most goals in one match reached so far (1 = nothing yet)
 
 	for (const section of ordered) {
@@ -157,6 +165,10 @@ export function buildCareer(sections: CareerSection[], ctx: CareerContext): Care
 			if (w.assists > 0 && !hadAssist) {
 				hadAssist = true;
 				events.push({ kind: "first_assist", league: section.league, week: w.week });
+			}
+			if ((w.own_goals ?? 0) > 0 && !hadOwnGoal) {
+				hadOwnGoal = true;
+				events.push({ kind: "first_own_goal", league: section.league, week: w.week });
 			}
 
 			const most = Math.max(0, ...ctx.matchGoals.filter((m) => m.league === section.league && m.week === w.week).map((m) => m.goals));
