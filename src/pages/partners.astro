@@ -1,12 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import PartnerGrid from "../components/PartnerGrid.astro";
 import PartnerInquiryForm from "../components/PartnerInquiryForm.astro";
 import T from "../components/T.astro";
 import partners from "../data/partners.json";
 ---
 
-<BaseLayout title="Partners | KICKS" description="KICKS partners and sponsorship inquiries.">
+<BaseLayout ogImage={pageOgImage("partners")} title="Partners | KICKS" description="KICKS partners and sponsorship inquiries.">
 	<main>
 		<section class="content-section" aria-labelledby="partners-title">
 			<p class="section-label"><T en="PARTNERS" ko="파트너" /></p>

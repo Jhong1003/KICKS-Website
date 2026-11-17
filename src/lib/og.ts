@@ -4,14 +4,20 @@
 // keep showing a cached old one. No entry → undefined → BaseLayout's default.
 import og from "../data/og.json";
 
-const manifest = og as { players?: Record<string, string>; leagues?: Record<string, string> };
+type Kind = "players" | "leagues" | "teams" | "wrapped" | "albums" | "pages";
+const manifest = og as Partial<Record<Kind, Record<string, string>>>;
+const DIRS: Record<Kind, string> = { players: "players", leagues: "league", teams: "team", wrapped: "wrapped", albums: "album", pages: "page" };
 
-export function playerOgImage(id: string): string | undefined {
-	const v = manifest.players?.[id];
-	return v ? `/og/players/${id}.jpg?v=${v}` : undefined;
+function card(kind: Kind, id: string): string | undefined {
+	const v = manifest[kind]?.[id];
+	return v ? `/og/${DIRS[kind]}/${id}.jpg?v=${v}` : undefined;
 }
 
-export function leagueOgImage(id: string): string | undefined {
-	const v = manifest.leagues?.[id];
-	return v ? `/og/league/${id}.jpg?v=${v}` : undefined;
-}
+export const playerOgImage = (id: string) => card("players", id);
+/** The league table while it runs; the CHAMPIONS banner once it's finished. */
+export const leagueOgImage = (id: string) => card("leagues", id);
+export const teamOgImage = (league: string, team: string) => card("teams", `${league}-${team}`);
+export const wrappedOgImage = (league: string, id: string) => card("wrapped", `${league}-${id}`);
+export const albumOgImage = (id: string) => card("albums", id);
+/** Keys: about, schedule, players, join, partners, hall-of-fame, gallery, full-matches, dream-team, app, keeper, freekick. */
+export const pageOgImage = (key: string) => card("pages", key);

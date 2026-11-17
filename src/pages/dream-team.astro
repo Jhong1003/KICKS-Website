@@ -11,6 +11,7 @@
 // effort) so a refresh doesn't lose them. Nothing is sent anywhere. Linked from the Players
 // page, not the main menu.
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import T from "../components/T.astro";
 import profilesData from "../data/player_profiles.json";
 import { getLeague, getTeamColor, getTeamName } from "../lib/leagues";
@@ -36,7 +37,7 @@ const players = (profilesData as PlayerProfile[])
 	.sort((a, b) => a.name.localeCompare(b.name, "ko"));
 ---
 
-<BaseLayout title="Dream Team | KICKS" description="If you were the head coach: pick your own KICKS XI — drag up to eleven players onto the pitch.">
+<BaseLayout ogImage={pageOgImage("dream-team")} title="Dream Team | KICKS" description="If you were the head coach: pick your own KICKS XI — drag up to eleven players onto the pitch.">
 	<main>
 		<section class="content-section" aria-labelledby="dream-team-title">
 			<a class="back-link" href="/players/"><T en="← All players" ko="← 전체 선수" /></a>

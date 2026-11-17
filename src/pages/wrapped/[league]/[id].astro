@@ -5,6 +5,7 @@
 // (drawn on a canvas from the JSON below) or shared as a link.
 // All the numbers and highlight rules live in src/lib/wrapped.ts.
 import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { playerOgImage, wrappedOgImage } from "../../../lib/og";
 import T from "../../../components/T.astro";
 import { leagues, getTeamColor, type League } from "../../../lib/leagues";
 import { BADGES, sortBadges, type PlayerLeagueSection, type PlayerProfile } from "../../../lib/players";
@@ -56,6 +57,7 @@ const cardData = {
 ---
 
 <BaseLayout
+	ogImage={wrappedOgImage(league.id, player.id) ?? playerOgImage(player.id)}
 	title={`${player.name} · ${league.id} Wrapped | KICKS`}
 	description={`${player.name}'s ${league.id} season recap on KICKS.`}
 	header="custom"

@@ -9,10 +9,11 @@
 // KakaoTalk can't install anything, but it does honour
 // kakaotalk://web/openExternal, which reopens the page in the phone's browser.
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import T from "../components/T.astro";
 ---
 
-<BaseLayout title="Get the App | KICKS" description="Add KICKS to your home screen — standings, results and title races one tap away.">
+<BaseLayout ogImage={pageOgImage("app")} title="Get the App | KICKS" description="Add KICKS to your home screen — standings, results and title races one tap away.">
 	<main class="app-page">
 		<section class="content-section" aria-labelledby="app-title">
 			<p class="section-label">KICKS APP</p>

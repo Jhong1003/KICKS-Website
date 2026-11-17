@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import T from "../components/T.astro";
 import BoardSection from "../components/BoardSection.astro";
 import aboutImage from "../assets/about.jpg";
@@ -41,7 +42,7 @@ const features = [
 ];
 ---
 
-<BaseLayout title="About | KICKS" description="Learn more about KICKS, UIUC's student-run futsal community. 축구·풋살을 좋아하는 사람들이 모인 UIUC 한인 풋살 동아리.">
+<BaseLayout ogImage={pageOgImage("about")} title="About | KICKS" description="Learn more about KICKS, UIUC's student-run futsal community. 축구·풋살을 좋아하는 사람들이 모인 UIUC 한인 풋살 동아리.">
 	<main>
 		<section class="content-section" aria-labelledby="about-page-title">
 			<div class="about-intro">

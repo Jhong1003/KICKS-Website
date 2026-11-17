@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import PlayerCard from "../components/PlayerCard.astro";
 import T from "../components/T.astro";
 import profilesData from "../data/player_profiles.json";
@@ -36,6 +37,7 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 ---
 
 <BaseLayout
+	ogImage={pageOgImage("players")}
 	title="Players | KICKS"
 	description="Meet the KICKS roster — season stats, play styles, and achievement badges for every player."
 >

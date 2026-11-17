@@ -7,10 +7,11 @@
 // the browser sends only its ten swipes and the Worker (functions/api/freekick.js)
 // replays them for the score. Without the API it plays as unranked practice.
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import T from "../components/T.astro";
 ---
 
-<BaseLayout title="Free Kick Challenge | KICKS" description="Curl free kicks over the wall and past the KICKS keeper.">
+<BaseLayout ogImage={pageOgImage("freekick")} title="Free Kick Challenge | KICKS" description="Curl free kicks over the wall and past the KICKS keeper.">
 	<main class="fk-page">
 		<section class="content-section" aria-labelledby="fk-title">
 			<p class="section-label">KICKS FREE KICK</p>

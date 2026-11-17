@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import MediaTabs from "../components/MediaTabs.astro";
 import T from "../components/T.astro";
 
@@ -14,6 +15,7 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 ---
 
 <BaseLayout
+	ogImage={pageOgImage("full-matches")}
 	title="Full Matches | KICKS"
 	description="Members-only full match videos for KICKS."
 >

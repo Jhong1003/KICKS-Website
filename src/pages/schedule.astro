@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import ScheduleTimeline from "../components/ScheduleTimeline.astro";
 import T from "../components/T.astro";
 import type { ScheduleEvent } from "../lib/schedule";
@@ -9,7 +10,7 @@ import { currentSeason } from "../lib/leagues";
 const events = scheduleData as ScheduleEvent[];
 ---
 
-<BaseLayout title="Schedule | KICKS" description={`KICKS ${currentSeason} season schedule: league days, events, friendlies, and the awards ceremony.`}>
+<BaseLayout ogImage={pageOgImage("schedule")} title="Schedule | KICKS" description={`KICKS ${currentSeason} season schedule: league days, events, friendlies, and the awards ceremony.`}>
 	<main>
 		<section class="content-section" aria-labelledby="schedule-title">
 			<p class="section-label"><T en={`${currentSeason} SEASON`} ko={`${currentSeason} 시즌`} /></p>

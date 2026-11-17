@@ -21,6 +21,11 @@ on:
       - "scripts/make_report.mjs"
       - "scripts/make_og.mjs"
       - "report/**"
+      - "src/assets/gallery/**"
+      - "src/data/gallery-albums.json"
+      - "src/data/partners.json"
+      - "src/data/team-info.json"
+      - "public/partners/**"
 
 permissions:
   contents: write
@@ -60,7 +65,7 @@ jobs:
       - name: Draw the slides
         run: NODE_PATH="$(npm root -g)" node scripts/make_report.mjs --all
 
-      # Link-preview cards (og:image) for player and league pages, same fonts
+      # Link-preview cards (og:image) for every page but the homepage, same fonts
       # and Playwright; redrawn only when a card's content changed.
       - name: Draw the link-preview cards
         run: NODE_PATH="$(npm root -g)" node scripts/make_og.mjs

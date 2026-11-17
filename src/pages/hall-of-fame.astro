@@ -2,6 +2,7 @@
 // Hall of Fame: every finished league's champion and awards (newest first),
 // then the club's all-time records. Grows by itself as leagues finish.
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageOgImage } from "../lib/og";
 import ClubRecords from "../components/ClubRecords.astro";
 import LeagueHonours from "../components/LeagueHonours.astro";
 import T from "../components/T.astro";
@@ -16,7 +17,7 @@ const seasonOrder = [...new Set(leagues.map((league) => league.id.split("-")[0])
 const seasons = seasonsWithAwards(seasonOrder).map((season) => ({ season, awards: manualAwards(season) }));
 ---
 
-<BaseLayout title="Hall of Fame | KICKS" description="KICKS league champions, award winners, and club records.">
+<BaseLayout ogImage={pageOgImage("hall-of-fame")} title="Hall of Fame | KICKS" description="KICKS league champions, award winners, and club records.">
 	<main class="hall-of-fame">
 		<section class="content-section hall-of-fame-intro" aria-labelledby="hall-of-fame-title">
 			<p class="section-label"><T en="HALL OF FAME" ko="명예의 전당" /></p>
