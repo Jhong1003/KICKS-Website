@@ -9,7 +9,13 @@ import { getPlayerPhotos } from "../../lib/player-photos";
 import { playerOgImage } from "../../lib/og";
 import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
-import { isLeagueFinished, isShownInLeague } from "../../lib/finale";
+import { getLeagueFinale, isLeagueFinished, isShownInLeague } from "../../lib/finale";
+import CareerTimeline from "../../components/CareerTimeline.astro";
+import { buildCareer } from "../../lib/career";
+import { leagues } from "../../lib/leagues";
+import leagueTableData from "../../data/league_table.json";
+import goalEventsData from "../../data/goal_events.json";
+import scheduleData from "../../data/schedule.json";
 
 export function getStaticPaths() {
 	const profiles = profilesData as PlayerProfile[];
@@ -24,6 +30,41 @@ interface Props {
 }
 
 const { player } = Astro.props;
+
+// Career timeline (src/lib/career.ts): this player's own moments across leagues.
+const finishedLeagues = leagues.filter((league) => isLeagueFinished(league.id));
+const finales = new Map(finishedLeagues.map((league) => [league.id, getLeagueFinale(league)]));
+const shownFinished = finishedLeagues.filter((league) => isShownInLeague(player, league.id));
+const holds = (pick: "goldenBoot" | "topAssists") =>
+	shownFinished.filter((league) => finales.get(league.id)?.[pick]?.winners.some((w) => w.id === player.id)).map((league) => league.id);
+const matchGoalCounts = new Map<string, { league: string; week: number; goals: number }>();
+for (const goal of goalEventsData as { league: string; week: number; match_id: string; scorer_id: string | null; own_goal: boolean }[]) {
+	if (goal.own_goal || goal.scorer_id !== player.player_id) continue;
+	const entry = matchGoalCounts.get(goal.match_id) ?? { league: goal.league, week: goal.week, goals: 0 };
+	entry.goals += 1;
+	matchGoalCounts.set(goal.match_id, entry);
+}
+const career = buildCareer(player.leagues, {
+	leagueOrder: leagues.map((league) => league.id),
+	championLeagues: shownFinished
+		.filter((league) => {
+			const section = player.leagues.find((s) => s.league === league.id);
+			return leagueTableData.some((row) => row.league === league.id && row.rank === 1 && row.team_id === section?.current_team_id);
+		})
+		.map((league) => league.id),
+	goldenBootLeagues: holds("goldenBoot"),
+	playmakerLeagues: holds("topAssists"),
+	finalWeeks: Object.fromEntries(finishedLeagues.map((league) => [league.id, league.rules.weeks])),
+	matchGoals: [...matchGoalCounts.values()],
+});
+const careerTeams = Object.fromEntries(
+	leagues.flatMap((league) => league.teams.map((t) => [`${league.id}|${t.team_id}`, { name: getTeamName(t.team_id, league), color: getTeamColor(t.team_id, league) }])),
+);
+const careerDates = Object.fromEntries(
+	(scheduleData as { type: string; league?: string; week?: number; date: string | null }[])
+		.filter((e) => e.type === "league" && e.league && e.week && e.date)
+		.map((e) => [`${e.league}|${e.week}`, e.date as string]),
+);
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
 ---
@@ -185,6 +226,7 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 				);
 			})
 		}
+		<CareerTimeline career={career} playerId={player.id} teams={careerTeams} dates={careerDates} />
 	</main>
 </BaseLayout>
 

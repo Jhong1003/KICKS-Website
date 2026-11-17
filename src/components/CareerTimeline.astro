@@ -1,0 +1,247 @@
+---
+// "Career" on a player's page: career totals and a newest-first timeline of
+// the moments of this player's own KICKS career, across every league. Numbers
+// from src/lib/career.ts; the page passes team names/colours and dates in.
+// About this one player only — no rank, no comparison (see career.ts).
+import T from "./T.astro";
+import type { Career, CareerEvent } from "../lib/career";
+
+interface Props {
+	career: Career;
+	playerId: string;
+	/** "<league>|<team_id>" → team name and colour. */
+	teams: Record<string, { name: string; color: string }>;
+	/** "<league>|<week>" → "YYYY-MM-DD" from schedule.json. */
+	dates: Record<string, string>;
+}
+
+const { career, playerId, teams, dates } = Astro.props;
+const { totals } = career;
+const events = [...career.events].reverse();
+
+const team = (event: CareerEvent) => (event.teamId ? teams[`${event.league}|${event.teamId}`] : undefined);
+const date = (event: CareerEvent) => {
+	const iso = dates[`${event.league}|${event.week}`];
+	if (!iso) return "";
+	const [y, m, d] = iso.split("-");
+	return `${y}.${m}.${d}`;
+};
+
+const ICON: Record<CareerEvent["kind"], string> = {
+	debut: "⚽",
+	new_league: "🆕",
+	transfer: "🔁",
+	first_goal: "🥅",
+	first_assist: "🅰️",
+	brace: "📦",
+	hat_trick: "🎩",
+	poker: "🃏",
+	goals: "⚽",
+	assists: "🤝",
+	weeks: "📅",
+	champion: "🏆",
+	golden_boot: "👟",
+	playmaker_award: "🎯",
+};
+
+function label(event: CareerEvent): { en: string; ko: string } {
+	const t = team(event)?.name ?? "";
+	const n = event.count ?? 0;
+	switch (event.kind) {
+		case "debut":
+			return { en: `KICKS debut · ${t}`, ko: `KICKS 데뷔 · ${t}` };
+		case "new_league":
+			return { en: `${event.league} with ${t}`, ko: `${event.league} 시작 · ${t}` };
+		case "transfer":
+			return { en: `Moved to ${t}`, ko: `팀 이동 · ${t}` };
+		case "first_goal":
+			return { en: "First KICKS goal", ko: "KICKS 첫 골" };
+		case "first_assist":
+			return { en: "First KICKS assist", ko: "KICKS 첫 어시스트" };
+		case "brace":
+			return { en: "First brace (2 goals in a match)", ko: "첫 멀티골 (한 경기 2골)" };
+		case "hat_trick":
+			return { en: "First hat-trick", ko: "첫 해트트릭" };
+		case "poker":
+			return { en: "First poker (4 goals in a match)", ko: "첫 포커 (한 경기 4골)" };
+		case "goals":
+			return { en: `${n} career goals`, ko: `통산 ${n}골` };
+		case "assists":
+			return { en: `${n} career assists`, ko: `통산 ${n}어시스트` };
+		case "weeks":
+			return { en: `${n} weeks played`, ko: `통산 ${n}주 출전` };
+		case "champion":
+			return { en: `${event.league} champion · ${t}`, ko: `${event.league} 우승 · ${t}` };
+		case "golden_boot":
+			return { en: `${event.league} Golden Boot`, ko: `${event.league} 득점왕` };
+		case "playmaker_award":
+			return { en: `${event.league} Playmaker Award`, ko: `${event.league} 도움왕` };
+	}
+}
+
+const HONOURS = new Set(["champion", "golden_boot", "playmaker_award"]);
+---
+
+{
+	events.length > 0 && (
+		<section class="content-section career" aria-labelledby={`career-title-${playerId}`}>
+			<h2 id={`career-title-${playerId}`}>
+				<T en="Career" ko="커리어" />
+			</h2>
+
+			<dl class="career-totals">
+				<div>
+					<dt><T en="Leagues" ko="리그" /></dt>
+					<dd>{totals.leagues}</dd>
+				</div>
+				<div>
+					<dt><T en="Goals" ko="골" /></dt>
+					<dd>{totals.goals}</dd>
+				</div>
+				<div>
+					<dt><T en="Assists" ko="어시스트" /></dt>
+					<dd>{totals.assists}</dd>
+				</div>
+				<div>
+					<dt><T en="Weeks played" ko="출전 주" /></dt>
+					<dd>{totals.weeksPlayed}</dd>
+				</div>
+				{totals.titles > 0 && (
+					<div class="career-total--gold">
+						<dt><T en="Titles" ko="우승" /></dt>
+						<dd>{totals.titles}</dd>
+					</div>
+				)}
+			</dl>
+
+			<ol class="career-timeline">
+				{events.map((event) => {
+					const text = label(event);
+					const color = team(event)?.color;
+					return (
+						<li class:list={["career-event", { "career-event--honour": HONOURS.has(event.kind) }]}>
+							<span class="career-dot" style={color ? `--dot: ${color}` : undefined} aria-hidden="true">
+								{ICON[event.kind]}
+							</span>
+							<div class="career-body">
+								<T as="p" class="career-title" en={text.en} ko={text.ko} />
+								<p class="career-when">
+									{date(event) && <span>{date(event)} · </span>}
+									<a href={`/league/${event.league}/?week=${event.week}#results`}>
+										<T en={`${event.league} Week ${event.week}`} ko={`${event.league} ${event.week}주차`} />
+									</a>
+								</p>
+							</div>
+						</li>
+					);
+				})}
+			</ol>
+		</section>
+	)
+}
+
+<style>
+	.career-totals {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+		gap: 0.5rem;
+		max-width: 620px;
+		margin: 0 0 2rem;
+	}
+
+	.career-totals div {
+		padding: 0.7rem 0.75rem;
+		border-radius: 12px;
+		background: #fff;
+		border: 1px solid var(--color-sage);
+	}
+
+	.career-totals dt {
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--color-green);
+	}
+
+	.career-totals dd {
+		margin: 0.2rem 0 0;
+		font-size: 1.6rem;
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.career-totals .career-total--gold {
+		background: linear-gradient(135deg, rgba(246, 231, 184, 0.9), #fff);
+		border-color: #e8d28c;
+	}
+
+	.career-timeline {
+		position: relative;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		max-width: 620px;
+	}
+
+	/* The line behind the dots. */
+	.career-timeline::before {
+		content: "";
+		position: absolute;
+		left: 19px;
+		top: 20px;
+		bottom: 20px;
+		width: 2px;
+		background: var(--color-sage);
+	}
+
+	.career-event {
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+		gap: 1rem;
+		padding: 0.55rem 0;
+	}
+
+	.career-dot {
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		background: #fff;
+		border: 2px solid var(--dot, var(--color-sage));
+		font-size: 1.1rem;
+		z-index: 1;
+	}
+
+	.career-event--honour .career-dot {
+		background: #f6e7b8;
+		border-color: #d9b44a;
+	}
+
+	.career-body {
+		padding-top: 0.2rem;
+	}
+
+	.career-title {
+		margin: 0;
+		font-weight: 700;
+	}
+
+	.career-event--honour .career-title {
+		color: #8a6a12;
+	}
+
+	.career-when {
+		margin: 0.15rem 0 0;
+		font-size: 0.82rem;
+		opacity: 0.7;
+	}
+
+	.career-when a {
+		color: inherit;
+	}
+</style>
