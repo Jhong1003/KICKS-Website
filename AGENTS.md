@@ -853,7 +853,9 @@ cards whose HTML changed. Locally: `NODE_PATH=<dir with playwright> CHROME_PATH=
   (keeper, free kick), partner logos, Hall of Fame champions, three album covers
   (gallery), the KICKS logo (about), the next dates on schedule.json with the
   latest past ones faded (schedule — English titles, redrawn as dates pass), the
-  current roster's faces in name order (players), an empty 7-a-side pitch (dream
+  whole current roster in one white column per team — team colour and name,
+  captain first with a C, then name order, never by a stat (players; initials
+  circles were tried and read as random dots), an empty 7-a-side pitch (dream
   team), a phone with the app icon (app), a club photo behind the text (join;
   full matches, with a play button). To add one: add a key in `pageCards()` in the
   script and pass `pageOgImage("<key>")` on the page. Korean text must be inside
