@@ -1,7 +1,8 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageOgImage } from "../lib/og";
-import ScheduleTimeline from "../components/ScheduleTimeline.astro";
+import ScheduleCalendar from "../components/ScheduleCalendar.astro";
+import SeasonSelect from "../components/SeasonSelect.astro";
 import T from "../components/T.astro";
 import type { ScheduleEvent } from "../lib/schedule";
 import scheduleData from "../data/schedule.json";
@@ -11,17 +12,11 @@ const events = scheduleData as ScheduleEvent[];
 ---
 
 <BaseLayout ogImage={pageOgImage("schedule")} title="Schedule | KICKS" description={`KICKS ${currentSeason} season schedule: league days, events, friendlies, and the awards ceremony.`}>
-	<main>
-		<section class="content-section" aria-labelledby="schedule-title">
-			<p class="section-label"><T en={`${currentSeason} SEASON`} ko={`${currentSeason} 시즌`} /></p>
-			<h1 id="schedule-title"><T en="Schedule" ko="일정" /></h1>
-			<T
-				as="p"
-				class="about-description"
-				en="Every league day, event, friendly, and ceremony this season."
-				ko="이번 시즌의 모든 리그 경기, 이벤트, 친선경기, 시상식 일정입니다."
-			/>
-			<ScheduleTimeline events={events} />
-		</section>
+	<main class="k-page">
+		<div class="k-page-head">
+			<h1 class="k-h1"><T en="Schedule" ko="일정" /></h1>
+			<SeasonSelect />
+		</div>
+		<ScheduleCalendar events={events} />
 	</main>
 </BaseLayout>

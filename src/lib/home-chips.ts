@@ -29,10 +29,11 @@ export function monthYear(isoDate: string, lang: Lang): string {
 	return lang === "ko" ? `${year}년 ${month}월` : `${MONTHS[month - 1]} ${year}`;
 }
 
-/** A short name for an event: its `short`, else its title up to the first " · ". */
+/** The chip name for an event: `chip`, else `short`, else its title up to the first " · ". */
 export function shortTitle(event: ScheduleEvent, lang: Lang): string {
+	const chip = lang === "ko" ? event.chip_ko ?? event.chip : event.chip;
 	const short = lang === "ko" ? event.short_ko ?? event.short : event.short;
-	return short ?? eventTitle(event, lang).split(" · ")[0];
+	return chip ?? short ?? eventTitle(event, lang).split(" · ")[0];
 }
 
 /**
