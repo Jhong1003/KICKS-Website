@@ -7,7 +7,7 @@ import BoardSection from "../components/BoardSection.astro";
 import aboutImage from "../assets/about.jpg";
 
 // KICKS 2.0 About: who we are + the group photo, what makes KICKS
-// different (four cards, facts only), and the board. Who-should-join moved
+// different (four cards, facts only, no numbers), and the board. Who-should-join moved
 // to the Join page; the Join button is always in the header.
 const features = [
 	{
@@ -64,11 +64,8 @@ const features = [
 			</div>
 			<div class="about-features">
 				{
-					features.map((feature, index) => (
+					features.map((feature) => (
 						<div class="about-feature k-card">
-							<span class="about-feature-number" aria-hidden="true">
-								{String(index + 1).padStart(2, "0")}
-							</span>
 							<T as="h3" class="k-h3" en={feature.title} ko={feature.titleKo} />
 							<T as="p" en={feature.description} ko={feature.descriptionKo} />
 						</div>
@@ -127,12 +124,6 @@ const features = [
 	}
 	.about-feature :global(h3) {
 		margin: 0;
-	}
-	.about-feature-number {
-		color: var(--k-olive);
-		font-family: var(--k-font-display);
-		font-size: 0.85rem;
-		font-weight: 700;
 	}
 	.about-feature :global(p) {
 		margin: 0;
