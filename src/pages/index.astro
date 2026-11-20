@@ -334,9 +334,11 @@ const chips = [...seasonChips.slice(0, 3), ...alwaysChips];
 		font-size: 0.85rem;
 	}
 
+	/* Centered however many chips there are. */
 	.home-chips {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: center;
 		gap: 8px;
 		margin: 28px 0 0;
 	}
@@ -406,8 +408,10 @@ const chips = [...seasonChips.slice(0, 3), ...alwaysChips];
 			flex: 0 0 78%;
 			scroll-snap-align: start;
 		}
+		/* Phone: one row that scrolls sideways; centered only when it fits. */
 		.home-chips {
 			flex-wrap: nowrap;
+			justify-content: safe center;
 			margin-right: calc(var(--k-gutter) * -1);
 			margin-left: calc(var(--k-gutter) * -1);
 			padding: 0 var(--k-gutter);

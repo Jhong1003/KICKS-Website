@@ -46,13 +46,13 @@ const isTied = (row: StandingsRow) => rows.filter((other) => other.rank === row.
 				<th class="k-left">#</th>
 				<th class="k-left"><T en="Team" ko="팀" /></th>
 				<th><T en="P" ko="경기" /></th>
-				<th><T en="W" ko="승" /></th>
-				<th><T en="D" ko="무" /></th>
-				<th><T en="L" ko="패" /></th>
-				{!compact && <th><T en="GF" ko="득점" /></th>}
-				{!compact && <th><T en="GA" ko="실점" /></th>}
+				<th class="k-hide-phone"><T en="W" ko="승" /></th>
+				<th class="k-hide-phone"><T en="D" ko="무" /></th>
+				<th class="k-hide-phone"><T en="L" ko="패" /></th>
+				{!compact && <th class="k-hide-phone"><T en="GF" ko="득점" /></th>}
+				{!compact && <th class="k-hide-phone"><T en="GA" ko="실점" /></th>}
 				<th><T en="GD" ko="득실" /></th>
-				{!compact && <th><T en="Part." ko="참여율" /></th>}
+				{!compact && <th class="k-hide-phone"><T en="Part." ko="참여율" /></th>}
 				<th class="k-standings-pts"><T en="Pts" ko="승점" /></th>
 				{showForm && <th class="k-standings-form"><T en="Form" ko="최근 경기" /></th>}
 			</tr>
@@ -84,13 +84,13 @@ const isTied = (row: StandingsRow) => rows.filter((other) => other.rank === row.
 								</span>
 							</td>
 							<td>{row.played}</td>
-							<td>{row.wins}</td>
-							<td>{row.draws}</td>
-							<td>{row.losses}</td>
-							{!compact && <td>{row.goals_for}</td>}
-							{!compact && <td>{row.goals_against}</td>}
+							<td class="k-hide-phone">{row.wins}</td>
+							<td class="k-hide-phone">{row.draws}</td>
+							<td class="k-hide-phone">{row.losses}</td>
+							{!compact && <td class="k-hide-phone">{row.goals_for}</td>}
+							{!compact && <td class="k-hide-phone">{row.goals_against}</td>}
 							<td>{signed(row.goal_difference)}</td>
-							{!compact && <td>{placeholder ? "–" : `${(row.participation_rate * 100).toFixed(1)}%`}</td>}
+							{!compact && <td class="k-hide-phone">{placeholder ? "–" : `${(row.participation_rate * 100).toFixed(1)}%`}</td>}
 							<td class="k-standings-pts k-strong">{row.points}</td>
 							{showForm && (
 								<td class="k-standings-form">
@@ -160,7 +160,14 @@ const isTied = (row: StandingsRow) => rows.filter((other) => other.rank === row.
 	.k-form-L {
 		background: #c8423b;
 	}
+	/* Phone: # · team · P · GD · Pts · Form, so points never fall off the edge. */
 	@media (max-width: 600px) {
+		.k-hide-phone {
+			display: none;
+		}
+		.k-standings-champion {
+			display: none;
+		}
 		.k-table th,
 		.k-table td {
 			padding-right: 7px;
