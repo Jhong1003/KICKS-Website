@@ -129,7 +129,7 @@ const seasonRosters = rosters.filter((entry) => entry.league.id.startsWith(`${se
 											</span>
 											<span class="pl-badges">
 												{badges.map((key) => (
-													<span class="pl-badge" title={BADGES[key].label}>
+													<span class:list={["pl-badge", `pl-badge--${BADGES[key].tier}`, { "pl-badge--champion": key === "champion" }]} title={BADGES[key].label}>
 														{BADGES[key].icon}
 													</span>
 												))}
@@ -286,7 +286,7 @@ const seasonRosters = rosters.filter((entry) => entry.league.id.startsWith(`${se
 	.pl-badges {
 		display: flex;
 		align-items: center;
-		gap: 3px;
+		gap: 5px;
 		min-height: 24px;
 	}
 	.pl-badge {
@@ -294,9 +294,25 @@ const seasonRosters = rosters.filter((entry) => entry.league.id.startsWith(`${se
 		place-items: center;
 		width: 24px;
 		height: 24px;
-		border: 1px solid var(--k-line);
 		border-radius: 50%;
+		background: #eef0e9;
 		font-size: 0.72rem;
+	}
+	/* Same tier colours as the player page, at card size. */
+	.pl-badge--rare {
+		box-shadow: 0 0 0 1.5px #4a7fc1;
+	}
+	.pl-badge--legendary {
+		background: #f6e7b8;
+		box-shadow: 0 0 0 1.5px #c9a227;
+	}
+	.pl-badge--icon {
+		background: var(--k-olive);
+		box-shadow: 0 0 0 1.5px #c9a227;
+	}
+	.pl-badge--champion {
+		background: radial-gradient(circle at 35% 30%, #fff6d6, #f1cf63 70%, #c9a227);
+		box-shadow: 0 0 0 1.5px #c9a227;
 	}
 	.pl-more {
 		color: var(--k-muted);
