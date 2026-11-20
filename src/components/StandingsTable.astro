@@ -17,6 +17,8 @@ interface StandingsRow {
 	href?: string;
 	/** Team color (#rrggbb) for the square before the name. */
 	color?: string;
+	/** Last few results, oldest first, for the Form column. */
+	form?: ("W" | "D" | "L")[];
 }
 
 interface Props {
@@ -31,6 +33,8 @@ interface Props {
 
 const { rows, finished = false, placeholder = false, compact = false } = Astro.props;
 
+const showForm = !compact && rows.some((row) => row.form && row.form.length > 0);
+const FORM_KO = { W: "승", D: "무", L: "패" };
 const signed = (value: number) => (value > 0 ? `+${value}` : String(value));
 const isTied = (row: StandingsRow) => rows.filter((other) => other.rank === row.rank).length > 1;
 ---
@@ -50,6 +54,7 @@ const isTied = (row: StandingsRow) => rows.filter((other) => other.rank === row.
 				<th><T en="GD" ko="득실" /></th>
 				{!compact && <th><T en="Part." ko="참여율" /></th>}
 				<th class="k-standings-pts"><T en="Pts" ko="승점" /></th>
+				{showForm && <th class="k-standings-form"><T en="Form" ko="최근 경기" /></th>}
 			</tr>
 		</thead>
 		<tbody>
@@ -87,6 +92,17 @@ const isTied = (row: StandingsRow) => rows.filter((other) => other.rank === row.
 							<td>{signed(row.goal_difference)}</td>
 							{!compact && <td>{placeholder ? "–" : `${(row.participation_rate * 100).toFixed(1)}%`}</td>}
 							<td class="k-standings-pts k-strong">{row.points}</td>
+							{showForm && (
+								<td class="k-standings-form">
+									<span class="k-form">
+										{(row.form ?? []).map((result) => (
+											<span class={`k-form-${result}`} title={result}>
+												<T en={result} ko={FORM_KO[result]} />
+											</span>
+										))}
+									</span>
+								</td>
+							)}
 						</tr>
 					);
 				})
@@ -121,6 +137,28 @@ const isTied = (row: StandingsRow) => rows.filter((other) => other.rank === row.
 	}
 	td.k-standings-pts {
 		font-size: 1.05rem;
+	}
+	.k-form {
+		display: inline-flex;
+		gap: 3px;
+	}
+	.k-form > span {
+		display: grid;
+		place-items: center;
+		width: 20px;
+		height: 20px;
+		color: #fff;
+		font-size: 0.68rem;
+		font-weight: 700;
+	}
+	.k-form-W {
+		background: #2e8b57;
+	}
+	.k-form-D {
+		background: #9a9a9a;
+	}
+	.k-form-L {
+		background: #c8423b;
 	}
 	@media (max-width: 600px) {
 		.k-table th,

@@ -45,7 +45,7 @@ const orderedTeams = orderedIds.flatMap((id) => league.teams.filter((team) => te
 	</>}
 	{scenarios.mode !== "unavailable" && (
 		<a class="week-race-link title-scenarios-link" href={`/league/${league.id}/scenarios/`}>
-			<span aria-hidden="true">🧮</span>{" "}
+			
 			{scenarios.mode === "live"
 				? <T en="What each team needs" ko="우승 경우의 수 보기" />
 				: <T en="Title scenarios before the final week" ko="마지막 주 전 우승 경우의 수" />} →
