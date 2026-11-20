@@ -513,28 +513,58 @@ const careerRows = player.leagues.map((section) => {
 		place-items: center;
 		width: 38px;
 		height: 38px;
-		border: 1px solid var(--k-line);
 		border-radius: 50%;
+		background: #eef0e9;
 		font-size: 1.05rem;
 	}
-	.pp-badge--icon .pp-badge-icon,
-	.pp-badge--champion .pp-badge-icon {
-		border: 2px solid #d9b04a;
+	/* Tier colours: rare blue ring, legendary gold, icon olive with a gold double ring. */
+	.pp-badge--rare .pp-badge-icon {
+		box-shadow: 0 0 0 2px #4a7fc1;
 	}
 	.pp-badge--legendary .pp-badge-icon {
-		border-color: #b8892b;
+		background: #f6e7b8;
+		box-shadow: 0 0 0 2px #c9a227;
+	}
+	.pp-badge--icon .pp-badge-icon {
+		background: var(--k-olive);
+		box-shadow: 0 0 0 2px #c9a227, 0 0 0 4px #f6e7b8;
+	}
+	.pp-badge--champion .pp-badge-icon {
+		background: radial-gradient(circle at 35% 30%, #fff6d6, #f1cf63 70%, #c9a227);
+		box-shadow: 0 0 0 2px #c9a227, 0 0 12px 2px rgba(233, 190, 60, 0.55);
 	}
 	.pp-badge-text {
 		display: grid;
+		justify-items: start;
+		gap: 2px;
 		line-height: 1.2;
 	}
 	.pp-badge-name {
 		font-size: 0.85rem;
 		font-weight: 700;
 	}
+	.pp-badge--champion .pp-badge-name {
+		color: #7a5f0e;
+	}
 	.pp-badge-tier {
-		color: var(--k-muted);
-		font-size: 0.72rem;
+		padding: 1px 6px;
+		background: #eef0e9;
+		color: var(--k-olive);
+		font-size: 0.66rem;
+		font-weight: 700;
+	}
+	.pp-badge--rare .pp-badge-tier {
+		background: #dbe7f5;
+		color: #2f5f99;
+	}
+	.pp-badge--legendary .pp-badge-tier,
+	.pp-badge--champion .pp-badge-tier {
+		background: #f6e7b8;
+		color: #7a5f0e;
+	}
+	.pp-badge--icon .pp-badge-tier {
+		background: var(--k-olive);
+		color: #f6e7b8;
 	}
 
 	.pp-numbers {
