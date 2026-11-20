@@ -26,7 +26,6 @@ import T from "./T.astro";
 		<textarea id="proposal" name="message" rows="5" maxlength="10000" required></textarea>
 	</div>
 
-	<T as="p" class="inquiry-note" en="Your contact details and message will be sent to KICKS through Formspree." ko="입력한 연락처와 문의 내용은 Formspree를 통해 KICKS로 전달됩니다." />
 	<button class="k-btn inquiry-submit" type="submit"><span data-inquiry-idle><T en="Send" ko="보내기" /></span><span data-inquiry-sending hidden><T en="Sending…" ko="보내는 중…" /></span></button>
 	<div class="inquiry-note" role="status" aria-live="polite">
 		<p data-inquiry-success hidden><T en="Your inquiry has been submitted. We’ll reply to the email address you provided." ko="문의가 접수됐어요. 남겨주신 이메일로 답변드리겠습니다." /></p>

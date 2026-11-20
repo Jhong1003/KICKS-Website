@@ -25,7 +25,7 @@ import { isRowShown } from "../lib/finale";
 
 const updates = updatesData as Record<string, { updated_at: string }>;
 const updateLabel = (iso: string, lang: string) => new Intl.DateTimeFormat(lang === "ko" ? "ko-KR" : "en-US", {
-    timeZone: "America/Chicago", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+    timeZone: "America/Chicago", month: "short", day: "numeric",
 }).format(new Date(iso));
 
 interface Props {
