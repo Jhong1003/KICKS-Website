@@ -6,9 +6,8 @@ import T from "../components/T.astro";
 import BoardSection from "../components/BoardSection.astro";
 import aboutImage from "../assets/about.jpg";
 
-// KICKS 2.0 About: who we are + the group photo, how a semester runs (plain
-// rows: a short title beside one or two sentences, no numbers or boxes), and
-// the board. Who-should-join moved
+// KICKS 2.0 About: who we are + the group photo, what makes KICKS
+// different (four cards, facts only), and the board. Who-should-join moved
 // to the Join page; the Join button is always in the header.
 const features = [
 	{
@@ -20,8 +19,8 @@ const features = [
 			"한 학기에 리그가 두 번 열립니다. 리그마다 3팀이 5주 동안 경기를 하고, 다음 리그에서는 팀을 새로 섞습니다. 그래서 학기가 끝날 때쯤이면 동아리 대부분의 멤버와 함께 뛰어보게 됩니다.",
 	},
 	{
-		title: "Awards night and dinner",
-		titleKo: "시상식과 회식",
+		title: "More than games",
+		titleKo: "경기 그 이상",
 		description:
 			"We end every league with an awards night and a team dinner, and we hold fundraisers and other events during the semester.",
 		descriptionKo: "리그가 끝날 때마다 시상식과 팀 회식을 하고, 학기 중에는 펀드레이징 등 다양한 행사도 진행합니다.",
@@ -33,8 +32,8 @@ const features = [
 		descriptionKo: "매 학기 다른 유학생 동아리와 친선 경기가 진행됩니다.",
 	},
 	{
-		title: "Every game filmed",
-		titleKo: "모든 경기 기록",
+		title: "Every game on record",
+		titleKo: "모든 경기를 기록",
 		description:
 			"We film and photograph every league game. Goals, assists and standings are updated on our website every week.",
 		descriptionKo: "모든 리그 경기를 영상과 사진으로 남기고, 골·어시스트·순위는 매주 웹사이트에 업데이트합니다.",
@@ -59,20 +58,23 @@ const features = [
 			</div>
 		</section>
 
-		<section class="k-section" aria-labelledby="semester-title">
+		<section class="k-section" aria-labelledby="different-title">
 			<div class="k-section-head">
-				<h2 class="k-h2" id="semester-title"><T en="A semester at KICKS" ko="KICKS의 한 학기" /></h2>
+				<h2 class="k-h2" id="different-title"><T en="What Makes KICKS Different" ko="KICKS만의 특별함" /></h2>
 			</div>
-			<dl class="about-rows">
+			<div class="about-features">
 				{
-					features.map((feature) => (
-						<div class="about-row">
-							<T as="dt" en={feature.title} ko={feature.titleKo} />
-							<T as="dd" en={feature.description} ko={feature.descriptionKo} />
+					features.map((feature, index) => (
+						<div class="about-feature k-card">
+							<span class="about-feature-number" aria-hidden="true">
+								{String(index + 1).padStart(2, "0")}
+							</span>
+							<T as="h3" class="k-h3" en={feature.title} ko={feature.titleKo} />
+							<T as="p" en={feature.description} ko={feature.descriptionKo} />
 						</div>
 					))
 				}
-			</dl>
+			</div>
 		</section>
 
 		<BoardSection />
@@ -111,28 +113,39 @@ const features = [
 		object-position: center top;
 	}
 
-	.about-rows {
-		margin: 0;
-		border-top: 2px solid var(--k-ink);
-	}
-	.about-row {
+	.about-features {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-		gap: 24px;
-		padding: 20px 0;
-		border-bottom: 1px solid var(--k-line);
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 20px;
 	}
-	.about-row :global(dt) {
+	.about-feature {
+		display: grid;
+		align-content: start;
+		gap: 10px;
+		padding: 22px 20px 24px;
+		border-top: 3px solid var(--k-olive);
+	}
+	.about-feature :global(h3) {
+		margin: 0;
+	}
+	.about-feature-number {
+		color: var(--k-olive);
 		font-family: var(--k-font-display);
-		font-size: 1.1rem;
+		font-size: 0.85rem;
 		font-weight: 700;
 	}
-	.about-row :global(dd) {
+	.about-feature :global(p) {
 		margin: 0;
 		color: #444;
-		line-height: 1.65;
+		font-size: 0.92rem;
+		line-height: 1.6;
 	}
 
+	@media (max-width: 980px) {
+		.about-features {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
 	@media (max-width: 860px) {
 		.about-intro {
 			grid-template-columns: 1fr;
@@ -144,11 +157,10 @@ const features = [
 			margin: 0 calc(var(--k-gutter) * -1);
 		}
 	}
-	@media (max-width: 640px) {
-		.about-row {
+	@media (max-width: 520px) {
+		.about-features {
 			grid-template-columns: 1fr;
-			gap: 6px;
-			padding: 16px 0;
+			gap: 12px;
 		}
 	}
 </style>
