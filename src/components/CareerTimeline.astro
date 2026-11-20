@@ -87,35 +87,10 @@ const HONOURS = new Set(["champion", "golden_boot", "playmaker_award"]);
 
 {
 	events.length > 0 && (
-		<section class="content-section career" aria-labelledby={`career-title-${playerId}`}>
-			<h2 id={`career-title-${playerId}`}>
-				<T en="Career" ko="커리어" />
+		<section class="k-section career career--k2" aria-labelledby={`career-title-${playerId}`}>
+			<h2 class="k-h2" id={`career-title-${playerId}`}>
+				<T en="Milestones" ko="첫 기록" />
 			</h2>
-
-			<dl class="career-totals">
-				<div>
-					<dt><T en="Leagues" ko="리그" /></dt>
-					<dd>{totals.leagues}</dd>
-				</div>
-				<div>
-					<dt><T en="Goals" ko="골" /></dt>
-					<dd>{totals.goals}</dd>
-				</div>
-				<div>
-					<dt><T en="Assists" ko="어시스트" /></dt>
-					<dd>{totals.assists}</dd>
-				</div>
-				<div>
-					<dt><T en="Weeks played" ko="출전 주" /></dt>
-					<dd>{totals.weeksPlayed}</dd>
-				</div>
-				{totals.titles > 0 && (
-					<div class="career-total--gold">
-						<dt><T en="Titles" ko="우승" /></dt>
-						<dd>{totals.titles}</dd>
-					</div>
-				)}
-			</dl>
 
 			<ol class="career-timeline">
 				{events.map((event) => {
@@ -246,5 +221,18 @@ const HONOURS = new Set(["champion", "golden_boot", "playmaker_award"]);
 
 	.career-when a {
 		color: inherit;
+	}
+</style>
+
+<style>
+	/* KICKS 2.0: the totals moved up into the player page's Career numbers;
+	   this keeps only the timeline, on white with a thin border. */
+	.career--k2 :global(.career-timeline) {
+		max-width: none;
+		margin-top: 16px;
+		padding: 20px 24px;
+		border: 1px solid var(--k-line);
+		border-radius: 0;
+		background: #fff;
 	}
 </style>
