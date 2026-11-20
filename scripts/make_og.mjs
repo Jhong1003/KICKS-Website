@@ -346,7 +346,7 @@ body { background: #222; }
 	font-family: "Inter Tight", Pretendard, sans-serif; }
 .card > * { position: absolute; }
 .logo { left: 64px; top: 44px; height: 58px; }
-.info { left: 64px; top: 150px; width: 640px; }
+.info { left: 64px; top: calc(50% + 24px); width: 640px; transform: translateY(-50%); }
 .meta { font-size: 26px; font-weight: 600; color: #c9d3bf; }
 .meta .olive, .olive { color: #e8c766; }
 h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; letter-spacing: -.02em; white-space: nowrap; }
@@ -373,12 +373,12 @@ h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; lett
 .home .hline { left: 0; right: 0; top: 470px; text-align: center; font-family: Pretendard, sans-serif; font-size: 32px; font-weight: 600; color: #c9d3bf; }
 /* player */
 .player h1 { font-family: Pretendard, sans-serif; }
-.player .avatar { right: 96px; top: 150px; width: 300px; height: 300px; border-radius: 50%; object-fit: cover;
+.player .avatar { right: 96px; top: calc(50% + 24px); transform: translateY(-50%); width: 300px; height: 300px; border-radius: 50%; object-fit: cover;
 	display: flex; align-items: center; justify-content: center; font-family: Pretendard, sans-serif; font-size: 104px; font-weight: 800; }
 .player .line, .team .line { font-family: Pretendard, "Inter Tight", sans-serif; }
 /* league */
 .league h1 { font-size: 84px; }
-.league .ltable { right: 64px; top: 150px; width: 560px; }
+.league .ltable { right: 64px; top: calc(50% + 24px); width: 560px; transform: translateY(-50%); }
 .league .lrow { display: grid; grid-template-columns: 44px 1fr 120px 80px; align-items: center; height: 96px; border-bottom: 1px solid rgba(255,255,255,.22); }
 .league .lrow.lhd { height: 46px; border-bottom: 2px solid #fff; font-size: 20px; font-weight: 600; color: #c9d3bf; }
 .league .lrow span:nth-child(n+3) { text-align: right; }
@@ -403,18 +403,18 @@ h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; lett
 .champion .cstrip img { max-height: 58px; max-width: 165px; object-fit: contain; }
 /* team */
 .team h1 { font-family: Pretendard, sans-serif; }
-.team .emblem { right: 96px; top: 150px; width: 290px; height: 290px; display: flex; align-items: center; justify-content: center;
+.team .emblem { right: 96px; top: calc(50% + 24px); transform: translateY(-50%); width: 290px; height: 290px; display: flex; align-items: center; justify-content: center;
 	font-family: Pretendard, sans-serif; font-size: 150px; font-weight: 800; }
 /* wrapped */
 .wrapped { background: #26321a; color: #fff; }
 .wrapped .court { inset: 0; }
 .wrapped .court i { position: absolute; border: 2px solid rgba(255,255,255,.07); }
 .wrapped .court .half { left: 50%; top: 0; bottom: 0; border-width: 0 0 0 2px; }
-.wrapped .court .circle { left: 50%; top: 50%; width: 220px; height: 220px; border-radius: 50%; transform: translate(-50%, -50%); }
+.wrapped .court .circle { left: 50%; top: calc(50% + 24px); width: 220px; height: 220px; border-radius: 50%; transform: translate(-50%, -50%); }
 .wrapped .court .box { top: 165px; width: 150px; height: 300px; }
 .wrapped .court .box.l { left: -2px; } .wrapped .court .box.r { right: -2px; }
 .wrapped .wlogo { left: 64px; top: 44px; height: 54px; }
-.wrapped .info { top: 150px; width: 760px; }
+.wrapped .info { width: 760px; }
 .wrapped .gold { color: #d9b04a; font-size: 28px; font-weight: 700; }
 .wrapped h1 { margin-top: 10px; font-family: Pretendard, sans-serif; font-size: 104px; }
 .wrapped .line { font-family: Pretendard, "Inter Tight", sans-serif; }
@@ -422,7 +422,7 @@ h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; lett
 .wrapped .badge { background: rgba(255,255,255,.1); }
 .wrapped .badge.t-legendary, .wrapped .badge.t-champion { background: #f6e7b8; }
 .wrapped .badge.t-icon { background: #fffaf0; box-shadow: 0 0 0 3px #c9a227, 0 0 0 6px #26321a, 0 0 0 8px #c9a227; }
-.wrapped .wplay { right: 120px; top: 200px; width: 200px; height: 200px; border-radius: 50%; border: 6px solid #d9b04a; display: flex; align-items: center; justify-content: center; }
+.wrapped .wplay { right: 120px; top: calc(50% + 24px); transform: translateY(-50%); width: 200px; height: 200px; border-radius: 50%; border: 6px solid #d9b04a; display: flex; align-items: center; justify-content: center; }
 .wrapped .wplay span { width: 0; height: 0; margin-left: 16px; border-left: 64px solid #d9b04a; border-top: 40px solid transparent; border-bottom: 40px solid transparent; }
 .wrapped .wsite { left: 64px; bottom: 40px; font-size: 24px; font-weight: 600; color: rgba(255,255,255,.6); }
 /* album */
@@ -432,14 +432,14 @@ h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; lett
 .album .sub { font-size: 28px; }
 .album .count { margin-top: 26px; font-size: 26px; font-weight: 700; color: #e8c766; }
 /* generic page */
-.page .info { top: 50%; width: 520px; transform: translateY(-50%); }
+.page .info { top: calc(50% + 24px); width: 520px; transform: translateY(-50%); }
 .page h1 { font-size: 80px; white-space: normal; }
 .page .ko { margin-top: 18px; font-family: Pretendard, sans-serif; font-size: 34px; font-weight: 600; color: #c9d3bf; }
-.page .side { right: 64px; top: 56px; width: 540px; height: 518px; }
+.page .side { right: 64px; top: calc(50% + 24px); width: 540px; height: 518px; transform: translateY(-50%); }
 .page .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.page .pic .playbtn { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; transform: translate(-50%, -50%); border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
+.page .pic .playbtn { position: absolute; left: 50%; top: calc(50% + 24px); width: 140px; height: 140px; transform: translate(-50%, -50%); border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
 .page .pic .playbtn span { width: 0; height: 0; margin-left: 12px; border-left: 46px solid #2f3d1e; border-top: 28px solid transparent; border-bottom: 28px solid transparent; }
-.page .list { top: 50%; height: auto; transform: translateY(-50%); }
+.page .list { top: calc(50% + 24px); height: auto; transform: translateY(-50%); }
 .page .lhd { padding-bottom: 12px; border-bottom: 2px solid #fff; font-size: 22px; font-weight: 600; color: #c9d3bf; }
 .page .arow { display: flex; align-items: center; gap: 24px; height: 100px; border-bottom: 1px solid rgba(255,255,255,.22); }
 .page .arow.past { opacity: .45; }
@@ -447,13 +447,13 @@ h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; lett
 .page .adate em { font-style: normal; font-size: 18px; font-weight: 700; color: #e8c766; }
 .page .adate b { margin-top: 4px; font-size: 34px; font-weight: 800; }
 .page .atitle { font-size: 28px; font-weight: 700; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.page .honours { top: 50%; height: auto; transform: translateY(-50%); display: flex; flex-direction: column; gap: 18px; }
+.page .honours { top: calc(50% + 24px); height: auto; transform: translateY(-50%); display: flex; flex-direction: column; gap: 18px; }
 .page .hcard { display: flex; align-items: center; gap: 28px; padding: 36px 34px; background: #26321a; border: 2px solid #c9a227; box-shadow: inset 0 0 0 6px #26321a, inset 0 0 0 7px rgba(232,199,102,.35); }
 .page .honours.n1 .hcard { padding: 44px 36px; }
 .page .hcard .trophy { flex: none; width: 92px; height: 92px; }
 .page .hcard small { display: block; font-size: 22px; font-weight: 700; color: #e8c766; }
 .page .hcard b { display: flex; align-items: center; gap: 14px; margin-top: 6px; font-family: Pretendard, sans-serif; font-size: 56px; font-weight: 800; line-height: 1.1; }
-.page .squads { top: 50%; right: 48px; width: auto; height: auto; transform: translateY(-50%); display: flex; gap: 20px; }
+.page .squads { top: calc(50% + 24px); right: 48px; width: auto; height: auto; transform: translateY(-50%); display: flex; gap: 20px; }
 .page .squad { width: 184px; }
 .page .shead { display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 2px solid #fff; font-family: Pretendard, sans-serif; font-size: 24px; white-space: nowrap; overflow: hidden; }
 .page .squad ul { list-style: none; }
@@ -463,19 +463,19 @@ h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; lett
 .page .logos span { display: flex; align-items: center; justify-content: center; min-height: 0; padding: 18px 28px; background: #fff; overflow: hidden; }
 .page .logos img { max-width: 100%; max-height: 100%; object-fit: contain; }
 .page .logos span:last-child:nth-child(odd) { grid-column: 1 / -1; }
-.page .collage { top: 0; bottom: 0; height: auto; right: 40px; width: 600px; }
+.page .collage { right: 40px; width: 600px; height: 520px; }
 .page .collage img { position: absolute; display: block; object-fit: cover; border: 10px solid #fff; border-bottom-width: 34px; box-shadow: 0 14px 34px rgba(0,0,0,.4); }
-.page .collage img:nth-child(1) { left: 0; top: 70px; width: 330px; height: 250px; transform: rotate(-6deg); }
-.page .collage img:nth-child(2) { right: 0; top: 46px; width: 320px; height: 240px; transform: rotate(5deg); }
-.page .collage img:nth-child(3) { left: 120px; top: 270px; width: 380px; height: 280px; transform: rotate(-1.5deg); z-index: 2; }
+.page .collage img:nth-child(1) { left: 0; top: 24px; width: 330px; height: 250px; transform: rotate(-6deg); }
+.page .collage img:nth-child(2) { right: 0; top: 0; width: 320px; height: 240px; transform: rotate(5deg); }
+.page .collage img:nth-child(3) { left: 120px; top: 224px; width: 380px; height: 280px; transform: rotate(-1.5deg); z-index: 2; }
 .page .pitch { right: 120px; width: 420px; background: #2f3d1e; border: 4px solid #fff; }
 .page .pitch i { position: absolute; border: 3px solid rgba(255,255,255,.75); }
-.page .pitch .half { left: 0; right: 0; top: 50%; border-width: 3px 0 0; }
-.page .pitch .circle { left: 50%; top: 50%; width: 110px; height: 110px; border-radius: 50%; transform: translate(-50%, -50%); }
+.page .pitch .half { left: 0; right: 0; top: calc(50% + 24px); border-width: 3px 0 0; }
+.page .pitch .circle { left: 50%; top: calc(50% + 24px); width: 110px; height: 110px; border-radius: 50%; transform: translate(-50%, -50%); }
 .page .pitch .box { left: 50%; bottom: -3px; width: 190px; height: 70px; transform: translateX(-50%); border-bottom: 0; }
 .page .pitch span { position: absolute; width: 62px; height: 62px; transform: translate(-50%, -50%); border-radius: 50%; border: 3px dashed rgba(255,255,255,.9);
 	display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 700; color: #fff; }
-.page .phone { right: 150px; top: 34px; width: 250px; height: 504px; padding: 12px; border-radius: 40px; background: #111; }
+.page .phone { right: 150px; width: 250px; height: 504px; padding: 12px; border-radius: 40px; background: #111; }
 .page .phone .screen { width: 100%; height: 100%; border-radius: 30px; background: #2f3d1e; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
 .page .phone img { width: 112px; height: 112px; border-radius: 26px; }
 .page .phone b { color: #fff; font-size: 26px; font-weight: 700; }
