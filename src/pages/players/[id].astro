@@ -217,15 +217,18 @@ const careerRows = player.leagues.map((section) => {
 							</button>
 						</div>
 						<BadgeGuide id={`badge-guide-${section.league}`} league={section.league} playerBadges={section.badges} />
+						<T as="p" class="pp-badge-hint k-meta" en="Tap a badge to see what it's for." ko="배지를 누르면 설명이 보여요." />
 						<ul class="pp-badge-list">
 							{sortBadges(section.badges).map((key) => (
 								<li class:list={["pp-badge", `pp-badge--${BADGES[key].tier}`, { "pp-badge--champion": key === FEATURED_BADGE }]}>
-									<span class="pp-badge-icon" aria-hidden="true">{BADGES[key].icon}</span>
-									<span class="pp-badge-text">
-										<span class="pp-badge-name"><T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} /></span>
-										<span class="pp-badge-tier"><T en={BADGE_TIER_LABELS[BADGES[key].tier]} ko={BADGE_TIER_LABELS_KO[BADGES[key].tier]} /></span>
-										<span class="pp-badge-desc"><T en={BADGES[key].description} ko={BADGES[key].descriptionKo} /></span>
-									</span>
+									<button type="button" class="pp-badge-btn" aria-expanded="false" data-badge-toggle>
+										<span class="pp-badge-icon" aria-hidden="true">{BADGES[key].icon}</span>
+										<span class="pp-badge-text">
+											<span class="pp-badge-name"><T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} /></span>
+											<span class="pp-badge-tier"><T en={BADGE_TIER_LABELS[BADGES[key].tier]} ko={BADGE_TIER_LABELS_KO[BADGES[key].tier]} /></span>
+											<span class="pp-badge-desc"><T en={BADGES[key].description} ko={BADGES[key].descriptionKo} /></span>
+										</span>
+									</button>
 								</li>
 							))}
 						</ul>
@@ -328,6 +331,13 @@ const careerRows = player.leagues.map((section) => {
 </BaseLayout>
 
 <script>
+	// Phone: badge descriptions are folded; a tap opens or closes one.
+	for (const button of document.querySelectorAll<HTMLButtonElement>("[data-badge-toggle]")) {
+		button.addEventListener("click", () => {
+			button.setAttribute("aria-expanded", String(button.getAttribute("aria-expanded") !== "true"));
+		});
+	}
+
 	const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-league-button]"));
 	const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-league-panel]"));
 
@@ -497,10 +507,21 @@ const careerRows = player.leagues.map((section) => {
 		padding: 0;
 		list-style: none;
 	}
-	.pp-badge {
+	.pp-badge-btn {
 		display: flex;
 		align-items: flex-start;
 		gap: 12px;
+		width: 100%;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: default;
+	}
+	.pp-badge-hint {
+		display: none;
 	}
 	.pp-badge-icon {
 		display: grid;
@@ -656,9 +677,36 @@ const careerRows = player.leagues.map((section) => {
 		.pp-info div:nth-child(n + 3) {
 			border-top: 1px solid var(--k-line);
 		}
+		.pp-badge-hint {
+			display: block;
+			margin: -8px 0 14px;
+		}
 		.pp-badge-list {
-			grid-template-columns: minmax(0, 1fr);
-			gap: 16px;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 14px 12px;
+		}
+		.pp-badge-btn {
+			gap: 9px;
+			cursor: pointer;
+		}
+		.pp-badge-icon {
+			width: 34px;
+			height: 34px;
+			font-size: 0.95rem;
+		}
+		.pp-badge-name {
+			display: block;
+			margin-right: 0;
+			font-size: 0.86rem;
+		}
+		.pp-badge-tier {
+			font-size: 0.7rem;
+		}
+		.pp-badge-desc {
+			display: none;
+		}
+		.pp-badge-btn[aria-expanded="true"] .pp-badge-desc {
+			display: block;
 		}
 		.pp-numbers {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
