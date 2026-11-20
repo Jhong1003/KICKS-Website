@@ -1080,3 +1080,66 @@ a.k-chip:focus-visible {
 	border-radius: 0;
 
 }
+
+/* ---------- Pages not rebuilt yet (app, report, scenarios, staff pages) ----------
+   They still use the old .content-section blocks; these rules line them up
+   with KICKS 2.0 (same width and title size, no small caps label over the
+   title) until each one gets its own pass. */
+
+.content-section {
+
+	width: 100%;
+	max-width: calc(var(--k-max) + var(--k-gutter) * 2);
+	margin: 0 auto;
+	padding: 40px var(--k-gutter) 0;
+	background: none;
+
+}
+
+.content-section + .content-section {
+
+	margin-top: 48px;
+	padding-top: 40px;
+	border-top: 1px solid var(--k-line);
+
+}
+
+.content-section > .section-label:has(+ h1) {
+
+	display: none;
+
+}
+
+.content-section > h1 {
+
+	margin-bottom: 12px;
+	font-family: var(--k-font-display);
+	font-size: var(--k-title);
+	font-weight: 800;
+	letter-spacing: -0.03em;
+
+}
+
+.content-section > .back-link {
+
+	margin-bottom: 14px;
+	color: var(--k-olive);
+	font-size: 0.9rem;
+	font-weight: 600;
+
+}
+
+.button-primary {
+
+	border-radius: 0;
+
+}
+
+.content-section h2 {
+
+	font-family: var(--k-font-display);
+	font-size: 1.45rem;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+
+}
