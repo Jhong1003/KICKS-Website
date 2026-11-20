@@ -1,68 +1,557 @@
 ---
-// Hall of Fame: every finished league's champion and awards (newest first),
-// then the club's all-time records. Grows by itself as leagues finish.
+// KICKS 2.0 Hall of Fame. Emphasis drops from the top: champions (team-color
+// cards), awards (gold medal cards), three all-time numbers, then the
+// detailed records. Only the newest season gets the big cards; earlier
+// seasons move into the Past champions table. Grows by itself as leagues
+// finish. No labels, no explanations, no emoji.
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageOgImage } from "../lib/og";
-import ClubRecords from "../components/ClubRecords.astro";
-import LeagueHonours from "../components/LeagueHonours.astro";
 import T from "../components/T.astro";
-import { isLeagueFinished } from "../lib/finale";
-import { leagues } from "../lib/leagues";
-import AwardCard from "../components/AwardCard.astro";
-import { AWARDS, manualAwards, seasonsWithAwards } from "../lib/awards";
+import { leagueParts } from "../lib/leagues";
+import { getLeagueFinale } from "../lib/finale";
+import {
+	allTimeRecords,
+	championCards,
+	detailedRecords,
+	finishedLeagues,
+	leagueAwardCards,
+	seasonAwardCards,
+} from "../lib/hall-of-fame";
 
-const finishedLeagues = leagues.filter((league) => isLeagueFinished(league.id)).reverse();
-// Season awards (Ballon d'Or, Puskás) from src/data/awards.json, newest season first.
-const seasonOrder = [...new Set(leagues.map((league) => league.id.split("-")[0]))];
-const seasons = seasonsWithAwards(seasonOrder).map((season) => ({ season, awards: manualAwards(season) }));
+const seasonOf = (id: string) => id.split("-")[0];
+const latestSeason = finishedLeagues[0] ? seasonOf(finishedLeagues[0].id) : null;
+const currentLeagues = finishedLeagues.filter((league) => seasonOf(league.id) === latestSeason);
+const pastLeagues = finishedLeagues.filter((league) => seasonOf(league.id) !== latestSeason);
+
+const champions = championCards(currentLeagues);
+const awards = [...(latestSeason ? seasonAwardCards(latestSeason) : []), ...currentLeagues.flatMap(leagueAwardCards)];
+const allTime = allTimeRecords();
+const records = detailedRecords();
+
+const pastRows = pastLeagues.map((league) => {
+	const finale = getLeagueFinale(league);
+	const { season, name } = leagueParts(league.id);
+	const champs = championCards([league]);
+	return {
+		season,
+		name,
+		champion: champs.map((card) => card.name).join(" · "),
+		goldenBoot: finale?.goldenBoot?.winners.map((winner) => winner.name).join(" · ") ?? "–",
+		playmaker: finale?.topAssists?.winners.map((winner) => winner.name).join(" · ") ?? "–",
+	};
+});
+
+const shade = (color: string) => `color-mix(in srgb, ${color} 78%, #000)`;
 ---
 
 <BaseLayout ogImage={pageOgImage("hall-of-fame")} title="Hall of Fame | KICKS" description="KICKS league champions, award winners, and club records.">
-	<main class="hall-of-fame">
-		<section class="content-section hall-of-fame-intro" aria-labelledby="hall-of-fame-title">
-			<p class="section-label"><T en="HALL OF FAME" ko="명예의 전당" /></p>
-			<h1 id="hall-of-fame-title"><T en="Hall of Fame" ko="명예의 전당" /></h1>
-			<T
-				as="p"
-				class="about-description"
-				en="Explore past champions, award winners, and all-time KICKS records."
-				ko="역대 우승팀과 수상자, KICKS의 최고 기록을 한곳에서 만나보세요."
-			/>
-			{
-				finishedLeagues.length === 0 && seasons.length === 0 && (
-					<T
-						as="p"
-						class="about-description"
-						en="Honours appear here once the first league is finished."
-						ko="첫 리그가 끝나면 이곳에 수상 기록이 나타나요."
-					/>
-				)
-			}
-		</section>
+	<main class="k-page hof">
+		<div class="k-page-head">
+			<h1 class="k-h1"><T en="Hall of Fame" ko="명예의 전당" /></h1>
+		</div>
 
 		{
-			seasons.map(({ season, awards }) => (
-				<section class="content-section honours" aria-labelledby={`season-honours-${season}`}>
-					<p class="section-label"><T en="SEASON AWARDS" ko="시즌 시상" /></p>
-					<h2 id={`season-honours-${season}`}>{season}</h2>
-					<div class="honours-grid">
-						{awards.map((entry) => (
-							<AwardCard
-								icon={AWARDS[entry.key].icon}
-								en={AWARDS[entry.key].en}
-								ko={AWARDS[entry.key].ko}
-								winners={entry.winners}
-								photo={entry.photo}
-								detailEn={entry.note}
-							/>
+			finishedLeagues.length === 0 && (
+				<T as="p" class="k-meta" en="Champions appear here once the first league is finished." ko="첫 리그가 끝나면 우승팀이 여기에 올라옵니다." />
+			)
+		}
+
+		{
+			champions.length > 0 && (
+				<section aria-labelledby="hof-champions">
+					<div class="k-section-head">
+						<h2 class="k-h2" id="hof-champions"><T en="Champions" ko="우승" /></h2>
+					</div>
+					<div class="hof-champions">
+						{champions.map((card) => (
+							<article class="hof-champ k-card">
+								<div class="hof-champ-top" style={`--team: ${card.color}; background: ${shade(card.color)}`}>
+									<svg class="hof-trophy" viewBox="0 0 48 48" aria-hidden="true">
+										<path
+											d="M14 6h20v5h7v4c0 6-4 10-9.2 10.8A11 11 0 0 1 26 31.6V37h6v5H16v-5h6v-5.4a11 11 0 0 1-5.8-5.8C11 25 7 21 7 15v-4h7V6Zm0 9h-3c0 3.3 1.5 5.8 4 6.7A12 12 0 0 1 14 18v-3Zm20 0v3c0 1.3-.2 2.6-.6 3.7 2.5-.9 3.6-3.4 3.6-6.7h-3Z"
+											fill="#d9b04a"
+										/>
+									</svg>
+									<p class="hof-champ-label">
+										<T en={`${card.title} · Champions`} ko={`${card.title} · 우승`} />
+									</p>
+									<p class="hof-champ-name">{card.name}</p>
+									<a class="hof-champ-link" href={`/league/${card.league.id}/team/${card.teamId}/`}>
+										<T en="Team page" ko="팀 페이지" /> →
+									</a>
+								</div>
+								<ul class="hof-roster">
+									{card.roster.map((person) => (
+										<li>
+											<a href={`/players/${person.id}/?league=${card.league.id}`}>
+												<span class="hof-avatar" style={`background: ${card.color}`} aria-hidden="true">
+													{person.initials}
+												</span>
+												<span class="hof-roster-name">
+													{person.name}
+													{person.captain && <span class="hof-c">C</span>}
+												</span>
+											</a>
+										</li>
+									))}
+								</ul>
+							</article>
 						))}
 					</div>
 				</section>
-			))
+			)
 		}
 
-		{finishedLeagues.map((league) => <LeagueHonours league={league} />)}
+		{
+			awards.length > 0 && (
+				<section class="k-section" aria-labelledby="hof-awards">
+					<div class="k-section-head">
+						<h2 class="k-h2" id="hof-awards"><T en="Awards" ko="수상" /></h2>
+					</div>
+					<div class="hof-awards">
+						{awards.map((award) => (
+							<article class="hof-award k-card">
+								<p class="hof-award-title">
+									<T en={award.en} ko={award.ko} />
+									<span class="hof-award-scope">{award.scopeLabel}</span>
+								</p>
+								<div class="hof-award-winners">
+									{award.winners.map((winner) => (
+										<a class="hof-award-winner" href={winner.id ? `/players/${winner.id}/${award.leagueId ? `?league=${award.leagueId}` : ""}` : undefined}>
+											<span class="hof-medal" style={`background: ${winner.color}`} aria-hidden="true">
+												{winner.initials}
+											</span>
+											<span class="hof-award-name">{winner.name}</span>
+											{winner.teamName && <span class="hof-award-team">{winner.teamName}</span>}
+										</a>
+									))}
+								</div>
+								{award.value !== undefined && (
+									<p class="hof-award-value">
+										{award.value}
+										<T class="hof-award-unit" en={award.unit!.en} ko={award.unit!.ko} />
+									</p>
+								)}
+								{award.note && <p class="hof-award-note">{award.note}</p>}
+							</article>
+						))}
+					</div>
+				</section>
+			)
+		}
 
-		<ClubRecords />
+		{
+			pastRows.length > 0 && (
+				<section class="k-section" aria-labelledby="hof-past">
+					<div class="k-section-head">
+						<h2 class="k-h2" id="hof-past"><T en="Past champions" ko="역대 우승팀" /></h2>
+					</div>
+					<div class="k-table-wrap">
+						<table class="k-table">
+							<thead>
+								<tr>
+									<th class="k-left"><T en="Season" ko="시즌" /></th>
+									<th class="k-left"><T en="League" ko="리그" /></th>
+									<th class="k-left"><T en="Champion" ko="우승팀" /></th>
+									<th class="k-left">Golden Boot</th>
+									<th class="k-left">Playmaker</th>
+								</tr>
+							</thead>
+							<tbody>
+								{pastRows.map((row) => (
+									<tr>
+										<td class="k-left">{row.season}</td>
+										<td class="k-left">{row.name}</td>
+										<td class="k-left k-strong">{row.champion}</td>
+										<td class="k-left">{row.goldenBoot}</td>
+										<td class="k-left">{row.playmaker}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				</section>
+			)
+		}
+
+		{
+			(allTime.length > 0 || records.players.length > 0) && (
+				<section class="k-section" aria-labelledby="hof-records">
+					<div class="k-section-head">
+						<h2 class="k-h2" id="hof-records"><T en="Club records" ko="클럽 기록" /></h2>
+						<T class="k-meta" en="Ties share the record." ko="기록이 같으면 공동 기록으로 인정합니다." />
+					</div>
+
+					<div class="hof-alltime">
+						{allTime.map((record) => (
+							<article class="hof-alltime-card k-card">
+								<p class="hof-alltime-label"><T en={record.en} ko={record.ko} /></p>
+								<p class="hof-alltime-value">{record.value}</p>
+								<ul class="hof-alltime-holders">
+									{record.holders.map((person) => (
+										<li>
+											<a href={`/players/${person.id}/`}>
+												<span class="hof-avatar hof-avatar--olive" aria-hidden="true">{person.initials}</span>
+												{person.name}
+											</a>
+										</li>
+									))}
+								</ul>
+							</article>
+						))}
+					</div>
+
+					<div class="hof-boxes">
+						{[
+							{ key: "players", en: "Players", ko: "선수", lines: records.players },
+							{ key: "teams", en: "Teams", ko: "팀", lines: records.teams },
+						].map((box) => (
+							<div class="hof-box k-card">
+								<h3 class="k-h3 hof-box-title"><T en={box.en} ko={box.ko} /></h3>
+								<ul class="hof-lines">
+									{box.lines.map((line) => (
+										<li class="hof-line">
+											<span class="hof-line-value">{line.value}</span>
+											<span class="hof-line-body">
+												<span class="hof-line-name"><T en={line.en} ko={line.ko} /></span>
+												{line.holders.map((holder) => (
+													<span class="hof-line-holder">
+														{holder.href ? <a href={holder.href}>{holder.name}</a> : holder.name}
+														<span class="hof-line-context"> · <T en={holder.contextEn} ko={holder.contextKo} /></span>
+													</span>
+												))}
+											</span>
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
+					</div>
+				</section>
+			)
+		}
 	</main>
 </BaseLayout>
+
+<style>
+	.hof {
+		--gold: #b8892b;
+	}
+
+	/* Champions */
+	.hof-champions {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 20px;
+	}
+	.hof-champ-top {
+		position: relative;
+		padding: 26px 26px 22px;
+		color: #fff;
+	}
+	.hof-trophy {
+		position: absolute;
+		top: 22px;
+		right: 22px;
+		width: 52px;
+		height: 52px;
+	}
+	.hof-champ-label {
+		margin: 0;
+		font-size: 0.82rem;
+		font-weight: 600;
+		opacity: 0.85;
+	}
+	.hof-champ-name {
+		margin: 6px 0 14px;
+		font-family: var(--k-font-display);
+		font-size: 2.3rem;
+		font-weight: 800;
+		letter-spacing: -0.02em;
+		line-height: 1.05;
+	}
+	.hof-champ-link {
+		display: inline-block;
+		padding: 6px 12px;
+		border: 1px solid rgba(255, 255, 255, 0.55);
+		font-size: 0.82rem;
+		font-weight: 700;
+	}
+	.hof-champ-link:hover {
+		background: rgba(255, 255, 255, 0.12);
+	}
+	.hof-roster {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px 16px;
+		margin: 0;
+		padding: 18px 22px 20px;
+		list-style: none;
+	}
+	.hof-roster a {
+		display: grid;
+		justify-items: center;
+		gap: 6px;
+		width: 56px;
+		text-align: center;
+	}
+	.hof-avatar {
+		display: grid;
+		place-items: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		color: #fff;
+		font-size: 0.78rem;
+		font-weight: 700;
+	}
+	.hof-avatar--olive {
+		background: var(--k-olive);
+	}
+	.hof-roster-name {
+		font-size: 0.78rem;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+	.hof-c {
+		display: inline-grid;
+		place-items: center;
+		width: 14px;
+		height: 14px;
+		margin-left: 3px;
+		border-radius: 50%;
+		background: var(--k-ink);
+		color: #fff;
+		font-size: 0.6rem;
+		font-weight: 800;
+		vertical-align: 1px;
+	}
+
+	/* Awards */
+	.hof-awards {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 20px;
+	}
+	.hof-award {
+		display: grid;
+		align-content: start;
+		justify-items: center;
+		gap: 12px;
+		padding: 20px 16px 22px;
+		border-top: 3px solid var(--gold);
+		text-align: center;
+	}
+	.hof-award-title {
+		display: grid;
+		gap: 2px;
+		margin: 0;
+		font-family: var(--k-font-display);
+		font-weight: 700;
+	}
+	.hof-award-scope {
+		color: var(--k-muted);
+		font-size: 0.8rem;
+		font-weight: 500;
+	}
+	.hof-award-winners {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 14px;
+	}
+	.hof-award-winner {
+		display: grid;
+		justify-items: center;
+		gap: 4px;
+	}
+	.hof-medal {
+		display: grid;
+		place-items: center;
+		width: 72px;
+		height: 72px;
+		border: 3px solid var(--gold);
+		border-radius: 50%;
+		box-shadow: 0 0 0 3px #fff inset;
+		color: #fff;
+		font-size: 1rem;
+		font-weight: 700;
+	}
+	.hof-award-name {
+		margin-top: 4px;
+		font-weight: 700;
+	}
+	.hof-award-team {
+		color: var(--k-muted);
+		font-size: 0.8rem;
+	}
+	.hof-award-value {
+		margin: 0;
+		font-family: var(--k-font-display);
+		font-size: 2rem;
+		font-weight: 800;
+		line-height: 1;
+	}
+	.hof-award-value :global(.hof-award-unit) {
+		margin-left: 4px;
+		color: var(--k-muted);
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+	.hof-award-note {
+		margin: 0;
+		color: #444;
+		font-size: 0.88rem;
+	}
+
+	/* Records */
+	.hof-alltime {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 20px;
+	}
+	.hof-alltime-card {
+		padding: 20px 22px 22px;
+	}
+	.hof-alltime-label {
+		margin: 0;
+		color: var(--k-muted);
+		font-size: 0.85rem;
+		font-weight: 600;
+	}
+	.hof-alltime-value {
+		margin: 4px 0 14px;
+		font-family: var(--k-font-display);
+		font-size: 3.4rem;
+		font-weight: 800;
+		line-height: 1;
+		letter-spacing: -0.03em;
+	}
+	.hof-alltime-holders {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px 16px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.hof-alltime-holders a {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-weight: 600;
+		font-size: 0.92rem;
+	}
+	.hof-alltime-holders .hof-avatar {
+		width: 32px;
+		height: 32px;
+		font-size: 0.68rem;
+	}
+	.hof-boxes {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 20px;
+		margin-top: 20px;
+	}
+	.hof-box {
+		padding: 18px 22px 8px;
+	}
+	.hof-box-title {
+		padding-bottom: 10px;
+		border-bottom: 2px solid var(--k-olive);
+	}
+	.hof-lines {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.hof-line {
+		display: grid;
+		grid-template-columns: 56px minmax(0, 1fr);
+		gap: 14px;
+		align-items: center;
+		padding: 12px 0;
+		border-bottom: 1px solid var(--k-line);
+	}
+	.hof-line:last-child {
+		border-bottom: 0;
+	}
+	.hof-line-value {
+		font-family: var(--k-font-display);
+		font-size: 1.9rem;
+		font-weight: 800;
+		text-align: center;
+	}
+	.hof-line-body {
+		display: grid;
+		gap: 2px;
+	}
+	.hof-line-name {
+		font-weight: 700;
+		font-size: 0.92rem;
+	}
+	.hof-line-holder {
+		font-size: 0.86rem;
+	}
+	.hof-line-holder a:hover,
+	.hof-alltime-holders a:hover,
+	.hof-roster a:hover .hof-roster-name,
+	a.hof-award-winner:hover .hof-award-name {
+		text-decoration: underline;
+	}
+	.hof-line-context {
+		color: var(--k-muted);
+	}
+
+	@media (max-width: 980px) {
+		.hof-awards {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 860px) {
+		.hof-champions,
+		.hof-boxes {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.hof-champ {
+			min-width: 0;
+		}
+		.hof-roster {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			scrollbar-width: none;
+		}
+		.hof-alltime {
+			grid-template-columns: 1fr;
+			gap: 0;
+			border-top: 1px solid var(--k-line);
+		}
+		.hof-alltime-card {
+			display: grid;
+			grid-template-columns: 72px minmax(0, 1fr);
+			gap: 4px 14px;
+			padding: 14px 0;
+			border: 0;
+			border-bottom: 1px solid var(--k-line);
+		}
+		.hof-alltime-label,
+		.hof-alltime-holders {
+			grid-column: 2;
+		}
+		.hof-alltime-value {
+			grid-column: 1;
+			grid-row: 1 / span 2;
+			align-self: center;
+			margin: 0;
+			font-size: 2.2rem;
+			text-align: center;
+		}
+		.hof-box {
+			padding: 14px 0 0;
+			border: 0;
+		}
+		.hof-champ-name {
+			font-size: 1.8rem;
+		}
+	}
+</style>
