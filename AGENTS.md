@@ -867,7 +867,8 @@ cards whose HTML changed. Locally: `NODE_PATH=<dir with playwright> CHROME_PATH=
 - **Team card** = team name, colour disc, place / points / W-D-L, captain
   (team-info.json), squad size, 🏆 CHAMPION when the finished league's rank 1.
   Place is the official standings rank, which the team page shows too.
-- **Wrapped card** = a teaser (KICKS WRAPPED, league, name, team, badges), drawn for
+- **Wrapped card** = a teaser (KICKS Wrapped, league, name, team, badges, and the big gold
+  number of the share image: goals, or games for a player without goals), drawn for
   the same players as `wrappedPlayers` (finished league, `isShownInLeague` rule
   repeated as `shownInLeague` in the script) — not the slides' contents.
 - **Album card** = the album cover (same cover rule as `src/lib/gallery.ts`), the

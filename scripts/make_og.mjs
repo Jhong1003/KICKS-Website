@@ -208,6 +208,11 @@ function wrappedCard(p, league) {
 	const team = teamOf(league.id, s.current_team_id);
 	const champ = (s.badges ?? []).includes("champion");
 	const badges = [...s.badges].filter((k) => k !== "own_goal_award").sort((a, b) => badgeRank(a) - badgeRank(b)).slice(0, 7);
+	// The big gold number, as on the Wrapped share image: goals, or games played for a
+	// player without goals (never weeks missed).
+	const goals = s.season_totals.goals;
+	const games = s.weekly_stats.reduce((sum, w) => sum + (w.games ?? 0), 0);
+	const [big, unit] = goals > 0 ? [goals, goals === 1 ? "goal" : "goals"] : [games, games === 1 ? "game" : "games"];
 	return `<section class="card wrapped">
 		<div class="court"><i class="half"></i><i class="circle"></i><i class="box l"></i><i class="box r"></i></div>
 		${logoWhite ? `<img class="wlogo" src="${logoWhite}" alt="">` : ""}
@@ -217,7 +222,7 @@ function wrappedCard(p, league) {
 			<div class="line">${sq(team.color)}<b>${esc(team.name)}</b>${champ ? `<span class="gold">Champions</span>` : ""}</div>
 			${badges.length ? badgeDots(badges) : ""}
 		</div>
-		<div class="wplay"><span></span></div>
+		<div class="wbig"><b>${big}</b><span>${unit}</span></div>
 		<div class="wsite">kicksuiuc.com</div>
 	</section>`;
 }
@@ -422,8 +427,9 @@ h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; lett
 .wrapped .badge { background: rgba(255,255,255,.1); }
 .wrapped .badge.t-legendary, .wrapped .badge.t-champion { background: #f6e7b8; }
 .wrapped .badge.t-icon { background: #fffaf0; box-shadow: 0 0 0 3px #c9a227, 0 0 0 6px #26321a, 0 0 0 8px #c9a227; }
-.wrapped .wplay { right: 120px; top: calc(50% + 24px); transform: translateY(-50%); width: 200px; height: 200px; border-radius: 50%; border: 6px solid #d9b04a; display: flex; align-items: center; justify-content: center; }
-.wrapped .wplay span { width: 0; height: 0; margin-left: 16px; border-left: 64px solid #d9b04a; border-top: 40px solid transparent; border-bottom: 40px solid transparent; }
+.wrapped .wbig { right: 110px; top: calc(50% + 24px); transform: translateY(-50%); text-align: center; color: #d9b04a; }
+.wrapped .wbig b { display: block; font-size: 230px; font-weight: 800; font-style: italic; line-height: .9; letter-spacing: -.04em; }
+.wrapped .wbig span { display: block; margin-top: 6px; font-size: 34px; font-weight: 700; letter-spacing: .02em; }
 .wrapped .wsite { left: 64px; bottom: 40px; font-size: 24px; font-weight: 600; color: rgba(255,255,255,.6); }
 /* album */
 .album .photo { right: 0; top: 0; width: 560px; height: 630px; object-fit: cover; }
