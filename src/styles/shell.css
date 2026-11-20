@@ -847,3 +847,69 @@ a.k-chip:focus-visible {
 	white-space: nowrap;
 
 }
+
+/* Underline tabs (Media, League, Dream Team squads). */
+
+.k-tabs {
+
+	display: flex;
+	gap: 28px;
+	margin-bottom: 28px;
+	overflow-x: auto;
+	border-bottom: 1px solid var(--k-line);
+	scrollbar-width: none;
+
+}
+
+.k-tabs::-webkit-scrollbar {
+
+	display: none;
+
+}
+
+.k-tabs a,
+.k-tabs button {
+
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 10px 0 12px;
+	border: 0;
+	background: none;
+	color: var(--k-muted);
+	font: inherit;
+	font-family: var(--k-font-display);
+	font-size: 0.98rem;
+	font-weight: 600;
+	white-space: nowrap;
+	cursor: pointer;
+
+}
+
+.k-tabs a:hover,
+.k-tabs button:hover {
+
+	color: var(--k-ink);
+
+}
+
+.k-tabs [aria-current="page"],
+.k-tabs [aria-selected="true"] {
+
+	color: var(--k-ink);
+
+}
+
+.k-tabs [aria-current="page"]::after,
+.k-tabs [aria-selected="true"]::after {
+
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: -1px;
+	left: 0;
+	height: 3px;
+	background: var(--k-olive);
+
+}

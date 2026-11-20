@@ -1,54 +1,96 @@
 ---
-// Gallery: one card per album, newest first (src/lib/gallery.ts). Each card
-// opens /gallery/<album-id>, which has the photo grid and lightbox.
+// Media › Photos: one tile per album, newest first (src/lib/gallery.ts).
+// Each opens /gallery/<album-id>, which has the photo grid and lightbox.
 import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { pageOgImage } from "../../lib/og";
 import T from "../../components/T.astro";
 import MediaTabs from "../../components/MediaTabs.astro";
 import { albums } from "../../lib/gallery";
-
-const monthLabel = (iso: string, lang: "en" | "ko") => {
-	const [year, month] = iso.split("-").map(Number);
-	return lang === "ko" ? `${year}년 ${month}월` : new Date(year, month - 1, 1).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-};
+import { monthYear } from "../../lib/home-chips";
 ---
 
-<BaseLayout ogImage={pageOgImage("gallery")} title="Gallery | KICKS" description="Photos from KICKS matches and events.">
-	<main>
-		<section class="content-section" aria-labelledby="gallery-title">
-			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>
-			<h1 id="gallery-title"><T en="Moments from the pitch." ko="KICKS의 순간들" /></h1>
-			<MediaTabs current="photos" />
-			{
-				albums.length === 0 ? (
-					<T as="p" class="gallery-empty" en="No photos yet." ko="아직 사진이 없어요." />
-				) : (
-					<div class="album-grid">
-						{albums.map((album) => (
-							<a class="album-card" href={`/gallery/${album.id}/`}>
-								<span class="album-cover">
-									<Image src={album.cover.src} alt="" width={640} loading="lazy" />
-								</span>
-								<span class="album-info">
-									<span class="album-title">
-										<T en={album.title} ko={album.titleKo} />
-									</span>
-									<span class="album-meta">
-										{album.date && (
-											<>
-												<T en={monthLabel(album.date, "en")} ko={monthLabel(album.date, "ko")} />
-												<span aria-hidden="true"> · </span>
-											</>
-										)}
-										<T en={`${album.images.length} photos`} ko={`사진 ${album.images.length}장`} />
-									</span>
-								</span>
-							</a>
-						))}
-					</div>
-				)
-			}
-		</section>
+<BaseLayout ogImage={pageOgImage("gallery")} title="Media | KICKS" description="Photos and full match videos from KICKS league days and events.">
+	<main class="k-page">
+		<MediaTabs current="photos" />
+		{
+			albums.length === 0 ? (
+				<T as="p" class="k-meta" en="No photos yet." ko="아직 사진이 없습니다." />
+			) : (
+				<div class="albums">
+					{albums.map((album) => (
+						<a class="album" href={`/gallery/${album.id}/`}>
+							<span class="album-photo">
+								<Image src={album.cover.src} alt="" width={820} quality={82} loading="lazy" />
+							</span>
+							<span class="album-title">
+								<T en={album.title} ko={album.titleKo} />
+							</span>
+							<span class="album-meta">
+								{album.date && (
+									<>
+										<T en={monthYear(album.date, "en")} ko={monthYear(album.date, "ko")} />
+										<span aria-hidden="true"> · </span>
+									</>
+								)}
+								<T en={`${album.images.length} photos`} ko={`사진 ${album.images.length}장`} />
+							</span>
+						</a>
+					))}
+				</div>
+			)
+		}
 	</main>
 </BaseLayout>
+
+<style>
+	.albums {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 36px 20px;
+	}
+	.album {
+		display: grid;
+		gap: 6px;
+	}
+	.album-photo {
+		display: block;
+		aspect-ratio: 3 / 2;
+		overflow: hidden;
+		margin-bottom: 6px;
+		background: #f0f0f0;
+	}
+	.album-photo :global(img) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.4s ease;
+	}
+	.album:hover .album-photo :global(img) {
+		transform: scale(1.03);
+	}
+	.album-title {
+		font-family: var(--k-font-display);
+		font-size: 1.05rem;
+		font-weight: 700;
+	}
+	.album:hover .album-title {
+		text-decoration: underline;
+	}
+	.album-meta {
+		color: var(--k-muted);
+		font-size: 0.85rem;
+	}
+	@media (max-width: 860px) {
+		.albums {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 28px 12px;
+		}
+	}
+	@media (max-width: 520px) {
+		.albums {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
