@@ -913,3 +913,10 @@ a.k-chip:focus-visible {
 	background: var(--k-olive);
 
 }
+
+/* Anything given display: … above still hides with the hidden attribute. */
+[hidden] {
+
+	display: none !important;
+
+}
