@@ -824,13 +824,20 @@ update. Not part of the site build; nothing under `report/` is deployed.
 
 ### Link-preview cards (og:image)
 
-What KakaoTalk, iMessage etc. show when a link is shared. Every page except the
-homepage gets its own 1200×630 card; the homepage keeps `public/og-image.png`.
-[scripts/make_og.mjs](scripts/make_og.mjs) draws them with the report's fonts and
-Playwright into `public/og/<dir>/`, and writes `src/data/og.json` (a hash per card,
-per kind — never hand-edit). Pages pick a card through [src/lib/og.ts](src/lib/og.ts)
-→ `ogImage` on `BaseLayout`, with `?v=<hash>` in the URL so a redrawn card isn't
-hidden behind a chat app's cache; no entry falls back to the default image. The
+What KakaoTalk, iMessage etc. show when a link is shared. Every page gets a
+1200×630 card, the homepage included (`public/og-image.png`, kind `home`).
+[scripts/make_og.mjs](scripts/make_og.mjs) draws them with Playwright into
+`public/og/<dir>/`, and writes `src/data/og.json` (a hash per card, per kind — never
+hand-edit). Pages pick a card through [src/lib/og.ts](src/lib/og.ts) → `ogImage` on
+`BaseLayout` (default `homeOgImage()`), with `?v=<hash>` in the URL so a redrawn card
+isn't hidden behind a chat app's cache. The look is KICKS 2.0 layout and type: white logo
+top left on the club olive (no strip or small print along the bottom); the schedule
+card lists the next dates (a month calendar was tried and read worse), Hall of Fame
+dark gold-trimmed cards with a drawn trophy, Photos three prints;
+Inter Tight for titles and numbers and Pretendard for Korean — both embedded from
+`report/assets/` (`InterTight.woff2`, `Pretendard-subset.woff2`, the same 2,350
+syllables as the report's Noto subset), so CI needs no fonts. No small caps labels.
+The champion banner and Wrapped keep their dark olive and gold. The
 "Make Report Slides" workflow runs it after every data update (and on pushes that
 touch the script, gallery photos/albums, partners or team-info) and commits only
 cards whose HTML changed. Locally: `NODE_PATH=<dir with playwright> CHROME_PATH=<chrome> node scripts/make_og.mjs`.
@@ -860,15 +867,16 @@ cards whose HTML changed. Locally: `NODE_PATH=<dir with playwright> CHROME_PATH=
 - **Team card** = team name, colour disc, place / points / W-D-L, captain
   (team-info.json), squad size, 🏆 CHAMPION when the finished league's rank 1.
   Place is the official standings rank, which the team page shows too.
-- **Wrapped card** = a teaser (KICKS WRAPPED, league, name, team, badges), drawn for
+- **Wrapped card** = a teaser (KICKS Wrapped, league, name, team, badges, and the big gold
+  number of the share image: goals, or games for a player without goals), drawn for
   the same players as `wrappedPlayers` (finished league, `isShownInLeague` rule
   repeated as `shownInLeague` in the script) — not the slides' contents.
 - **Album card** = the album cover (same cover rule as `src/lib/gallery.ts`), the
   Korean and English titles, date and photo count.
-- **Page cards** = label, English title, Korean name, and a picture that fits the
+- **Page cards** = English title and Korean name, and a picture that fits the
   page — never the bare ball logo (tried; it looked like filler): game stills
   (keeper, free kick), partner logos, Hall of Fame champions, three album covers
-  (gallery), the KICKS logo (about), the next dates on schedule.json with the
+  (gallery), a club photo (about, join, full matches with a play button), the next dates on schedule.json with the
   latest past ones faded (schedule — English titles, redrawn as dates pass), the
   whole current roster in one white column per team — team colour and name,
   captain first with a C, then name order, never by a stat (players; initials

@@ -7,6 +7,7 @@ import "../styles/shell.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { SEASON_THEMES } from "../lib/season-theme";
+import { homeOgImage } from "../lib/og";
 
 interface Props {
 	title: string;
@@ -23,7 +24,7 @@ const {
 	description = "UIUC Korean-inspired futsal community · 리그 순위, 선수 기록, 경기 일정",
 	header = "default",
 	noindex = false,
-	ogImage: ogImagePath = "/og-image.png",
+	ogImage: ogImagePath = homeOgImage(),
 } = Astro.props;
 
 // Astro.site (set in astro.config.mjs) makes these absolute regardless of
