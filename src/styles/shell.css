@@ -475,8 +475,8 @@ html[lang="ko"] .k-lang [data-lang-option="ko"] {
 
 	.k-nav-list a {
 
-		padding: 14px 0;
-		font-size: 1.6rem;
+		padding: 12px 0;
+		font-size: 1.3rem;
 		font-weight: 700;
 		letter-spacing: -0.02em;
 
@@ -983,7 +983,8 @@ a.k-chip:focus-visible {
 .mg .mg-board [data-board-list] li {
 
 	grid-template-columns: 30px minmax(0, 1fr) auto;
-	grid-template-areas: "rank name score" "rank detail score";
+	/* The rank sits on the nickname's line, the detail under the nickname. */
+	grid-template-areas: "rank name score" ". detail score";
 	align-items: center;
 	row-gap: 0;
 	padding: 10px 0;
