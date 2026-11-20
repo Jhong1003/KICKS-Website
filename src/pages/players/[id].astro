@@ -535,8 +535,7 @@ const careerRows = player.leagues.map((section) => {
 	}
 	.pp-badge-text {
 		display: grid;
-		justify-items: start;
-		gap: 2px;
+		gap: 1px;
 		line-height: 1.2;
 	}
 	.pp-badge-name {
@@ -546,25 +545,21 @@ const careerRows = player.leagues.map((section) => {
 	.pp-badge--champion .pp-badge-name {
 		color: #7a5f0e;
 	}
+	/* Tier as plain coloured text: the ring on the icon already carries the colour. */
 	.pp-badge-tier {
-		padding: 1px 6px;
-		background: #eef0e9;
-		color: var(--k-olive);
-		font-size: 0.66rem;
-		font-weight: 700;
+		color: var(--k-muted);
+		font-size: 0.72rem;
+		font-weight: 600;
 	}
 	.pp-badge--rare .pp-badge-tier {
-		background: #dbe7f5;
 		color: #2f5f99;
 	}
 	.pp-badge--legendary .pp-badge-tier,
 	.pp-badge--champion .pp-badge-tier {
-		background: #f6e7b8;
-		color: #7a5f0e;
+		color: #9a7412;
 	}
 	.pp-badge--icon .pp-badge-tier {
-		background: var(--k-olive);
-		color: #f6e7b8;
+		color: var(--k-olive);
 	}
 
 	.pp-numbers {
