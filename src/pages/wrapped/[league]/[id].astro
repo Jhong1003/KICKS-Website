@@ -10,6 +10,8 @@ import T from "../../../components/T.astro";
 import { leagues, getTeamColor, type League } from "../../../lib/leagues";
 import { BADGES, sortBadges, type PlayerLeagueSection, type PlayerProfile } from "../../../lib/players";
 import { buildWrapped, wrappedPlayers } from "../../../lib/wrapped";
+import { teamResults, type TeamMatch } from "../../../lib/team-stats";
+import matchesData from "../../../data/matches.json";
 
 export function getStaticPaths() {
 	return leagues.flatMap((league) =>
@@ -52,11 +54,18 @@ const rows = [
 ].filter((row) => !(leadIsGoals ? row.en === "Goals" : row.en === "Games"));
 const [topHighlight, ...otherHighlights] = data.highlights;
 const isAward = (icon: string) => ["👑", "🏆", "🏅"].includes(icon);
-// Week bars on the share card: G+A per week, or games per week for a player without any.
-const bars = section.weekly_stats.map((week) => ({
-	week: week.week,
-	value: data.attackingPoints > 0 ? week.goals + week.assists : week.games,
-}));
+// Week bars on the share card: G+A per week; for a player without any, the
+// team they played for that week: wins, draws and losses stacked.
+const byTeam = data.attackingPoints > 0;
+const bars = section.weekly_stats.map((week) => {
+	const results = week.team_id ? teamResults(matchesData as TeamMatch[], league.id, week.team_id).filter((r) => r.week === week.week) : [];
+	const count = (result: string) => results.filter((r) => r.result === result).length;
+	return {
+		week: week.week,
+		value: byTeam ? week.goals + week.assists : results.length,
+		wdl: byTeam ? null : [count("W"), count("D"), count("L")],
+	};
+});
 const barMax = Math.max(1, ...bars.map((bar) => bar.value));
 
 // What the canvas needs to draw the summary image in either language.
@@ -75,6 +84,10 @@ const cardData = {
 	positions: player.positions,
 	badges: cardBadges,
 	highlights: data.highlights.map(({ icon, title, sub }) => ({ icon, title, sub })),
+	lead,
+	bars: bars.map((bar) => bar.value),
+	wdl: bars.map((bar) => bar.wdl),
+	barWeeks: bars.map((bar) => bar.week),
 };
 ---
 
@@ -293,11 +306,23 @@ const cardData = {
 					<div class="wrapped-share-chart" aria-hidden="true">
 						{bars.map((bar) => (
 							<span class="wrapped-share-bar">
-								<span class="wrapped-share-fill" style={`height: ${Math.max(4, (bar.value / barMax) * 100)}%`} />
+								{bar.wdl ? (
+									<span class="wrapped-share-stack" style={`height: ${Math.max(4, (bar.value / barMax) * 100)}%`}>
+										{bar.wdl.map((n, i) => n > 0 && <span class={`wrapped-share-seg wrapped-share-seg--${"wdl"[i]}`} style={`flex: ${n}`} />)}
+									</span>
+								) : (
+									<span class="wrapped-share-fill" style={`height: ${Math.max(4, (bar.value / barMax) * 100)}%`} />
+								)}
 								<span class="wrapped-share-week">W{bar.week}</span>
 							</span>
 						))}
 					</div>
+					{!byTeam && (
+						<p class="wrapped-share-legend">
+							<span><i class="wrapped-share-seg--w" />W</span><span><i class="wrapped-share-seg--d" />D</span><span><i class="wrapped-share-seg--l" />L</span>
+							<T class="wrapped-share-legend-note" en={`${data.team.teamName} by week`} ko={`${data.team.teamName} 주차별 성적`} />
+						</p>
+					)}
 					<p class="wrapped-share-foot"><span>{section.play_style_tag}</span><span>kicksuiuc.com</span></p>
 				</div>
 				<div class="wrapped-actions" data-wrapped-actions>
@@ -323,6 +348,10 @@ const cardData = {
 		goals: number; assists: number; points: number; games: number; tag: string; positions: string[];
 		badges: { icon: string; tier: string }[];
 		highlights: { icon: string; title: Text; sub: Text }[];
+		lead: { value: number; en: string; ko: string };
+		bars: number[];
+		wdl: (number[] | null)[];
+		barWeeks: number[];
 	}
 
 	const root = document.getElementById("wrapped");
@@ -406,26 +435,6 @@ const cardData = {
 		});
 	}
 
-	const POSITION_COLORS: Record<string, string> = { GK: "#f0a202", DF: "#2f6fed", MF: "#2e9e5b", FW: "#d7263d" };
-	const FONT = '-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif';
-
-	/** Splits `text` into lines no wider than `maxWidth` (with the font currently set). */
-	function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
-		const lines: string[] = [];
-		let line = "";
-		for (const word of text.split(" ")) {
-			const test = line ? `${line} ${word}` : word;
-			if (ctx.measureText(test).width > maxWidth && line) {
-				lines.push(line);
-				line = word;
-			} else {
-				line = test;
-			}
-		}
-		lines.push(line);
-		return lines;
-	}
-
 	/** fillText with CSS-style letter-spacing (drawn glyph by glyph, so it works in every browser). */
 	function spacedText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, spacing: number, align: "left" | "center" = "left") {
 		const chars = [...text];
@@ -441,14 +450,31 @@ const cardData = {
 	}
 
 	/**
-	 * The share image: a copy of the summary card on the last slide. Every size
-	 * below is the card's CSS value multiplied by S (the card is ~336px wide on
-	 * a phone and 940px here), so the saved image looks like what's on screen.
-	 * The card is centered and kept inside Instagram's safe zone — the story
-	 * header covers roughly the top 250px and the reply bar the bottom 250px.
+	 * The share image (1080×1920): the gold-bordered card from the last slide,
+	 * drawn at full size on the dark olive court. The card is centered and
+	 * kept inside Instagram's safe zone (the story header covers roughly the
+	 * top 250px, the reply bar the bottom 250px).
 	 */
 	async function drawCard(card: CardData, lang: "en" | "ko"): Promise<Blob | null> {
+		const DISPLAY = '"Inter Tight Variable", "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif';
+		const BODY = '"Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif';
+		const teamLine = `${card.champion ? (lang === "ko" ? "우승 · " : "Champions · ") : ""}${card.team}`;
+		const brand = `${card.league} · ${lang === "ko" ? "시즌 리뷰" : "SEASON REVIEW"}`;
+		const unit = card.lead[lang];
+		const labels = lang === "ko" ? ["골", "도움", "경기"] : ["Goals", "Assists", "Games"];
+		// Make sure the web fonts (and the Korean glyphs in this card) are loaded before drawing.
+		const allText = [card.name, teamLine, brand, unit, card.tag, ...labels, "kicksuiuc.com 0123456789W"].join(" ");
+		await Promise.all(
+			["800 80px", "700 80px", "600 40px", "800 italic 200px"].flatMap((spec) => [
+				document.fonts?.load(`${spec} "Inter Tight Variable"`, allText),
+				document.fonts?.load(`${spec} "Pretendard Variable"`, allText),
+			]),
+		).catch(() => {});
 		await document.fonts?.ready;
+		const logo = new Image();
+		logo.src = "/kicks-logo-white.jpg";
+		await logo.decode().catch(() => {});
+
 		const W = 1080;
 		const H = 1920;
 		const canvas = document.createElement("canvas");
@@ -456,174 +482,174 @@ const cardData = {
 		canvas.height = H;
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return null;
-		const t = (text: { en: string; ko: string }) => text[lang];
-		const gold = "#e9c65a";
-		const cream = "#f7f6f2";
+		const gold = "#d9b04a";
+		const white = "#ffffff";
+		const soft = "rgba(255, 255, 255, 0.72)";
 
-		// Background: same 160° gradient as the slides.
-		const background = ctx.createLinearGradient(W * 0.33, 0, W * 0.67, H);
-		background.addColorStop(0, "#3f5128");
-		background.addColorStop(1, "#1b2411");
+		// Background: dark olive with faint futsal court lines, as on the slides.
+		const background = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, H);
+		background.addColorStop(0, "#4a5f30");
+		background.addColorStop(0.55, "#2c3a1c");
+		background.addColorStop(1, "#1f2914");
 		ctx.fillStyle = background;
 		ctx.fillRect(0, 0, W, H);
-
-		const cardW = 940;
-		const S = cardW / 336;
-		const px = (css: number) => Math.round(css * S);
-		const cardX = (W - cardW) / 2;
-		const padX = px(20);
-		const padY = px(22);
-		const left = cardX + padX;
-		const inner = cardW - padX * 2;
-
-		// Font sizes (CSS rem × 16 × S).
-		const brandSize = px(10.56);
-		const nameSize = px(35.2);
-		const chipSize = px(11.5);
-		const teamSize = px(14.4);
-		const statSize = px(28.8);
-		const statLabelSize = px(lang === "ko" ? 12.8 : 10.9);
-		const highlightSize = px(14.7);
-		const highlightLine = Math.round(highlightSize * 1.35);
-		const badgeLabelSize = px(10.9);
-		const emojiSize = px(20.8);
-		const iconCol = Math.round(highlightSize * 1.3) + px(10);
-
-		// Measure what wraps.
-		ctx.font = `600 ${highlightSize}px ${FONT}`;
-		const highlightLines = card.highlights.map((highlight) => wrapLines(ctx, t(highlight.title), inner - iconCol));
-		ctx.font = `${emojiSize}px ${FONT}`;
-		const emojiStep = emojiSize + px(8);
-		const perRow = Math.max(1, Math.floor((inner + px(8)) / emojiStep));
-		const badgeRows = Math.ceil(card.badges.length / perRow);
-		const emojiRow = Math.round(emojiSize * 1.2);
-
-		const blocks = {
-			brand: brandSize + px(12),
-			name: Math.round(nameSize * 1.1),
-			team: px(6) + Math.round(teamSize * 1.4) + px(16),
-			stats: px(12) * 2 + Math.round(statSize * 1.1) + px(2) + Math.round(statLabelSize * 1.3),
-			highlights:
-				px(16) + highlightLines.reduce((sum, lines) => sum + lines.length * highlightLine, 0) + px(8) * (highlightLines.length - 1) + px(12),
-			badges: card.badges.length > 0 ? Math.round(badgeLabelSize * 1.3) + px(8) + badgeRows * emojiRow + (badgeRows - 1) * px(4) : 0,
-		};
-		const cardH = padY * 2 + Object.values(blocks).reduce((a, b) => a + b, 0);
-		// The card itself sits dead center; the site address hangs below it.
-		const cardY = Math.max(250, Math.round((H - cardH) / 2));
-
-		// Card.
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+		ctx.lineWidth = 4;
+		ctx.strokeRect(40, 40, W - 80, H - 80);
 		ctx.beginPath();
-		ctx.roundRect(cardX, cardY, cardW, cardH, px(16));
-		ctx.fillStyle = "rgba(20, 27, 13, 0.55)";
-		ctx.fill();
-		ctx.lineWidth = Math.max(2, Math.round(S));
-		ctx.strokeStyle = "rgba(233, 198, 90, 0.5)";
+		ctx.moveTo(40, H / 2);
+		ctx.lineTo(W - 40, H / 2);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.arc(W / 2, H / 2, 160, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(W / 2 - 240, 40);
+		ctx.lineTo(W / 2 - 240, 200);
+		ctx.arc(W / 2, 200, 240, Math.PI, 0, true);
+		ctx.lineTo(W / 2 + 240, 40);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(W / 2 - 240, H - 40);
+		ctx.lineTo(W / 2 - 240, H - 200);
+		ctx.arc(W / 2, H - 200, 240, Math.PI, 0);
+		ctx.lineTo(W / 2 + 240, H - 40);
 		ctx.stroke();
 
-		let y = cardY + padY;
+		// Card layout (heights in px, top to bottom).
+		const cardW = 940;
+		const pad = 64;
+		const inner = cardW - pad * 2;
+		const stacked = card.wdl.some((entry) => entry !== null);
+		const heights = { logo: 56, brand: 34, big: 230, name: 96, team: 50, stats: 170, chart: stacked ? 300 : 250, foot: 40 };
+		const gaps = [22, 34, 18, 0, 34, 40, 40];
+		const cardH = pad * 2 + Object.values(heights).reduce((a, b) => a + b, 0) + gaps.reduce((a, b) => a + b, 0);
+		const cardX = (W - cardW) / 2;
+		const cardY = Math.max(250, Math.round((H - cardH) / 2));
+		const left = cardX + pad;
+
+		ctx.fillStyle = "#26321a";
+		ctx.fillRect(cardX, cardY, cardW, cardH);
+		ctx.strokeStyle = gold;
+		ctx.lineWidth = 8;
+		ctx.strokeRect(cardX + 4, cardY + 4, cardW - 8, cardH - 8);
+
+		let y = cardY + pad;
 		ctx.textBaseline = "top";
+		ctx.textAlign = "left";
 
-		// Brand line.
-		ctx.fillStyle = gold;
-		ctx.font = `800 ${brandSize}px ${FONT}`;
-		spacedText(ctx, `KICKS · ${card.league} WRAPPED`, left, y, brandSize * 0.14);
-		y += blocks.brand;
-
-		// Name + position chips (vertically centered on the name).
-		ctx.fillStyle = cream;
-		ctx.font = `700 ${nameSize}px ${FONT}`;
-		ctx.fillText(card.name, left, y);
-		const nameMid = y + blocks.name / 2;
-		let chipX = left + ctx.measureText(card.name).width + px(8);
-		ctx.font = `700 ${chipSize}px ${FONT}`;
-		ctx.textBaseline = "middle";
-		const chipH = Math.round(chipSize * 1.25 + px(6.4));
-		for (const position of card.positions) {
-			const width = ctx.measureText(position).width + px(10.4) * 2;
-			if (chipX + width > left + inner) break;
-			ctx.fillStyle = POSITION_COLORS[position] ?? "#7f8c8d";
-			ctx.beginPath();
-			ctx.roundRect(chipX, nameMid - chipH / 2, width, chipH, chipH / 2);
-			ctx.fill();
-			ctx.fillStyle = "#ffffff";
-			ctx.fillText(position, chipX + px(10.4), nameMid + 1);
-			chipX += width + px(8);
+		// Logo.
+		if (logo.naturalWidth) {
+			const logoW = (heights.logo * logo.naturalWidth) / logo.naturalHeight;
+			ctx.drawImage(logo, left, y, logoW, heights.logo);
 		}
+		y += heights.logo + gaps[0];
+
+		// "FA26-L2 · SEASON REVIEW"
+		ctx.fillStyle = gold;
+		ctx.font = `700 28px ${BODY}`;
+		spacedText(ctx, brand, left, y, lang === "ko" ? 1 : 3);
+		y += heights.brand + gaps[1];
+
+		// The one big number, gold and italic, with its unit.
+		ctx.font = `italic 800 230px ${DISPLAY}`;
+		ctx.fillStyle = gold;
+		ctx.fillText(String(card.lead.value), left - 6, y);
+		const bigW = ctx.measureText(String(card.lead.value)).width;
+		ctx.font = `600 48px ${DISPLAY}`;
+		ctx.textBaseline = "alphabetic";
+		ctx.fillText(unit, left + bigW + 34, y + 210);
 		ctx.textBaseline = "top";
-		y += blocks.name + px(6);
+		y += heights.big + gaps[2];
 
-		// Team · style.
-		ctx.fillStyle = "rgba(247, 246, 242, 0.85)";
-		ctx.font = `400 ${teamSize}px ${FONT}`;
-		ctx.fillText(`${card.champion ? "🏆 " : ""}${card.team} · ${card.tag}`, left, y + Math.round(teamSize * 0.2));
-		y += blocks.team - px(6);
+		// Name and team.
+		ctx.fillStyle = white;
+		ctx.font = `800 84px ${DISPLAY}`;
+		ctx.fillText(card.name, left, y);
+		y += heights.name + gaps[3];
+		ctx.fillStyle = soft;
+		ctx.font = `600 38px ${BODY}`;
+		ctx.fillText(teamLine, left, y);
+		y += heights.team + gaps[4];
 
-		// Stats between two rules.
-		ctx.strokeStyle = "rgba(247, 246, 242, 0.18)";
-		ctx.lineWidth = Math.max(2, Math.round(S));
+		// Three numbers between two rules.
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+		ctx.lineWidth = 3;
 		ctx.beginPath();
 		ctx.moveTo(left, y);
 		ctx.lineTo(left + inner, y);
-		ctx.moveTo(left, y + blocks.stats);
-		ctx.lineTo(left + inner, y + blocks.stats);
+		ctx.moveTo(left, y + heights.stats);
+		ctx.lineTo(left + inner, y + heights.stats);
 		ctx.stroke();
-		const stats = [
-			[card.goals, lang === "ko" ? "골" : "GOALS"],
-			[card.assists, lang === "ko" ? "어시" : "ASSISTS"],
-			[card.games, lang === "ko" ? "경기" : "GAMES"],
-		] as const;
+		const values = [card.goals, card.assists, card.games];
 		const colW = inner / 3;
-		stats.forEach(([value, label], i) => {
+		ctx.textAlign = "center";
+		values.forEach((value, i) => {
 			const cx = left + colW * i + colW / 2;
-			ctx.textAlign = "center";
-			ctx.fillStyle = "rgba(247, 246, 242, 0.95)";
-			ctx.font = `800 ${statSize}px ${FONT}`;
-			ctx.fillText(String(value), cx, y + px(12));
-			ctx.fillStyle = "rgba(247, 246, 242, 0.85)";
-			ctx.font = `700 ${statLabelSize}px ${FONT}`;
-			spacedText(ctx, label, cx, y + px(12) + Math.round(statSize * 1.1) + px(2), lang === "ko" ? statLabelSize * 0.02 : statLabelSize * 0.06, "center");
+			ctx.fillStyle = white;
+			ctx.font = `800 76px ${DISPLAY}`;
+			ctx.fillText(String(value), cx, y + 24);
+			ctx.fillStyle = soft;
+			ctx.font = `600 28px ${BODY}`;
+			ctx.fillText(labels[i], cx, y + 112);
 		});
 		ctx.textAlign = "left";
-		y += blocks.stats + px(16);
+		y += heights.stats + gaps[5];
 
-		// Highlights: emoji + title, emoji centered on the text block.
-		card.highlights.forEach((highlight, i) => {
-			const lines = highlightLines[i];
-			const blockH = lines.length * highlightLine;
-			ctx.textBaseline = "middle";
+		// A gold bar per week.
+		const barAreaH = heights.chart - (stacked ? 94 : 44);
+		const count = Math.max(1, card.bars.length);
+		const gap = 20;
+		const barW = (inner - gap * (count - 1)) / count;
+		const max = Math.max(1, ...card.bars);
+		const segColors = [gold, "rgba(217, 176, 74, 0.5)", "rgba(255, 255, 255, 0.2)"];
+		card.bars.forEach((value, i) => {
+			const h = Math.max(8, (value / max) * barAreaH);
+			const x = left + i * (barW + gap);
+			const wdl = card.wdl[i];
+			if (wdl && value > 0) {
+				// Wins at the bottom, then draws, then losses.
+				let top = y + barAreaH;
+				wdl.forEach((n, k) => {
+					const segH = (n / value) * h;
+					top -= segH;
+					ctx.fillStyle = segColors[k];
+					ctx.fillRect(x, top, barW, segH);
+				});
+			} else {
+				ctx.fillStyle = gold;
+				ctx.fillRect(x, y + barAreaH - h, barW, h);
+			}
+			ctx.fillStyle = soft;
+			ctx.font = `600 26px ${BODY}`;
 			ctx.textAlign = "center";
-			ctx.font = `${highlightSize}px ${FONT}`;
-			ctx.fillText(highlight.icon, left + (highlightSize * 1.3) / 2, y + blockH / 2);
+			ctx.fillText(`W${card.barWeeks[i]}`, x + barW / 2, y + barAreaH + 12);
 			ctx.textAlign = "left";
-			ctx.textBaseline = "top";
-			ctx.fillStyle = cream;
-			ctx.font = `600 ${highlightSize}px ${FONT}`;
-			lines.forEach((line, n) => ctx.fillText(line, left + iconCol, y + n * highlightLine + (highlightLine - highlightSize) / 2));
-			y += blockH + px(8);
 		});
-		y += px(12) - px(8);
-
-		// Badges.
-		if (card.badges.length > 0) {
-			ctx.fillStyle = gold;
-			ctx.font = `800 ${badgeLabelSize}px ${FONT}`;
-			spacedText(ctx, lang === "ko" ? `배지 ${card.badges.length}개` : `${card.badges.length} BADGES`, left, y, badgeLabelSize * 0.1);
-			y += Math.round(badgeLabelSize * 1.3) + px(8);
-			ctx.font = `${emojiSize}px ${FONT}`;
-			ctx.textBaseline = "middle";
-			card.badges.forEach((badge, i) => {
-				const row = Math.floor(i / perRow);
-				const col = i % perRow;
-				ctx.fillText(badge.icon, left + col * emojiStep, y + row * (emojiRow + px(4)) + emojiRow / 2);
+		if (stacked) {
+			// Legend: W · D · L squares, then whose results these are.
+			const ly = y + barAreaH + 58;
+			let lx = left;
+			ctx.font = `600 26px ${BODY}`;
+			["W", "D", "L"].forEach((letter, k) => {
+				ctx.fillStyle = segColors[k];
+				ctx.fillRect(lx, ly + 4, 20, 20);
+				ctx.fillStyle = soft;
+				ctx.fillText(letter, lx + 28, ly);
+				lx += 28 + ctx.measureText(letter).width + 26;
 			});
+			ctx.textAlign = "right";
+			ctx.fillText(lang === "ko" ? `${card.team} 주차별 성적` : `${card.team} by week`, left + inner, ly);
+			ctx.textAlign = "left";
 		}
+		y += heights.chart + gaps[6];
 
-		// Site address under the card, lined up with its right edge.
-		ctx.textBaseline = "top";
+		// Play style on the left, the site on the right.
+		ctx.fillStyle = soft;
+		ctx.font = `700 30px ${BODY}`;
+		ctx.fillText(card.tag, left, y);
 		ctx.textAlign = "right";
-		ctx.fillStyle = "rgba(247, 246, 242, 0.55)";
-		ctx.font = `700 30px ${FONT}`;
-		ctx.fillText("kicksuiuc.com", cardX + cardW - px(4), cardY + cardH + px(10));
+		ctx.fillText("kicksuiuc.com", left + inner, y);
 		ctx.textAlign = "left";
 
 		return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
@@ -1031,6 +1057,41 @@ const cardData = {
 	.wrapped-share-fill {
 		display: block;
 		background: #d9b04a;
+	}
+	.wrapped-share-stack {
+		display: flex;
+		flex-direction: column-reverse;
+	}
+	.wrapped-share-seg--w {
+		background: #d9b04a;
+	}
+	.wrapped-share-seg--d {
+		background: rgba(217, 176, 74, 0.5);
+	}
+	.wrapped-share-seg--l {
+		background: rgba(255, 255, 255, 0.2);
+	}
+	.wrapped-share-legend {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 10px;
+		margin: 6px 0 0;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.7rem;
+	}
+	.wrapped-share-legend span {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+	.wrapped-share-legend i {
+		display: inline-block;
+		width: 8px;
+		height: 8px;
+	}
+	.wrapped-share-legend :global(.wrapped-share-legend-note) {
+		margin-left: auto;
 	}
 	.wrapped-share-week {
 		position: absolute;
