@@ -5,7 +5,7 @@
 import og from "../data/og.json";
 
 type Kind = "players" | "leagues" | "teams" | "wrapped" | "albums" | "pages";
-const manifest = og as Partial<Record<Kind, Record<string, string>>>;
+const manifest = og as Partial<Record<Kind | "home", Record<string, string>>>;
 const DIRS: Record<Kind, string> = { players: "players", leagues: "league", teams: "team", wrapped: "wrapped", albums: "album", pages: "page" };
 
 function card(kind: Kind, id: string): string | undefined {
@@ -21,3 +21,5 @@ export const wrappedOgImage = (league: string, id: string) => card("wrapped", `$
 export const albumOgImage = (id: string) => card("albums", id);
 /** Keys: about, schedule, players, join, partners, hall-of-fame, gallery, full-matches, dream-team, app, keeper, freekick. */
 export const pageOgImage = (key: string) => card("pages", key);
+/** The homepage card (public/og-image.png), with its hash so a redraw gets a new URL. */
+export const homeOgImage = () => `/og-image.png${manifest.home?.home ? `?v=${manifest.home.home}` : ""}`;
