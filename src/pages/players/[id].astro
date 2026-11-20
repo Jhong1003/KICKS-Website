@@ -520,7 +520,7 @@ const careerRows = player.leagues.map((section) => {
 		text-align: left;
 		cursor: default;
 	}
-	.pp-badge-hint {
+	:global(.pp-badge-hint) {
 		display: none;
 	}
 	.pp-badge-icon {
@@ -533,7 +533,7 @@ const careerRows = player.leagues.map((section) => {
 		background: #eef0e9;
 		font-size: 1.05rem;
 	}
-	/* Tier colours: rare blue ring, legendary gold, icon olive with a gold double ring. */
+	/* Tier colours: rare blue ring, legendary gold, icon cream with a gold double ring. */
 	.pp-badge--rare .pp-badge-icon {
 		box-shadow: 0 0 0 2px #4a7fc1;
 	}
@@ -542,8 +542,8 @@ const careerRows = player.leagues.map((section) => {
 		box-shadow: 0 0 0 2px #c9a227;
 	}
 	.pp-badge--icon .pp-badge-icon {
-		background: var(--k-olive);
-		box-shadow: 0 0 0 2px #c9a227, 0 0 0 4px #f6e7b8;
+		background: #fffaf0;
+		box-shadow: 0 0 0 2px #c9a227, 0 0 0 4px #fff, 0 0 0 5.5px #c9a227;
 	}
 	.pp-badge--champion .pp-badge-icon {
 		background: radial-gradient(circle at 35% 30%, #fff6d6, #f1cf63 70%, #c9a227);
@@ -677,7 +677,7 @@ const careerRows = player.leagues.map((section) => {
 		.pp-info div:nth-child(n + 3) {
 			border-top: 1px solid var(--k-line);
 		}
-		.pp-badge-hint {
+		:global(.pp-badge-hint) {
 			display: block;
 			margin: -8px 0 14px;
 		}
