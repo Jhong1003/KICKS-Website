@@ -67,7 +67,7 @@ const faqs = [
 		</div>
 
 		<div class="join-cards">
-			<section class="join-card join-card--player k-card" aria-labelledby="join-player-title">
+			<section class:list={["join-card k-card", { "join-card--open": status !== "closed" }]} aria-labelledby="join-player-title">
 				<p class:list={["join-status", { "join-status--off": status === "closed" }]}>
 					<span class="join-dot" aria-hidden="true"></span>
 					<T en={playerStatus.en} ko={playerStatus.ko} />
@@ -102,7 +102,7 @@ const faqs = [
 				}
 			</section>
 
-			<section class="join-card k-card" aria-labelledby="join-manager-title">
+			<section class="join-card join-card--open k-card" aria-labelledby="join-manager-title">
 				<p class="join-status">
 					<span class="join-dot" aria-hidden="true"></span>
 					<T en="Always open" ko="상시 모집" />
@@ -114,7 +114,7 @@ const faqs = [
 					en="Help run the club: league days, stats, photos and events. No playing required."
 					ko="경기 운영, 기록, 사진, 이벤트 등 동아리 운영을 함께합니다. 직접 경기를 뛰지 않아도 지원할 수 있습니다."
 				/>
-				<a class="k-btn k-btn--line join-btn" href={managerFormUrl} target="_blank" rel="noopener noreferrer">
+				<a class="k-btn join-btn" href={managerFormUrl} target="_blank" rel="noopener noreferrer">
 					<T en="Apply as a manager" ko="매니저로 지원하기" />
 				</a>
 			</section>
@@ -153,7 +153,8 @@ const faqs = [
 		gap: 14px;
 		padding: 28px;
 	}
-	.join-card--player {
+	/* Olive line on the left of every card that's taking applications. */
+	.join-card--open {
 		border-left: 4px solid var(--k-olive);
 	}
 	.join-status {
