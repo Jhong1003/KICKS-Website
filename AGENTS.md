@@ -832,8 +832,8 @@ hand-edit). Pages pick a card through [src/lib/og.ts](src/lib/og.ts) → `ogImag
 `BaseLayout` (default `homeOgImage()`), with `?v=<hash>` in the URL so a redrawn card
 isn't hidden behind a chat app's cache. The look is KICKS 2.0 layout and type: white logo
 top left on the club olive (no strip or small print along the bottom); the schedule
-card is a month calendar (the month of the next event, days in their kind colours), Hall
-of Fame dark gold-trimmed cards with a drawn trophy, Photos three prints;
+card lists the next dates (a month calendar was tried and read worse), Hall of Fame
+dark gold-trimmed cards with a drawn trophy, Photos three prints;
 Inter Tight for titles and numbers and Pretendard for Korean — both embedded from
 `report/assets/` (`InterTight.woff2`, `Pretendard-subset.woff2`, the same 2,350
 syllables as the report's Noto subset), so CI needs no fonts. No small caps labels.

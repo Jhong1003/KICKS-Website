@@ -519,7 +519,7 @@ html[lang="ko"] .k-lang [data-lang-option="ko"] {
 		display: block;
 		padding: 10px 0;
 		color: var(--k-ink);
-		font-size: 1.05rem;
+		font-size: 0.95rem;
 		font-weight: 600;
 
 	}
@@ -527,7 +527,7 @@ html[lang="ko"] .k-lang [data-lang-option="ko"] {
 	.k-lang--menu {
 
 		margin-top: 28px;
-		font-size: 0.95rem;
+		font-size: 0.88rem;
 
 	}
 

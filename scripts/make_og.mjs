@@ -282,48 +282,22 @@ function pageCards() {
 		: "";
 	const covers = albums().slice(0, 3);
 	const collage = covers.length ? `<div class="side collage">${covers.map((a) => `<img src="${dataUrl(a.cover, imageMime(a.cover))}" alt="">`).join("")}</div>` : "";
-	// Schedule: a month calendar like the Schedule page — the month of the next event
-	// (the last one once the season is over), event days filled in their kind's
-	// colour with a short name; days already past fade. Chicago date at draw time;
-	// the workflow redraws several times a day, so it moves on by itself. English
-	// names only: the embedded Korean font is a subset.
+	// Schedule: the next dates on schedule.json (Chicago date at draw time; the workflow
+	// redraws several times a day, so it moves on by itself), with the latest past ones
+	// faded filling the rest. English titles: the embedded Korean font is a subset.
 	const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
 	const dated = schedule.filter((e) => e.date).sort((a, b) => a.date.localeCompare(b.date));
-	const nextEvent = dated.find((e) => e.date >= today);
-	const focus = nextEvent ?? dated.at(-1);
-	const KIND = { league: "#3f5128", friendly: "#2f62b5", event: "#7b3f6e", fundraiser: "#d66a1f", dinner: "#b8892b" };
-	const kindOf = (e) => (e.type === "league" ? "league" : e.type === "friendly" ? "friendly" : e.type === "ceremony" ? "dinner" : /fundrais/i.test(e.title) ? "fundraiser" : "event");
-	const calName = (e) => {
-		if (e.type === "league" && e.league && e.week) {
-			const part = e.league.split("-")[1] ?? "";
-			return `${/^L\d+$/i.test(part) ? `L${part.slice(1)}` : e.league} · Week ${e.week}`;
-		}
-		return e.chip ?? e.short ?? e.title;
-	};
-	let scheduleSide = "";
-	let nextLine = "";
-	if (focus) {
-		const [y, m] = focus.date.split("-").map(Number);
-		const first = new Date(Date.UTC(y, m - 1, 1));
-		const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
-		const lead = first.getUTCDay();
-		const monthName = first.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
-		const cells = [];
-		for (let i = 0; i < lead; i++) cells.push(`<span class="cday empty"></span>`);
-		for (let d = 1; d <= days; d++) {
-			const iso = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-			const ev = dated.find((e) => e.date === iso);
-			cells.push(ev
-				? `<span class="cday ev${iso < today ? " past" : ""}" style="--kind:${KIND[kindOf(ev)]}"><b>${d}</b><small>${esc(calName(ev))}</small></span>`
-				: `<span class="cday${iso < today ? " past" : ""}"><b>${d}</b></span>`);
-		}
-		while (cells.length % 7) cells.push(`<span class="cday empty"></span>`);
-		scheduleSide = `<div class="side cal"><div class="chead">${esc(monthName)}</div><div class="cweek">${["S", "M", "T", "W", "T", "F", "S"].map((w) => `<span>${w}</span>`).join("")}</div><div class="cgrid rows-${cells.length / 7}">${cells.join("")}</div></div>`;
-		if (nextEvent) {
-			const when = new Date(`${nextEvent.date}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
-			nextLine = `<div class="next"><small>Next up</small><b>${esc(when)} · ${esc(calName(nextEvent))}</b></div>`;
-		}
-	}
+	const upcoming = dated.filter((e) => e.date >= today);
+	const next = dated.findIndex((e) => e.date >= today);
+	const from = next === -1 ? Math.max(0, dated.length - 4) : Math.max(0, Math.min(next - 4 + Math.min(upcoming.length, 4), dated.length - 4));
+	const shown = dated.slice(from, from + 4);
+	const md = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).split(" ");
+	const scheduleSide = shown.length
+		? `<div class="side list agenda"><div class="lhd">${upcoming.length ? "Coming up" : "Season wrapped"}</div>${shown.map((e) => {
+				const [mon, day] = md(e.date);
+				return `<div class="arow${e.date < today ? " past" : ""}"><span class="adate"><em>${mon}</em><b>${day}</b></span><span class="atitle">${esc(e.short ?? e.title)}</span></div>`;
+			}).join("")}</div>`
+		: "";
 	// Players: the current league's roster, one column per team (team colour and name,
 	// captain first with a C, then name order — never by a stat, same as /players).
 	const current = [...leagues].reverse().find((l) => profiles.some((p) => p.leagues.some((x) => x.league === l.id)));
@@ -347,7 +321,7 @@ function pageCards() {
 	const play = `<span class="playbtn"><span></span></span>`;
 	return {
 		about: { title: "About KICKS", ko: "UIUC 한인 풋살 동아리", side: img(assetPhoto("src/assets/about.jpg")) },
-		schedule: { title: `${season} Schedule`, ko: "시즌 일정", side: scheduleSide, extra: nextLine },
+		schedule: { title: `${season} Schedule`, ko: "시즌 일정", side: scheduleSide },
 		players: { title: "Players", ko: current ? `${leagueName(current.id)} 선수단` : "KICKS 선수단", side: rosterSide },
 		join: { title: "Join KICKS", ko: "멤버 모집", side: img(assetPhoto("src/assets/hero.jpg")) },
 		partners: { title: "Partners", ko: "KICKS와 함께하는 곳", side: logoGrid },
@@ -465,25 +439,14 @@ h1 { margin-top: 6px; font-size: 92px; font-weight: 800; line-height: 1.08; lett
 .page .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .page .pic .playbtn { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; transform: translate(-50%, -50%); border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
 .page .pic .playbtn span { width: 0; height: 0; margin-left: 12px; border-left: 46px solid #2f3d1e; border-top: 28px solid transparent; border-bottom: 28px solid transparent; }
-.page .list { top: 60px; height: auto; }
+.page .list { top: 50%; height: auto; transform: translateY(-50%); }
 .page .lhd { padding-bottom: 12px; border-bottom: 2px solid #fff; font-size: 22px; font-weight: 600; color: #c9d3bf; }
-.page .next { margin-top: 44px; }
-.page .next small { display: block; font-size: 22px; font-weight: 600; color: #e8c766; }
-.page .next b { display: block; margin-top: 6px; font-size: 32px; font-weight: 700; }
-.page .cal { background: #fff; color: #111; padding: 22px 24px 24px; display: flex; flex-direction: column; }
-.page .chead { font-size: 30px; font-weight: 800; letter-spacing: -.01em; }
-.page .cweek { display: grid; grid-template-columns: repeat(7, 1fr); margin-top: 12px; padding-bottom: 8px; border-bottom: 2px solid #111; font-size: 17px; font-weight: 700; color: #6b6b6b; }
-.page .cweek span { padding-left: 6px; }
-.page .cgrid { flex: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.page .cgrid.rows-5 { grid-template-rows: repeat(5, 1fr); }
-.page .cgrid.rows-6 { grid-template-rows: repeat(6, 1fr); }
-.page .cday { padding: 5px 6px; border-bottom: 1px solid #e5e5e5; overflow: hidden; }
-.page .cday b { display: block; font-size: 18px; font-weight: 600; color: #444; }
-.page .cday.past b { color: #b5b5b5; }
-.page .cday.ev { background: color-mix(in srgb, var(--kind) 14%, #fff); border-left: 4px solid var(--kind); }
-.page .cday.ev b { color: #111; font-weight: 800; }
-.page .cday.ev small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 2px; font-size: 13px; font-weight: 700; line-height: 1.15; color: color-mix(in srgb, var(--kind) 80%, #000); }
-.page .cday.ev.past { opacity: .5; }
+.page .arow { display: flex; align-items: center; gap: 24px; height: 100px; border-bottom: 1px solid rgba(255,255,255,.22); }
+.page .arow.past { opacity: .45; }
+.page .adate { flex: none; width: 74px; height: 74px; border: 1px solid rgba(255,255,255,.4); display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+.page .adate em { font-style: normal; font-size: 18px; font-weight: 700; color: #e8c766; }
+.page .adate b { margin-top: 4px; font-size: 34px; font-weight: 800; }
+.page .atitle { font-size: 28px; font-weight: 700; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .page .honours { top: 50%; height: auto; transform: translateY(-50%); display: flex; flex-direction: column; gap: 18px; }
 .page .hcard { display: flex; align-items: center; gap: 28px; padding: 36px 34px; background: #26321a; border: 2px solid #c9a227; box-shadow: inset 0 0 0 6px #26321a, inset 0 0 0 7px rgba(232,199,102,.35); }
 .page .honours.n1 .hcard { padding: 44px 36px; }
