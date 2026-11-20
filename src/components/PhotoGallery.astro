@@ -27,7 +27,7 @@ const fullSize = await Promise.all(images.map((image) => getImage({ src: image.s
 		<div class="gallery-grid">
 			{images.map((image, index) => (
 				<button class="gallery-item" type="button" data-index={index} data-full={fullSize[index].src} aria-label={`View photo: ${image.alt}`} data-i18n-attrs={JSON.stringify({ "aria-label": { en: `View photo: ${image.alt}`, ko: `사진 ${index + 1} 확대 보기` } })}>
-					<Image src={image.src} alt={image.alt} width={480} loading="lazy" />
+					<Image src={image.src} alt={image.alt} width={index === 0 ? 1000 : 480} loading={index === 0 ? "eager" : "lazy"} />
 				</button>
 			))}
 		</div>
@@ -43,6 +43,31 @@ const fullSize = await Promise.all(images.map((image) => getImage({ src: image.s
 </dialog>
 
 <style>
+	/* KICKS 2.0: four columns, tight gaps, square corners, the cover (first
+	   photo) twice the size. */
+	.gallery-grid {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 6px;
+		margin-top: 0;
+	}
+	.gallery-grid .gallery-item {
+		border-radius: 0;
+		aspect-ratio: 1;
+		background: #f0f0f0;
+	}
+	.gallery-grid .gallery-item:first-child {
+		grid-column: span 2;
+		grid-row: span 2;
+	}
+	.gallery-grid .gallery-item :global(img) {
+		aspect-ratio: auto;
+	}
+	@media (max-width: 600px) {
+		.gallery-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 3px;
+		}
+	}
 	dialog.lightbox { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; border: 0; color: white; }
 	dialog.lightbox:not([open]) { display: none; }
 	dialog.lightbox::backdrop { background: transparent; }

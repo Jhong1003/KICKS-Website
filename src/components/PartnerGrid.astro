@@ -1,13 +1,8 @@
 ---
 import T from "./T.astro";
 
-// partners.json's link_label is hand-typed English; the common ones get a
-// Korean version here, anything else is shown as written in both languages.
-const LINK_LABELS_KO: Record<string, string> = {
-	"Visit website": "웹사이트 방문",
-	"View on Google Maps": "구글 지도에서 보기",
-};
-
+// KICKS 2.0 partner row: the logo is the main thing, then the name, a short
+// address and one link (Website, or Map when the link is a map).
 interface Partner {
 	partner_id: string;
 	name: string;
@@ -23,37 +18,92 @@ interface Props {
 }
 
 const { partners } = Astro.props;
+
+// "707 S 6th St #105, Champaign, IL 61820" → "707 S 6th St #105, Champaign".
+const shortAddress = (address: string) => address.replace(/,\s*[A-Z]{2}\s*\d{5}(-\d{4})?\s*$/, "").replace(/,\s*[A-Z]{2}\s*$/, "");
+const isMap = (partner: Partner) => /map/i.test(partner.link_label ?? "") || /google\.[a-z.]+\/maps/.test(partner.url ?? "");
 ---
 
-<div class="partner-grid">
+<div class="partner-row">
 	{
 		partners.map((partner) => (
-			<article class="partner-card">
-				<div class="partner-logo-area" style={`--logo-scale: ${partner.logo_scale ?? 0.8}`}>
-					{
-						partner.logo ? (
-							<img src={partner.logo} alt={`${partner.name} logo`} loading="lazy" />
-						) : (
-							<span class="partner-logo-placeholder">{partner.name}</span>
-						)
-					}
+			<article class="partner">
+				<div class="partner-logo" style={`--logo-scale: ${partner.logo_scale ?? 0.8}`}>
+					{partner.logo ? (
+						<img src={partner.logo} alt={`${partner.name} logo`} loading="lazy" />
+					) : (
+						<span class="partner-logo-name">{partner.name}</span>
+					)}
 				</div>
-				<div class="partner-info">
-					<h3 class="partner-name">{partner.name}</h3>
-					{partner.address && <p class="partner-address">{partner.address}</p>}
-					{
-						partner.url && (
-							<a class="partner-link" href={partner.url} target="_blank" rel="noopener noreferrer">
-								<T
-									en={partner.link_label ?? "Visit website"}
-									ko={LINK_LABELS_KO[partner.link_label ?? "Visit website"] ?? partner.link_label ?? ""}
-								/>{" "}
-								→
-							</a>
-						)
-					}
-				</div>
+				<h3 class="partner-name">{partner.name}</h3>
+				{partner.address && <p class="partner-address">{shortAddress(partner.address)}</p>}
+				{partner.url && (
+					<a class="k-link partner-link" href={partner.url} target="_blank" rel="noopener noreferrer">
+						{isMap(partner) ? <T en="Map" ko="지도" /> : <T en="Website" ko="웹사이트" />} →
+					</a>
+				)}
 			</article>
 		))
 	}
 </div>
+
+<style>
+	.partner-row {
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 20px;
+	}
+	.partner {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.partner-logo {
+		display: grid;
+		place-items: center;
+		aspect-ratio: 1;
+		margin-bottom: 12px;
+		border: 1px solid var(--k-line);
+		background: #fff;
+	}
+	/* logo_scale (partners.json) evens out logos with different padding. Bumped a
+	   little for the bigger KICKS 2.0 tiles. */
+	.partner-logo img {
+		width: calc(min(88%, var(--logo-scale) * 150%));
+		max-height: 78%;
+		object-fit: contain;
+	}
+	.partner-logo-name {
+		padding: 12px;
+		font-weight: 700;
+		text-align: center;
+	}
+	.partner-name {
+		margin: 0;
+		font-family: var(--k-font-display);
+		font-size: 0.98rem;
+		font-weight: 700;
+		line-height: 1.3;
+	}
+	.partner-address {
+		margin: 0;
+		color: var(--k-muted);
+		font-size: 0.85rem;
+		line-height: 1.45;
+	}
+	.partner-link {
+		margin-top: 4px;
+		font-size: 0.85rem;
+	}
+	@media (max-width: 980px) {
+		.partner-row {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 560px) {
+		.partner-row {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 24px 14px;
+		}
+	}
+</style>

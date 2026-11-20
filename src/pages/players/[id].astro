@@ -1,13 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PlayerCard from "../../components/PlayerCard.astro";
 import BadgeGuide from "../../components/BadgeGuide.astro";
 import T from "../../components/T.astro";
-import WeeklyStatsChart from "../../components/WeeklyStatsChart.astro";
 import profilesData from "../../data/player_profiles.json";
 import { getPlayerPhotos } from "../../lib/player-photos";
 import { playerOgImage } from "../../lib/og";
-import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, sortBadges, type PlayerProfile } from "../../lib/players";
+import { BADGES, BADGE_TIER_LABELS, BADGE_TIER_LABELS_KO, FEATURED_BADGE, getContrastingTextColor, sortBadges, type PlayerProfile } from "../../lib/players";
+import { leagueParts } from "../../lib/leagues";
+import { captainName } from "../../lib/hall-of-fame";
 import { getLeague, getTeamColor, getTeamName } from "../../lib/leagues";
 import { getLeagueFinale, isLeagueFinished, isShownInLeague } from "../../lib/finale";
 import CareerTimeline from "../../components/CareerTimeline.astro";
@@ -44,6 +44,12 @@ for (const goal of goalEventsData as { league: string; week: number; match_id: s
 	entry.goals += 1;
 	matchGoalCounts.set(goal.match_id, entry);
 }
+const championLeagueIds = shownFinished
+	.filter((league) => {
+		const section = player.leagues.find((s) => s.league === league.id);
+		return leagueTableData.some((row) => row.league === league.id && row.rank === 1 && row.team_id === section?.current_team_id);
+	})
+	.map((league) => league.id);
 const career = buildCareer(player.leagues, {
 	leagueOrder: leagues.map((league) => league.id),
 	championLeagues: shownFinished
@@ -66,7 +72,44 @@ const careerDates = Object.fromEntries(
 		.map((e) => [`${e.league}|${e.week}`, e.date as string]),
 );
 
-const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+// ---- KICKS 2.0 page data ----
+const newest = player.leagues[0];
+const newestLeague = newest ? getLeague(newest.league) : undefined;
+const headColor = newest ? getTeamColor(newest.current_team_id, newestLeague) : "#3f5128";
+const headTeam = newest ? getTeamName(newest.current_team_id, newestLeague) : "";
+const isCaptain = (leagueId: string, teamId: string | null) => Boolean(teamId && captainName(leagueId, teamId) === player.name);
+const photos = getPlayerPhotos(player.id);
+const wrappedLeague = newest && isLeagueFinished(newest.league) && isShownInLeague(player, newest.league) ? newest.league : null;
+const shortLeague = (id: string) => `${leagueParts(id).season} L${leagueParts(id).number ?? ""}`;
+const fullLeague = (id: string) => `${leagueParts(id).season} ${leagueParts(id).name}`;
+const debut = player.leagues.at(-1)?.league;
+const championLeagues = new Set(championLeagueIds);
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const shortDate = (iso?: string) => {
+	if (!iso) return { en: "", ko: "" };
+	const [, m, d] = iso.split("-").map(Number);
+	return { en: `${MONTHS[m - 1]} ${d}`, ko: `${m}월 ${d}일` };
+};
+const awardsIn = (leagueId: string) => {
+	const finale = finales.get(leagueId);
+	const list: { en: string; ko: string }[] = [];
+	if (championLeagues.has(leagueId)) list.push({ en: "Champion", ko: "우승" });
+	if (finale?.goldenBoot?.winners.some((w) => w.id === player.id)) list.push({ en: "Golden Boot", ko: "득점왕" });
+	if (finale?.topAssists?.winners.some((w) => w.id === player.id)) list.push({ en: "Playmaker", ko: "도움왕" });
+	return list;
+};
+const careerRows = player.leagues.map((section) => {
+	const league = getLeague(section.league);
+	return {
+		league: section.league,
+		team: getTeamName(section.current_team_id, league),
+		color: getTeamColor(section.current_team_id, league),
+		weeks: section.season_totals.weeks_attended,
+		goals: section.season_totals.goals,
+		assists: section.season_totals.assists,
+		awards: awardsIn(section.league),
+	};
+});
 ---
 
 <BaseLayout
@@ -74,182 +117,608 @@ const plural = (count: number, word: string) => `${count} ${word}${count === 1 ?
 	description={`${player.name}'s KICKS player profile — league stats, play style, and badges.`}
 	ogImage={playerOgImage(player.id)}
 >
-	<main>
-		<section class="content-section player-detail-head" aria-labelledby="player-detail-title">
-			<a class="back-link" href="/players/">
-				<T en="← All players" ko="← 전체 선수" />
-			</a>
-			<h1 id="player-detail-title">{player.name}</h1>
-			{player.positions.length > 0 && (
-				<p class="player-positions">
-					{player.positions.map((position) => (
-						<span class={`position-chip position-${position}`}>{position}</span>
-					))}
-				</p>
+	<main class="k-page pp">
+		<a class="k-link pp-back" href="/players/">← <T en="Players" ko="선수" /></a>
+
+		<header class="pp-head" style={`background: color-mix(in srgb, ${headColor} 82%, #000)`}>
+			<span class="pp-avatar" style={`background: ${headColor}; color: ${getContrastingTextColor(headColor)}`}>
+				{photos.card ? <img src={photos.card} alt="" /> : player.avatar_initials}
+			</span>
+			<div class="pp-head-text">
+				<h1 class="pp-name">{player.name}</h1>
+				{newest && (
+					<p class="pp-team">
+						{newest.current_team_id ? (
+							<a href={`/league/${newest.league}/team/${newest.current_team_id}/`}>{headTeam} ›</a>
+						) : (
+							headTeam
+						)}
+						{isCaptain(newest.league, newest.current_team_id) && <span class="pp-c">C</span>}
+						<span class="pp-team-league">{fullLeague(newest.league)}</span>
+					</p>
+				)}
+			</div>
+			{wrappedLeague && (
+				<a class="pp-wrapped" href={`/wrapped/${wrappedLeague}/${player.id}/`}>
+					<T en={`${leagueParts(wrappedLeague).name} Wrapped`} ko={`${leagueParts(wrappedLeague).name} Wrapped`} /> →
+				</a>
 			)}
-			{
-				/* One league at a time, newest first; ?league=<id> (used by links
-				   from that league's roster, stats and honours) opens that one. */
-				player.leagues.length > 1 && (
-					<div class="league-switcher" role="group" aria-label="Choose a league">
-						{player.leagues.map((section, index) => (
-							<button
-								class="league-switcher-link"
-								type="button"
-								data-league-button={section.league}
-								aria-pressed={index === 0 ? "true" : "false"}
-							>
-								{section.league}
-							</button>
-						))}
-					</div>
-				)
-			}
-		</section>
-		{
-			player.leagues.map((section, index) => {
-				const league = getLeague(section.league);
-				const teamName = getTeamName(section.current_team_id, league);
-				const teamColor = getTeamColor(section.current_team_id, league);
+		</header>
 
-				return (
-					<div data-league-panel={section.league} hidden={index !== 0}>
-						<section class="content-section" aria-labelledby={`player-league-${section.league}`}>
-							<div class="player-name-row">
-								<p class="section-label" id={`player-league-${section.league}`}>
-									{section.league} ·{" "}
-									{section.current_team_id ? (
-										<a class="player-team-link" href={`/league/${section.league}/team/${section.current_team_id}/`}>{teamName}</a>
-									) : (
-										teamName
-									)}
-								</p>
-								{isLeagueFinished(section.league) && isShownInLeague(player, section.league) && (
-									<a class="wrapped-entry" href={`/wrapped/${section.league}/${player.id}/`}>
-										<span aria-hidden="true">🎁</span>
-										<T en={`My ${section.league} Wrapped`} ko={`나의 ${section.league} Wrapped 보기`} />
-										<span aria-hidden="true">→</span>
-									</a>
-								)}
-							</div>
+		<div class="pp-switch" role="group" aria-label="League or career">
+			{player.leagues.map((section, index) => (
+				<button type="button" data-league-button={section.league} aria-pressed={index === 0 ? "true" : "false"}>
+					{shortLeague(section.league)}
+				</button>
+			))}
+			<button type="button" data-league-button="career" aria-pressed="false">
+				<T en="Career" ko="통산" />
+			</button>
+		</div>
 
-							<div class="about-intro player-detail">
-								<div class="split-photo player-detail-card-col">
-									<PlayerCard
-										player={player}
-										section={section}
-										teamName={teamName}
-										teamColor={teamColor}
-										size="large"
-										avatarPhoto={getPlayerPhotos(player.id).card}
-										portraitPhoto={getPlayerPhotos(player.id).portrait}
-									/>
-								</div>
-								<div class="about-intro-text">
+		{player.leagues.map((section, index) => {
+			const league = getLeague(section.league);
+			const teamName = getTeamName(section.current_team_id, league);
+			const totals = section.season_totals;
+			const best = section.personal_best_week?.week;
+			return (
+				<div data-league-panel={section.league} hidden={index !== 0}>
+					<div class="pp-top">
+						<dl class="pp-info k-card">
+							<div>
+								<dt><T en="Team" ko="팀" /></dt>
+								<dd>
+									{section.current_team_id ? <a href={`/league/${section.league}/team/${section.current_team_id}/`}>{teamName}</a> : teamName}
 									{section.team_history.length > 0 && (
-										<div class="player-detail-meta">
-											<p class="section-label"><T en="TEAM HISTORY" ko="이전 소속 팀" /></p>
-											<T
-												as="p"
-												class="about-description"
-												en={`Previously played for ${section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")} earlier in this league.`}
-												ko={`이번 리그 초반에는 ${section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")} 소속이었어요.`}
-											/>
-										</div>
+										<span class="k-meta">
+											{" "}
+											(<T en="before: " ko="이전: " />
+											{section.team_history.map((segment) => getTeamName(segment.team_id, league)).join(", ")})
+										</span>
 									)}
-
-									{section.personal_best_week && (
-										<div class="player-detail-meta">
-											<p class="section-label"><T en="PERSONAL BEST WEEK" ko="최고의 활약을 펼친 주" /></p>
-											<T
-												as="p"
-												class="about-description"
-												en={`Week ${section.personal_best_week.week}: ${plural(section.personal_best_week.goals, "goal")} and ${plural(section.personal_best_week.assists, "assist")} (${plural(section.personal_best_week.attacking_points, "attacking point")}).`}
-												ko={`${section.personal_best_week.week}주차: ${section.personal_best_week.goals}골 ${section.personal_best_week.assists}어시스트 (공격포인트 ${section.personal_best_week.attacking_points}개)`}
-											/>
-										</div>
-									)}
-
-									<div class="player-detail-meta">
-										<div class="player-badge-head">
-											<p class="section-label"><T en="BADGES" ko="배지" /></p>
-											<button
-												class="player-badge-guide-link"
-												type="button"
-												aria-haspopup="dialog"
-												data-badge-guide-open={`badge-guide-${section.league}`}
-											>
-												<T en="All Badges" ko="배지 목록" /> →
-											</button>
-										</div>
-										<BadgeGuide
-											id={`badge-guide-${section.league}`}
-											league={section.league}
-											playerBadges={section.badges}
-										/>
-										<div class="player-badge-list">
-											{sortBadges(section.badges).map((key) => (
-												<div class:list={["player-badge-item", `player-badge-item--${BADGES[key].tier}`, { "player-badge-item--champion": key === FEATURED_BADGE }]}>
-													<span class="player-badge-icon" aria-hidden="true">
-														{BADGES[key].icon}
-													</span>
-													<div>
-														<p class="player-badge-label">
-															<T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} />
-															<span class="player-badge-tier">
-																<T
-																	en={BADGE_TIER_LABELS[BADGES[key].tier]}
-																	ko={BADGE_TIER_LABELS_KO[BADGES[key].tier]}
-																/>
-															</span>
-														</p>
-														<T
-															as="p"
-															class="player-badge-description"
-															en={BADGES[key].description}
-															ko={BADGES[key].descriptionKo}
-														/>
-													</div>
-												</div>
-											))}
-										</div>
-									</div>
-								</div>
+								</dd>
 							</div>
-						</section>
+							<div>
+								<dt><T en="Play style" ko="플레이 스타일" /></dt>
+								<dd>{section.play_style_tag}</dd>
+							</div>
+							<div>
+								<dt><T en="Weeks played" ko="출전 주차" /></dt>
+								<dd>{totals.weeks_attended} / {totals.weeks_played}</dd>
+							</div>
+							<div>
+								<dt><T en="KICKS debut" ko="KICKS 데뷔" /></dt>
+								<dd>{debut ? fullLeague(debut) : "–"}</dd>
+							</div>
+							<div>
+								<dt><T en="Leagues" ko="참가 리그" /></dt>
+								<dd>{player.leagues.length}</dd>
+							</div>
+							<div>
+								<dt><T en="Titles" ko="우승" /></dt>
+								<dd>{championLeagues.size}</dd>
+							</div>
+						</dl>
 
-						<section class="content-section" aria-labelledby={`player-chart-title-${section.league}`}>
-							<h2 id={`player-chart-title-${section.league}`}><T en="Week by Week" ko="주차별 기록" /></h2>
-							<WeeklyStatsChart weeklyStats={section.weekly_stats} />
-						</section>
 					</div>
-				);
-			})
-		}
+
+					<dl class="pp-numbers">
+						<div><dt><T en="Goals" ko="골" /></dt><dd>{totals.goals}</dd></div>
+						<div><dt><T en="Assists" ko="어시스트" /></dt><dd>{totals.assists}</dd></div>
+						<div><dt>G+A</dt><dd>{totals.goals + totals.assists}</dd></div>
+						<div><dt><T en="Weeks played" ko="출전 주" /></dt><dd>{totals.weeks_attended}</dd></div>
+					</dl>
+
+					<section class="k-section pp-badges" aria-label="Badges">
+						<div class="pp-badges-head">
+							<h2 class="k-h2"><T en="Badges" ko="배지" /></h2>
+							<button class="k-link pp-link-button" type="button" aria-haspopup="dialog" data-badge-guide-open={`badge-guide-${section.league}`}>
+								<T en="All badges" ko="배지 목록" /> →
+							</button>
+						</div>
+						<BadgeGuide id={`badge-guide-${section.league}`} league={section.league} playerBadges={section.badges} />
+						<T as="p" class="pp-badge-hint k-meta" en="Tap a badge to see what it's for." ko="배지를 누르면 설명이 보여요." />
+						<ul class="pp-badge-list">
+							{sortBadges(section.badges).map((key) => (
+								<li class:list={["pp-badge", `pp-badge--${BADGES[key].tier}`, { "pp-badge--champion": key === FEATURED_BADGE }]}>
+									<button type="button" class="pp-badge-btn" aria-expanded="false" data-badge-toggle>
+										<span class="pp-badge-icon" aria-hidden="true">{BADGES[key].icon}</span>
+										<span class="pp-badge-text">
+											<span class="pp-badge-name"><T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} /></span>
+											<span class="pp-badge-tier"><T en={BADGE_TIER_LABELS[BADGES[key].tier]} ko={BADGE_TIER_LABELS_KO[BADGES[key].tier]} /></span>
+											<span class="pp-badge-desc"><T en={BADGES[key].description} ko={BADGES[key].descriptionKo} /></span>
+										</span>
+									</button>
+								</li>
+							))}
+						</ul>
+					</section>
+
+					<section class="k-section pp-table" aria-label="Week by week">
+						<h2 class="k-h2"><T en="Week by week" ko="주차별 기록" /></h2>
+						<div class="k-table-wrap">
+							<table class="k-table">
+								<thead>
+									<tr>
+										<th class="k-left"><T en="Week" ko="주차" /></th>
+										<th class="k-left"><T en="Date" ko="날짜" /></th>
+										<th class="k-left"><T en="Team" ko="팀" /></th>
+										<th><T en="G" ko="골" /></th>
+										<th><T en="A" ko="도움" /></th>
+										<th>G+A</th>
+									</tr>
+								</thead>
+								<tbody>
+									{section.weekly_stats.map((week) => {
+										const date = shortDate(careerDates[`${section.league}|${week.week}`]);
+										return (
+											<tr class:list={{ "pp-absent": week.games === 0 }}>
+												<td class="k-left">
+													<a href={`/league/${section.league}/?week=${week.week}#results`}><T en={`Week ${week.week}`} ko={`${week.week}주차`} /></a>
+													{best === week.week && <span class="pp-best">BEST WEEK</span>}
+												</td>
+												<td class="k-left"><T en={date.en} ko={date.ko} /></td>
+												<td class="k-left">{getTeamName(week.team_id, league)}</td>
+												<td>{week.games === 0 ? "–" : week.goals}</td>
+												<td>{week.games === 0 ? "–" : week.assists}</td>
+												<td class="k-strong">{week.games === 0 ? "–" : week.goals + week.assists}</td>
+											</tr>
+										);
+									})}
+								</tbody>
+							</table>
+						</div>
+					</section>
+				</div>
+			);
+		})}
+
+		<div data-league-panel="career" hidden>
+			<dl class="pp-numbers">
+				<div><dt><T en="Goals" ko="골" /></dt><dd>{career.totals.goals}</dd></div>
+				<div><dt><T en="Assists" ko="어시스트" /></dt><dd>{career.totals.assists}</dd></div>
+				<div><dt>G+A</dt><dd>{career.totals.goals + career.totals.assists}</dd></div>
+				<div><dt><T en="Weeks played" ko="출전 주" /></dt><dd>{career.totals.weeksPlayed}</dd></div>
+			</dl>
+			<section class="k-section pp-table" aria-label="League by league">
+				<h2 class="k-h2"><T en="League by league" ko="리그별 기록" /></h2>
+				<div class="k-table-wrap">
+					<table class="k-table">
+						<thead>
+							<tr>
+								<th class="k-left"><T en="League" ko="리그" /></th>
+								<th class="k-left"><T en="Team" ko="팀" /></th>
+								<th><T en="Weeks" ko="출전" /></th>
+								<th><T en="G" ko="골" /></th>
+								<th><T en="A" ko="도움" /></th>
+								<th>G+A</th>
+								<th class="k-left"><T en="Awards" ko="수상" /></th>
+							</tr>
+						</thead>
+						<tbody>
+							{careerRows.map((row) => (
+								<tr>
+									<td class="k-left"><a href={`/league/${row.league}/`}>{fullLeague(row.league)}</a></td>
+									<td class="k-left">
+										<span class="pp-team-cell" style={`--team-color: ${row.color}`}><span class="k-team-dot" aria-hidden="true" />{row.team}</span>
+									</td>
+									<td>{row.weeks}</td>
+									<td>{row.goals}</td>
+									<td>{row.assists}</td>
+									<td class="k-strong">{row.goals + row.assists}</td>
+									<td class="k-left">
+										{row.awards.length ? row.awards.map((award, i) => <>{i > 0 && " · "}<T en={award.en} ko={award.ko} /></>) : "–"}
+									</td>
+								</tr>
+							))}
+							<tr class="pp-total">
+								<td class="k-left"><T en="Total" ko="합계" /></td>
+								<td class="k-left"></td>
+								<td>{career.totals.weeksPlayed}</td>
+								<td>{career.totals.goals}</td>
+								<td>{career.totals.assists}</td>
+								<td class="k-strong">{career.totals.goals + career.totals.assists}</td>
+								<td class="k-left">{career.totals.titles > 0 && <T en={`${career.totals.titles}× Champion`} ko={`우승 ${career.totals.titles}회`} />}</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		</div>
+
 		<CareerTimeline career={career} playerId={player.id} teams={careerTeams} dates={careerDates} />
 	</main>
 </BaseLayout>
 
 <script>
+	// Phone: badge descriptions are folded; a tap opens or closes one.
+	for (const button of document.querySelectorAll<HTMLButtonElement>("[data-badge-toggle]")) {
+		button.addEventListener("click", () => {
+			button.setAttribute("aria-expanded", String(button.getAttribute("aria-expanded") !== "true"));
+		});
+	}
+
 	const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-league-button]"));
 	const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-league-panel]"));
 
 	function showLeague(id: string, updateUrl: boolean) {
 		if (!panels.some((panel) => panel.dataset.leaguePanel === id)) return;
 		buttons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.leagueButton === id)));
-		panels.forEach((panel) => {
-			panel.hidden = panel.dataset.leaguePanel !== id;
-		});
+		panels.forEach((panel) => (panel.hidden = panel.dataset.leaguePanel !== id));
 		if (updateUrl) {
 			const url = new URL(window.location.href);
 			url.searchParams.set("league", id);
 			history.replaceState(null, "", url);
 		}
 	}
-
-	buttons.forEach((button) => {
-		button.addEventListener("click", () => showLeague(button.dataset.leagueButton ?? "", true));
-	});
+	buttons.forEach((button) => button.addEventListener("click", () => showLeague(button.dataset.leagueButton ?? "", true)));
 	const requested = new URLSearchParams(window.location.search).get("league");
 	if (requested) showLeague(requested, false);
 </script>
+
+<style>
+	.pp-back {
+		display: inline-block;
+		margin-bottom: 14px;
+	}
+	.pp-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 16px 24px;
+		padding: 28px;
+		color: #fff;
+	}
+	.pp-avatar {
+		display: grid;
+		place-items: center;
+		width: 96px;
+		height: 96px;
+		overflow: hidden;
+		border: 3px solid rgba(255, 255, 255, 0.85);
+		border-radius: 50%;
+		font-size: 1.6rem;
+		font-weight: 800;
+	}
+	.pp-avatar img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.pp-head-text {
+		flex: 1;
+		min-width: 200px;
+	}
+	.pp-name {
+		margin: 0;
+		font-family: var(--k-font-display);
+		font-size: 2.8rem;
+		font-weight: 800;
+		letter-spacing: -0.02em;
+		line-height: 1.05;
+	}
+	.pp-team {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		margin: 8px 0 0;
+		font-weight: 600;
+	}
+	.pp-team a:hover {
+		text-decoration: underline;
+	}
+	.pp-team-league {
+		font-weight: 500;
+		opacity: 0.8;
+	}
+	.pp-c {
+		display: inline-grid;
+		place-items: center;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: #111;
+		color: #fff;
+		font-size: 0.66rem;
+		font-weight: 800;
+	}
+	.pp-wrapped {
+		padding: 10px 16px;
+		background: #d9b04a;
+		color: #111;
+		font-weight: 700;
+		font-size: 0.9rem;
+	}
+	.pp-wrapped:hover {
+		background: #e6bf5c;
+	}
+
+	.pp-switch {
+		display: inline-flex;
+		margin: 20px 0;
+		border: 1px solid var(--k-line);
+	}
+	.pp-switch button {
+		min-height: 36px;
+		padding: 0 16px;
+		border: 0;
+		background: #fff;
+		font: inherit;
+		font-size: 0.88rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.pp-switch button + button {
+		border-left: 1px solid var(--k-line);
+	}
+	.pp-switch button[aria-pressed="true"] {
+		background: var(--k-olive);
+		color: #fff;
+	}
+
+	.pp-info {
+		display: grid;
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+		margin: 0;
+	}
+	.pp-info div {
+		padding: 14px 18px;
+	}
+	.pp-info div + div {
+		border-left: 1px solid var(--k-line);
+	}
+	.pp-info dt {
+		color: var(--k-muted);
+		font-size: 0.78rem;
+		font-weight: 600;
+	}
+	.pp-info dd {
+		margin: 4px 0 0;
+		font-weight: 700;
+	}
+	.pp-info dd a:hover {
+		text-decoration: underline;
+	}
+	.pp-badges-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		margin-bottom: 18px;
+	}
+	.pp-badges-head .k-h2 {
+		margin: 0;
+	}
+	.pp-link-button {
+		padding: 0;
+		border: 0;
+		background: none;
+		font: inherit;
+		font-size: 0.88rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	/* Badges line up in three columns, each with what it was earned for. */
+	.pp-badge-list {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 22px 28px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.pp-badge-btn {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		width: 100%;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: default;
+	}
+	:global(.pp-badge-hint) {
+		display: none;
+	}
+	.pp-badge-icon {
+		display: grid;
+		place-items: center;
+		width: 38px;
+		height: 38px;
+		flex: none;
+		border-radius: 50%;
+		background: #eef0e9;
+		font-size: 1.05rem;
+	}
+	/* Tier colours: rare blue ring, legendary gold, icon cream with a gold double ring. */
+	.pp-badge--rare .pp-badge-icon {
+		box-shadow: 0 0 0 2px #4a7fc1;
+	}
+	.pp-badge--legendary .pp-badge-icon {
+		background: #f6e7b8;
+		box-shadow: 0 0 0 2px #c9a227;
+	}
+	.pp-badge--icon .pp-badge-icon {
+		background: #fffaf0;
+		box-shadow: 0 0 0 2px #c9a227, 0 0 0 4px #fff, 0 0 0 5.5px #c9a227;
+	}
+	.pp-badge--champion .pp-badge-icon {
+		background: radial-gradient(circle at 35% 30%, #fff6d6, #f1cf63 70%, #c9a227);
+		box-shadow: 0 0 0 2px #c9a227, 0 0 12px 2px rgba(233, 190, 60, 0.55);
+	}
+	.pp-badge-text {
+		display: block;
+		min-width: 0;
+		padding-top: 2px;
+		line-height: 1.3;
+	}
+	.pp-badge-name {
+		margin-right: 6px;
+		font-size: 0.92rem;
+		font-weight: 700;
+	}
+	.pp-badge-desc {
+		display: block;
+		margin-top: 3px;
+		color: var(--k-muted);
+		font-size: 0.8rem;
+		line-height: 1.45;
+	}
+	.pp-badge--champion .pp-badge-name {
+		color: #7a5f0e;
+	}
+	/* Tier as plain coloured text: the ring on the icon already carries the colour. */
+	.pp-badge-tier {
+		color: var(--k-muted);
+		font-size: 0.72rem;
+		font-weight: 600;
+	}
+	.pp-badge--rare .pp-badge-tier {
+		color: #2f5f99;
+	}
+	.pp-badge--legendary .pp-badge-tier,
+	.pp-badge--champion .pp-badge-tier {
+		color: #9a7412;
+	}
+	.pp-badge--icon .pp-badge-tier {
+		color: var(--k-olive);
+	}
+
+	.pp-numbers {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		margin: 20px 0 0;
+		border: 1px solid var(--k-line);
+	}
+	.pp-numbers div {
+		padding: 18px 20px;
+	}
+	.pp-numbers div + div {
+		border-left: 1px solid var(--k-line);
+	}
+	.pp-numbers dt {
+		color: var(--k-muted);
+		font-size: 0.82rem;
+		font-weight: 600;
+	}
+	.pp-numbers dd {
+		margin: 4px 0 0;
+		font-family: var(--k-font-display);
+		font-size: 2.6rem;
+		font-weight: 800;
+		line-height: 1;
+	}
+	.pp-table .k-h2 {
+		margin-bottom: 12px;
+	}
+	.pp-table a:hover {
+		text-decoration: underline;
+	}
+	.pp-best {
+		margin-left: 8px;
+		padding: 2px 6px;
+		background: var(--k-olive);
+		color: #fff;
+		font-size: 0.62rem;
+		font-weight: 800;
+		letter-spacing: 0.04em;
+	}
+	.pp-absent td {
+		color: var(--k-muted);
+	}
+	.pp-team-cell {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.pp-total td {
+		border-top: 2px solid var(--k-ink);
+		font-weight: 700;
+	}
+
+	@media (max-width: 1100px) and (min-width: 861px) {
+		.pp-info {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+		.pp-info div:nth-child(4) {
+			border-left: 0;
+		}
+		.pp-info div:nth-child(n + 4) {
+			border-top: 1px solid var(--k-line);
+		}
+		.pp-badge-list {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 860px) {
+		.pp-head {
+			padding: 20px;
+		}
+		.pp-avatar {
+			width: 72px;
+			height: 72px;
+			font-size: 1.2rem;
+		}
+		.pp-name {
+			font-size: 2rem;
+		}
+		.pp-info {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.pp-info div + div {
+			border-left: 0;
+		}
+		.pp-info div:nth-child(even) {
+			border-left: 1px solid var(--k-line);
+		}
+		.pp-info div:nth-child(n + 3) {
+			border-top: 1px solid var(--k-line);
+		}
+		:global(.pp-badge-hint) {
+			display: block;
+			margin: -8px 0 14px;
+		}
+		.pp-badge-list {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 14px 12px;
+		}
+		.pp-badge-btn {
+			gap: 9px;
+			cursor: pointer;
+		}
+		.pp-badge-icon {
+			width: 34px;
+			height: 34px;
+			font-size: 0.95rem;
+		}
+		.pp-badge-name {
+			display: block;
+			margin-right: 0;
+			font-size: 0.86rem;
+		}
+		.pp-badge-tier {
+			font-size: 0.7rem;
+		}
+		.pp-badge-desc {
+			display: none;
+		}
+		.pp-badge-btn[aria-expanded="true"] .pp-badge-desc {
+			display: block;
+		}
+		.pp-numbers {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.pp-numbers div:nth-child(3) {
+			border-left: 0;
+		}
+		.pp-numbers div:nth-child(n + 3) {
+			border-top: 1px solid var(--k-line);
+		}
+		.pp-numbers dd {
+			font-size: 2rem;
+		}
+	}
+</style>

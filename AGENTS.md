@@ -957,6 +957,20 @@ text, add both versions.
 
 ### Design
 
+**KICKS 2.0** (branch `redesign-kicks-2`, merged in the winter break): white
+background, content centered at 1240px, black logo in the middle of the header
+(`public/kicks-logo-black.webp`) with EN | 한 on the left and Join KICKS on the
+right, one menu row, an olive notice strip, olive footer. Inter Tight for menu,
+titles and numbers, Pretendard for body text (both bundled from npm). Olive
+`#3f5128` is the one accent; corners are square except avatars, badges and
+team dots. Shared look and building blocks (`k-page`, `k-h1`, `k-chip`,
+`k-btn`, `k-card`, `k-table`, `k-tabs`, `k-team-dot`, the mini-game layout)
+live in [src/styles/shell.css](src/styles/shell.css), loaded after
+`global.css`; page-specific styles sit in each page. No small caps labels over
+titles, no emoji in page chrome, and the hidden attribute always hides.
+Missing pages are served `dist/404.html` (`assets.not_found_handling` in
+wrangler.jsonc).
+
 **Keep the current design and styling by default.** Don't introduce a new
 CSS framework, restyle components, or change the color palette
 (`src/styles/global.css`) unless explicitly asked to.

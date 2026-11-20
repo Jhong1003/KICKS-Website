@@ -19,78 +19,74 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 	title="Full Matches | KICKS"
 	description="Members-only full match videos for KICKS."
 >
-	<main>
-		<section class="content-section" aria-labelledby="full-matches-title">
-			<p class="section-label"><T en="MEMBERS ONLY" ko="멤버 전용" /></p>
-			<h1 id="full-matches-title"><T en="Full Matches" ko="전체 경기 영상" /></h1>
-			<MediaTabs current="videos" />
+	<main class="k-page">
+		<MediaTabs current="videos" />
 
-			<div id="lock-screen" class="lock-screen">
-				<svg class="lock-screen-icon" viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10H7Zm2 0h6V7a3 3 0 0 0-6 0v3Z"
-						fill="currentColor"
-					/>
-				</svg>
-				<h2 class="lock-screen-title"><T en="KICKS Members Only" ko="KICKS 멤버 전용" /></h2>
-				<T
-					as="p"
-					class="lock-screen-text"
-					en="Enter the club password to watch full match videos."
-					ko="전체 경기 영상을 보려면 동아리 비밀번호를 입력하세요."
+		<div id="lock-screen" class="fm-lock k-card">
+			<svg class="fm-lock-icon" viewBox="0 0 24 24" aria-hidden="true">
+				<path
+					d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10H7Zm2 0h6V7a3 3 0 0 0-6 0v3Z"
+					fill="currentColor"
 				/>
+			</svg>
+			<h2 class="k-h2 fm-lock-title"><T en="Members only" ko="멤버 전용" /></h2>
+			<T
+				as="p"
+				class="fm-lock-text"
+				en="Full match videos are for KICKS members."
+				ko="풀경기 영상은 KICKS 멤버만 볼 수 있습니다."
+			/>
 
-				<form id="unlock-form" class="unlock-form">
-					<div class="password-field">
-						<input
-							type="password"
-							id="password-input"
-							class="unlock-input"
-							placeholder="Club password"
-							data-i18n-attrs={JSON.stringify({ placeholder: { en: "Club password", ko: "동아리 비밀번호" } })}
-							autocomplete="current-password"
-							required
-						/>
-						<button
-							type="button"
-							id="toggle-password"
-							class="toggle-password-visibility"
-							aria-label="Show password"
-							aria-pressed="false"
-						>
-							<svg class="eye-icon eye-icon-open" viewBox="0 0 24 24" aria-hidden="true">
-								<path
-									d="M12 5c-5.5 0-9.5 4.5-10.7 7 1.2 2.5 5.2 7 10.7 7s9.5-4.5 10.7-7c-1.2-2.5-5.2-7-10.7-7Zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9Zm0-7.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
-									fill="currentColor"
-								/>
-							</svg>
-							<svg class="eye-icon eye-icon-closed" viewBox="0 0 24 24" aria-hidden="true">
-								<path
-									d="m3.3 2.3 18.4 18.4-1.4 1.4-3.1-3.1A11.6 11.6 0 0 1 12 20c-5.5 0-9.5-4.5-10.7-7a15.6 15.6 0 0 1 4.2-5.3L1.9 3.7l1.4-1.4ZM12 7.5c.4 0 .8.05 1.15.14l-1.5 1.5a3 3 0 0 0-3.51 3.51l-1.5 1.5A4.5 4.5 0 0 1 12 7.5Zm0-3.5c5.5 0 9.5 4.5 10.7 7a15.6 15.6 0 0 1-3 3.9l-1.42-1.42A11.9 11.9 0 0 0 20.7 11c-1.2-2.5-5.2-7-8.7-7-1.02 0-2 .16-2.9.44L7.6 3.03A11.6 11.6 0 0 1 12 4Zm-.1 9.86 2.24-2.24a3 3 0 0 1-2.24 2.24Z"
-									fill="currentColor"
-								/>
-							</svg>
-						</button>
-					</div>
-					<button class="button-primary unlock-button" type="submit"><T en="Unlock" ko="잠금 해제" /></button>
-				</form>
-				<p id="unlock-error" class="unlock-error" hidden>
-					<T en="That password didn't work. Please try again." ko="비밀번호가 맞지 않아요. 다시 시도해주세요." />
-				</p>
-			</div>
-
-			<div id="video-list" class="video-list" hidden></div>
-			<p id="no-videos-message" class="no-videos-message" hidden>
-				<T en="No videos yet — check back soon!" ko="아직 영상이 없어요. 곧 올라올 예정이에요!" />
+			<form id="unlock-form" class="fm-form">
+				<div class="fm-password">
+					<input
+						type="password"
+						id="password-input"
+						class="fm-input"
+						placeholder="Password"
+						data-i18n-attrs={JSON.stringify({ placeholder: { en: "Password", ko: "비밀번호" } })}
+						autocomplete="current-password"
+						required
+					/>
+					<button
+						type="button"
+						id="toggle-password"
+						class="fm-eye"
+						aria-label="Show password"
+						aria-pressed="false"
+					>
+						<svg class="eye-icon eye-icon-open" viewBox="0 0 24 24" aria-hidden="true">
+							<path
+								d="M12 5c-5.5 0-9.5 4.5-10.7 7 1.2 2.5 5.2 7 10.7 7s9.5-4.5 10.7-7c-1.2-2.5-5.2-7-10.7-7Zm0 11.5A4.5 4.5 0 1 1 12 7.5a4.5 4.5 0 0 1 0 9Zm0-7.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"
+								fill="currentColor"
+							/>
+						</svg>
+						<svg class="eye-icon eye-icon-closed" viewBox="0 0 24 24" aria-hidden="true">
+							<path
+								d="m3.3 2.3 18.4 18.4-1.4 1.4-3.1-3.1A11.6 11.6 0 0 1 12 20c-5.5 0-9.5-4.5-10.7-7a15.6 15.6 0 0 1 4.2-5.3L1.9 3.7l1.4-1.4ZM12 7.5c.4 0 .8.05 1.15.14l-1.5 1.5a3 3 0 0 0-3.51 3.51l-1.5 1.5A4.5 4.5 0 0 1 12 7.5Zm0-3.5c5.5 0 9.5 4.5 10.7 7a15.6 15.6 0 0 1-3 3.9l-1.42-1.42A11.9 11.9 0 0 0 20.7 11c-1.2-2.5-5.2-7-8.7-7-1.02 0-2 .16-2.9.44L7.6 3.03A11.6 11.6 0 0 1 12 4Zm-.1 9.86 2.24-2.24a3 3 0 0 1-2.24 2.24Z"
+								fill="currentColor"
+							/>
+						</svg>
+					</button>
+				</div>
+				<button class="k-btn" type="submit"><T en="Unlock" ko="잠금 해제" /></button>
+			</form>
+			<p id="unlock-error" class="fm-error" hidden>
+				<T en="That password didn't work. Please try again." ko="비밀번호가 맞지 않습니다. 다시 입력해주세요." />
 			</p>
-		</section>
+		</div>
+
+		<div id="video-list" class="fm-list" hidden></div>
+		<p id="no-videos-message" class="k-meta" hidden>
+			<T en="Videos go up a few days after each league day." ko="영상은 리그 경기 후 며칠 안에 올라옵니다." />
+		</p>
 	</main>
 </BaseLayout>
 
 <script type="application/json" id="full-matches-payload" set:html={JSON.stringify(encryptedPayload)} />
 
 <script>
-	import { bilingualHtml, formatShortDate, weekLabel } from "../lib/i18n";
+	import { bilingualHtml, weekLabel } from "../lib/i18n";
 
 	interface FullMatchesPayload {
 		kdf: { iterations: number };
@@ -113,23 +109,13 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		driveUrl: string;
 	}
 
-	/**
-	 * A card says the date and nothing else above its title: the league is the
-	 * heading of the block the card is in, and the week is in the title right
-	 * underneath, so "FA26-L1 · Week 4 · Sun, Sep 27" over "Week 4 Full Match"
-	 * repeated both of them and pushed the line onto two rows.
-	 */
-	function cardText(video: VideoEntry) {
-		const meta = { metaEn: formatShortDate(video.date, "en"), metaKo: formatShortDate(video.date, "ko") };
-		if (video.type === "event") {
-			return { ...meta, titleEn: video.title, titleKo: video.titleKo || video.title };
-		}
+	const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+	/** One row: date box (OCT / 31), the match name, Watch. */
+	function rowText(video: VideoEntry) {
+		if (video.type === "event") return { en: video.title, ko: video.titleKo || video.title };
 		const week = video.week ?? 0;
-		return {
-			...meta,
-			titleEn: `${weekLabel(week, "en")} Full Match`,
-			titleKo: `${weekLabel(week, "ko")} 전체 경기 영상`,
-		};
+		return { en: weekLabel(week, "en"), ko: weekLabel(week, "ko") };
 	}
 
 	// We cache the PASSWORD (not the decrypted videos) so every page load
@@ -217,21 +203,22 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 	}
 
 	function groupHeading(key: string) {
-		if (key === EVENT_GROUP) return bilingualHtml("Event Matches", "이벤트 매치");
+		if (key === EVENT_GROUP) return bilingualHtml("Friendlies & events", "친선전·이벤트");
 		if (!key) return bilingualHtml("Earlier", "이전 영상");
-		return key;
+		// FA26-L2 → "FA26 League 2"
+		const [season, part = ""] = key.split("-");
+		return /^L\d+$/i.test(part) ? `${season} League ${part.slice(1)}` : key;
 	}
 
-	function videoCard(video: VideoEntry) {
-		const text = cardText(video);
+	function videoRow(video: VideoEntry) {
+		const text = rowText(video);
+		const [, month, day] = video.date.split("-").map(Number);
 		return `
-			<div class="video-card">
-				<div class="video-card-meta">${bilingualHtml(text.metaEn, text.metaKo)}</div>
-				<h3 class="video-card-title">${bilingualHtml(text.titleEn, text.titleKo)}</h3>
-				<a class="button-primary" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">
-					${bilingualHtml("Watch on Google Drive", "구글 드라이브에서 보기")}
-				</a>
-			</div>
+			<li class="fm-row">
+				<span class="fm-date"><span class="fm-month">${MONTHS[month - 1]}</span><span class="fm-day">${day}</span></span>
+				<span class="fm-name">${bilingualHtml(text.en, text.ko)}</span>
+				<a class="fm-watch" href="${video.driveUrl}" target="_blank" rel="noopener noreferrer">▶ ${bilingualHtml("Watch", "보기")}</a>
+			</li>
 		`;
 	}
 
@@ -239,9 +226,9 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		videoListEl.innerHTML = groupVideos(videos)
 			.map(
 				(group) => `
-					<section class="video-group">
-						<h2 class="video-group-title">${groupHeading(group.key)}</h2>
-						<div class="video-grid">${group.entries.map(videoCard).join("")}</div>
+					<section class="fm-group">
+						<h2 class="fm-group-title">${groupHeading(group.key)}</h2>
+						<ol class="fm-rows">${group.entries.map(videoRow).join("")}</ol>
 					</section>
 				`,
 			)
@@ -307,3 +294,151 @@ const encryptedPayload = Object.values(dataFiles)[0]?.default ?? null;
 		});
 	}
 </script>
+
+<style>
+	.fm-lock {
+		display: grid;
+		justify-items: center;
+		gap: 10px;
+		max-width: 520px;
+		margin: 24px auto 0;
+		padding: 40px 32px 36px;
+		text-align: center;
+	}
+	.fm-lock-icon {
+		width: 30px;
+		height: 30px;
+		color: var(--k-olive);
+	}
+	.fm-lock-title {
+		margin-top: 4px;
+	}
+	:global(.fm-lock-text) {
+		margin: 0 0 12px;
+		color: #444;
+	}
+	.fm-form {
+		display: flex;
+		gap: 8px;
+		width: 100%;
+	}
+	.fm-password {
+		position: relative;
+		flex: 1;
+	}
+	.fm-input {
+		width: 100%;
+		height: 42px;
+		padding: 0 44px 0 12px;
+		border: 1px solid var(--k-line);
+		border-radius: 0;
+		font: inherit;
+	}
+	.fm-input:focus {
+		outline: 2px solid var(--k-olive);
+		outline-offset: -1px;
+	}
+	.fm-eye {
+		position: absolute;
+		top: 50%;
+		right: 6px;
+		display: grid;
+		place-items: center;
+		width: 32px;
+		height: 32px;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--k-muted);
+		transform: translateY(-50%);
+		cursor: pointer;
+	}
+	.fm-eye svg {
+		width: 18px;
+		height: 18px;
+	}
+	.fm-eye .eye-icon-closed,
+	.fm-eye[aria-pressed="true"] .eye-icon-open {
+		display: none;
+	}
+	.fm-eye[aria-pressed="true"] .eye-icon-closed {
+		display: block;
+	}
+	.fm-form .k-btn {
+		min-height: 42px;
+	}
+	.fm-error {
+		margin: 4px 0 0;
+		color: #b3261e;
+		font-size: 0.88rem;
+	}
+
+	.fm-list:not([hidden]) {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 32px;
+		align-items: start;
+	}
+	.fm-list :global(.fm-group-title) {
+		margin: 0 0 10px;
+		font-family: var(--k-font-display);
+		font-size: 1.05rem;
+		font-weight: 700;
+	}
+	.fm-list :global(.fm-rows) {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 2px solid var(--k-olive);
+	}
+	.fm-list :global(.fm-row) {
+		display: grid;
+		grid-template-columns: 46px minmax(0, 1fr) auto;
+		gap: 12px;
+		align-items: center;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--k-line);
+	}
+	.fm-list :global(.fm-date) {
+		display: grid;
+		justify-items: center;
+		padding: 3px 0;
+		border: 1px solid var(--k-line);
+		line-height: 1.1;
+	}
+	.fm-list :global(.fm-month) {
+		color: var(--k-muted);
+		font-size: 0.64rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+	}
+	.fm-list :global(.fm-day) {
+		font-family: var(--k-font-display);
+		font-size: 1.05rem;
+		font-weight: 700;
+	}
+	.fm-list :global(.fm-name) {
+		font-weight: 600;
+		font-size: 0.93rem;
+	}
+	.fm-list :global(.fm-watch) {
+		padding: 6px 10px;
+		border: 1px solid var(--k-line);
+		font-size: 0.8rem;
+		font-weight: 700;
+		white-space: nowrap;
+	}
+	.fm-list :global(.fm-watch:hover) {
+		border-color: var(--k-ink);
+	}
+	@media (max-width: 860px) {
+		.fm-list:not([hidden]) {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 480px) {
+		.fm-lock {
+			padding: 32px 20px;
+		}
+	}
+</style>

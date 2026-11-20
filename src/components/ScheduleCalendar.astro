@@ -1,0 +1,544 @@
+---
+// KICKS 2.0 Schedule: one big month calendar on the left (month buttons on
+// top, event names written in the day cells, colored by kind), and on the
+// right a Next up card and the chosen month's list. Past events stay.
+//
+// Everything is rendered at build time for every month; the script below
+// picks the month to open, marks today and re-picks Next up against the
+// visitor's own date (the build date goes stale between deploys).
+import T from "./T.astro";
+import { KIND_LABELS, scheduleKind, scheduleName, daysBetween, todayIso, type ScheduleEvent, type ScheduleKind } from "../lib/schedule";
+
+interface Props {
+	events: ScheduleEvent[];
+}
+
+const { events } = Astro.props;
+
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const MONTHS_SHORT = MONTHS_EN.map((name) => name.slice(0, 3));
+const WEEKDAYS_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const WEEKDAYS_KO = ["일", "월", "화", "수", "목", "금", "토"];
+
+type Item = ScheduleEvent & { date: string; kind: ScheduleKind; nameEn: string; nameKo: string };
+const items: Item[] = events
+	.filter((event): event is ScheduleEvent & { date: string } => Boolean(event.date))
+	.sort((a, b) => a.date.localeCompare(b.date))
+	.map((event) => ({ ...event, kind: scheduleKind(event), nameEn: scheduleName(event, "en"), nameKo: scheduleName(event, "ko") }));
+
+const monthKeys = [...new Set(items.map((item) => item.date.slice(0, 7)))];
+const months = monthKeys.map((key) => {
+	const [year, month] = key.split("-").map(Number);
+	const first = new Date(year, month - 1, 1).getDay();
+	const days = new Date(year, month, 0).getDate();
+	const cells: (number | null)[] = [...Array(first).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
+	while (cells.length % 7) cells.push(null);
+	const monthItems = items.filter((item) => item.date.startsWith(key));
+	return { key, year, month, cells, items: monthItems };
+});
+
+const iso = (year: number, month: number, day: number) => `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+const weekday = (date: string) => {
+	const [y, m, d] = date.split("-").map(Number);
+	return new Date(y, m - 1, d).getDay();
+};
+const longDate = (date: string, lang: "en" | "ko") => {
+	const [, m, d] = date.split("-").map(Number);
+	const wd = weekday(date);
+	return lang === "ko" ? `${m}월 ${d}일 (${WEEKDAYS_KO[wd]})` : `${WEEKDAYS_EN[wd]}, ${MONTHS_SHORT[m - 1]} ${d}`;
+};
+
+// Build-time picks (the script redoes these for the visitor's date).
+const today = todayIso();
+const nextUp = items.find((item) => item.date >= today) ?? null;
+const openMonth = monthKeys.includes(today.slice(0, 7)) ? today.slice(0, 7) : today < (monthKeys[0] ?? "") ? monthKeys[0] : monthKeys.at(-1);
+const kindsUsed = (Object.keys(KIND_LABELS) as ScheduleKind[]).filter((kind) => items.some((item) => item.kind === kind));
+
+// Everything the script needs, in one place.
+const clientItems = items.map((item) => ({
+	date: item.date,
+	nameEn: item.nameEn,
+	nameKo: item.nameKo,
+	location: item.location ?? "",
+	dateEn: longDate(item.date, "en"),
+	dateKo: longDate(item.date, "ko"),
+}));
+---
+
+<div class="sch" data-schedule={JSON.stringify(clientItems)} data-open-month={openMonth}>
+	<div class="sch-main">
+		<div class="sch-months" role="tablist" aria-label="Month">
+			{
+				months.map((month) => (
+					<button
+						class="sch-month-button"
+						type="button"
+						role="tab"
+						data-month={month.key}
+						aria-selected={month.key === openMonth ? "true" : "false"}
+					>
+						<T en={MONTHS_SHORT[month.month - 1]} ko={`${month.month}월`} />
+						<span class="sch-month-count">{month.items.length}</span>
+					</button>
+				))
+			}
+		</div>
+
+		{
+			months.map((month) => (
+				<div class="sch-cal" data-month-panel={month.key} hidden={month.key !== openMonth}>
+					<p class="sch-cal-title">
+						<T en={`${MONTHS_EN[month.month - 1]} ${month.year}`} ko={`${month.year}년 ${month.month}월`} />
+					</p>
+					<div class="sch-grid">
+						{WEEKDAYS_EN.map((day, i) => (
+							<span class="sch-weekday">
+								<T en={day} ko={WEEKDAYS_KO[i]} />
+							</span>
+						))}
+						{month.cells.map((day) => {
+							if (day === null) return <span class="sch-day sch-day--empty" />;
+							const date = iso(month.year, month.month, day);
+							const dayItems = month.items.filter((item) => item.date === date);
+							return (
+								<div class="sch-day" data-date={date}>
+									<button class="sch-day-number" type="button" data-jump={dayItems.length ? date : undefined} tabindex={dayItems.length ? undefined : -1}>
+										{day}
+									</button>
+									{dayItems.map((item) => (
+										<span class={`sch-entry sch-kind--${item.kind}`}>
+											<T en={item.nameEn} ko={item.nameKo} />
+										</span>
+									))}
+									{dayItems.length > 0 && (
+										<span class="sch-dots" aria-hidden="true">
+											{dayItems.map((item) => (
+												<span class={`sch-dot sch-kind--${item.kind}`} />
+											))}
+										</span>
+									)}
+								</div>
+							);
+						})}
+					</div>
+				</div>
+			))
+		}
+
+		<ul class="sch-legend">
+			{
+				kindsUsed.map((kind) => (
+					<li>
+						<span class={`sch-legend-swatch sch-kind--${kind}`} aria-hidden="true" />
+						<T en={KIND_LABELS[kind].en} ko={KIND_LABELS[kind].ko} />
+					</li>
+				))
+			}
+		</ul>
+	</div>
+
+	<aside class="sch-side">
+		<div class="sch-next" id="sch-next" hidden={!nextUp}>
+			<p class="sch-next-head">
+				<span class="sch-next-label"><T en="Next up" ko="다음 일정" /></span>
+				<span class="sch-next-dday" data-next-dday>{nextUp ? `D-${daysBetween(today, nextUp.date)}` : ""}</span>
+			</p>
+			<p class="sch-next-name" data-next-name>
+				{nextUp && <T en={nextUp.nameEn} ko={nextUp.nameKo} />}
+			</p>
+			<p class="sch-next-date" data-next-date>
+				{nextUp && <T en={longDate(nextUp.date, "en")} ko={longDate(nextUp.date, "ko")} />}
+			</p>
+			<p class="sch-next-place" data-next-place>{nextUp?.location}</p>
+		</div>
+
+		{
+			months.map((month) => (
+				<div class="sch-list-panel" data-month-panel={month.key} hidden={month.key !== openMonth}>
+					<p class="sch-list-title">
+						<T en={`${MONTHS_EN[month.month - 1]}`} ko={`${month.month}월`} />
+					</p>
+					<ol class="sch-list">
+						{month.items.map((item) => {
+							const wd = weekday(item.date);
+							return (
+								<li class={`sch-row sch-kind--${item.kind}`} data-row-date={item.date}>
+									<span class="sch-row-date">
+										<span class="sch-row-weekday">
+											<T en={WEEKDAYS_EN[wd].toUpperCase()} ko={WEEKDAYS_KO[wd]} />
+										</span>
+										<span class="sch-row-day">{Number(item.date.slice(8))}</span>
+									</span>
+									<span class="sch-row-body">
+										<span class="sch-row-name">
+											<T en={item.nameEn} ko={item.nameKo} />
+										</span>
+										{item.location && <span class="sch-row-place">{item.location}</span>}
+									</span>
+								</li>
+							);
+						})}
+					</ol>
+					{month.items.length === 0 && (
+						<T as="p" class="sch-empty" en="Nothing scheduled this month." ko="이번 달은 예정된 일정이 없습니다." />
+					)}
+				</div>
+			))
+		}
+	</aside>
+</div>
+
+<script>
+	import { bilingualHtml } from "../lib/i18n";
+	import { daysBetween, todayIso } from "../lib/schedule";
+
+	type ClientItem = { date: string; nameEn: string; nameKo: string; location: string; dateEn: string; dateKo: string };
+
+	const root = document.querySelector<HTMLElement>(".sch");
+	if (root) {
+		const items = JSON.parse(root.dataset.schedule ?? "[]") as ClientItem[];
+		const today = todayIso();
+		const buttons = [...root.querySelectorAll<HTMLButtonElement>("[data-month]")];
+		const panels = [...root.querySelectorAll<HTMLElement>("[data-month-panel]")];
+		const monthKeys = buttons.map((button) => button.dataset.month!);
+
+		function showMonth(key: string) {
+			buttons.forEach((button) => button.setAttribute("aria-selected", String(button.dataset.month === key)));
+			panels.forEach((panel) => (panel.hidden = panel.dataset.monthPanel !== key));
+		}
+		buttons.forEach((button) => button.addEventListener("click", () => showMonth(button.dataset.month!)));
+
+		// Open this month (or the nearest month that has events).
+		const thisMonth = today.slice(0, 7);
+		showMonth(monthKeys.includes(thisMonth) ? thisMonth : today < monthKeys[0] ? monthKeys[0] : monthKeys[monthKeys.length - 1]);
+
+		// Today's cell.
+		root.querySelectorAll<HTMLElement>(`[data-date="${today}"]`).forEach((cell) => cell.classList.add("sch-day--today"));
+
+		// Next up, for today.
+		const next = items.find((item) => item.date >= today);
+		const card = document.getElementById("sch-next");
+		if (card) {
+			card.hidden = !next;
+			if (next) {
+				const days = daysBetween(today, next.date);
+				card.querySelector("[data-next-dday]")!.textContent = days === 0 ? "D-DAY" : `D-${days}`;
+				card.querySelector("[data-next-name]")!.innerHTML = bilingualHtml(next.nameEn, next.nameKo);
+				card.querySelector("[data-next-date]")!.innerHTML = bilingualHtml(next.dateEn, next.dateKo);
+				card.querySelector("[data-next-place]")!.textContent = next.location;
+			}
+		}
+
+		// Phone: tapping a day with events scrolls the list to it.
+		root.querySelectorAll<HTMLButtonElement>("[data-jump]").forEach((button) =>
+			button.addEventListener("click", () => {
+				const row = root.querySelector<HTMLElement>(`[data-row-date="${button.dataset.jump}"]`);
+				if (!row) return;
+				row.scrollIntoView({ behavior: "smooth", block: "center" });
+				row.classList.remove("sch-row--flash");
+				void row.offsetWidth;
+				row.classList.add("sch-row--flash");
+			}),
+		);
+	}
+</script>
+
+<style>
+	.sch {
+		--kind-league: #3f5128;
+		--kind-friendly: #2f62b5;
+		--kind-event: #7b3f6e;
+		--kind-fundraiser: #d66a1f;
+		--kind-dinner: #b8892b;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 340px;
+		gap: 40px;
+		align-items: start;
+	}
+	.sch-kind--league { --kind: var(--kind-league); }
+	.sch-kind--friendly { --kind: var(--kind-friendly); }
+	.sch-kind--event { --kind: var(--kind-event); }
+	.sch-kind--fundraiser { --kind: var(--kind-fundraiser); }
+	.sch-kind--dinner { --kind: var(--kind-dinner); }
+
+	/* Month buttons */
+	.sch-months {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-bottom: 20px;
+	}
+	.sch-month-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 36px;
+		padding: 0 14px;
+		border: 1px solid var(--k-line);
+		background: #fff;
+		color: var(--k-ink);
+		font: inherit;
+		font-size: 0.9rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.sch-month-count {
+		color: var(--k-muted);
+		font-size: 0.8rem;
+		font-weight: 500;
+	}
+	.sch-month-button[aria-selected="true"] {
+		border-color: var(--k-olive);
+		background: var(--k-olive);
+		color: #fff;
+	}
+	.sch-month-button[aria-selected="true"] .sch-month-count {
+		color: rgba(255, 255, 255, 0.75);
+	}
+
+	/* Calendar */
+	.sch-cal-title {
+		margin: 0 0 10px;
+		font-family: var(--k-font-display);
+		font-size: 1.2rem;
+		font-weight: 700;
+	}
+	.sch-grid {
+		display: grid;
+		grid-template-columns: repeat(7, minmax(0, 1fr));
+		border-top: 1px solid var(--k-line);
+		border-left: 1px solid var(--k-line);
+	}
+	.sch-weekday {
+		padding: 8px 10px;
+		border-right: 1px solid var(--k-line);
+		border-bottom: 1px solid var(--k-line);
+		color: var(--k-muted);
+		font-size: 0.8rem;
+	}
+	.sch-day {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		min-height: 104px;
+		padding: 6px;
+		border-right: 1px solid var(--k-line);
+		border-bottom: 1px solid var(--k-line);
+		min-width: 0;
+	}
+	.sch-day--empty {
+		background: #fafafa;
+	}
+	.sch-day-number {
+		align-self: flex-start;
+		display: grid;
+		place-items: center;
+		width: 26px;
+		height: 26px;
+		padding: 0;
+		border: 0;
+		border-radius: 50%;
+		background: none;
+		color: var(--k-ink);
+		font: inherit;
+		font-size: 0.85rem;
+		cursor: default;
+	}
+	.sch-day--today .sch-day-number {
+		background: var(--k-ink);
+		color: #fff;
+		font-weight: 700;
+	}
+	.sch-entry {
+		display: block;
+		padding: 4px 6px 4px 7px;
+		border-left: 3px solid var(--kind);
+		background: color-mix(in srgb, var(--kind) 10%, #fff);
+		color: color-mix(in srgb, var(--kind) 85%, #000);
+		font-size: 0.76rem;
+		font-weight: 600;
+		line-height: 1.3;
+		overflow-wrap: anywhere;
+	}
+	.sch-dots {
+		display: none;
+	}
+	.sch-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 18px;
+		margin: 14px 0 0;
+		padding: 0;
+		list-style: none;
+		color: var(--k-muted);
+		font-size: 0.8rem;
+	}
+	.sch-legend li {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.sch-legend-swatch {
+		width: 10px;
+		height: 10px;
+		background: var(--kind);
+	}
+
+	/* Next up */
+	.sch-next {
+		margin-bottom: 28px;
+		padding: 18px 20px;
+		border: 1px solid var(--k-line);
+		border-left: 4px solid var(--k-olive);
+		background: #fff;
+	}
+	.sch-next p {
+		margin: 0;
+	}
+	.sch-next-head {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 8px !important;
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.sch-next-label {
+		color: var(--k-olive);
+	}
+	.sch-next-dday {
+		color: var(--k-muted);
+	}
+	.sch-next-name {
+		font-family: var(--k-font-display);
+		font-size: 1.15rem;
+		font-weight: 600;
+		line-height: 1.3;
+	}
+	.sch-next-date {
+		margin-top: 4px !important;
+		font-size: 0.92rem;
+	}
+	.sch-next-place {
+		margin-top: 2px !important;
+		color: var(--k-muted);
+		font-size: 0.85rem;
+	}
+
+	/* Month list */
+	.sch-list-title {
+		margin: 0 0 8px;
+		color: var(--k-muted);
+		font-size: 0.85rem;
+	}
+	.sch-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--k-line);
+	}
+	.sch-row {
+		display: grid;
+		grid-template-columns: 48px minmax(0, 1fr);
+		gap: 14px;
+		align-items: center;
+		padding: 12px 0;
+		border-bottom: 1px solid var(--k-line);
+		transition: background-color 0.6s ease;
+	}
+	.sch-row-date {
+		display: grid;
+		justify-items: center;
+		padding: 4px 0;
+		border: 1px solid var(--k-line);
+		line-height: 1.1;
+	}
+	.sch-row-weekday {
+		color: var(--k-muted);
+		font-size: 0.66rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+	}
+	.sch-row-day {
+		font-family: var(--k-font-display);
+		font-size: 1.15rem;
+		font-weight: 700;
+	}
+	.sch-row-body {
+		display: grid;
+		gap: 2px;
+		min-width: 0;
+	}
+	.sch-row-name {
+		font-weight: 600;
+		font-size: 0.95rem;
+	}
+	.sch-row-place {
+		color: var(--k-muted);
+		font-size: 0.82rem;
+	}
+	.sch-row--flash {
+		background: #f3f5ef;
+	}
+	:global(.sch-empty) {
+		margin: 12px 0 0;
+		color: var(--k-muted);
+		font-size: 0.9rem;
+	}
+
+	/* Phone: small calendar with color dots, Next up on top, list below. */
+	@media (max-width: 860px) {
+		.sch {
+			grid-template-columns: 1fr;
+			gap: 20px;
+		}
+		.sch-side {
+			display: contents;
+		}
+		.sch-next {
+			order: -1;
+			margin-bottom: 0;
+		}
+		.sch-list-panel {
+			order: 2;
+		}
+		.sch-months {
+			flex-wrap: nowrap;
+			overflow-x: auto;
+			scrollbar-width: none;
+		}
+		.sch-day {
+			align-items: center;
+			min-height: 48px;
+			padding: 4px 0 6px;
+		}
+		.sch-day-number {
+			align-self: center;
+		}
+		.sch-day-number[data-jump] {
+			cursor: pointer;
+			font-weight: 700;
+		}
+		.sch-entry {
+			display: none;
+		}
+		.sch-dots {
+			display: flex;
+			gap: 3px;
+		}
+		.sch-dot {
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: var(--kind);
+		}
+		.sch-weekday {
+			padding: 6px 0;
+			text-align: center;
+		}
+		.sch-row-date {
+			border-left: 3px solid var(--kind);
+		}
+	}
+</style>

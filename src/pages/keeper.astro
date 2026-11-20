@@ -15,18 +15,19 @@ import T from "../components/T.astro";
 ---
 
 <BaseLayout ogImage={pageOgImage("keeper")} title="Keeper Challenge | KICKS" description="Save as many shots as you can and climb the KICKS keeper leaderboard.">
-	<main class="keeper-page">
-		<section class="content-section" aria-labelledby="keeper-title">
-			<p class="section-label">KICKS KEEPER</p>
-			<h1 id="keeper-title"><T en="Keeper Challenge" ko="골키퍼 챌린지" /></h1>
+	<main class="k-page keeper-page mg">
+		<a class="k-link mg-back" href="/#mini-games">← <T en="Mini games" ko="미니게임" /></a>
+		<section class="mg-section" aria-labelledby="keeper-title">
+			<h1 class="k-h1" id="keeper-title"><T en="Keeper Challenge" ko="골키퍼 챌린지" /></h1>
 			<T
 				as="p"
-				class="about-description keeper-intro"
+				class="mg-intro keeper-intro"
 				en="Read the shot, dive at the right moment. Three goals and you're out."
-				ko="슈팅 방향을 읽고 타이밍에 맞춰 막아보세요. 3골 먹으면 끝이에요."
+				ko="슈팅 방향을 읽고 타이밍에 맞춰 몸을 날리세요. 세 골을 먹으면 게임이 끝납니다."
 			/>
 
-			<div class="keeper-game">
+			<div class="mg-body">
+			<div class="keeper-game mg-game">
 				<div class="keeper-hud" aria-live="off">
 					<span class="keeper-hud-item"><span class="keeper-hud-label"><T en="Score" ko="점수" /></span> <strong data-hud-score>0</strong></span>
 					<span class="keeper-hud-item"><span class="keeper-hud-label"><T en="Combo" ko="콤보" /></span> <strong data-hud-combo>0</strong></span>
@@ -73,12 +74,13 @@ import T from "../components/T.astro";
 				</div>
 			</div>
 
-			<div class="keeper-board">
+			<div class="keeper-board mg-board">
 				<T as="h2" en="Leaderboard" ko="랭킹" />
 				<p class="keeper-board-me" data-board-me hidden></p>
 				<ol class="keeper-board-list" data-board-list></ol>
-				<p class="keeper-board-empty" data-board-empty><T en="No scores yet — be the first." ko="아직 기록이 없어요. 첫 번째 주인공이 되어보세요." /></p>
-				<T as="p" class="keeper-board-note" en="Each browser keeps its best score. Names are nicknames anyone can pick." ko="브라우저마다 최고 기록 하나가 남아요. 이름은 누구나 정할 수 있는 닉네임이에요." />
+				<p class="keeper-board-empty" data-board-empty><T en="No scores yet." ko="아직 기록이 없습니다." /></p>
+				<T as="p" class="keeper-board-note" en="Best score per browser. Anyone can pick any nickname." ko="최고 점수는 브라우저마다 저장됩니다. 닉네임은 누구나 자유롭게 정할 수 있습니다." />
+			</div>
 			</div>
 		</section>
 	</main>

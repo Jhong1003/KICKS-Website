@@ -97,3 +97,20 @@ export function getTeamIdByName(name: string, league: League | undefined): strin
 export function getTeamColor(teamId: string | null, league: League | undefined): string {
 	return findTeam(teamId, league)?.color || DEFAULT_TEAM_COLOR;
 }
+
+/**
+ * How a league is named on the page: "FA26-L2" → season "FA26", number 2,
+ * name "League 2" (the same in both languages). "league season" is never a
+ * thing: a season is a semester, and it holds League 1 and League 2.
+ */
+export function leagueParts(id: string): { season: string; number: number | null; name: string } {
+	const [season, part = ""] = id.split("-");
+	const number = /^L(\d+)$/i.test(part) ? Number(part.slice(1)) : null;
+	return { season, number, name: number ? `League ${number}` : part || id };
+}
+
+/** "FA26 League 2". */
+export function leagueFullName(id: string): string {
+	const { season, name } = leagueParts(id);
+	return `${season} ${name}`;
+}

@@ -1,0 +1,70 @@
+---
+// "FA26 ▾": which season (semester) a page is showing. Seasons come from the
+// league ids (FA26-L1 → FA26). Until a page has more than one season's data
+// it just names the current one. Once SQL (D1) holds the season list, this
+// reads from there instead.
+import { leagues, currentSeason } from "../lib/leagues";
+
+interface Props {
+	/** Season shown now (default: the current one). */
+	current?: string;
+	/** Where each season opens; seasons without a link are listed but not selectable. */
+	hrefs?: Record<string, string>;
+}
+
+const { current = currentSeason, hrefs = {} } = Astro.props;
+const seasons = [...new Set(leagues.map((league) => league.id.split("-")[0]))].reverse();
+if (!seasons.includes(current)) seasons.unshift(current);
+---
+
+<label class="k-season">
+	<span class="visually-hidden">Season</span>
+	<select data-season-select>
+		{
+			seasons.map((season) => (
+				<option value={hrefs[season] ?? ""} selected={season === current} disabled={season !== current && !hrefs[season]}>
+					{season}
+				</option>
+			))
+		}
+	</select>
+</label>
+
+<script>
+	document.querySelectorAll<HTMLSelectElement>("[data-season-select]").forEach((select) =>
+		select.addEventListener("change", () => {
+			if (select.value) location.href = select.value;
+		}),
+	);
+</script>
+
+<style>
+	.k-season {
+		position: relative;
+		display: inline-flex;
+	}
+	.k-season select {
+		appearance: none;
+		min-height: 36px;
+		padding: 0 34px 0 14px;
+		border: 1px solid var(--k-line);
+		border-radius: 0;
+		background: #fff;
+		color: var(--k-ink);
+		font: inherit;
+		font-family: var(--k-font-display);
+		font-size: 0.92rem;
+		font-weight: 700;
+		cursor: pointer;
+	}
+	.k-season::after {
+		content: "▾";
+		position: absolute;
+		top: 50%;
+		right: 12px;
+		transform: translateY(-50%);
+		color: var(--k-muted);
+		font-size: 0.8rem;
+		pointer-events: none;
+	}
+</style>

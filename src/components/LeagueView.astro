@@ -1,6 +1,7 @@
 ---
 import ChampionshipSimulator from "./ChampionshipSimulator.astro";
-import PointsRaceDialog from "./PointsRaceDialog.astro";
+import PointsRaceChart from "./PointsRaceChart.astro";
+import SeasonSelect from "./SeasonSelect.astro";
 import StandingsTable from "./StandingsTable.astro";
 import WeeklyResults from "./WeeklyResults.astro";
 import PlayerStatsTable from "./PlayerStatsTable.astro";
@@ -14,9 +15,12 @@ import profilesData from "../data/player_profiles.json";
 import goalEventsData from "../data/goal_events.json";
 import historyData from "../data/standings_history.json";
 import updatesData from "../data/data-updates.json";
-import { leagues, getTeamColor, getTeamName, type League } from "../lib/leagues";
+import scheduleData from "../data/schedule.json";
+import { leagues, getTeamColor, getTeamName, leagueParts, type League } from "../lib/leagues";
+import { recentForm, teamResults, type TeamMatch } from "../lib/team-stats";
+import { getLeagueFinale } from "../lib/finale";
+import { captainName } from "../lib/hall-of-fame";
 import { matchTimelines, type TimelineGoal } from "../lib/match-timeline";
-import { pointsRaceDialogId } from "../lib/points-race";
 import { isRowShown } from "../lib/finale";
 
 const updates = updatesData as Record<string, { updated_at: string }>;
@@ -65,7 +69,9 @@ const playerNames = new Map(profilesData.map((profile) => [profile.player_id, pr
 const standings = inLeague(leagueTableData).map((row) => ({
 	...row,
 	team: teamName(row.team_id),
+	color: getTeamColor(row.team_id, league),
 	href: `/league/${league.id}/team/${row.team_id}/`,
+	form: recentForm(teamResults(matchesData as TeamMatch[], league.id, row.team_id), 5).map((result) => result.result),
 }));
 const matches = inLeague(matchesData as MatchRecord[]).map((match) => ({
 	...match,
@@ -75,7 +81,7 @@ const matches = inLeague(matchesData as MatchRecord[]).map((match) => ({
 // Same rule as the pipeline's Champion badge (_champions in update_data.py):
 // a league is finished once every fixture has a score.
 const finished = matches.length > 0 && matches.every((match) => match.home_score !== null && match.away_score !== null);
-const weekSummaries = inLeague(weekSummariesData).map((row) => ({ ...row, team: teamName(row.team_id) }));
+const weekSummaries = inLeague(weekSummariesData).map((row) => ({ ...row, team: teamName(row.team_id), color: getTeamColor(row.team_id, league) }));
 // Inactive players stay listed in a finished league they played through to
 // the end (isShownInLeague); ranks are renumbered over the visible rows.
 const leaderboard = inLeague(leaderboardData)
@@ -102,6 +108,7 @@ const placeholderStandings = league.teams.map((team) => ({
 	goal_difference: 0,
 	points: 0,
 	participation_rate: 0,
+	color: getTeamColor(team.team_id, league),
 	href: `/league/${league.id}/team/${team.team_id}/`,
 }));
 
@@ -133,165 +140,259 @@ const weeks = weekNumbers.map((week) => {
 
 // Only used when weeks is non-empty (the results section is skipped otherwise).
 const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.week ?? 0;
+
+// ---- KICKS 2.0 head and Overview ----
+const { season, name: leagueName } = leagueParts(league.id);
+const seasonLeagues = leagues.filter((entry) => entry.id.startsWith(`${season}-`));
+const weeksPlayed = weeks.filter((week) => week.hasResults).length;
+const latestWeek = weeks.find((week) => week.hasResults) ?? null;
+const topScorers = (() => {
+	const scorers = [...leaderboard].filter((row) => row.goals > 0).sort((a, b) => b.goals - a.goals || a.player.localeCompare(b.player, "ko"));
+	const cut = scorers[2]?.goals ?? 0;
+	return scorers.filter((row) => row.goals >= cut).slice(0, 5);
+})();
+const finale = getLeagueFinale(league);
+const champions = (finale?.championTeamIds ?? []).map((teamId) => ({
+	teamId,
+	name: teamName(teamId),
+	color: getTeamColor(teamId, league),
+	captain: captainName(league.id, teamId),
+	row: standings.find((row) => row.team_id === teamId),
+}));
+// Before a league's first game: "League 1 starts Sat, Jan 30." from the schedule.
+const kickoff = (scheduleData as { date: string | null; type: string; league?: string; week?: number }[]).find(
+	(entry) => entry.type === "league" && entry.league === league.id && entry.week === 1 && entry.date,
+)?.date;
+const kickoffText = kickoff
+	? (() => {
+			const [y, m, d] = kickoff.split("-").map(Number);
+			const day = new Date(y, m - 1, d).getDay();
+			const en = `${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day]}, ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m - 1]} ${d}`;
+			const ko = `${m}월 ${d}일(${["일", "월", "화", "수", "목", "금", "토"][day]})`;
+			return { en, ko };
+		})()
+	: null;
+const tabs = [
+	{ id: "overview", en: "Overview", ko: "개요" },
+	{ id: "table", en: "Table", ko: "순위" },
+	{ id: "results", en: "Results", ko: "결과" },
+	{ id: "player-stats", en: "Player stats", ko: "선수 기록" },
+	{ id: "forecasts", en: "Forecasts", ko: "경기 예측" },
+];
 ---
 
-<main data-league-view>
-	<section class="content-section" aria-labelledby="league-title">
-		<p class="section-label">{league.id}</p>
-		<h1 id="league-title"><T en="Standings & Results" ko="순위 & 경기 결과" /></h1>
-        {updates[league.id] ? (
-            <p class="league-table-note"><T en="Records updated: " ko="기록 업데이트: " /><time datetime={updates[league.id].updated_at}><T en={updateLabel(updates[league.id].updated_at, "en")} ko={updateLabel(updates[league.id].updated_at, "ko")} /></time> <T en="(Central Time)" ko="(미 중부시간)" /></p>
-        ) : (
-            matchesData.filter((m) => m.league === league.id && m.status === "completed" && m.date).length > 0 &&
-            <p class="league-table-note"><T en="Latest recorded match: " ko="최근 기록된 경기일: " /><time>{matchesData.filter((m) => m.league === league.id && m.status === "completed" && m.date).map((m) => m.date).sort().at(-1)}</time></p>
-        )}
+<main class="k-page league" data-league-view>
+	<header class="lg-head k-card">
+		<span class="lg-emblem" aria-hidden="true"><img src="/favicon.svg" alt="" width="40" height="40" /></span>
+		<div class="lg-head-text">
+			<h1 class="k-h1 lg-title">KICKS {leagueName}</h1>
+			<p class="lg-sub">
+				<T
+					en={`UIUC · 7v7 · ${league.teams.length} teams · ${rules.weeks} weeks`}
+					ko={`UIUC · 7대7 · ${league.teams.length}팀 · ${rules.weeks}주`}
+				/>
+				{updates[league.id] && (
+					<span class="lg-updated">
+						{" · "}
+						<T en="Updated " ko="업데이트 " />
+						<time datetime={updates[league.id].updated_at}>
+							<T en={updateLabel(updates[league.id].updated_at, "en")} ko={updateLabel(updates[league.id].updated_at, "ko")} />
+						</time>
+					</span>
+				)}
+			</p>
+		</div>
+		<div class="lg-picker">
+			<SeasonSelect current={season} />
+			{
+				seasonLeagues.length > 1 && (
+					<nav class="lg-leagues" aria-label="Leagues">
+						{seasonLeagues.map((entry) => (
+							<a href={`/league/${entry.id}/`} aria-current={entry.id === league.id ? "page" : undefined}>
+								{leagueParts(entry.id).name}
+							</a>
+						))}
+					</nav>
+				)
+			}
+		</div>
+	</header>
 
-		{
-			leagues.length > 1 && (
-				<nav class="league-switcher" aria-label="Leagues">
-					{leagues.map((entry) => (
-						<a
-							class="league-switcher-link"
-							href={`/league/${entry.id}/`}
-							aria-current={entry.id === league.id ? "page" : undefined}
-						>
-							{entry.id}
-							{!entry.started && (
-								<span class="league-switcher-note">
-									<T en="upcoming" ko="예정" />
-								</span>
-							)}
-						</a>
-					))}
-				</nav>
-			)
-		}
-		<nav class="league-subnav" aria-label="League sections">
-			<a id="overview-tab" href="#overview" data-league-tab="overview"><T en="OVERVIEW" ko="개요" /></a>
-			<a id="player-stats-tab" href="#player-stats" data-league-tab="player-stats"><T en="PLAYER STATS" ko="선수 기록" /></a>
-		</nav>
-	</section>
+	<nav class="k-tabs lg-tabs" aria-label="League sections">
+		{tabs.map((tab) => (
+			<a id={`${tab.id}-tab`} href={`#${tab.id}`} data-league-tab={tab.id}>
+				<T en={tab.en} ko={tab.ko} />
+			</a>
+		))}
+	</nav>
 
 	<div id="overview" data-league-panel>
-	<section class="content-section" aria-labelledby="standings-title">
-		<h2 id="standings-title"><T en="League Table" ko="순위표" /></h2>
+		<div class="lg-overview">
+			<div class="lg-col">
+				<section class="lg-block k-card" aria-labelledby="ov-table">
+					<div class="lg-block-head">
+						<h2 class="k-h3" id="ov-table">
+							{finished ? <T en="Final standings" ko="최종 순위" /> : weeksPlayed ? <T en={`After Week ${weeksPlayed}`} ko={`${weeksPlayed}주차까지`} /> : <T en="Standings" ko="순위" />}
+						</h2>
+						<a class="k-link" href="#table" data-league-goto="table"><T en="Table" ko="순위표" /> →</a>
+					</div>
+					<ol class="lg-mini-table">
+						{(standings.length ? standings : placeholderStandings).map((row) => (
+							<li style={`--team-color: ${row.color}`}>
+								<span class="lg-mini-rank">{standings.length ? row.rank : "–"}</span>
+								<span class="k-team-dot" aria-hidden="true" />
+								<a class="k-team-link lg-mini-team" href={row.href}>{row.team}</a>
+								<span class="lg-mini-pts"><T en={`${row.points} pts`} ko={`${row.points}점`} /></span>
+							</li>
+						))}
+					</ol>
+				</section>
+
+				{latestWeek && (
+					<section class="lg-block k-card" aria-labelledby="ov-results">
+						<div class="lg-block-head">
+							<h2 class="k-h3" id="ov-results"><T en={`Week ${latestWeek.week} results`} ko={`${latestWeek.week}주차 결과`} /></h2>
+							<a class="k-link" href={`?week=${latestWeek.week}#results`} data-league-goto="results"><T en="Results" ko="결과" /> →</a>
+						</div>
+						<ul class="lg-mini-results">
+							{latestWeek.matches.filter((match) => match.status === "completed").map((match) => (
+								<li>
+									<span class="lg-mr-team lg-mr-home">{match.home_team}</span>
+									<span class="lg-mr-score">{match.home_score} – {match.away_score}</span>
+									<span class="lg-mr-team">{match.away_team}</span>
+								</li>
+							))}
+						</ul>
+					</section>
+				)}
+			</div>
+
+			<div class="lg-col">
+				{champions.map((champ) => (
+					<section class="lg-champ" style={`background: color-mix(in srgb, ${champ.color} 78%, #000)`} aria-label="Champion">
+						<p class="lg-champ-label"><T en={`${season} ${leagueName} · Champions`} ko={`${season} ${leagueName} · 우승`} /></p>
+						<a class="lg-champ-name" href={`/league/${league.id}/team/${champ.teamId}/`}>{champ.name}</a>
+						{champ.row && (
+							<p class="lg-champ-line">
+								<T
+									en={`${champ.row.points} pts · ${champ.row.wins}W ${champ.row.draws}D ${champ.row.losses}L`}
+									ko={`${champ.row.points}점 · ${champ.row.wins}승 ${champ.row.draws}무 ${champ.row.losses}패`}
+								/>
+								{champ.captain && <> · <T en={`Captain ${champ.captain}`} ko={`주장 ${champ.captain}`} /></>}
+							</p>
+						)}
+					</section>
+				))}
+
+				<section class="lg-block k-card" aria-labelledby="ov-scorers">
+					<div class="lg-block-head">
+						<h2 class="k-h3" id="ov-scorers"><T en="Top scorers" ko="득점 순위" /></h2>
+						<a class="k-link" href="#player-stats" data-league-goto="player-stats"><T en="Player stats" ko="선수 기록" /> →</a>
+					</div>
+					{topScorers.length ? (
+						<ol class="lg-scorers">
+							{topScorers.map((row, index) => {
+								const rank = topScorers.findIndex((other) => other.goals === row.goals) + 1;
+								return (
+									<li>
+										<span class="lg-scorer-rank">{rank}</span>
+										<span class="lg-scorer-name">
+											<a href={`/players/${row.id}/?league=${league.id}`}>{row.player}</a>
+											<span class="k-meta">{row.team}</span>
+										</span>
+										<span class="lg-scorer-goals">{row.goals}</span>
+									</li>
+								);
+							})}
+						</ol>
+					) : (
+						<T as="p" class="k-meta" en="No goals yet." ko="아직 골이 없습니다." />
+					)}
+				</section>
+			</div>
+		</div>
+	</div>
+
+	<div id="table" data-league-panel>
 		{
 			standings.length > 0 ? (
 				<StandingsTable rows={standings} finished={finished} />
 			) : (
 				<>
-					{/* Before the first result: every team at zero, in teams-tab order, no ranks.
-					    Built here for display only — league_table.json stays as generated. */}
 					<StandingsTable rows={placeholderStandings} placeholder />
-					<T
-						as="p"
-						class="league-table-note"
-						en="Rankings start once the first match has been played."
-						ko="첫 경기가 끝나면 순위가 매겨져요."
-					/>
+					{kickoffText ? (
+						<T
+							as="p"
+							class="k-meta lg-note"
+							en={`${leagueName} starts ${kickoffText.en}. Teams are announced at the General Meeting that week.`}
+							ko={`${leagueName}은 ${kickoffText.ko}에 시작합니다. 팀은 리그 시작 전 전체 모임(GM)에서 발표합니다.`}
+						/>
+					) : (
+						<T as="p" class="k-meta lg-note" en="Rankings start once the first match is played." ko="첫 경기가 끝나면 순위가 매겨집니다." />
+					)}
 				</>
 			)
 		}
-		{/* How points and ties work, straight from this league's rules (league-config.json). */}
-		<ul class="league-rules">
-			<li>
-				<T
-					en={`Win ${rules.win_points} pts · Draw ${rules.draw_points} pt${rules.draw_points === 1 ? "" : "s"} · Loss 0`}
-					ko={`승 ${rules.win_points}점 · 무 ${rules.draw_points}점 · 패 0점`}
-				/>
-			</li>
-			{
-				rules.final_win_points !== rules.win_points && (
-					<li class="league-rules-highlight">
-						<T
-							en={`Week ${rules.final_week}${rules.final_week < rules.weeks ? " onward" : " (final week)"}: a win is worth ${rules.final_win_points} pts`}
-							ko={`${rules.final_week}주차${rules.final_week < rules.weeks ? "부터" : "(마지막 주)"}는 승리 ${rules.final_win_points}점`}
-						/>
-					</li>
-				)
-			}
-			<li>
-				<T
-					en={`Tiebreakers: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].en).join(" → ")}`}
-					ko={`승점이 같을 때: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].ko).join(" → ")}`}
-				/>
-			</li>
-		</ul>
-	</section>
+		<p class="k-meta lg-rules">
+			<T
+				en={`Win ${rules.win_points} pts${rules.final_win_points !== rules.win_points ? ` (${rules.final_win_points} in the final week)` : ""} · Draw ${rules.draw_points}`}
+				ko={`승 ${rules.win_points}점${rules.final_win_points !== rules.win_points ? ` (마지막 주 ${rules.final_win_points}점)` : ""} · 무 ${rules.draw_points}점`}
+			/>
+			<span aria-hidden="true"> · </span>
+			<T
+				en={`Ties: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].en).join(" → ")}`}
+				ko={`승점이 같으면: ${rules.ranking_criteria.slice(1).map((c) => tiebreakText[c].ko).join(" → ")}`}
+			/>
+		</p>
+		{hasRaceHistory && (
+			<section class="lg-race" aria-labelledby="lg-race-title">
+				<h2 class="k-h3" id="lg-race-title">
+					{finished ? <T en="How it unfolded" ko="리그 흐름" /> : <T en="Points by week" ko="주차별 승점" />}
+				</h2>
+				<PointsRaceChart league={league} finished={finished} compact />
+			</section>
+		)}
+	</div>
 
-	<section class="content-section" id="results" aria-labelledby="results-title">
-		<h2 id="results-title"><T en="Match Results" ko="경기 결과" /></h2>
+	<div id="results" data-league-panel>
 		{
 			weeks.length > 0 ? (
-				<>
-					<WeeklyResults
-						weeks={weeks}
-						defaultWeek={defaultWeek}
-						raceDialogId={hasRaceHistory ? pointsRaceDialogId(league.id) : undefined}
-						reportLeague={league.id}
-						timelines={timelines}
-						teamColor={goalTeamColor}
-						matchMinutes={matchMinutes}
-					/>
-					<PointsRaceDialog league={league} finished={finished} />
-				</>
-			) : (
-				<T
-					as="p"
-					class="about-description"
-					en="Fixtures will appear here once this league's matches are added."
-					ko="이 리그의 경기가 등록되면 여기에 일정이 나타나요."
+				<WeeklyResults
+					weeks={weeks}
+					defaultWeek={defaultWeek}
+					reportLeague={league.id}
+					timelines={timelines}
+					teamColor={goalTeamColor}
+					matchMinutes={matchMinutes}
 				/>
+			) : (
+				<T as="p" class="k-meta" en="Fixtures appear here once this league's matches are added." ko="이 리그의 경기가 등록되면 여기에 나옵니다." />
 			)
 		}
-	</section>
-
-	{/* One Forecasts section rather than three stacked ones: match forecasts,
-	    title chances and the week-by-week chart all come from the same model,
-	    and side by side as separate h2s they read as three of the same thing. */}
-	<section class="content-section league-forecasts" aria-labelledby="league-forecasts-title">
-		{finished ? (
-			<details class="past-forecasts">
-				<summary><h2 id="league-forecasts-title"><T en="Revisit past forecasts" ko="지난 예측 돌아보기" /></h2></summary>
-				<MatchForecasts league={league} />
-				<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
-			</details>
-		) : (
-			<>
-				<h2 id="league-forecasts-title"><T en="Forecasts" ko="예측" /></h2>
-				<MatchForecasts league={league} />
-				<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
-			</>
-		)}
-	</section>
-
 	</div>
+
 	<div id="player-stats" data-league-panel>
-	<section class="content-section" aria-labelledby="player-stats-title">
-		<h2 id="player-stats-title"><T en="Player Stats" ko="선수 기록" /></h2>
 		{
 			leaderboard.length > 0 ? (
-				<>
-					<T as="p" class="about-description" en="Click a column header to sort." ko="항목 제목을 누르면 해당 기록순으로 정렬돼요." />
-					<PlayerStatsTable players={leaderboard} leagueId={league.id} />
-				</>
+				<PlayerStatsTable players={leaderboard} leagueId={league.id} />
 			) : (
-				<T
-					as="p"
-					class="about-description"
-					en="Player stats appear once the first week has been recorded."
-					ko="첫 주 기록이 입력되면 선수 기록이 나타나요."
-				/>
+				<T as="p" class="k-meta" en="Player stats appear once the first week is recorded." ko="첫 주 기록이 입력되면 선수 기록이 나옵니다." />
 			)
 		}
-	</section>
+	</div>
+
+	<div id="forecasts" data-league-panel>
+		<section class="league-forecasts" aria-label="Forecasts">
+			<MatchForecasts league={league} />
+			<ChampionshipSimulator league={league} matches={matchesData} standings={leagueTableData} />
+		</section>
 	</div>
 </main>
 
 <script>
 	const root = document.querySelector<HTMLElement>("[data-league-view]");
 	if (root) {
-		const nav = root.querySelector<HTMLElement>(".league-subnav")!;
+		const nav = root.querySelector<HTMLElement>(".lg-tabs")!;
 		const tabs = Array.from(nav.querySelectorAll<HTMLAnchorElement>("[data-league-tab]"));
 		const panels = Array.from(root.querySelectorAll<HTMLElement>("[data-league-panel]"));
 		nav.setAttribute("role", "tablist");
@@ -306,14 +407,22 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 		}
 		function syncFromUrl(scrollToAnchor = false) {
 			const hash = location.hash.slice(1);
-			const selected = hash === "player-stats" || hash === "player-stats-title" ? "player-stats" : "overview";
+			const ALIASES: Record<string, string> = {
+				"player-stats-title": "player-stats",
+				standings: "table",
+				"title-race": "forecasts",
+			};
+			const ids = tabs.map((tab) => tab.dataset.leagueTab!);
+			let selected = ALIASES[hash] ?? (ids.includes(hash) ? hash : "overview");
+			// ?week=N without a hash (old links from the Schedule) opens Results.
+			if (!hash && new URLSearchParams(location.search).has("week")) selected = "results";
 			for (const panel of panels) panel.hidden = panel.id !== selected;
 			for (const tab of tabs) {
 				const active = tab.dataset.leagueTab === selected;
 				tab.setAttribute("aria-selected", String(active));
 				tab.tabIndex = active ? 0 : -1;
 			}
-			if (scrollToAnchor && hash && hash !== "overview" && hash !== "player-stats") {
+			if (scrollToAnchor && hash && !ids.includes(hash) && !ALIASES[hash]) {
 				requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
 			}
 		}
@@ -344,6 +453,231 @@ const defaultWeek = weeks.find((week) => week.hasResults)?.week ?? weeks[0]?.wee
 </script>
 
 <style>
-	.past-forecasts > summary { cursor: pointer; }
-	.past-forecasts > summary h2 { display: inline; }
+	.lg-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 16px 20px;
+		margin-bottom: 20px;
+		padding: 22px 24px;
+	}
+	.lg-emblem {
+		display: grid;
+		place-items: center;
+		width: 64px;
+		height: 64px;
+		border: 1px solid var(--k-line);
+		border-radius: 50%;
+		background: #fff;
+	}
+	.lg-emblem img {
+		width: 40px;
+		height: 40px;
+	}
+	.lg-head-text {
+		flex: 1;
+		min-width: 220px;
+	}
+	.lg-title {
+		font-size: 2rem;
+	}
+	.lg-sub {
+		margin: 6px 0 0;
+		color: var(--k-muted);
+		font-size: 0.9rem;
+	}
+	.lg-picker {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+	}
+	.lg-leagues {
+		display: inline-flex;
+		border: 1px solid var(--k-line);
+	}
+	.lg-leagues a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 34px;
+		padding: 0 14px;
+		font-size: 0.88rem;
+		font-weight: 600;
+	}
+	.lg-leagues a + a {
+		border-left: 1px solid var(--k-line);
+	}
+	.lg-leagues a[aria-current="page"] {
+		background: var(--k-olive);
+		color: #fff;
+	}
+
+	.lg-overview {
+		display: grid;
+		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+		gap: 20px;
+		align-items: start;
+	}
+	.lg-col {
+		display: grid;
+		gap: 20px;
+	}
+	.lg-block {
+		padding: 18px 20px 14px;
+	}
+	.lg-block-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 12px;
+		padding-bottom: 10px;
+		border-bottom: 2px solid var(--k-olive);
+	}
+	.lg-mini-table,
+	.lg-mini-results,
+	.lg-scorers {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.lg-mini-table li {
+		display: grid;
+		grid-template-columns: 24px 10px minmax(0, 1fr) auto;
+		gap: 12px;
+		align-items: center;
+		padding: 11px 0;
+		border-bottom: 1px solid var(--k-line);
+	}
+	.lg-mini-table li:last-child,
+	.lg-mini-results li:last-child,
+	.lg-scorers li:last-child {
+		border-bottom: 0;
+	}
+	.lg-mini-rank {
+		color: var(--k-muted);
+		font-weight: 600;
+	}
+	.lg-mini-team {
+		font-weight: 700;
+	}
+	.lg-mini-pts {
+		font-family: var(--k-font-display);
+		font-weight: 700;
+	}
+	.lg-mini-results li {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 64px minmax(0, 1fr);
+		gap: 8px;
+		align-items: center;
+		padding: 9px 0;
+		border-bottom: 1px solid var(--k-line);
+		font-size: 0.92rem;
+	}
+	.lg-mr-home {
+		text-align: right;
+	}
+	.lg-mr-score {
+		color: var(--k-olive);
+		font-family: var(--k-font-display);
+		font-weight: 800;
+		text-align: center;
+	}
+	.lg-champ {
+		padding: 20px 22px;
+		color: #fff;
+	}
+	.lg-champ-label {
+		margin: 0;
+		font-size: 0.8rem;
+		font-weight: 600;
+		opacity: 0.85;
+	}
+	.lg-champ-name {
+		display: inline-block;
+		margin: 4px 0 6px;
+		font-family: var(--k-font-display);
+		font-size: 1.9rem;
+		font-weight: 800;
+	}
+	.lg-champ-name:hover {
+		text-decoration: underline;
+	}
+	.lg-champ-line {
+		margin: 0;
+		font-size: 0.88rem;
+		opacity: 0.9;
+	}
+	.lg-scorers li {
+		display: grid;
+		grid-template-columns: 24px minmax(0, 1fr) auto;
+		gap: 12px;
+		align-items: center;
+		padding: 10px 0;
+		border-bottom: 1px solid var(--k-line);
+	}
+	.lg-scorer-rank {
+		color: var(--k-muted);
+		font-weight: 600;
+	}
+	.lg-scorer-name {
+		display: grid;
+		gap: 1px;
+	}
+	.lg-scorer-name a {
+		font-weight: 700;
+	}
+	.lg-scorer-name a:hover {
+		text-decoration: underline;
+	}
+	.lg-scorer-goals {
+		font-family: var(--k-font-display);
+		font-size: 1.4rem;
+		font-weight: 800;
+	}
+	.lg-rules,
+	:global(.lg-note) {
+		margin: 12px 0 0;
+	}
+	.lg-race {
+		max-width: 760px;
+		margin-top: 40px;
+	}
+	.lg-race .k-h3 {
+		margin-bottom: 8px;
+	}
+	/* The chart's own small title repeats the heading above it. */
+	.lg-race :global(.points-race-compact-title) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+	}
+	.lg-race :global(.points-race-chart svg) {
+		width: 100%;
+		height: auto;
+	}
+	[data-league-panel]:focus {
+		outline: none;
+	}
+	.league-forecasts {
+		display: grid;
+		gap: 28px;
+	}
+
+	@media (max-width: 860px) {
+		.lg-head {
+			padding: 18px;
+		}
+		.lg-emblem {
+			width: 52px;
+			height: 52px;
+		}
+		.lg-title {
+			font-size: 1.6rem;
+		}
+		.lg-overview {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
 </style>

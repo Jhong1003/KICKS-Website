@@ -33,13 +33,13 @@ const columns = [
 ] as const;
 ---
 
-<div class="table-scroll">
-	<table class="player-stats-table">
+<div class="table-scroll k-table-wrap">
+	<table class="player-stats-table k-table">
 		<thead>
 			<tr>
 				{
 					columns.map((column) => (
-						<th data-sortable data-type={column.type}>
+						<th class={column.type === "string" ? "k-left" : undefined} data-sortable data-type={column.type}>
 							<T en={column.label} ko={column.labelKo} />
 						</th>
 					))
@@ -51,16 +51,16 @@ const columns = [
 				players.map((player) => (
 					<tr class={player.rank <= 3 ? "player-row-top" : undefined}>
 						<td data-sort-value={player.rank}>{player.rank}</td>
-						<td class="player-stats-name" data-sort-value={player.player.toLowerCase()}>
+						<td class="player-stats-name k-left" data-sort-value={player.player.toLowerCase()}>
 							<a href={playerHref(player.id)}>{player.player}</a>
 						</td>
-						<td data-sort-value={player.team.toLowerCase()}>{player.team}</td>
+						<td class="k-left" data-sort-value={player.team.toLowerCase()}>{player.team}</td>
 						<td data-sort-value={player.weeks_attended}>
 							{player.weeks_attended} / {player.weeks_played}
 						</td>
 						<td data-sort-value={player.goals}>{player.goals}</td>
 						<td data-sort-value={player.assists}>{player.assists}</td>
-						<td data-sort-value={player.attacking_points}>{player.attacking_points}</td>
+						<td class="k-strong" data-sort-value={player.attacking_points}>{player.attacking_points}</td>
 					</tr>
 				))
 			}
@@ -98,3 +98,24 @@ const columns = [
 		});
 	});
 </script>
+
+<style>
+	/* KICKS 2.0: plain rows, no highlighted top three, sentence-case headers. */
+	.player-stats-table :global(th) {
+		text-transform: none;
+		cursor: pointer;
+	}
+	.player-stats-table :global(tr.player-row-top) {
+		background: none;
+	}
+	.player-stats-table :global(tr.player-row-top td:first-child) {
+		padding-left: 12px;
+		border-left: 0;
+	}
+	.player-stats-table :global(tr.player-row-top td:last-child) {
+		color: var(--k-ink);
+	}
+	.player-stats-table :global(.player-stats-name a:hover) {
+		text-decoration: underline;
+	}
+</style>

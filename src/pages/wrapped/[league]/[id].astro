@@ -10,6 +10,8 @@ import T from "../../../components/T.astro";
 import { leagues, getTeamColor, type League } from "../../../lib/leagues";
 import { BADGES, sortBadges, type PlayerLeagueSection, type PlayerProfile } from "../../../lib/players";
 import { buildWrapped, wrappedPlayers } from "../../../lib/wrapped";
+import { teamResults, type TeamMatch } from "../../../lib/team-stats";
+import matchesData from "../../../data/matches.json";
 
 export function getStaticPaths() {
 	return leagues.flatMap((league) =>
@@ -37,6 +39,35 @@ const cardBadges = badges
 	.map((key) => ({ icon: BADGES[key].icon, tier: key === "champion" ? "champion" : BADGES[key].tier }));
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
+// KICKS 2.0: one number leads (goals if any, otherwise games played), with a
+// gold line when the player ranked well in it; the rest go in rows below.
+const leadIsGoals = data.goals > 0;
+const lead = leadIsGoals
+	? { value: data.goals, en: plural(data.goals, "goal").split(" ")[1], ko: "골" }
+	: { value: data.games, en: plural(data.games, "game").split(" ")[1], ko: "경기" };
+const leadRank = data.highlights.find((h) => h.kind === "rank" && (leadIsGoals ? / goals/.test(h.title.en) : false));
+const rows = [
+	{ en: "Goals", ko: "골", value: data.goals },
+	{ en: "Assists", ko: "어시스트", value: data.assists },
+	{ en: "Attacking points", ko: "공격포인트", value: data.attackingPoints },
+	{ en: "Games", ko: "경기", value: data.games },
+].filter((row) => !(leadIsGoals ? row.en === "Goals" : row.en === "Games"));
+const [topHighlight, ...otherHighlights] = data.highlights;
+const isAward = (icon: string) => ["👑", "🏆", "🏅"].includes(icon);
+// Week bars on the share card: G+A per week; for a player without any, the
+// team they played for that week: wins, draws and losses stacked.
+const byTeam = data.attackingPoints > 0;
+const bars = section.weekly_stats.map((week) => {
+	const results = week.team_id ? teamResults(matchesData as TeamMatch[], league.id, week.team_id).filter((r) => r.week === week.week) : [];
+	const count = (result: string) => results.filter((r) => r.result === result).length;
+	return {
+		week: week.week,
+		value: byTeam ? week.goals + week.assists : results.length,
+		wdl: byTeam ? null : [count("W"), count("D"), count("L")],
+	};
+});
+const barMax = Math.max(1, ...bars.map((bar) => bar.value));
+
 // What the canvas needs to draw the summary image in either language.
 const cardData = {
 	name: player.name,
@@ -53,6 +84,10 @@ const cardData = {
 	positions: player.positions,
 	badges: cardBadges,
 	highlights: data.highlights.map(({ icon, title, sub }) => ({ icon, title, sub })),
+	lead,
+	bars: bars.map((bar) => bar.value),
+	wdl: bars.map((bar) => bar.wdl),
+	barWeeks: bars.map((bar) => bar.week),
 };
 ---
 
@@ -64,10 +99,19 @@ const cardData = {
 >
 	<div class="wrapped" id="wrapped" data-player-url={`/players/${player.id}/?league=${league.id}`}>
 		<div class="wrapped-stage" style={`--team-color: ${teamColor}`}>
+			<svg class="wrapped-court" viewBox="0 0 400 800" preserveAspectRatio="none" aria-hidden="true">
+				<g fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2">
+					<rect x="16" y="16" width="368" height="768" />
+					<line x1="16" y1="400" x2="384" y2="400" />
+					<circle cx="200" cy="400" r="60" />
+					<path d="M110 16 v60 a90 90 0 0 0 180 0 v-60" />
+					<path d="M110 784 v-60 a90 90 0 0 1 180 0 v60" />
+				</g>
+			</svg>
 			<div class="wrapped-progress" aria-hidden="true"></div>
 
 			<div class="wrapped-top">
-				<span class="wrapped-brand">KICKS WRAPPED</span>
+				<img class="wrapped-logo" src="/kicks-logo-white.jpg" alt="KICKS" />
 				<div class="wrapped-top-actions">
 					<button class="wrapped-lang" type="button" data-wrapped-lang>EN | 한</button>
 					<a
@@ -83,7 +127,7 @@ const cardData = {
 
 			<!-- 1. Intro -->
 			<section class="wrapped-slide wrapped-slide--intro">
-				<p class="wrapped-eyebrow">{league.id}</p>
+				<T as="p" class="wrapped-eyebrow" en="Season review" ko="시즌 리뷰" />
 				<div class="wrapped-name-row">
 					<h1 class="wrapped-hero">{player.name}</h1>
 					{
@@ -100,54 +144,55 @@ const cardData = {
 					as="p"
 					class="wrapped-lead"
 					en={`${data.league.weeks} weeks. ${data.league.matches} matches. ${data.league.goals} goals across the league.`}
-					ko={`${data.league.weeks}주, ${data.league.matches}경기, 리그 전체 ${data.league.goals}골.`}
+					ko={`${data.league.weeks}주. ${data.league.matches}경기. 리그 전체 ${data.league.goals}골.`}
 				/>
-				<T
-					as="p"
-					class="wrapped-lead wrapped-lead--strong"
-					en={`And you were out there for ${plural(data.games, "game")}.`}
-					ko={`그중 ${data.games}경기에 함께했어요.`}
-				/>
+				<p class="wrapped-team-line">{data.team.teamName} · {league.id}</p>
 				<T as="p" class="wrapped-hint" en="Tap to continue →" ko="탭해서 넘기기 →" />
 			</section>
 
-			<!-- 2. Numbers -->
+			<!-- 2. Numbers: one big number, then the rest as rows -->
 			<section class="wrapped-slide">
-				<T as="p" class="wrapped-eyebrow" en="Your numbers" ko="당신의 숫자" />
-				<div class="wrapped-stats">
-					<div><span class="wrapped-stat-value">{data.goals}</span><T class="wrapped-stat-label" en="Goals" ko="골" /></div>
-					<div><span class="wrapped-stat-value">{data.assists}</span><T class="wrapped-stat-label" en="Assists" ko="어시스트" /></div>
-					<div><span class="wrapped-stat-value">{data.attackingPoints}</span><T class="wrapped-stat-label" en="Attacking pts" ko="공격포인트" /></div>
-					<div><span class="wrapped-stat-value">{data.games}</span><T class="wrapped-stat-label" en="Games" ko="경기" /></div>
-				</div>
+				<T as="p" class="wrapped-eyebrow" en="Your numbers" ko="나의 기록" />
+				<p class="wrapped-big">{lead.value}<T class="wrapped-big-unit" en={lead.en} ko={lead.ko} /></p>
+				{leadRank && <T as="p" class="wrapped-gold" en={leadRank.title.en} ko={leadRank.title.ko} />}
+				<ul class="wrapped-rows">
+					{rows.map((row) => (
+						<li><T en={row.en} ko={row.ko} /><strong>{row.value}</strong></li>
+					))}
+				</ul>
 				{
 					data.attackingPoints === 0 && (
-						<T
-							as="p"
-							class="wrapped-lead"
-							en={`Some seasons aren't about the scoresheet. ${plural(data.games, "game")} with the team is its own story.`}
-							ko={`기록지에 다 담기지 않는 시즌도 있어요. 팀과 함께한 ${data.games}경기가 그 자체로 이야기예요.`}
-						/>
+						<T as="p" class="wrapped-lead" en="Some seasons aren't about the scoresheet." ko="기록만으로는 다 말할 수 없는 시즌도 있습니다." />
 					)
 				}
 			</section>
 
-			<!-- 3. Highlights -->
+			<!-- 3. Highlights: the main one as a medal, the other two small -->
 			<section class="wrapped-slide">
-				<T as="p" class="wrapped-eyebrow" en="Your highlights" ko="나의 주요 활약" />
-				<ol class="wrapped-highlights">
-					{
-						data.highlights.map((highlight) => (
+				<T as="p" class="wrapped-eyebrow" en="Your highlight" ko="나의 하이라이트" />
+				{topHighlight && (
+					<div class="wrapped-medal-block">
+						<span class:list={["wrapped-medal", { "wrapped-medal--gold": isAward(topHighlight.icon) }]} aria-hidden="true">
+							{isAward(topHighlight.icon) ? (
+								<svg viewBox="0 0 48 48"><path d="M8 30c6 0 10-3 14-9l3-5c1-2 3-3 5-2l2 1c2 1 2 3 1 5l-2 4c4 0 8 1 9 4v4H8z" fill="#d9b04a" /><rect x="8" y="34" width="32" height="4" fill="#b8892b" /></svg>
+							) : (
+								<span>{topHighlight.icon}</span>
+							)}
+						</span>
+						<T as="p" class="wrapped-medal-title" en={topHighlight.title.en} ko={topHighlight.title.ko} />
+						<T as="p" class="wrapped-medal-sub" en={topHighlight.sub.en} ko={topHighlight.sub.ko} />
+					</div>
+				)}
+				{otherHighlights.length > 0 && (
+					<ul class="wrapped-rows wrapped-rows--small">
+						{otherHighlights.map((highlight) => (
 							<li>
-								<span class="wrapped-highlight-icon" aria-hidden="true">{highlight.icon}</span>
-								<div>
-									<T as="p" class="wrapped-highlight-title" en={highlight.title.en} ko={highlight.title.ko} />
-									<T as="p" class="wrapped-highlight-sub" en={highlight.sub.en} ko={highlight.sub.ko} />
-								</div>
+								<T en={highlight.title.en} ko={highlight.title.ko} />
+								<T class="wrapped-row-sub" en={highlight.sub.en} ko={highlight.sub.ko} />
 							</li>
-						))
-					}
-				</ol>
+						))}
+					</ul>
+				)}
 			</section>
 
 			<!-- 4. Best week -->
@@ -175,7 +220,7 @@ const cardData = {
 			<!-- 5. Style + badges -->
 			<section class="wrapped-slide">
 				<T as="p" class="wrapped-eyebrow" en="Your style" ko="나의 플레이 스타일" />
-				<p class="wrapped-hero wrapped-hero--tag">{section.play_style_tag}</p>
+				<p class="wrapped-hero wrapped-hero--tag"><T en="Played like a" ko="이번 리그의 스타일" /> <em>{section.play_style_tag}</em></p>
 				<T
 					as="p"
 					class="wrapped-lead"
@@ -185,9 +230,9 @@ const cardData = {
 				<ul class="wrapped-badges">
 					{
 						badges.map((key) => (
-							<li class:list={["wrapped-badge", `wrapped-badge--${BADGES[key].tier}`, { "wrapped-badge--champion": key === "champion" }]}>
-								<span aria-hidden="true">{BADGES[key].icon}</span>
-								<T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} />
+							<li class:list={["wrapped-badge2", { "wrapped-badge2--gold": key === "champion" || BADGES[key].tier === "icon" || BADGES[key].tier === "legendary" }]}>
+								<span class="wrapped-badge2-icon" aria-hidden="true">{BADGES[key].icon}</span>
+								<T class="wrapped-badge2-name" en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} />
 							</li>
 						))
 					}
@@ -200,7 +245,7 @@ const cardData = {
 				{
 					data.team.champion ? (
 						<>
-							<p class="wrapped-trophy" aria-hidden="true">🏆</p>
+							<svg class="wrapped-trophy-svg" viewBox="0 0 48 48" aria-hidden="true"><path d="M14 6h20v5h7v4c0 6-4 10-9.2 10.8A11 11 0 0 1 26 31.6V37h6v5H16v-5h6v-5.4a11 11 0 0 1-5.8-5.8C11 25 7 21 7 15v-4h7V6Zm0 9h-3c0 3.3 1.5 5.8 4 6.7A12 12 0 0 1 14 18v-3Zm20 0v3c0 1.3-.2 2.6-.6 3.7 2.5-.9 3.6-3.4 3.6-6.7h-3Z" fill="#d9b04a" /></svg>
 							<T as="p" class="wrapped-hero" en="Champions" ko="우승" />
 							<p class="wrapped-team-name">{data.team.teamName}</p>
 						</>
@@ -247,48 +292,38 @@ const cardData = {
 
 			<!-- 8. Summary card -->
 			<section class="wrapped-slide wrapped-slide--summary">
-				<div class="wrapped-card">
-					<p class="wrapped-card-brand">KICKS · {league.id} WRAPPED</p>
-					<p class="wrapped-card-name">
-						{player.name}
-						{player.positions.map((position) => (
-							<span class={`position-chip position-${position}`}>{position}</span>
-						))}
-					</p>
-					<p class="wrapped-card-team">
-						{data.team.champion && <span aria-hidden="true">🏆 </span>}{data.team.teamName} · {section.play_style_tag}
-					</p>
-					<div class="wrapped-card-stats">
+				<div class="wrapped-share">
+					<img class="wrapped-share-logo" src="/kicks-logo-white.jpg" alt="KICKS" />
+					<p class="wrapped-share-brand">{league.id} · <T en="Season review" ko="시즌 리뷰" /></p>
+					<p class="wrapped-share-big">{lead.value}<T class="wrapped-share-unit" en={lead.en} ko={lead.ko} /></p>
+					<p class="wrapped-share-name">{player.name}</p>
+					<p class="wrapped-share-team">{data.team.champion && <T en="Champions · " ko="우승 · " />}{data.team.teamName}</p>
+					<div class="wrapped-share-stats">
 						<div><strong>{data.goals}</strong><T en="Goals" ko="골" /></div>
-						<div><strong>{data.assists}</strong><T en="Assists" ko="어시" /></div>
+						<div><strong>{data.assists}</strong><T en="Assists" ko="도움" /></div>
 						<div><strong>{data.games}</strong><T en="Games" ko="경기" /></div>
 					</div>
-					<ul class="wrapped-card-highlights">
-						{
-							data.highlights.map((highlight) => (
-								<li>
-									<span aria-hidden="true">{highlight.icon}</span>
-									<T en={highlight.title.en} ko={highlight.title.ko} />
-								</li>
-							))
-						}
-					</ul>
-					{
-						cardBadges.length > 0 && (
-							<div class="wrapped-card-badge-row">
-								<T
-									class="wrapped-card-badge-count"
-									en={plural(cardBadges.length, "badge")}
-									ko={`배지 ${cardBadges.length}개`}
-								/>
-								<ul class="wrapped-card-badges" aria-hidden="true">
-									{cardBadges.map((badge) => (
-										<li class={`wrapped-card-badge wrapped-card-badge--${badge.tier}`}>{badge.icon}</li>
-									))}
-								</ul>
-							</div>
-						)
-					}
+					<div class="wrapped-share-chart" aria-hidden="true">
+						{bars.map((bar) => (
+							<span class="wrapped-share-bar">
+								{bar.wdl ? (
+									<span class="wrapped-share-stack" style={`height: ${Math.max(4, (bar.value / barMax) * 100)}%`}>
+										{bar.wdl.map((n, i) => n > 0 && <span class={`wrapped-share-seg wrapped-share-seg--${"wdl"[i]}`} style={`flex: ${n}`} />)}
+									</span>
+								) : (
+									<span class="wrapped-share-fill" style={`height: ${Math.max(4, (bar.value / barMax) * 100)}%`} />
+								)}
+								<span class="wrapped-share-week">W{bar.week}</span>
+							</span>
+						))}
+					</div>
+					{!byTeam && (
+						<p class="wrapped-share-legend">
+							<span><i class="wrapped-share-seg--w" />W</span><span><i class="wrapped-share-seg--d" />D</span><span><i class="wrapped-share-seg--l" />L</span>
+							<T class="wrapped-share-legend-note" en={`${data.team.teamName} by week`} ko={`${data.team.teamName} 주차별 성적`} />
+						</p>
+					)}
+					<p class="wrapped-share-foot"><span>{section.play_style_tag}</span><span>kicksuiuc.com</span></p>
 				</div>
 				<div class="wrapped-actions" data-wrapped-actions>
 					<button type="button" class="wrapped-button wrapped-button--primary" data-wrapped-save>
@@ -298,9 +333,6 @@ const cardData = {
 						<span data-copy-label><T en="Copy link" ko="링크 복사" /></span>
 						<span data-copy-done hidden><T en="Copied!" ko="복사됐어요!" /></span>
 					</button>
-					<a class="wrapped-button wrapped-button--ghost" href={`/players/${player.id}/?league=${league.id}`}>
-						<T en="Player page" ko="선수 페이지" />
-					</a>
 				</div>
 			</section>
 		</div>
@@ -316,6 +348,10 @@ const cardData = {
 		goals: number; assists: number; points: number; games: number; tag: string; positions: string[];
 		badges: { icon: string; tier: string }[];
 		highlights: { icon: string; title: Text; sub: Text }[];
+		lead: { value: number; en: string; ko: string };
+		bars: number[];
+		wdl: (number[] | null)[];
+		barWeeks: number[];
 	}
 
 	const root = document.getElementById("wrapped");
@@ -399,26 +435,6 @@ const cardData = {
 		});
 	}
 
-	const POSITION_COLORS: Record<string, string> = { GK: "#f0a202", DF: "#2f6fed", MF: "#2e9e5b", FW: "#d7263d" };
-	const FONT = '-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif';
-
-	/** Splits `text` into lines no wider than `maxWidth` (with the font currently set). */
-	function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
-		const lines: string[] = [];
-		let line = "";
-		for (const word of text.split(" ")) {
-			const test = line ? `${line} ${word}` : word;
-			if (ctx.measureText(test).width > maxWidth && line) {
-				lines.push(line);
-				line = word;
-			} else {
-				line = test;
-			}
-		}
-		lines.push(line);
-		return lines;
-	}
-
 	/** fillText with CSS-style letter-spacing (drawn glyph by glyph, so it works in every browser). */
 	function spacedText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, spacing: number, align: "left" | "center" = "left") {
 		const chars = [...text];
@@ -434,14 +450,31 @@ const cardData = {
 	}
 
 	/**
-	 * The share image: a copy of the summary card on the last slide. Every size
-	 * below is the card's CSS value multiplied by S (the card is ~336px wide on
-	 * a phone and 940px here), so the saved image looks like what's on screen.
-	 * The card is centered and kept inside Instagram's safe zone — the story
-	 * header covers roughly the top 250px and the reply bar the bottom 250px.
+	 * The share image (1080×1920): the gold-bordered card from the last slide,
+	 * drawn at full size on the dark olive court. The card is centered and
+	 * kept inside Instagram's safe zone (the story header covers roughly the
+	 * top 250px, the reply bar the bottom 250px).
 	 */
 	async function drawCard(card: CardData, lang: "en" | "ko"): Promise<Blob | null> {
+		const DISPLAY = '"Inter Tight Variable", "Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif';
+		const BODY = '"Pretendard Variable", Pretendard, -apple-system, "Apple SD Gothic Neo", sans-serif';
+		const teamLine = `${card.champion ? (lang === "ko" ? "우승 · " : "Champions · ") : ""}${card.team}`;
+		const brand = `${card.league} · ${lang === "ko" ? "시즌 리뷰" : "SEASON REVIEW"}`;
+		const unit = card.lead[lang];
+		const labels = lang === "ko" ? ["골", "도움", "경기"] : ["Goals", "Assists", "Games"];
+		// Make sure the web fonts (and the Korean glyphs in this card) are loaded before drawing.
+		const allText = [card.name, teamLine, brand, unit, card.tag, ...labels, "kicksuiuc.com 0123456789W"].join(" ");
+		await Promise.all(
+			["800 80px", "700 80px", "600 40px", "800 italic 200px"].flatMap((spec) => [
+				document.fonts?.load(`${spec} "Inter Tight Variable"`, allText),
+				document.fonts?.load(`${spec} "Pretendard Variable"`, allText),
+			]),
+		).catch(() => {});
 		await document.fonts?.ready;
+		const logo = new Image();
+		logo.src = "/kicks-logo-white.jpg";
+		await logo.decode().catch(() => {});
+
 		const W = 1080;
 		const H = 1920;
 		const canvas = document.createElement("canvas");
@@ -449,174 +482,174 @@ const cardData = {
 		canvas.height = H;
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return null;
-		const t = (text: { en: string; ko: string }) => text[lang];
-		const gold = "#e9c65a";
-		const cream = "#f7f6f2";
+		const gold = "#d9b04a";
+		const white = "#ffffff";
+		const soft = "rgba(255, 255, 255, 0.72)";
 
-		// Background: same 160° gradient as the slides.
-		const background = ctx.createLinearGradient(W * 0.33, 0, W * 0.67, H);
-		background.addColorStop(0, "#3f5128");
-		background.addColorStop(1, "#1b2411");
+		// Background: dark olive with faint futsal court lines, as on the slides.
+		const background = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, H);
+		background.addColorStop(0, "#4a5f30");
+		background.addColorStop(0.55, "#2c3a1c");
+		background.addColorStop(1, "#1f2914");
 		ctx.fillStyle = background;
 		ctx.fillRect(0, 0, W, H);
-
-		const cardW = 940;
-		const S = cardW / 336;
-		const px = (css: number) => Math.round(css * S);
-		const cardX = (W - cardW) / 2;
-		const padX = px(20);
-		const padY = px(22);
-		const left = cardX + padX;
-		const inner = cardW - padX * 2;
-
-		// Font sizes (CSS rem × 16 × S).
-		const brandSize = px(10.56);
-		const nameSize = px(35.2);
-		const chipSize = px(11.5);
-		const teamSize = px(14.4);
-		const statSize = px(28.8);
-		const statLabelSize = px(lang === "ko" ? 12.8 : 10.9);
-		const highlightSize = px(14.7);
-		const highlightLine = Math.round(highlightSize * 1.35);
-		const badgeLabelSize = px(10.9);
-		const emojiSize = px(20.8);
-		const iconCol = Math.round(highlightSize * 1.3) + px(10);
-
-		// Measure what wraps.
-		ctx.font = `600 ${highlightSize}px ${FONT}`;
-		const highlightLines = card.highlights.map((highlight) => wrapLines(ctx, t(highlight.title), inner - iconCol));
-		ctx.font = `${emojiSize}px ${FONT}`;
-		const emojiStep = emojiSize + px(8);
-		const perRow = Math.max(1, Math.floor((inner + px(8)) / emojiStep));
-		const badgeRows = Math.ceil(card.badges.length / perRow);
-		const emojiRow = Math.round(emojiSize * 1.2);
-
-		const blocks = {
-			brand: brandSize + px(12),
-			name: Math.round(nameSize * 1.1),
-			team: px(6) + Math.round(teamSize * 1.4) + px(16),
-			stats: px(12) * 2 + Math.round(statSize * 1.1) + px(2) + Math.round(statLabelSize * 1.3),
-			highlights:
-				px(16) + highlightLines.reduce((sum, lines) => sum + lines.length * highlightLine, 0) + px(8) * (highlightLines.length - 1) + px(12),
-			badges: card.badges.length > 0 ? Math.round(badgeLabelSize * 1.3) + px(8) + badgeRows * emojiRow + (badgeRows - 1) * px(4) : 0,
-		};
-		const cardH = padY * 2 + Object.values(blocks).reduce((a, b) => a + b, 0);
-		// The card itself sits dead center; the site address hangs below it.
-		const cardY = Math.max(250, Math.round((H - cardH) / 2));
-
-		// Card.
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+		ctx.lineWidth = 4;
+		ctx.strokeRect(40, 40, W - 80, H - 80);
 		ctx.beginPath();
-		ctx.roundRect(cardX, cardY, cardW, cardH, px(16));
-		ctx.fillStyle = "rgba(20, 27, 13, 0.55)";
-		ctx.fill();
-		ctx.lineWidth = Math.max(2, Math.round(S));
-		ctx.strokeStyle = "rgba(233, 198, 90, 0.5)";
+		ctx.moveTo(40, H / 2);
+		ctx.lineTo(W - 40, H / 2);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.arc(W / 2, H / 2, 160, 0, Math.PI * 2);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(W / 2 - 240, 40);
+		ctx.lineTo(W / 2 - 240, 200);
+		ctx.arc(W / 2, 200, 240, Math.PI, 0, true);
+		ctx.lineTo(W / 2 + 240, 40);
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(W / 2 - 240, H - 40);
+		ctx.lineTo(W / 2 - 240, H - 200);
+		ctx.arc(W / 2, H - 200, 240, Math.PI, 0);
+		ctx.lineTo(W / 2 + 240, H - 40);
 		ctx.stroke();
 
-		let y = cardY + padY;
+		// Card layout (heights in px, top to bottom).
+		const cardW = 940;
+		const pad = 64;
+		const inner = cardW - pad * 2;
+		const stacked = card.wdl.some((entry) => entry !== null);
+		const heights = { logo: 56, brand: 34, big: 230, name: 96, team: 50, stats: 170, chart: stacked ? 300 : 250, foot: 40 };
+		const gaps = [22, 34, 18, 0, 34, 40, 40];
+		const cardH = pad * 2 + Object.values(heights).reduce((a, b) => a + b, 0) + gaps.reduce((a, b) => a + b, 0);
+		const cardX = (W - cardW) / 2;
+		const cardY = Math.max(250, Math.round((H - cardH) / 2));
+		const left = cardX + pad;
+
+		ctx.fillStyle = "#26321a";
+		ctx.fillRect(cardX, cardY, cardW, cardH);
+		ctx.strokeStyle = gold;
+		ctx.lineWidth = 8;
+		ctx.strokeRect(cardX + 4, cardY + 4, cardW - 8, cardH - 8);
+
+		let y = cardY + pad;
 		ctx.textBaseline = "top";
+		ctx.textAlign = "left";
 
-		// Brand line.
-		ctx.fillStyle = gold;
-		ctx.font = `800 ${brandSize}px ${FONT}`;
-		spacedText(ctx, `KICKS · ${card.league} WRAPPED`, left, y, brandSize * 0.14);
-		y += blocks.brand;
-
-		// Name + position chips (vertically centered on the name).
-		ctx.fillStyle = cream;
-		ctx.font = `700 ${nameSize}px ${FONT}`;
-		ctx.fillText(card.name, left, y);
-		const nameMid = y + blocks.name / 2;
-		let chipX = left + ctx.measureText(card.name).width + px(8);
-		ctx.font = `700 ${chipSize}px ${FONT}`;
-		ctx.textBaseline = "middle";
-		const chipH = Math.round(chipSize * 1.25 + px(6.4));
-		for (const position of card.positions) {
-			const width = ctx.measureText(position).width + px(10.4) * 2;
-			if (chipX + width > left + inner) break;
-			ctx.fillStyle = POSITION_COLORS[position] ?? "#7f8c8d";
-			ctx.beginPath();
-			ctx.roundRect(chipX, nameMid - chipH / 2, width, chipH, chipH / 2);
-			ctx.fill();
-			ctx.fillStyle = "#ffffff";
-			ctx.fillText(position, chipX + px(10.4), nameMid + 1);
-			chipX += width + px(8);
+		// Logo.
+		if (logo.naturalWidth) {
+			const logoW = (heights.logo * logo.naturalWidth) / logo.naturalHeight;
+			ctx.drawImage(logo, left, y, logoW, heights.logo);
 		}
+		y += heights.logo + gaps[0];
+
+		// "FA26-L2 · SEASON REVIEW"
+		ctx.fillStyle = gold;
+		ctx.font = `700 28px ${BODY}`;
+		spacedText(ctx, brand, left, y, lang === "ko" ? 1 : 3);
+		y += heights.brand + gaps[1];
+
+		// The one big number, gold and italic, with its unit.
+		ctx.font = `italic 800 230px ${DISPLAY}`;
+		ctx.fillStyle = gold;
+		ctx.fillText(String(card.lead.value), left - 6, y);
+		const bigW = ctx.measureText(String(card.lead.value)).width;
+		ctx.font = `600 48px ${DISPLAY}`;
+		ctx.textBaseline = "alphabetic";
+		ctx.fillText(unit, left + bigW + 34, y + 210);
 		ctx.textBaseline = "top";
-		y += blocks.name + px(6);
+		y += heights.big + gaps[2];
 
-		// Team · style.
-		ctx.fillStyle = "rgba(247, 246, 242, 0.85)";
-		ctx.font = `400 ${teamSize}px ${FONT}`;
-		ctx.fillText(`${card.champion ? "🏆 " : ""}${card.team} · ${card.tag}`, left, y + Math.round(teamSize * 0.2));
-		y += blocks.team - px(6);
+		// Name and team.
+		ctx.fillStyle = white;
+		ctx.font = `800 84px ${DISPLAY}`;
+		ctx.fillText(card.name, left, y);
+		y += heights.name + gaps[3];
+		ctx.fillStyle = soft;
+		ctx.font = `600 38px ${BODY}`;
+		ctx.fillText(teamLine, left, y);
+		y += heights.team + gaps[4];
 
-		// Stats between two rules.
-		ctx.strokeStyle = "rgba(247, 246, 242, 0.18)";
-		ctx.lineWidth = Math.max(2, Math.round(S));
+		// Three numbers between two rules.
+		ctx.strokeStyle = "rgba(255, 255, 255, 0.16)";
+		ctx.lineWidth = 3;
 		ctx.beginPath();
 		ctx.moveTo(left, y);
 		ctx.lineTo(left + inner, y);
-		ctx.moveTo(left, y + blocks.stats);
-		ctx.lineTo(left + inner, y + blocks.stats);
+		ctx.moveTo(left, y + heights.stats);
+		ctx.lineTo(left + inner, y + heights.stats);
 		ctx.stroke();
-		const stats = [
-			[card.goals, lang === "ko" ? "골" : "GOALS"],
-			[card.assists, lang === "ko" ? "어시" : "ASSISTS"],
-			[card.games, lang === "ko" ? "경기" : "GAMES"],
-		] as const;
+		const values = [card.goals, card.assists, card.games];
 		const colW = inner / 3;
-		stats.forEach(([value, label], i) => {
+		ctx.textAlign = "center";
+		values.forEach((value, i) => {
 			const cx = left + colW * i + colW / 2;
-			ctx.textAlign = "center";
-			ctx.fillStyle = "rgba(247, 246, 242, 0.95)";
-			ctx.font = `800 ${statSize}px ${FONT}`;
-			ctx.fillText(String(value), cx, y + px(12));
-			ctx.fillStyle = "rgba(247, 246, 242, 0.85)";
-			ctx.font = `700 ${statLabelSize}px ${FONT}`;
-			spacedText(ctx, label, cx, y + px(12) + Math.round(statSize * 1.1) + px(2), lang === "ko" ? statLabelSize * 0.02 : statLabelSize * 0.06, "center");
+			ctx.fillStyle = white;
+			ctx.font = `800 76px ${DISPLAY}`;
+			ctx.fillText(String(value), cx, y + 24);
+			ctx.fillStyle = soft;
+			ctx.font = `600 28px ${BODY}`;
+			ctx.fillText(labels[i], cx, y + 112);
 		});
 		ctx.textAlign = "left";
-		y += blocks.stats + px(16);
+		y += heights.stats + gaps[5];
 
-		// Highlights: emoji + title, emoji centered on the text block.
-		card.highlights.forEach((highlight, i) => {
-			const lines = highlightLines[i];
-			const blockH = lines.length * highlightLine;
-			ctx.textBaseline = "middle";
+		// A gold bar per week.
+		const barAreaH = heights.chart - (stacked ? 94 : 44);
+		const count = Math.max(1, card.bars.length);
+		const gap = 20;
+		const barW = (inner - gap * (count - 1)) / count;
+		const max = Math.max(1, ...card.bars);
+		const segColors = [gold, "rgba(217, 176, 74, 0.5)", "rgba(255, 255, 255, 0.2)"];
+		card.bars.forEach((value, i) => {
+			const h = Math.max(8, (value / max) * barAreaH);
+			const x = left + i * (barW + gap);
+			const wdl = card.wdl[i];
+			if (wdl && value > 0) {
+				// Wins at the bottom, then draws, then losses.
+				let top = y + barAreaH;
+				wdl.forEach((n, k) => {
+					const segH = (n / value) * h;
+					top -= segH;
+					ctx.fillStyle = segColors[k];
+					ctx.fillRect(x, top, barW, segH);
+				});
+			} else {
+				ctx.fillStyle = gold;
+				ctx.fillRect(x, y + barAreaH - h, barW, h);
+			}
+			ctx.fillStyle = soft;
+			ctx.font = `600 26px ${BODY}`;
 			ctx.textAlign = "center";
-			ctx.font = `${highlightSize}px ${FONT}`;
-			ctx.fillText(highlight.icon, left + (highlightSize * 1.3) / 2, y + blockH / 2);
+			ctx.fillText(`W${card.barWeeks[i]}`, x + barW / 2, y + barAreaH + 12);
 			ctx.textAlign = "left";
-			ctx.textBaseline = "top";
-			ctx.fillStyle = cream;
-			ctx.font = `600 ${highlightSize}px ${FONT}`;
-			lines.forEach((line, n) => ctx.fillText(line, left + iconCol, y + n * highlightLine + (highlightLine - highlightSize) / 2));
-			y += blockH + px(8);
 		});
-		y += px(12) - px(8);
-
-		// Badges.
-		if (card.badges.length > 0) {
-			ctx.fillStyle = gold;
-			ctx.font = `800 ${badgeLabelSize}px ${FONT}`;
-			spacedText(ctx, lang === "ko" ? `배지 ${card.badges.length}개` : `${card.badges.length} BADGES`, left, y, badgeLabelSize * 0.1);
-			y += Math.round(badgeLabelSize * 1.3) + px(8);
-			ctx.font = `${emojiSize}px ${FONT}`;
-			ctx.textBaseline = "middle";
-			card.badges.forEach((badge, i) => {
-				const row = Math.floor(i / perRow);
-				const col = i % perRow;
-				ctx.fillText(badge.icon, left + col * emojiStep, y + row * (emojiRow + px(4)) + emojiRow / 2);
+		if (stacked) {
+			// Legend: W · D · L squares, then whose results these are.
+			const ly = y + barAreaH + 58;
+			let lx = left;
+			ctx.font = `600 26px ${BODY}`;
+			["W", "D", "L"].forEach((letter, k) => {
+				ctx.fillStyle = segColors[k];
+				ctx.fillRect(lx, ly + 4, 20, 20);
+				ctx.fillStyle = soft;
+				ctx.fillText(letter, lx + 28, ly);
+				lx += 28 + ctx.measureText(letter).width + 26;
 			});
+			ctx.textAlign = "right";
+			ctx.fillText(lang === "ko" ? `${card.team} 주차별 성적` : `${card.team} by week`, left + inner, ly);
+			ctx.textAlign = "left";
 		}
+		y += heights.chart + gaps[6];
 
-		// Site address under the card, lined up with its right edge.
-		ctx.textBaseline = "top";
+		// Play style on the left, the site on the right.
+		ctx.fillStyle = soft;
+		ctx.font = `700 30px ${BODY}`;
+		ctx.fillText(card.tag, left, y);
 		ctx.textAlign = "right";
-		ctx.fillStyle = "rgba(247, 246, 242, 0.55)";
-		ctx.font = `700 30px ${FONT}`;
-		ctx.fillText("kicksuiuc.com", cardX + cardW - px(4), cardY + cardH + px(10));
+		ctx.fillText("kicksuiuc.com", left + inner, y);
 		ctx.textAlign = "left";
 
 		return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
@@ -797,5 +830,284 @@ const cardData = {
 
 	@media (prefers-reduced-motion: reduce) {
 		.wrapped-slide { transform: none; transition: opacity 1ms, visibility 0s; }
+	}
+</style>
+
+<style>
+	/* KICKS 2.0 Wrapped: dark olive, faint court lines, gold as the one accent. */
+	.wrapped-stage {
+		background: radial-gradient(120% 80% at 50% 0%, #4a5f30 0%, #2c3a1c 55%, #1f2914 100%) !important;
+	}
+	.wrapped-court {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+	.wrapped-logo {
+		height: 22px;
+		width: auto;
+	}
+	:global(.wrapped-eyebrow) {
+		color: #d9b04a !important;
+	}
+	.wrapped-team-line {
+		margin: 10px 0 0;
+		color: rgba(255, 255, 255, 0.8);
+		font-weight: 600;
+	}
+	.wrapped-big {
+		margin: 8px 0 0;
+		font-family: var(--k-font-display);
+		font-size: 7rem;
+		font-weight: 700;
+		font-style: normal;
+		line-height: 1;
+		letter-spacing: -0.04em;
+	}
+	.wrapped-big :global(.wrapped-big-unit) {
+		margin-left: 10px;
+		font-size: 1.4rem;
+		font-weight: 600;
+		letter-spacing: 0;
+		opacity: 0.8;
+	}
+	:global(.wrapped-gold) {
+		margin: 10px 0 0;
+		color: #d9b04a;
+		font-weight: 700;
+	}
+	.wrapped-rows {
+		width: 100%;
+		max-width: 360px;
+		margin: 28px 0 0;
+		padding: 0;
+		list-style: none;
+	}
+	.wrapped-rows li {
+		display: flex;
+		justify-content: space-between;
+		gap: 12px;
+		padding: 12px 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+		font-weight: 600;
+	}
+	.wrapped-rows strong {
+		font-family: var(--k-font-display);
+		font-size: 1.3rem;
+	}
+	.wrapped-rows--small li {
+		flex-direction: column;
+		gap: 2px;
+		font-size: 0.95rem;
+	}
+	.wrapped-rows :global(.wrapped-row-sub) {
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 0.82rem;
+		font-weight: 500;
+	}
+	.wrapped-medal-block {
+		display: grid;
+		justify-items: start;
+		gap: 8px;
+		margin-top: 12px;
+	}
+	.wrapped-medal {
+		display: grid;
+		place-items: center;
+		width: 112px;
+		height: 112px;
+		border: 4px solid rgba(255, 255, 255, 0.85);
+		border-radius: 50%;
+		font-size: 2.6rem;
+	}
+	.wrapped-medal--gold {
+		border-color: #d9b04a;
+		box-shadow: 0 0 0 6px rgba(217, 176, 74, 0.18);
+	}
+	.wrapped-medal svg {
+		width: 58px;
+		height: 58px;
+	}
+	:global(.wrapped-medal-title) {
+		margin: 8px 0 0;
+		font-family: var(--k-font-display);
+		font-size: 1.5rem;
+		font-weight: 700;
+		line-height: 1.2;
+	}
+	:global(.wrapped-medal-sub) {
+		margin: 0;
+		color: rgba(255, 255, 255, 0.7);
+	}
+	.wrapped-hero--tag em {
+		color: #d9b04a;
+		font-style: italic;
+	}
+	.wrapped-badge2 {
+		display: grid;
+		justify-items: center;
+		gap: 4px;
+		width: 72px;
+		text-align: center;
+	}
+	.wrapped-badge2-icon {
+		display: grid;
+		place-items: center;
+		width: 52px;
+		height: 52px;
+		border: 2px solid rgba(255, 255, 255, 0.5);
+		border-radius: 50%;
+		font-size: 1.4rem;
+	}
+	.wrapped-badge2--gold .wrapped-badge2-icon {
+		border-color: #d9b04a;
+	}
+	.wrapped-badge2 :global(.wrapped-badge2-name) {
+		font-size: 0.68rem;
+		font-weight: 600;
+		line-height: 1.2;
+	}
+	.wrapped-trophy-svg {
+		width: 84px;
+		height: 84px;
+	}
+
+	/* Share card */
+	.wrapped-share {
+		position: relative;
+		display: grid;
+		gap: 6px;
+		width: min(100%, 360px);
+		padding: 22px 22px 18px;
+		border: 3px solid #d9b04a;
+		background: #26321a;
+	}
+	.wrapped-share-logo {
+		height: 20px;
+		width: auto;
+	}
+	.wrapped-share-brand {
+		margin: 2px 0 0;
+		color: #d9b04a;
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+	.wrapped-share-big {
+		margin: 6px 0 0;
+		color: #d9b04a;
+		font-family: var(--k-font-display);
+		font-size: 4.6rem;
+		font-weight: 800;
+		font-style: italic;
+		line-height: 1;
+	}
+	.wrapped-share-big :global(.wrapped-share-unit) {
+		margin-left: 8px;
+		font-size: 1.1rem;
+		font-style: normal;
+	}
+	.wrapped-share-name {
+		margin: 6px 0 0;
+		font-family: var(--k-font-display);
+		font-size: 1.8rem;
+		font-weight: 800;
+	}
+	.wrapped-share-team {
+		margin: 0;
+		color: rgba(255, 255, 255, 0.75);
+		font-weight: 600;
+	}
+	.wrapped-share-stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		margin-top: 10px;
+		border-top: 1px solid rgba(255, 255, 255, 0.15);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+	}
+	.wrapped-share-stats div {
+		display: grid;
+		padding: 10px 0;
+		font-size: 0.75rem;
+		text-align: center;
+	}
+	.wrapped-share-stats strong {
+		font-family: var(--k-font-display);
+		font-size: 1.5rem;
+	}
+	.wrapped-share-chart {
+		display: flex;
+		align-items: flex-end;
+		gap: 8px;
+		height: 90px;
+		margin-top: 12px;
+	}
+	.wrapped-share-bar {
+		position: relative;
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		justify-content: flex-end;
+		height: 100%;
+		padding-bottom: 16px;
+	}
+	.wrapped-share-fill {
+		display: block;
+		background: #d9b04a;
+	}
+	.wrapped-share-stack {
+		display: flex;
+		flex-direction: column-reverse;
+	}
+	.wrapped-share-seg--w {
+		background: #d9b04a;
+	}
+	.wrapped-share-seg--d {
+		background: rgba(217, 176, 74, 0.5);
+	}
+	.wrapped-share-seg--l {
+		background: rgba(255, 255, 255, 0.2);
+	}
+	.wrapped-share-legend {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 10px;
+		margin: 6px 0 0;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.7rem;
+	}
+	.wrapped-share-legend span {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+	}
+	.wrapped-share-legend i {
+		display: inline-block;
+		width: 8px;
+		height: 8px;
+	}
+	.wrapped-share-legend :global(.wrapped-share-legend-note) {
+		margin-left: auto;
+	}
+	.wrapped-share-week {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 0.65rem;
+		text-align: center;
+	}
+	.wrapped-share-foot {
+		display: flex;
+		justify-content: space-between;
+		margin: 10px 0 0;
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.78rem;
+		font-weight: 600;
 	}
 </style>

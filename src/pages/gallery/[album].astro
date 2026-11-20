@@ -1,29 +1,117 @@
 ---
-// One album: /gallery/<album-id>. Same grid + lightbox the gallery always had.
+// One album: /gallery/<album-id>. Photo grid (cover first, big) + lightbox,
+// then links to the albums on either side.
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { albumOgImage } from "../../lib/og";
 import PhotoGallery from "../../components/PhotoGallery.astro";
 import T from "../../components/T.astro";
 import { albums, type GalleryAlbum } from "../../lib/gallery";
+import scheduleData from "../../data/schedule.json";
+import type { ScheduleEvent } from "../../lib/schedule";
 
 export function getStaticPaths() {
-	return albums.map((album) => ({ params: { album: album.id }, props: { album } }));
+	return albums.map((album, index) => ({
+		params: { album: album.id },
+		// albums are newest first: "previous" is the older one.
+		props: { album, newer: albums[index - 1] ?? null, older: albums[index + 1] ?? null },
+	}));
 }
 
 interface Props {
 	album: GalleryAlbum;
+	newer: GalleryAlbum | null;
+	older: GalleryAlbum | null;
 }
 
-const { album } = Astro.props;
+const { album, newer, older } = Astro.props;
+
+// The date and place come from the schedule entry on the same day, if any.
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const event = album.date ? (scheduleData as ScheduleEvent[]).find((entry) => entry.date === album.date) : undefined;
+const place = event?.location?.split(",")[0] ?? null;
+const dateEn = album.date ? (([y, m, d]) => `${MONTHS[m - 1]} ${d}, ${y}`)(album.date.split("-").map(Number)) : null;
+const dateKo = album.date ? (([y, m, d]) => `${y}년 ${m}월 ${d}일`)(album.date.split("-").map(Number)) : null;
+
+// Cover first, then the rest in order.
+const images = [album.cover, ...album.images.filter((image) => image !== album.cover)];
 ---
 
-<BaseLayout ogImage={albumOgImage(album.id)} title={`${album.title} | KICKS Gallery`} description={`Photos from ${album.title} at KICKS.`}>
-	<main>
-		<section class="content-section" aria-labelledby="album-title">
-			<a class="album-back" href="/gallery/">← <T en="All albums" ko="전체 앨범" /></a>
-			<p class="section-label"><T en="GALLERY" ko="갤러리" /></p>
-			<h1 id="album-title"><T en={album.title} ko={album.titleKo} /></h1>
-			<PhotoGallery images={album.images} />
-		</section>
+<BaseLayout ogImage={albumOgImage(album.id)} title={`${album.title} | KICKS Media`} description={`Photos from ${album.title} at KICKS.`}>
+	<main class="k-page">
+		<a class="k-link album-back" href="/gallery/">← <T en="Media" ko="미디어" /></a>
+		<div class="k-page-head album-head">
+			<div>
+				<h1 class="k-h1"><T en={album.title} ko={album.titleKo} /></h1>
+				{
+					(dateEn || place) && (
+						<p class="album-line">
+							{dateEn && <T en={dateEn} ko={dateKo!} />}
+							{dateEn && place && <span aria-hidden="true"> · </span>}
+							{place}
+						</p>
+					)
+				}
+			</div>
+			<span class="k-meta"><T en={`${album.images.length} photos`} ko={`사진 ${album.images.length}장`} /></span>
+		</div>
+
+		<PhotoGallery images={images} />
+
+		<nav class="album-nav" aria-label="Other albums" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Other albums", ko: "다른 앨범" } })}>
+			{
+				older ? (
+					<a class="album-nav-link" href={`/gallery/${older.id}/`}>
+						<span class="k-meta">← <T en="Previous album" ko="이전 앨범" /></span>
+						<T class="album-nav-title" en={older.title} ko={older.titleKo} />
+					</a>
+				) : (
+					<span />
+				)
+			}
+			{
+				newer && (
+					<a class="album-nav-link album-nav-link--next" href={`/gallery/${newer.id}/`}>
+						<span class="k-meta"><T en="Next album" ko="다음 앨범" /> →</span>
+						<T class="album-nav-title" en={newer.title} ko={newer.titleKo} />
+					</a>
+				)
+			}
+		</nav>
 	</main>
 </BaseLayout>
+
+<style>
+	.album-back {
+		display: inline-block;
+		margin-bottom: 14px;
+	}
+	.album-head {
+		margin-bottom: 20px;
+	}
+	.album-line {
+		margin: 10px 0 0;
+		color: var(--k-muted);
+		font-size: 0.95rem;
+	}
+	.album-nav {
+		display: flex;
+		justify-content: space-between;
+		gap: 20px;
+		margin-top: 40px;
+		padding-top: 20px;
+		border-top: 1px solid var(--k-line);
+	}
+	.album-nav-link {
+		display: grid;
+		gap: 4px;
+	}
+	.album-nav-link--next {
+		text-align: right;
+	}
+	.album-nav-link :global(.album-nav-title) {
+		font-weight: 700;
+	}
+	.album-nav-link:hover :global(.album-nav-title) {
+		text-decoration: underline;
+	}
+</style>

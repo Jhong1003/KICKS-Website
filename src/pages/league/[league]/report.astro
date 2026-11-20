@@ -14,7 +14,7 @@ import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { leagueOgImage } from "../../../lib/og";
 import T from "../../../components/T.astro";
 import reportsData from "../../../data/reports.json";
-import { leagues, type League } from "../../../lib/leagues";
+import { leagues, leagueFullName, type League } from "../../../lib/leagues";
 
 export function getStaticPaths() {
 	return leagues.map((league) => ({ params: { league: league.id }, props: { league } }));
@@ -34,24 +34,19 @@ const pad = (n: number) => String(n).padStart(2, "0");
 ---
 
 <BaseLayout ogImage={leagueOgImage(league.id)} title={`Report · ${league.id} | KICKS`} description={`${league.id} Instagram report slides — save and share.`}>
-	<main class="report-page">
-		<section class="content-section" aria-labelledby="report-title">
-			<a class="back-link" href={`/league/${league.id}/#results`}>
-				← <T en={`${league.id} league`} ko={`${league.id} 리그`} />
-			</a>
-			<p class="section-label">{league.id}</p>
-			<h1 id="report-title"><T en="League Report" ko="리그 리포트" /></h1>
+	<main class="k-page report-page">
+		<a class="k-link report-back" href={`/league/${league.id}/?week=${latest ?? 1}#results`}>
+			← <T en={leagueFullName(league.id)} ko={leagueFullName(league.id)} />
+		</a>
+		<div class="k-page-head">
+			<h1 class="k-h1" id="report-title"><T en="League report" ko="리그 리포트" /></h1>
+		</div>
 
-			{weeks.length === 0 ? (
-				<T as="p" class="about-description" en="The first report appears once a week's results are all in." ko="한 주 결과가 다 들어오면 첫 리포트가 생겨요." />
-			) : (
-				<>
-					<T
-						as="p"
-						class="about-description"
-						en="Instagram-size slides, made from the league's results. Save them and share away."
-						ko="리그 결과로 자동으로 만든 인스타용 이미지예요. 저장해서 스토리나 피드에 올려주세요."
-					/>
+		{weeks.length === 0 ? (
+			<T as="p" class="k-meta" en="The first report appears once a week's results are all in." ko="한 주의 결과가 모두 들어오면 첫 리포트가 만들어집니다." />
+		) : (
+			<>
+				<div class="report-bar">
 					<div class="report-weeks" role="tablist" aria-label="Week">
 						{weeks.map((w) => (
 							<button type="button" role="tab" class="report-week" data-report-week={w.week} aria-selected={w.week === latest ? "true" : "false"}>
@@ -59,24 +54,32 @@ const pad = (n: number) => String(n).padStart(2, "0");
 							</button>
 						))}
 					</div>
+				</div>
 
-					{weeks.map((w) => (
-						<div class="report-set" data-report-set={w.week} hidden={w.week !== latest}>
-							<button type="button" class="report-save" data-report-save>
+				{weeks.map((w) => (
+					<div class="report-set" data-report-set={w.week} hidden={w.week !== latest}>
+						<div class="report-set-head">
+							<span class="k-meta">
+								<T
+									en={`${w.slides.length} slides · 1080 × 1350 for Instagram`}
+									ko={`${w.slides.length}장 · 인스타그램용 1080 × 1350`}
+								/>
+							</span>
+							<button type="button" class="k-btn" data-report-save>
 								<T en={`Save all ${w.slides.length}`} ko={`${w.slides.length}장 모두 저장`} />
 							</button>
-							<div class="report-grid">
-								{w.slides.map((src, i) => (
-									<a href={src} target="_blank" rel="noopener" class="report-slide">
-										<img src={src} alt={`${league.id} ${w.final ? "final" : `week ${w.week}`} report, slide ${i + 1}`} width="1080" height="1350" loading={w.week === latest ? "eager" : "lazy"} decoding="async" data-file={`kicks-${league.id}-${w.final ? "final" : `w${pad(w.week)}`}-${i + 1}.jpg`} />
-									</a>
-								))}
-							</div>
 						</div>
-					))}
-				</>
-			)}
-		</section>
+						<div class="report-grid">
+							{w.slides.map((src, i) => (
+								<a href={src} target="_blank" rel="noopener" class="report-slide">
+									<img src={src} alt={`${league.id} ${w.final ? "final" : `week ${w.week}`} report, slide ${i + 1}`} width="1080" height="1350" loading={w.week === latest ? "eager" : "lazy"} decoding="async" data-file={`kicks-${league.id}-${w.final ? "final" : `w${pad(w.week)}`}-${i + 1}.jpg`} />
+								</a>
+							))}
+						</div>
+					</div>
+				))}
+			</>
+		)}
 	</main>
 </BaseLayout>
 
@@ -134,40 +137,67 @@ const pad = (n: number) => String(n).padStart(2, "0");
 </script>
 
 <style>
-	.report-weeks { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 16px; }
+	.report-back {
+		display: inline-block;
+		margin-bottom: 14px;
+	}
+	.report-weeks {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-bottom: 20px;
+	}
 	.report-week {
-		padding: 8px 16px;
-		border: 1px solid var(--color-green);
-		border-radius: 999px;
-		background: transparent;
-		color: var(--color-green);
+		min-height: 36px;
+		padding: 0 14px;
+		border: 1px solid var(--k-line);
+		background: #fff;
+		color: var(--k-ink);
 		font: inherit;
+		font-family: var(--k-font-display);
 		font-size: 0.9rem;
-		font-weight: 700;
+		font-weight: 600;
 		cursor: pointer;
 	}
-	.report-week[aria-selected="true"] { background: var(--color-green); color: var(--color-background); }
-	.report-week:focus-visible, .report-save:focus-visible { outline: 2px solid var(--color-green); outline-offset: 3px; }
-	.report-save {
-		display: inline-flex;
+	.report-week[aria-selected="true"] {
+		border-color: var(--k-olive);
+		background: var(--k-olive);
+		color: #fff;
+	}
+	.report-set-head {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
 		align-items: center;
-		gap: 6px;
-		margin-bottom: 16px;
-		padding: 10px 22px;
-		border: 0;
-		border-radius: 999px;
-		background: var(--color-green);
-		color: var(--color-background);
-		font: inherit;
-		font-weight: 700;
-		cursor: pointer;
+		gap: 10px 20px;
+		margin-bottom: 14px;
 	}
-	.report-save:disabled { opacity: 0.6; cursor: progress; }
+	.report-set-head .k-btn:disabled {
+		opacity: 0.6;
+		cursor: progress;
+	}
 	/* All four in one row on a computer; two by two on a phone. */
-	.report-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-	.report-slide { display: block; border-radius: 6px; overflow: hidden; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12); }
-	.report-slide img { display: block; width: 100%; height: auto; }
+	.report-grid {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 14px;
+	}
+	.report-slide {
+		display: block;
+		border: 1px solid var(--k-line);
+	}
+	.report-slide:hover {
+		border-color: var(--k-ink);
+	}
+	.report-slide img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
 	@media (max-width: 900px) {
-		.report-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+		.report-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 8px;
+		}
 	}
 </style>

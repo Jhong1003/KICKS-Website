@@ -12,18 +12,19 @@ import T from "../components/T.astro";
 ---
 
 <BaseLayout ogImage={pageOgImage("freekick")} title="Free Kick Challenge | KICKS" description="Curl free kicks over the wall and past the KICKS keeper.">
-	<main class="fk-page">
-		<section class="content-section" aria-labelledby="fk-title">
-			<p class="section-label">KICKS FREE KICK</p>
-			<h1 id="fk-title"><T en="Free Kick Challenge" ko="프리킥 챌린지" /></h1>
+	<main class="k-page fk-page mg">
+		<a class="k-link mg-back" href="/#mini-games">← <T en="Mini games" ko="미니게임" /></a>
+		<section class="mg-section" aria-labelledby="fk-title">
+			<h1 class="k-h1" id="fk-title"><T en="Free Kick Challenge" ko="프리킥 챌린지" /></h1>
 			<T
 				as="p"
-				class="about-description fk-intro"
+				class="mg-intro fk-intro"
 				en="Ten free kicks. Bend them over the wall and past the keeper."
-				ko="프리킥 10개. 벽을 넘기고 키퍼를 피해 골망을 흔들어보세요."
+				ko="프리킥 기회는 10번. 수비벽을 넘기고 골키퍼를 피해 감아 차세요."
 			/>
 
-			<div class="fk-game">
+			<div class="mg-body">
+			<div class="fk-game mg-game">
 				<div class="fk-hud" aria-live="off">
 					<span><span class="fk-hud-label"><T en="Score" ko="점수" /></span> <strong data-hud-score>0</strong></span>
 					<span><span class="fk-hud-label"><T en="Streak" ko="연속" /></span> <strong data-hud-combo>0</strong></span>
@@ -61,12 +62,13 @@ import T from "../components/T.astro";
 				</div>
 			</div>
 
-			<div class="fk-board">
+			<div class="fk-board mg-board">
 				<T as="h2" en="Leaderboard" ko="랭킹" />
 				<p class="fk-board-me" data-board-me hidden></p>
 				<ol class="fk-board-list" data-board-list></ol>
-				<p class="fk-board-empty" data-board-empty><T en="No scores yet — be the first." ko="아직 기록이 없어요. 첫 번째 주인공이 되어보세요." /></p>
-				<T as="p" class="fk-board-note" en="One row per name, with its best score. Names are nicknames anyone can pick." ko="이름마다 최고 기록 하나가 남아요. 이름은 누구나 정할 수 있는 닉네임이에요." />
+				<p class="fk-board-empty" data-board-empty><T en="No scores yet." ko="아직 기록이 없습니다." /></p>
+				<T as="p" class="fk-board-note" en="Best score per name. Anyone can pick any nickname." ko="이름마다 최고 점수가 저장됩니다. 닉네임은 누구나 자유롭게 정할 수 있습니다." />
+			</div>
 			</div>
 		</section>
 	</main>

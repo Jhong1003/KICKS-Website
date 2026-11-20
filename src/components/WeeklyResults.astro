@@ -19,6 +19,7 @@ interface Match {
 interface WeekSummaryRow {
 	week: number;
 	team: string;
+	color?: string;
 	wins: number;
 	draws: number;
 	losses: number;
@@ -110,41 +111,35 @@ const REACTIONS = [
 				</p>
 
 				{week.summary.length > 0 && (
-					<table class="week-summary-table">
-						<thead>
-							<tr>
-								<th><T en="Team" ko="팀" /></th>
-								<th><T en="W" ko="승" /></th>
-								<th><T en="D" ko="무" /></th>
-								<th><T en="L" ko="패" /></th>
-								<th><T en="Pts" ko="승점" /></th>
-							</tr>
-						</thead>
-						<tbody>
+					<div class="wr-week">
+						<span class="wr-week-label"><T en="This week" ko="이번 주" /></span>
+						<ul class="wr-week-teams">
 							{week.summary.map((row) => (
-								<tr>
-									<td class="week-summary-team">{row.team}</td>
-									<td>{row.wins}</td>
-									<td>{row.draws}</td>
-									<td>{row.losses}</td>
-									<td class="week-summary-points">{row.points}</td>
-								</tr>
+								<li style={row.color ? `--team-color: ${row.color}` : undefined}>
+									<span class="k-team-dot" aria-hidden="true" />
+									<span class="wr-week-team">{row.team}</span>
+									<span class="wr-week-record">
+										<T en={`${row.wins}W ${row.draws}D ${row.losses}L`} ko={`${row.wins}승 ${row.draws}무 ${row.losses}패`} />
+									</span>
+									<span class="wr-week-points">
+										<T en={`${row.points} pts`} ko={`${row.points}점`} />
+									</span>
+								</li>
 							))}
-						</tbody>
-					</table>
+						</ul>
+					</div>
 				)}
 				{raceDialogId && week.summary.length > 0 && (
-					<button class="week-race-link" type="button" aria-haspopup="dialog" data-race-open={raceDialogId}>
-						<span aria-hidden="true">📈</span> <T en="View points by week" ko="주차별 승점 그래프 보기" /> →
+					<button class="k-link wr-link" type="button" aria-haspopup="dialog" data-race-open={raceDialogId}>
+						<T en="Points by week" ko="주차별 승점" /> →
 					</button>
 				)}
 				{reportWeeks[String(week.week)] && (
-					<a class="week-race-link week-report-link" href={`/league/${reportLeague}/report/?week=${week.week}`}>
-						<span aria-hidden="true">📸</span>{" "}
+					<a class="k-link wr-link" href={`/league/${reportLeague}/report/?week=${week.week}`}>
 						{reportWeeks[String(week.week)].final ? (
-							<T en="League final report (Instagram)" ko="리그 결산 리포트 (인스타용)" />
+							<T en="League final report" ko="리그 결산 리포트" />
 						) : (
-							<T en="This week's report (Instagram)" ko="이번 주 리포트 (인스타용)" />
+							<T en="This week's report" ko="이번 주 리포트" />
 						)}{" "}
 						→
 					</a>
@@ -185,9 +180,8 @@ const REACTIONS = [
 												   so it works with no JavaScript and each card remembers nothing. */
 												<details class="match-goals">
 													<summary class="match-goals-toggle">
-														<span aria-hidden="true">⚽</span>
 														<span class="match-goals-count">{goalsOf(match).length}</span>
-														<T class="match-goals-label" en="goals" ko="골 기록" />
+														<T class="match-goals-label" en={goalsOf(match).length === 1 ? "goal" : "goals"} ko="골 기록" />
 													</summary>
 												<div class="match-timeline">
 													<div
@@ -265,6 +259,122 @@ const REACTIONS = [
 		))
 	}
 </div>
+
+<style>
+	/* KICKS 2.0 look for the results tab (the old rules in global.css stay
+	   underneath until that file is cleaned up). */
+	.week-tabs :global(.week-tab-list) {
+		gap: 8px;
+		margin-bottom: 18px;
+		border: 0;
+	}
+	.week-tabs :global(.week-tab) {
+		min-height: 36px;
+		padding: 0 14px;
+		border: 1px solid var(--k-line);
+		border-radius: 0;
+		background: #fff;
+		color: var(--k-ink);
+		font-family: var(--k-font-display);
+		font-size: 0.9rem;
+		font-weight: 600;
+	}
+	.week-tabs :global(.week-tab[aria-selected="true"]) {
+		border-color: var(--k-olive);
+		background: var(--k-olive);
+		color: #fff;
+	}
+	.week-tabs :global(.week-date) {
+		margin: 0 0 12px;
+		color: var(--k-muted);
+		font-size: 0.9rem;
+	}
+	.wr-week {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px 20px;
+		padding: 12px 16px;
+		border: 1px solid var(--k-line);
+		background: #fafaf8;
+	}
+	.wr-week-label {
+		color: var(--k-olive);
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.wr-week-teams {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px 24px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.wr-week-teams li {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 0.92rem;
+	}
+	.wr-week-team {
+		font-weight: 700;
+	}
+	.wr-week-record {
+		color: #444;
+	}
+	.wr-week-points {
+		color: var(--k-muted);
+	}
+	.wr-link {
+		display: inline-block;
+		margin: 12px 20px 0 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		font: inherit;
+		font-size: 0.88rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.week-tabs :global(.week-rounds) {
+		margin-top: 20px;
+	}
+	.week-tabs :global(.round-label) {
+		margin: 0 0 8px;
+		color: var(--k-muted);
+		font-family: var(--k-font-display);
+		font-size: 0.8rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+	.week-tabs :global(.match-card) {
+		border: 1px solid var(--k-line);
+		border-radius: 0;
+		background: #fff;
+		box-shadow: none;
+	}
+	.week-tabs :global(.match-card:hover) {
+		border-color: #cfcfcf;
+		box-shadow: none;
+		transform: none;
+	}
+	.week-tabs :global(.match-score) {
+		border-radius: 0;
+		background: none;
+		color: var(--k-olive);
+		font-family: var(--k-font-display);
+		font-size: 1.15rem;
+		font-weight: 800;
+	}
+	.week-tabs :global(.match-score--vs) {
+		color: var(--k-muted);
+		font-size: 0.8rem;
+	}
+</style>
 
 <script>
 	const tabs = Array.from(document.querySelectorAll<HTMLButtonElement>(".week-tab"));

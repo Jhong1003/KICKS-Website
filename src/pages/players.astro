@@ -1,39 +1,67 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pageOgImage } from "../lib/og";
-import PlayerCard from "../components/PlayerCard.astro";
 import T from "../components/T.astro";
+import SeasonSelect from "../components/SeasonSelect.astro";
 import profilesData from "../data/player_profiles.json";
-import { getPlayerPhotos } from "../lib/player-photos";
 import leagueTable from "../data/league_table.json";
-import { getSection, sortPlayers, type PlayerInLeague, type PlayerProfile } from "../lib/players";
+import { getPlayerPhotos } from "../lib/player-photos";
+import { BADGES, BADGE_LADDERS, getContrastingTextColor, getSection, sortBadges, type BadgeKey, type PlayerProfile } from "../lib/players";
 import { isShownInLeague } from "../lib/finale";
-import { currentLeague, leagues, latestLeague, getTeamColor, getTeamName, type League } from "../lib/leagues";
+import { currentLeague, leagues, latestLeague, getTeamColor, leagueParts, type League } from "../lib/leagues";
+import { captainName } from "../lib/hall-of-fame";
 
-// Everyone in one league, by name: a plain roster, not a second set of team
-// pages. Teams have their own pages (/league/<id>/team/<team_id>), linked
-// from the "By team" chips at the top, so this page doesn't group by team.
-// Never grouped or ordered by any stat (see AGENTS.md's "Player profiles").
-// League buttons switch between leagues' rosters; the newest league that has
-// any players opens first, even before its first game.
+// KICKS 2.0 Players: this league's squad, one row per team (in standings
+// order), captain first then by name. A small card per player: play style,
+// initials, name, and the three rarest badges. Never ranked or compared
+// (AGENTS.md "Player profiles"); goals and the full badge list are on the
+// player's page. Not grouped by position: everyone rotates.
+
+const MAX_BADGES = 3;
+
+// A card keeps only the highest step of a step-up badge (Brace → Hat-trick → Poker).
+const topSteps = (keys: BadgeKey[]) =>
+	keys.filter((key) => !BADGE_LADDERS.some((ladder) => ladder.includes(key) && ladder.slice(ladder.indexOf(key) + 1).some((higher) => keys.includes(higher))));
 
 function buildRoster(league: League) {
-	const roster = (profilesData as PlayerProfile[]).flatMap((player): PlayerInLeague[] => {
-		const section = getSection(player, league.id);
-		return section && isShownInLeague(player, league.id) ? [{ player, section }] : [];
-	});
-	// Team chips in current standings order (league leader first); a league
-	// with no results yet keeps its teams-tab order.
 	const standingsOrder = leagueTable.filter((row) => row.league === league.id).map((row) => row.team_id);
-	const teams = [...league.teams].sort((a, b) => {
-		const rank = (id: string) => (standingsOrder.includes(id) ? standingsOrder.indexOf(id) : standingsOrder.length);
-		return rank(a.team_id) - rank(b.team_id);
-	});
-	return { league, players: sortPlayers(roster, "name", league), teams };
+	const teams = [...league.teams]
+		.sort((a, b) => {
+			const rank = (id: string) => (standingsOrder.includes(id) ? standingsOrder.indexOf(id) : standingsOrder.length);
+			return rank(a.team_id) - rank(b.team_id);
+		})
+		.map((team) => {
+			const captain = captainName(league.id, team.team_id);
+			const color = getTeamColor(team.team_id, league);
+			const players = (profilesData as PlayerProfile[])
+				.flatMap((player) => {
+					const section = getSection(player, league.id);
+					if (!section || !isShownInLeague(player, league.id) || section.current_team_id !== team.team_id) return [];
+					const badges = sortBadges(topSteps(section.badges));
+					return [
+						{
+							player,
+							section,
+							captain: player.name === captain,
+							badges: badges.slice(0, MAX_BADGES),
+							more: Math.max(0, badges.length - MAX_BADGES),
+							photo: getPlayerPhotos(player.id).card,
+						},
+					];
+				})
+				.sort((a, b) => Number(b.captain) - Number(a.captain) || a.player.name.localeCompare(b.player.name, "ko"));
+			return { id: team.team_id, name: team.name, color, text: getContrastingTextColor(color), players };
+		})
+		.filter((team) => team.players.length > 0);
+	return { league, teams, count: teams.reduce((sum, team) => sum + team.players.length, 0) };
 }
 
-const rosters = leagues.map(buildRoster).filter((entry) => entry.players.length > 0);
-const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeague.id) ? currentLeague.id : (rosters[rosters.length - 1]?.league.id ?? latestLeague.id);
+const rosters = leagues.map(buildRoster).filter((entry) => entry.count > 0);
+const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeague.id)
+	? currentLeague.id
+	: (rosters[rosters.length - 1]?.league.id ?? latestLeague.id);
+const season = leagueParts(defaultLeagueId).season;
+const seasonRosters = rosters.filter((entry) => entry.league.id.startsWith(`${season}-`));
 ---
 
 <BaseLayout
@@ -41,162 +69,272 @@ const defaultLeagueId = rosters.some((entry) => entry.league.id === currentLeagu
 	title="Players | KICKS"
 	description="Meet the KICKS roster — season stats, play styles, and achievement badges for every player."
 >
-	<main>
-		<section class="content-section" aria-labelledby="players-title">
-			{
-				rosters.map(({ league }) => (
-					<p class="section-label" data-league-label={league.id} hidden={league.id !== defaultLeagueId}>
-						<T en={`${league.id} ROSTER`} ko={`${league.id} 선수단`} />
-					</p>
-				))
-			}
-		<div class="players-head">
-				<h1 id="players-title"><T en="Players" ko="선수" /></h1>
+	<main class="k-page">
+		<div class="k-page-head">
+			<div>
+				<h1 class="k-h1"><T en="Players" ko="선수" /></h1>
 				{
-					rosters.length > 1 && (
-						<div class="league-switcher players-league-switcher" role="group" aria-label="Choose a league">
-							{rosters.map(({ league }) => (
-								<button
-									class="league-switcher-link"
-									type="button"
-									data-league-button={league.id}
-									aria-pressed={league.id === defaultLeagueId ? "true" : "false"}
-								>
-									{league.id}
-									{!league.started && (
-										<span class="league-switcher-note">
-											<T en="upcoming" ko="예정" />
-										</span>
-									)}
+					rosters.map(({ league, teams, count }) => (
+						<p class="pl-sub" data-league-label={league.id} hidden={league.id !== defaultLeagueId}>
+							<T
+								en={`${season} ${leagueParts(league.id).name} · ${count} players across ${teams.length} teams`}
+								ko={`${season} ${leagueParts(league.id).name} · ${teams.length}팀 ${count}명`}
+							/>
+						</p>
+					))
+				}
+			</div>
+			<div class="pl-picker">
+				<SeasonSelect current={season} />
+				{
+					seasonRosters.length > 1 && (
+						<div class="pl-leagues" role="group" aria-label="League">
+							{seasonRosters.map(({ league }) => (
+								<button type="button" data-league-button={league.id} aria-pressed={league.id === defaultLeagueId ? "true" : "false"}>
+									{leagueParts(league.id).name}
 								</button>
 							))}
 						</div>
 					)
 				}
 			</div>
+		</div>
 
-			{
-				rosters.map(({ league, players, teams }) => (
-					<div class="player-league-panel" data-league-panel={league.id} hidden={league.id !== defaultLeagueId}>
-						<nav class="players-teams" aria-label={`${league.id} teams`}>
-							<span class="players-teams-label"><T en="By team →" ko="팀별로 보기 →" /></span>
-							{teams.map((team) => (
-								<a class="players-team-chip" href={`/league/${league.id}/team/${team.team_id}/`}>
-									<span class="player-group-dot" style={`background-color: ${getTeamColor(team.team_id, league)}`} aria-hidden="true" />
-									{team.name}
+		{
+			rosters.map(({ league, teams }) => (
+				<div class="pl-panel" data-league-panel={league.id} hidden={league.id !== defaultLeagueId}>
+					{teams.map((team) => (
+						<section class="pl-team" aria-label={team.name}>
+							<div class="pl-team-head" style={`--team-color: ${team.color}`}>
+								<span class="k-team-dot" aria-hidden="true" />
+								<h2 class="pl-team-name">{team.name}</h2>
+								<span class="k-meta">
+									<T en={`${team.players.length} players`} ko={`${team.players.length}명`} />
+								</span>
+								<a class="k-link pl-team-link" href={`/league/${league.id}/team/${team.id}/`}>
+									<T en="Team page" ko="팀 페이지" /> →
 								</a>
-							))}
-							<a class="dream-team-link players-dream-team" href="/dream-team/">
-								<span aria-hidden="true">⭐</span>
-								<T en="Build My Dream Team" ko="나만의 드림팀 만들기" />
-								<span aria-hidden="true">→</span>
-							</a>
-						</nav>
-
-						<div class="player-grid">
-							{players.map(({ player, section }) => (
-								<PlayerCard
-									player={player}
-									section={section}
-									teamName={getTeamName(section.current_team_id, league)}
-									teamColor={getTeamColor(section.current_team_id, league)}
-									href={`/players/${player.id}/?league=${league.id}`}
-									avatarPhoto={getPlayerPhotos(player.id).card}
-								/>
-							))}
-						</div>
-					</div>
-				))
-			}
-
-		</section>
+							</div>
+							<ul class="pl-grid">
+								{team.players.map(({ player, section, captain, badges, more, photo }) => (
+									<li>
+										<a class="pl-card" href={`/players/${player.id}/?league=${league.id}`}>
+											<span class="pl-tag">{section.play_style_tag}</span>
+											<span class="pl-avatar" style={`background: ${team.color}; color: ${team.text}`}>
+												{photo ? <img src={photo} alt="" loading="lazy" /> : player.avatar_initials}
+											</span>
+											<span class="pl-name">
+												{player.name}
+												{captain && <span class="pl-c" title="Captain">C</span>}
+											</span>
+											<span class="pl-badges">
+												{badges.map((key) => (
+													<span class:list={["pl-badge", `pl-badge--${BADGES[key].tier}`, { "pl-badge--champion": key === "champion" }]} title={BADGES[key].label}>
+														{BADGES[key].icon}
+													</span>
+												))}
+												{more > 0 && <span class="pl-more">+{more}</span>}
+											</span>
+										</a>
+									</li>
+								))}
+							</ul>
+						</section>
+					))}
+				</div>
+			))
+		}
 	</main>
 </BaseLayout>
 
 <script>
-	// League switcher: every league's roster is pre-rendered, so switching is
-	// just show/hide. ?league=<id> opens a specific league (and is kept in
-	// the address bar so the page can be shared or reloaded as-is).
-	const leagueButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-league-button]"));
-	const leaguePanels = Array.from(document.querySelectorAll<HTMLElement>("[data-league-panel]"));
-	const leagueLabels = Array.from(document.querySelectorAll<HTMLElement>("[data-league-label]"));
+	// Every league's squad is pre-rendered; switching is show/hide.
+	// ?league=<id> opens one and is kept in the address bar.
+	const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-league-button]"));
+	const panels = Array.from(document.querySelectorAll<HTMLElement>("[data-league-panel]"));
+	const labels = Array.from(document.querySelectorAll<HTMLElement>("[data-league-label]"));
 
 	function showLeague(id: string, updateUrl: boolean) {
-		if (!leaguePanels.some((panel) => panel.dataset.leaguePanel === id)) return;
-		leagueButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.leagueButton === id)));
-		leaguePanels.forEach((panel) => {
-			panel.hidden = panel.dataset.leaguePanel !== id;
-		});
-		leagueLabels.forEach((label) => {
-			label.hidden = label.dataset.leagueLabel !== id;
-		});
+		if (!panels.some((panel) => panel.dataset.leaguePanel === id)) return;
+		buttons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.leagueButton === id)));
+		panels.forEach((panel) => (panel.hidden = panel.dataset.leaguePanel !== id));
+		labels.forEach((label) => (label.hidden = label.dataset.leagueLabel !== id));
 		if (updateUrl) {
 			const url = new URL(window.location.href);
 			url.searchParams.set("league", id);
 			history.replaceState(null, "", url);
 		}
 	}
-
-	leagueButtons.forEach((button) => {
-		button.addEventListener("click", () => showLeague(button.dataset.leagueButton ?? "", true));
-	});
-	const requestedLeague = new URLSearchParams(window.location.search).get("league");
-	if (requestedLeague) showLeague(requestedLeague, false);
+	buttons.forEach((button) => button.addEventListener("click", () => showLeague(button.dataset.leagueButton ?? "", true)));
+	const requested = new URLSearchParams(window.location.search).get("league");
+	if (requested) showLeague(requested, false);
 </script>
 
 <style>
-	.players-head {
+	.pl-sub {
+		margin: 8px 0 0;
+		color: var(--k-muted);
+	}
+	.pl-picker {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px 24px;
-	}
-
-	.players-league-switcher {
-		margin: 0;
-	}
-
-	.players-teams {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 8px 10px;
-		margin-top: 24px;
-	}
-
-	.players-teams-label {
-		margin-right: 4px;
-		font-size: 0.85rem;
-		font-weight: 600;
-		opacity: 0.7;
-	}
-
-	.players-team-chip {
-		display: inline-flex;
-		align-items: center;
 		gap: 8px;
-		padding: 8px 16px;
-		border: 1px solid var(--color-sage);
-		border-radius: 999px;
-		background-color: #fff;
-		color: var(--color-dark);
+	}
+	.pl-leagues {
+		display: inline-flex;
+		border: 1px solid var(--k-line);
+	}
+	.pl-leagues button {
+		min-height: 34px;
+		padding: 0 14px;
+		border: 0;
+		background: #fff;
+		font: inherit;
+		font-size: 0.88rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.pl-leagues button + button {
+		border-left: 1px solid var(--k-line);
+	}
+	.pl-leagues button[aria-pressed="true"] {
+		background: var(--k-olive);
+		color: #fff;
+	}
+
+	.pl-team + .pl-team {
+		margin-top: 40px;
+	}
+	.pl-team-head {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding-bottom: 10px;
+		border-bottom: 2px solid var(--k-olive);
+	}
+	.pl-team-name {
+		margin: 0;
+		font-family: var(--k-font-display);
+		font-size: 1.2rem;
+		font-weight: 700;
+	}
+	.pl-team-link {
+		margin-left: auto;
+	}
+	.pl-grid {
+		display: grid;
+		grid-template-columns: repeat(9, minmax(0, 1fr));
+		gap: 10px;
+		margin: 14px 0 0;
+		padding: 0;
+		list-style: none;
+	}
+	.pl-card {
+		display: grid;
+		justify-items: center;
+		gap: 6px;
+		height: 100%;
+		padding: 12px 6px 12px;
+		border: 1px solid var(--k-line);
+		background: #fff;
+		text-align: center;
+	}
+	.pl-card:hover {
+		border-color: var(--k-ink);
+	}
+	.pl-tag {
+		color: var(--k-muted);
+		font-size: 0.66rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+	.pl-avatar {
+		display: grid;
+		place-items: center;
+		width: 52px;
+		height: 52px;
+		overflow: hidden;
+		border-radius: 50%;
 		font-size: 0.9rem;
+		font-weight: 700;
+	}
+	.pl-avatar img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.pl-name {
+		font-weight: 700;
+		font-size: 0.92rem;
+		white-space: nowrap;
+	}
+	.pl-c {
+		display: inline-grid;
+		place-items: center;
+		width: 15px;
+		height: 15px;
+		margin-left: 4px;
+		border-radius: 50%;
+		background: var(--k-ink);
+		color: #fff;
+		font-size: 0.6rem;
+		font-weight: 800;
+		vertical-align: 1px;
+	}
+	.pl-badges {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+		min-height: 28px;
+	}
+	.pl-badge {
+		display: grid;
+		place-items: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: #eef0e9;
+		font-size: 0.72rem;
+	}
+	/* Same tier colours as the player page, at card size. */
+	.pl-badge--rare {
+		box-shadow: 0 0 0 1.5px #4a7fc1;
+	}
+	.pl-badge--legendary {
+		background: #f6e7b8;
+		box-shadow: 0 0 0 1.5px #c9a227;
+	}
+	.pl-badge--icon {
+		background: #fffaf0;
+		box-shadow: 0 0 0 1.5px #c9a227, 0 0 0 3px #fff, 0 0 0 4px #c9a227;
+	}
+	.pl-badge--champion {
+		background: radial-gradient(circle at 35% 30%, #fff6d6, #f1cf63 70%, #c9a227);
+		box-shadow: 0 0 0 1.5px #c9a227;
+	}
+	.pl-more {
+		color: var(--k-muted);
+		font-size: 0.72rem;
 		font-weight: 600;
 	}
 
-	.players-team-chip:hover {
-		border-color: var(--color-green);
+	@media (max-width: 1100px) {
+		.pl-grid {
+			grid-template-columns: repeat(6, minmax(0, 1fr));
+		}
 	}
-
-	/* Same row as the team chips, pushed to the right; wraps under them on phones. */
-	.players-dream-team {
-		margin: 0 0 0 auto;
-	}
-
-	@media (max-width: 700px) {
-		.players-dream-team {
-			margin: 4px 0 0;
+	@media (max-width: 860px) {
+		.pl-grid {
+			display: flex;
+			overflow-x: auto;
+			margin-right: calc(var(--k-gutter) * -1);
+			padding-right: var(--k-gutter);
+			scrollbar-width: none;
+		}
+		.pl-grid li {
+			flex: 0 0 108px;
 		}
 	}
 </style>

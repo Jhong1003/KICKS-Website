@@ -9,6 +9,8 @@ import T from "../../components/T.astro";
 import perks from "../../data/perks.json";
 import profiles from "../../data/player_profiles.json";
 import board from "../../data/board.json";
+import partners from "../../data/partners.json";
+import { currentSeason } from "../../lib/leagues";
 
 // Players on the roster (not inactive) plus staff who don't play, e.g.
 // managers (board members in hand-edited src/data/board.json with a "member_id" like "M001").
@@ -16,6 +18,31 @@ const members = [
 	...profiles.filter((p) => p.status !== "inactive").map((p) => ({ player_id: p.player_id, name: p.name })),
 	...(board as { member_id?: string; name: string }[]).filter((m): m is { member_id: string; name: string } => Boolean(m.member_id)).map((m) => ({ player_id: m.member_id, name: m.name })),
 ].sort((a, b) => a.name.localeCompare(b.name, "ko"));
+
+// KICKS 2.0: each offer split into the big part ("10% off") and the rest,
+// with the partner's logo and short address from partners.json.
+const splitOffer = (text: string, lang: "en" | "ko") => {
+	const match = lang === "en" ? text.match(/^(\$?\d+%? off)\s*(.*)$/i) : text.match(/^(.*?)\s*(\$?\d+%? 할인)$/);
+	if (!match) return { big: text, rest: "" };
+	return lang === "en" ? { big: match[1], rest: match[2] } : { big: match[2], rest: match[1] };
+};
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const untilText = (iso?: string) => {
+	if (!iso) return null;
+	const [, m, d] = iso.split("-").map(Number);
+	return { en: `Until ${MONTHS[m - 1]} ${d}`, ko: `${m}월 ${d}일까지` };
+};
+const cards = perks.map((perk) => {
+	const partner = (partners as { name: string; logo: string | null; address?: string }[]).find((entry) => entry.name === perk.name);
+	return {
+		...perk,
+		logo: partner?.logo ?? null,
+		address: partner?.address?.replace(/,\s*[A-Z]{2}\s*\d{5}.*$/, "") ?? "",
+		en: splitOffer(perk.offer_en, "en"),
+		ko: splitOffer(perk.offer_ko, "ko"),
+		until: untilText(perk.valid_until),
+	};
+});
 ---
 
 <BaseLayout
@@ -23,156 +50,153 @@ const members = [
 	description="Members-only partner benefits for KICKS."
 	noindex
 >
-	<main>
-		<section class="content-section" aria-labelledby="perks-title">
-			<p class="section-label"><T en="MEMBERS ONLY" ko="멤버 전용" /></p>
-			<h1 id="perks-title"><T en="Member Benefits" ko="멤버 혜택" /></h1>
+	<main class="k-page mb">
+		<a class="k-link mb-back" href="/partners/">← <T en="Partners" ko="파트너" /></a>
+		<div class="k-page-head">
+			<h1 class="k-h1"><T en="Member benefits" ko="멤버 혜택" /></h1>
+		</div>
 
-			<div id="perks-unlock" class="lock-screen">
-				<svg class="lock-screen-icon" viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10H7Zm2 0h6V7a3 3 0 0 0-6 0v3Z"
-						fill="currentColor"
-					/>
-				</svg>
-				<h2 class="lock-screen-title"><T en="KICKS Members Only" ko="KICKS 멤버 전용" /></h2>
-				<T
-					as="p"
-					class="lock-screen-text"
-					en="Pick your name and enter the member code from the group chat."
-					ko="이름을 고르고 단톡방에 공지된 멤버 코드를 입력하세요."
+		<div id="perks-unlock" class="mb-lock k-card">
+			<svg class="mb-lock-icon" viewBox="0 0 24 24" aria-hidden="true">
+				<path
+					d="M7 10V7a5 5 0 0 1 10 0v3h1.5A1.5 1.5 0 0 1 20 11.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 20.5v-9A1.5 1.5 0 0 1 5.5 10H7Zm2 0h6V7a3 3 0 0 0-6 0v3Z"
+					fill="currentColor"
 				/>
-				<form id="perks-unlock-form" class="unlock-form perks-unlock-form">
-					<label class="perks-field-label" for="perks-member">
-						<T en="Your name" ko="이름" />
-					</label>
-					<select id="perks-member" class="unlock-input" required>
-						<option value="" disabled selected>—</option>
-						{members.map((m) => <option value={m.player_id}>{m.name}</option>)}
-					</select>
-					<label class="perks-field-label" for="perks-code">
-						<T en="Member code" ko="멤버 코드" />
-					</label>
-					<input
-						type="password"
-						id="perks-code"
-						class="unlock-input"
-						autocomplete="off"
-						placeholder="Member code"
-						data-i18n-attrs={JSON.stringify({ placeholder: { en: "Member code", ko: "멤버 코드" } })}
-						required
-					/>
-					<button class="button-primary unlock-button" type="submit"><T en="Unlock" ko="잠금 해제" /></button>
-				</form>
-				<p id="perks-unlock-error" class="unlock-error" hidden></p>
-			</div>
-
-			<div id="perks-home" hidden>
-				<p class="perks-hello">
-					<span id="perks-hello-name"></span>
-					<button type="button" id="perks-switch" class="perks-text-button">
-						<T en="Not you?" ko="다른 멤버로 바꾸기" />
-					</button>
-				</p>
-				<T
-					as="p"
-					class="about-description"
-					en="At the counter, tap the restaurant and show the screen to the staff."
-					ko="계산할 때 가게를 누르고 화면을 직원에게 보여주세요."
-				/>
-				<ul class="perks-list">
-					{
-						perks.map((perk) => (
-							<li class="perk-card" data-perk-id={perk.perk_id} data-valid-until={perk.valid_until}>
-								<div class="perk-card-body">
-									<h3 class="perk-card-name">{perk.name}</h3>
-									<T as="p" class="perk-card-offer" en={perk.offer_en} ko={perk.offer_ko} />
-									{perk.valid_until && (
-										<p class="perk-card-until">
-											<T en="Valid through" ko="사용 기한" /> {perk.valid_until}
-										</p>
-									)}
-								</div>
-								{perk.active ? (
-									<>
-										<button type="button" class="button-primary perk-use" data-perk-id={perk.perk_id}>
-											<T en="Use now" ko="지금 사용하기" />
-										</button>
-										{/* Shown instead of the button once valid_until has passed (script below). */}
-										<span class="perk-soon perk-expired" hidden>
-											<T en="Expired" ko="기간 종료" />
-										</span>
-									</>
-								) : (
-									<span class="perk-soon">
-										<T en="Coming soon" ko="준비 중" />
-									</span>
-								)}
-							</li>
-						))
-					}
-				</ul>
-				<T
-					as="p"
-					class="perks-fine-print"
-					en="Can't be combined with other discounts or promotions."
-					ko="다른 할인·프로모션과 함께 사용할 수 없어요."
-				/>
-				<p id="perks-error" class="unlock-error" hidden></p>
-			</div>
-		</section>
-
-		{/* Asked before opening a coupon, since every open is logged as a use. */}
-		<dialog id="perks-confirm" class="perk-confirm" aria-labelledby="perk-confirm-title">
-			<h2 id="perk-confirm-title" class="perk-confirm-title"></h2>
+			</svg>
+			<h2 class="k-h2"><T en="Members only" ko="멤버 전용" /></h2>
 			<T
 				as="p"
-				class="perk-confirm-text"
-				en="Open it at the counter to show the staff. Each open is recorded as a use."
-				ko="계산할 때 직원에게 보여줄 화면이에요. 열면 사용 기록이 남아요."
+				class="mb-lock-text"
+				en="Pick your name and enter the member code from the group chat."
+				ko="이름을 선택하고, 단톡방에 공지된 멤버 코드를 입력해주세요."
 			/>
-			<div class="perk-confirm-actions">
-				<button type="button" id="perk-confirm-cancel" class="perk-confirm-cancel">
-					<T en="Not now" ko="취소" />
+			<form id="perks-unlock-form" class="mb-form">
+				<label class="mb-label" for="perks-member"><T en="Your name" ko="이름" /></label>
+				<select id="perks-member" class="mb-input" required>
+					<option value="" disabled selected>—</option>
+					{members.map((m) => <option value={m.player_id}>{m.name}</option>)}
+				</select>
+				<label class="mb-label" for="perks-code"><T en="Member code" ko="멤버 코드" /></label>
+				<input
+					type="password"
+					id="perks-code"
+					class="mb-input"
+					autocomplete="off"
+					placeholder="Member code"
+					data-i18n-attrs={JSON.stringify({ placeholder: { en: "Member code", ko: "멤버 코드" } })}
+					required
+				/>
+				<button class="k-btn mb-unlock" type="submit"><T en="Unlock" ko="잠금 해제" /></button>
+			</form>
+			<p id="perks-unlock-error" class="mb-error" hidden></p>
+		</div>
+
+		<div id="perks-home" class="mb-home" hidden>
+			<div class="mb-left">
+				<div class="mb-card">
+					<svg class="mb-card-court" viewBox="0 0 200 200" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+						<g fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="2">
+							<line x1="40" y1="0" x2="40" y2="200" />
+							<circle cx="40" cy="100" r="44" />
+							<path d="M200 50 h-34 a50 50 0 0 0 0 100 h34" />
+						</g>
+					</svg>
+					<img class="mb-card-logo" src="/kicks-logo-white.jpg" alt="KICKS" />
+					<p class="mb-card-member">MEMBER</p>
+					<p class="mb-card-name" id="perks-hello-name"></p>
+					<p class="mb-card-season">{currentSeason} season · UIUC</p>
+				</div>
+				<button type="button" id="perks-switch" class="mb-switch">
+					<T en="Not you? Switch member" ko="본인이 아니신가요? 멤버 변경" />
 				</button>
-				<button type="button" id="perk-confirm-ok" class="button-primary perk-confirm-ok">
-					<T en="Use it" ko="사용하기" />
-				</button>
+				<div class="mb-how">
+					<h2 class="k-h3"><T en="How to use" ko="사용 방법" /></h2>
+					<ol>
+						<li><T en="Pick the partner and tap Use now." ko="파트너를 선택하고 '지금 사용'을 누릅니다." /></li>
+						<li><T en="Show the screen to the staff at the counter." ko="계산할 때 직원에게 화면을 보여주세요." /></li>
+					</ol>
+					<T as="p" class="k-meta" en="Can't be combined with other discounts or promotions." ko="다른 할인·프로모션과 함께 사용할 수 없습니다." />
+				</div>
+			</div>
+
+			<div class="mb-right">
+				<h2 class="k-h2 mb-list-title"><T en="Your benefits" ko="나의 혜택" /></h2>
+				<ul class="mb-list">
+					{cards.map((perk) => (
+						<li class="mb-perk k-card perk-card" data-perk-id={perk.perk_id} data-valid-until={perk.valid_until}>
+							<span class="mb-perk-logo">{perk.logo ? <img src={perk.logo} alt="" loading="lazy" /> : perk.name.slice(0, 2)}</span>
+							<span class="mb-perk-body">
+								<span class="mb-perk-offer"><T en={perk.en.big} ko={perk.ko.big} /></span>
+								{(perk.en.rest || perk.ko.rest) && <T class="mb-perk-cond" en={perk.en.rest} ko={perk.ko.rest} />}
+								<span class="mb-perk-name">{perk.name}</span>
+								{perk.address && <span class="mb-perk-address">{perk.address}</span>}
+							</span>
+							<span class="mb-perk-action">
+								{perk.active ? (
+									<>
+										<button type="button" class="k-btn perk-use" data-perk-id={perk.perk_id}>
+											<T en="Use now" ko="지금 사용" />
+										</button>
+										<span class="mb-soon perk-expired" hidden><T en="Expired" ko="기간 종료" /></span>
+									</>
+								) : (
+									<span class="mb-soon"><T en="Coming soon" ko="준비 중" /></span>
+								)}
+								{perk.until && <T class="mb-perk-until" en={perk.until.en} ko={perk.until.ko} />}
+							</span>
+						</li>
+					))}
+				</ul>
+				<p id="perks-error" class="mb-error" hidden></p>
+			</div>
+		</div>
+
+		{/* Asked before opening a coupon, since every open is logged as a use. */}
+		<dialog id="perks-confirm" class="mb-confirm" aria-labelledby="perk-confirm-title">
+			<h2 id="perk-confirm-title" class="k-h3"></h2>
+			<T
+				as="p"
+				class="mb-confirm-text"
+				en="Open it at the counter to show the staff. Each open is recorded as a use."
+				ko="계산할 때 직원에게 보여줄 화면입니다. 열면 사용 기록이 남습니다."
+			/>
+			<div class="mb-confirm-actions">
+				<button type="button" id="perk-confirm-cancel" class="k-btn k-btn--line"><T en="Not now" ko="취소" /></button>
+				<button type="button" id="perk-confirm-ok" class="k-btn"><T en="Use it" ko="사용하기" /></button>
 			</div>
 		</dialog>
 
-		<div id="perks-coupon" class="perk-coupon" role="dialog" aria-modal="true" aria-labelledby="perk-coupon-partner" hidden>
-			<div class="perk-coupon-card">
-				<p class="perk-coupon-brand">KICKS MEMBER</p>
-				<h2 id="perk-coupon-partner" class="perk-coupon-partner"></h2>
-				<p id="perk-coupon-offer" class="perk-coupon-offer"></p>
-				<p id="perk-coupon-member" class="perk-coupon-member"></p>
-				<div class="perk-coupon-live">
-					<span class="perk-coupon-pulse" aria-hidden="true"></span>
-					<span id="perk-coupon-clock" class="perk-coupon-clock"></span>
+		<div id="perks-coupon" class="mb-store" role="dialog" aria-modal="true" aria-labelledby="perk-coupon-partner" hidden>
+			<div class="mb-store-card">
+				<p class="mb-store-brand"><img src="/kicks-logo-black.webp" alt="KICKS" /> <span>MEMBER BENEFIT</span></p>
+				<img id="perk-coupon-logo" class="mb-store-logo" src="" alt="" hidden />
+				<h2 id="perk-coupon-partner" class="mb-store-partner"></h2>
+				<p id="perk-coupon-offer" class="mb-store-offer"></p>
+				<p id="perk-coupon-member" class="mb-store-member"></p>
+				<div class="mb-store-live">
+					<span class="mb-store-pulse" aria-hidden="true"></span>
+					<span id="perk-coupon-clock" class="mb-store-clock"></span>
 				</div>
-				<p id="perk-coupon-date" class="perk-coupon-date"></p>
-				<p id="perk-coupon-opened" class="perk-coupon-opened"></p>
+				<p id="perk-coupon-date" class="mb-store-small"></p>
+				<p id="perk-coupon-opened" class="mb-store-small"></p>
 				<T
 					as="p"
-					class="perk-coupon-note"
+					class="mb-store-note"
 					en="Show this screen to the staff. The live clock means it isn't a screenshot."
-					ko="이 화면을 직원에게 보여주세요. 시계가 움직이면 캡처가 아니라는 뜻이에요."
+					ko="이 화면을 직원에게 보여주세요. 화면 속 시계가 실시간으로 움직이기 때문에, 캡처한 화면이 아니라는 걸 바로 알 수 있습니다."
 				/>
-				<button type="button" id="perk-coupon-close" class="perk-coupon-close">
-					<T en="Done" ko="닫기" />
-				</button>
+				<button type="button" id="perk-coupon-close" class="k-btn mb-store-done"><T en="Done" ko="닫기" /></button>
 			</div>
 		</div>
 	</main>
 </BaseLayout>
 
-<script type="application/json" id="perks-data" set:html={JSON.stringify({ perks, members })} />
+<script type="application/json" id="perks-data" set:html={JSON.stringify({ perks: cards, members })} />
 
 <script>
 	import { bilingualHtml } from "../../lib/i18n";
 
-	type Perk = { perk_id: string; name: string; offer_en: string; offer_ko: string; active: boolean };
+	type Perk = { perk_id: string; name: string; offer_en: string; offer_ko: string; active: boolean; logo: string | null };
 	type Member = { player_id: string; name: string };
 	type Saved = { code: string; player_id: string };
 
@@ -256,7 +280,7 @@ const members = [
 		unlock.hidden = true;
 		home.hidden = false;
 		homeError.hidden = true;
-		$("perks-hello-name").innerHTML = bilingualHtml(`Hi, ${nameOf(saved.player_id)}`, `${nameOf(saved.player_id)}님, 안녕하세요`);
+		$("perks-hello-name").textContent = nameOf(saved.player_id);
 	}
 
 	$("perks-unlock-form").addEventListener("submit", async (event) => {
@@ -301,6 +325,9 @@ const members = [
 	}
 	function openCoupon(perk: Perk, saved: Saved, redeemedAt: string) {
 		$("perk-coupon-partner").textContent = perk.name;
+		const logo = $<HTMLImageElement>("perk-coupon-logo");
+		logo.hidden = !perk.logo;
+		if (perk.logo) logo.src = perk.logo;
 		$("perk-coupon-offer").innerHTML = bilingualHtml(perk.offer_en, perk.offer_ko);
 		$("perk-coupon-member").textContent = nameOf(saved.player_id);
 		const now = new Date();
@@ -377,284 +404,377 @@ const members = [
 </script>
 
 <style>
-	.perks-unlock-form {
-		flex-direction: column;
-		align-items: stretch;
+	.mb-back {
+		display: inline-block;
+		margin-bottom: 14px;
+	}
+
+	/* Lock */
+	.mb-lock {
+		display: grid;
+		justify-items: center;
+		gap: 10px;
+		max-width: 440px;
+		margin: 8px auto 0;
+		padding: 36px 28px;
+		text-align: center;
+	}
+	.mb-lock-icon {
+		width: 28px;
+		height: 28px;
+		color: var(--k-olive);
+	}
+	:global(.mb-lock-text) {
+		margin: 0 0 8px;
+		color: #444;
+	}
+	.mb-form {
+		display: grid;
+		gap: 6px;
 		width: 100%;
-		gap: 8px;
+		text-align: left;
 	}
-
-	.perks-field-label {
-		font-size: 0.85rem;
+	.mb-label {
+		margin-top: 6px;
+		color: var(--k-muted);
+		font-size: 0.82rem;
 		font-weight: 600;
-		color: var(--color-green);
+	}
+	.mb-input {
+		width: 100%;
+		height: 44px;
+		padding: 0 12px;
+		border: 1px solid var(--k-line);
+		border-radius: 0;
+		background: #fff;
+		font: inherit;
+	}
+	.mb-input:focus {
+		outline: 2px solid var(--k-olive);
+		outline-offset: -1px;
+	}
+	.mb-unlock {
+		width: 100%;
+		min-height: 46px;
+		margin-top: 12px;
+	}
+	.mb-error {
+		margin: 8px 0 0;
+		color: #b3261e;
+		font-size: 0.88rem;
 	}
 
-	.perks-hello {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		gap: 12px;
-		margin: 24px 0 4px;
-		font-size: 1.2rem;
+	/* Unlocked */
+	.mb-home:not([hidden]) {
+		display: grid;
+		grid-template-columns: 380px minmax(0, 1fr);
+		gap: 40px;
+		align-items: start;
+	}
+	.mb-card {
+		position: relative;
+		display: grid;
+		align-content: space-between;
+		aspect-ratio: 1.586;
+		overflow: hidden;
+		padding: 22px 24px;
+		border-radius: 10px;
+		background: var(--k-olive);
+		color: #fff;
+	}
+	.mb-card-court {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 55%;
+		height: 100%;
+	}
+	.mb-card-logo {
+		position: relative;
+		width: 120px;
+		height: auto;
+	}
+	.mb-card-member {
+		position: relative;
+		margin: 18px 0 0;
+		font-size: 0.72rem;
 		font-weight: 700;
+		letter-spacing: 0.14em;
+		opacity: 0.8;
 	}
-
-	.perks-text-button {
+	.mb-card-name {
+		position: relative;
+		margin: 2px 0 0;
+		font-family: var(--k-font-display);
+		font-size: 1.9rem;
+		font-weight: 800;
+	}
+	.mb-card-season {
+		position: relative;
+		margin: 6px 0 0;
+		font-size: 0.82rem;
+		opacity: 0.85;
+	}
+	.mb-switch {
+		margin-top: 10px;
 		padding: 0;
 		border: 0;
 		background: none;
-		color: var(--color-green);
+		color: var(--k-muted);
 		font: inherit;
 		font-size: 0.85rem;
-		font-weight: 500;
 		text-decoration: underline;
 		cursor: pointer;
 	}
-
-	.perks-list {
+	.mb-how {
+		margin-top: 28px;
+		padding-top: 18px;
+		border-top: 1px solid var(--k-line);
+	}
+	.mb-how ol {
+		margin: 10px 0 10px;
+		padding-left: 20px;
+		line-height: 1.7;
+	}
+	.mb-list-title {
+		margin-bottom: 14px;
+	}
+	.mb-list {
 		display: grid;
-		gap: 16px;
-		margin: 24px 0 0;
+		gap: 12px;
+		margin: 0;
 		padding: 0;
 		list-style: none;
-		max-width: 560px;
 	}
-
-	.perk-card {
-		display: flex;
-		flex-wrap: wrap;
+	.mb-perk {
+		display: grid;
+		grid-template-columns: 76px minmax(0, 1fr) auto;
+		gap: 18px;
 		align-items: center;
-		justify-content: space-between;
-		gap: 16px;
-		padding: 20px;
-		border: 1px solid var(--color-sage);
-		border-radius: 16px;
-		background-color: #fff;
+		padding: 16px 18px;
 	}
-
-	.perk-card-name {
-		margin: 0 0 4px;
-		font-size: 1.15rem;
+	.mb-perk-logo {
+		display: grid;
+		place-items: center;
+		width: 76px;
+		height: 76px;
+		border: 1px solid var(--k-line);
+		font-weight: 700;
 	}
-
-	.perk-card-offer,
-	.perk-card-until {
-		margin: 0;
+	.mb-perk-logo img {
+		max-width: 80%;
+		max-height: 80%;
+		object-fit: contain;
 	}
-
-	.perk-card-offer {
-		color: var(--color-green);
-		font-weight: 600;
+	.mb-perk-body {
+		display: grid;
+		gap: 2px;
 	}
-
-	.perk-card-until {
-		margin-top: 4px;
-		font-size: 0.8rem;
-		opacity: 0.7;
+	.mb-perk-offer {
+		color: var(--k-olive);
+		font-family: var(--k-font-display);
+		font-size: 1.7rem;
+		font-weight: 800;
+		line-height: 1.1;
 	}
-
-	.perks-fine-print {
-		margin: 12px 0 0;
-		font-size: 0.8rem;
-		opacity: 0.7;
-	}
-
-	/* .button-primary sets display, which would beat the hidden attribute. */
-	.perk-use[hidden],
-	.perk-expired[hidden] {
-		display: none;
-	}
-
-	.perk-soon {
-		padding: 8px 14px;
-		border-radius: 999px;
-		background-color: var(--color-sage);
-		color: var(--color-green);
-		font-size: 0.85rem;
-		font-weight: 600;
-	}
-
-	.perk-confirm {
-		width: calc(100% - 32px);
-		max-width: 360px;
-		padding: 24px 20px 20px;
-		border: 0;
-		border-radius: 16px;
-		background-color: var(--color-background);
-		color: var(--color-dark);
-		text-align: center;
-	}
-
-	.perk-confirm::backdrop {
-		background-color: rgba(0, 0, 0, 0.45);
-	}
-
-	.perk-confirm-title {
-		margin: 0;
-		max-width: none;
-		font-size: 1.2rem;
-		line-height: 1.35;
-	}
-
-	.perk-confirm-text {
-		margin: 10px 0 0;
-		text-wrap: balance;
+	.mb-perk-body :global(.mb-perk-cond) {
 		font-size: 0.9rem;
-		line-height: 1.6;
-	}
-
-	.perk-confirm-actions {
-		display: flex;
-		gap: 10px;
-		margin-top: 20px;
-	}
-
-	.perk-confirm-actions button {
-		flex: 1;
-		justify-content: center;
-		margin: 0;
-		padding: 12px 16px;
-		border-radius: 6px;
-		font: inherit;
-		font-size: 0.95rem;
 		font-weight: 600;
-		cursor: pointer;
+	}
+	.mb-perk-name {
+		margin-top: 4px;
+		font-weight: 700;
+		font-size: 0.92rem;
+	}
+	.mb-perk-address {
+		color: var(--k-muted);
+		font-size: 0.82rem;
+	}
+	.mb-perk-action {
+		display: grid;
+		justify-items: end;
+		gap: 6px;
+	}
+	.mb-perk-action :global(.mb-perk-until) {
+		color: var(--k-muted);
+		font-size: 0.78rem;
+	}
+	.mb-soon {
+		padding: 8px 12px;
+		background: #f2f2f2;
+		color: var(--k-muted);
+		font-size: 0.85rem;
+		font-weight: 700;
 	}
 
-	.perk-confirm-ok {
-		border: 1px solid var(--color-green);
+	/* Confirm */
+	.mb-confirm {
+		max-width: 360px;
+		padding: 24px;
+		border: 1px solid var(--k-line);
+		border-radius: 0;
+	}
+	.mb-confirm::backdrop {
+		background: rgba(0, 0, 0, 0.45);
+	}
+	:global(.mb-confirm-text) {
+		margin: 10px 0 18px;
+		color: #444;
+		font-size: 0.92rem;
+	}
+	.mb-confirm-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
 	}
 
-	.perk-confirm-cancel {
-		border: 1px solid var(--color-green);
-		background-color: transparent;
-		color: var(--color-green);
-	}
-
-	.perk-coupon {
+	/* Store screen */
+	.mb-store {
 		position: fixed;
 		inset: 0;
-		z-index: 1000;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 16px;
-		background-color: var(--color-green);
+		z-index: 100;
+		display: grid;
+		place-items: center;
+		overflow-y: auto;
+		padding: 20px;
+		background: var(--k-olive);
 	}
-
-	.perk-coupon[hidden] {
+	.mb-store[hidden] {
 		display: none;
 	}
-
 	:global(body.perk-coupon-open) {
 		overflow: hidden;
 	}
-
-	.perk-coupon-card {
-		width: 100%;
-		max-width: 400px;
-		padding: 32px 24px;
-		border-radius: 24px;
-		background-color: var(--color-background);
-		color: var(--color-dark);
+	.mb-store-card {
+		display: grid;
+		justify-items: center;
+		gap: 8px;
+		width: min(100%, 380px);
+		padding: 26px 24px 22px;
+		background: #fff;
 		text-align: center;
 	}
-
-	.perk-coupon-brand {
+	.mb-store-brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
 		margin: 0;
-		color: var(--color-green);
-		font-size: 0.8rem;
+		color: var(--k-muted);
+		font-size: 0.72rem;
 		font-weight: 800;
-		letter-spacing: 0.2em;
+		letter-spacing: 0.12em;
 	}
-
-	.perk-coupon-partner {
-		margin: 12px 0 4px;
-		max-width: none;
-		font-size: 1.8rem;
+	.mb-store-brand img {
+		height: 22px;
+	}
+	.mb-store-logo {
+		max-width: 120px;
+		max-height: 70px;
+		margin-top: 10px;
+		object-fit: contain;
+	}
+	.mb-store-partner {
+		margin: 0;
+		font-size: 1rem;
+	}
+	.mb-store-offer {
+		margin: 4px 0 0;
+		color: var(--k-olive);
+		font-family: var(--k-font-display);
+		font-size: 1.6rem;
+		font-weight: 800;
 		line-height: 1.2;
 	}
-
-	.perk-coupon-offer {
-		margin: 0;
-		color: var(--color-green);
-		font-size: 1.3rem;
-		font-weight: 800;
-	}
-
-	.perk-coupon-member {
-		margin: 20px 0 0;
-		font-size: 1.4rem;
+	.mb-store-member {
+		margin: 6px 0 0;
+		font-size: 1.15rem;
 		font-weight: 700;
 	}
-
-	.perk-coupon-live {
-		display: flex;
+	.mb-store-live {
+		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		gap: 12px;
-		margin-top: 20px;
+		gap: 10px;
+		margin-top: 8px;
 	}
-
-	.perk-coupon-clock {
+	.mb-store-pulse {
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background: #2e8b57;
+		animation: mb-pulse 1.6s ease-in-out infinite;
+	}
+	@keyframes mb-pulse {
+		50% {
+			opacity: 0.35;
+		}
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.mb-store-pulse {
+			animation: none;
+		}
+	}
+	.mb-store-clock {
+		font-family: var(--k-font-display);
 		font-size: 2.4rem;
 		font-weight: 800;
 		font-variant-numeric: tabular-nums;
-		letter-spacing: -0.02em;
+	}
+	.mb-store-small {
+		margin: 0;
+		color: var(--k-muted);
+		font-size: 0.85rem;
+	}
+	:global(.mb-store-note) {
+		margin: 8px 0 0;
+		color: #444;
+		font-size: 0.82rem;
+		line-height: 1.5;
+	}
+	.mb-store-done {
+		width: 100%;
+		min-height: 46px;
+		margin-top: 10px;
 	}
 
-	.perk-coupon-pulse {
-		width: 14px;
-		height: 14px;
-		border-radius: 50%;
-		background-color: #2fa84f;
-		animation: perk-pulse 1.2s ease-in-out infinite;
-	}
-
-	@keyframes perk-pulse {
-		0%,
-		100% {
-			transform: scale(0.7);
-			opacity: 0.5;
+	@media (max-width: 860px) {
+		.mb-home:not([hidden]) {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 28px;
 		}
-		50% {
-			transform: scale(1.15);
-			opacity: 1;
+		/* Phone order: card → benefits → how to use. */
+		.mb-left {
+			display: contents;
 		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.perk-coupon-pulse {
-			animation-duration: 3s;
+		.mb-card {
+			order: 1;
 		}
-	}
-
-	.perk-coupon-date,
-	.perk-coupon-opened,
-	.perk-coupon-note {
-		margin: 6px 0 0;
-		font-size: 0.9rem;
-	}
-
-	.perk-coupon-opened {
-		opacity: 0.7;
-	}
-
-	.perk-coupon-note {
-		margin-top: 20px;
-		opacity: 0.8;
-	}
-
-	.perk-coupon-close {
-		margin-top: 24px;
-		padding: 12px 32px;
-		border: 0;
-		border-radius: 999px;
-		background-color: var(--color-green);
-		color: var(--color-background);
-		font: inherit;
-		font-weight: 700;
-		cursor: pointer;
+		.mb-switch {
+			order: 2;
+			justify-self: start;
+			margin-top: -18px;
+		}
+		.mb-right {
+			order: 3;
+		}
+		.mb-how {
+			order: 4;
+			margin-top: 0;
+		}
+		.mb-perk {
+			grid-template-columns: 60px minmax(0, 1fr);
+		}
+		.mb-perk-logo {
+			width: 60px;
+			height: 60px;
+		}
+		.mb-perk-action {
+			grid-column: 1 / -1;
+			grid-template-columns: 1fr auto;
+			align-items: center;
+		}
+		.mb-perk-action .k-btn {
+			width: 100%;
+			min-height: 46px;
+		}
 	}
 </style>

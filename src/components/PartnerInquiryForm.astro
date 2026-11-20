@@ -4,6 +4,7 @@ import T from "./T.astro";
 
 <form class="inquiry-form" id="partner-inquiry" action="https://formspree.io/f/xvkkyerv" method="POST">
 	<input type="hidden" name="subject" value="KICKS · Partnership inquiry / 파트너십 문의" />
+	<div class="inquiry-row">
 	<div class="form-field">
 		<label for="brand-name"><T en="Brand Name" ko="브랜드명" /></label>
 		<input type="text" id="brand-name" name="brand-name" autocomplete="organization" maxlength="200" required />
@@ -12,6 +13,7 @@ import T from "./T.astro";
 	<div class="form-field">
 		<label for="contact-name"><T en="Contact Person" ko="담당자 이름" /></label>
 		<input type="text" id="contact-name" name="name" autocomplete="name" maxlength="100" required />
+	</div>
 	</div>
 
 	<div class="form-field">
@@ -25,18 +27,33 @@ import T from "./T.astro";
 	</div>
 
 	<T as="p" class="inquiry-note" en="Your contact details and message will be sent to KICKS through Formspree." ko="입력한 연락처와 문의 내용은 Formspree를 통해 KICKS로 전달됩니다." />
-	<button class="form-submit" type="submit"><span data-inquiry-idle><T en="Send Inquiry" ko="문의 보내기" /></span><span data-inquiry-sending hidden><T en="Sending…" ko="보내는 중…" /></span></button>
+	<button class="k-btn inquiry-submit" type="submit"><span data-inquiry-idle><T en="Send" ko="보내기" /></span><span data-inquiry-sending hidden><T en="Sending…" ko="보내는 중…" /></span></button>
 	<div class="inquiry-note" role="status" aria-live="polite">
 		<p data-inquiry-success hidden><T en="Your inquiry has been submitted. We’ll reply to the email address you provided." ko="문의가 접수됐어요. 남겨주신 이메일로 답변드리겠습니다." /></p>
-		<p data-inquiry-error hidden><T en="We couldn’t confirm your submission. Your message is still here. Please try again later or email us directly below." ko="문의 접수를 확인하지 못했어요. 입력한 내용은 그대로 남아 있어요. 잠시 후 다시 시도하거나 아래 이메일로 직접 문의해주세요." /></p>
+		<p data-inquiry-error hidden><T en="We couldn’t confirm your submission. Your message is still here. Please try again later or email kicks.uiuc@gmail.com." ko="문의 접수를 확인하지 못했습니다. 입력한 내용은 그대로 남아 있습니다. 잠시 후 다시 시도하거나 kicks.uiuc@gmail.com으로 메일을 보내주세요." /></p>
 	</div>
 </form>
 
-<p class="inquiry-note"><T en="Having trouble sending? Email us directly: " ko="전송이 안 되면 이메일로 직접 문의해주세요: " /><a href="mailto:kicks.uiuc@gmail.com">kicks.uiuc@gmail.com</a></p>
-
 <style>
-	.inquiry-note { max-width: 680px; line-height: 1.7; font-size: 0.9rem; }
-	.inquiry-note a { text-decoration: underline; text-underline-offset: 3px; }
+	.inquiry-form { display: grid; gap: 16px; max-width: none; margin: 0; }
+	.inquiry-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+	.inquiry-form :global(.form-field) { display: grid; gap: 6px; margin: 0; }
+	.inquiry-form label { color: var(--k-muted); font-size: 0.82rem; font-weight: 600; }
+	.inquiry-form input,
+	.inquiry-form textarea {
+		width: 100%;
+		padding: 11px 12px;
+		border: 1px solid var(--k-line);
+		border-radius: 0;
+		background: #fff;
+		font: inherit;
+		font-size: 0.95rem;
+	}
+	.inquiry-form input:focus,
+	.inquiry-form textarea:focus { outline: 2px solid var(--k-olive); outline-offset: -1px; border-color: var(--k-olive); }
+	.inquiry-submit { justify-self: start; min-width: 120px; }
+	:global(.inquiry-note) { margin: 0; color: var(--k-muted); line-height: 1.6; font-size: 0.82rem; }
+	@media (max-width: 600px) { .inquiry-row { grid-template-columns: 1fr; } }
 </style>
 
 <script>

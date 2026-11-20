@@ -13,6 +13,12 @@ export interface ScheduleEvent {
 	/** Optional Korean title; falls back to `title` when missing. */
 	title_ko?: string;
 	type: ScheduleEventType;
+	/** Optional short name for the Schedule page's calendar and lists, e.g. "Team Dinner #1 (BBQ)". */
+	short?: string;
+	short_ko?: string;
+	/** Optional even shorter name for the homepage chip, e.g. "Awards night"; falls back to `short`. */
+	chip?: string;
+	chip_ko?: string;
 	/** For `league` entries: which league (e.g. "FA26-L1") and the week within it. */
 	league?: string;
 	week?: number;
@@ -216,4 +222,51 @@ export function groupByMonth(views: ScheduleEventView[]): ScheduleMonthGroup[] {
 			events: monthEvents,
 		};
 	});
+}
+
+// ---------- KICKS 2.0 Schedule page ----------
+
+/** What a calendar entry is colored as. Fundraisers are `event`s whose title says so. */
+export type ScheduleKind = "league" | "friendly" | "event" | "fundraiser" | "dinner";
+
+export const KIND_LABELS: Record<ScheduleKind, { en: string; ko: string }> = {
+	league: { en: "League", ko: "리그" },
+	friendly: { en: "Friendly", ko: "친선전" },
+	event: { en: "Event", ko: "이벤트" },
+	fundraiser: { en: "Fundraiser", ko: "펀드레이징" },
+	dinner: { en: "Dinner & awards", ko: "회식·시상식" },
+};
+
+export function scheduleKind(event: ScheduleEvent): ScheduleKind {
+	if (event.type === "league") return "league";
+	if (event.type === "friendly") return "friendly";
+	if (event.type === "ceremony") return "dinner";
+	return /fundrais/i.test(event.title) ? "fundraiser" : "event";
+}
+
+/**
+ * The name on the Schedule page: "League 2 · Week 1" for a league day (the
+ * season is already in the page's season picker), otherwise the entry's
+ * `short` name, falling back to its title.
+ */
+export function scheduleName(event: ScheduleEvent, lang: Lang): string {
+	if (event.type === "league" && event.league && event.week) {
+		const part = event.league.split("-")[1] ?? "";
+		const league = /^L\d+$/i.test(part) ? `League ${part.slice(1)}` : event.league;
+		return `${league} · ${weekLabel(event.week, lang)}`;
+	}
+	const short = lang === "ko" ? event.short_ko ?? event.short : event.short;
+	return short ?? eventTitle(event, lang);
+}
+
+/** Whole days from `today` (YYYY-MM-DD) to `date`. */
+export function daysBetween(today: string, date: string): number {
+	const [ay, am, ad] = today.split("-").map(Number);
+	const [by, bm, bd] = date.split("-").map(Number);
+	return Math.round((Date.UTC(by, bm - 1, bd) - Date.UTC(ay, am - 1, ad)) / 86_400_000);
+}
+
+export function todayIso(date: Date = new Date()): string {
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }

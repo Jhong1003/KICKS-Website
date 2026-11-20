@@ -9,28 +9,28 @@
 	{
 		"id": "fa26-gm1",
 		"title": "General Meeting #1",
-		"title_ko": "GM 1 · 제너럴 미팅",
+		"title_ko": "전체 모임 1 (GM)",
 		"date": "2026-09-02",
 		"cover": "15.jpg"
 	},
 	{
 		"id": "fa26-inazuma-friendly",
-		"title": "KICKS vs Inazuma (JSA) · Friendly Match",
-		"title_ko": "KICKS vs 이나즈마 (JSA) · 친선경기",
+		"title": "Friendly vs Inazuma (JSA)",
+		"title_ko": "친선전 vs 이나즈마 (JSA)",
 		"date": "2026-10-03",
 		"cover": "62.jpg"
 	},
 	{
 		"id": "fa26-team-dinner-1",
-		"title": "Team Dinner #1 · Outdoor BBQ",
-		"title_ko": "전체회식 1 · 야외 BBQ",
+		"title": "Team Dinner #1 (BBQ)",
+		"title_ko": "전체회식 1 (BBQ)",
 		"date": "2026-10-23",
 		"cover": "51.jpg"
 	},
 	{
 		"id": "fa26-saudi-friendly",
-		"title": "KICKS vs Saudi Club · Friendly Match",
-		"title_ko": "KICKS vs Saudi Club · 친선경기",
+		"title": "Friendly vs Saudi Club",
+		"title_ko": "친선전 vs Saudi Club",
 		"date": "2026-11-07",
 		"cover": "29.jpg"
 	}

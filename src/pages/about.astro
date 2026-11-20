@@ -6,75 +6,70 @@ import T from "../components/T.astro";
 import BoardSection from "../components/BoardSection.astro";
 import aboutImage from "../assets/about.jpg";
 
+// KICKS 2.0 About: who we are + the group photo, what makes KICKS
+// different (four cards, facts only), and the board. Who-should-join moved
+// to the Join page; the Join button is always in the header.
 const features = [
 	{
-		title: "Two Leagues Every Semester",
+		title: "Two leagues a semester",
 		titleKo: "한 학기, 두 번의 리그",
-		descriptionKo:
-			"한 학기에 리그가 두 번 열려요. 리그마다 3~4개 팀으로 나뉘어 같은 팀원들과 호흡을 맞추고, 다음 리그에서는 팀을 새로 짜서 더 많은 멤버와 함께 뛸 수 있어요.",
 		description:
-			"We run two leagues each semester. For each league, members are split into 3 to 4 teams, so you build real chemistry with your teammates. Teams are reshuffled for the next league, so you get to play with even more members.",
+			"Each league runs for five Saturdays with 3 or 4 teams. Teams are reshuffled for the next league, so you play with most of the club by the end of the semester.",
+		descriptionKo:
+			"한 학기에 리그가 두 번 열립니다. 리그마다 3팀이 5주 동안 경기를 하고, 다음 리그에서는 팀을 새로 섞습니다. 그래서 학기가 끝날 때쯤이면 동아리 대부분의 멤버와 함께 뛰어보게 됩니다.",
 	},
 	{
-		title: "A Close-Knit Community",
-		titleKo: "끈끈한 커뮤니티",
-		descriptionKo:
-			"단순히 공만 차는 곳이 아니에요. 매주 함께 모여 뛰면서 서로를 알아가고, 오래가는 우정을 만들어갑니다. 리그 밖에서도 팀 회식과 바비큐, 이벤트 매치를 즐기고, 함께 축구 경기를 보며 어울려요.",
+		title: "More than games",
+		titleKo: "경기 그 이상",
 		description:
-			"We're more than just a place to play. By showing up and playing together every week, we get to know each other and create lasting friendships. Outside the league, we get together for team dinners, BBQs, event matches, and watching games.",
+			"We end every league with an awards night and a team dinner, and we hold fundraisers and other events during the semester.",
+		descriptionKo: "리그가 끝날 때마다 시상식과 팀 회식을 하고, 학기 중에는 펀드레이징 등 다양한 행사도 진행합니다.",
 	},
 	{
-		title: "Friendly Matches with Other Teams",
-		titleKo: "다른 팀과의 친선경기",
-		descriptionKo:
-			"UIUC의 여러 유학생 축구·풋살 동아리와 친선경기를 하며, 새로운 사람들을 만나고 축구로 교류할 기회를 만듭니다.",
-		description:
-			"We play friendly matches against international student soccer and futsal clubs across UIUC, creating chances to meet new people and connect through the game.",
+		title: "Friendlies with other clubs",
+		titleKo: "다른 동아리와 친선전",
+		description: "We also play friendly matches against other international student clubs every semester.",
+		descriptionKo: "매 학기 다른 유학생 동아리와 친선 경기가 진행됩니다.",
 	},
 	{
-		title: "Every Moment, Captured",
-		titleKo: "모든 순간을 기록합니다",
-		descriptionKo:
-			"전체 경기 영상부터 하이라이트까지 모든 경기를 사진과 영상으로 남겨, 필드에서 함께한 순간이 오래 남는 추억이 되도록 합니다.",
+		title: "Every game on record",
+		titleKo: "모든 경기를 기록",
 		description:
-			"We capture our matches in photos and videos, from full games to highlights, so the moments we share on the field become memories that last.",
+			"We film and photograph every league game. Goals, assists and standings are updated on our website every week.",
+		descriptionKo: "모든 리그 경기를 영상과 사진으로 남기고, 골·어시스트·순위는 매주 웹사이트에 업데이트합니다.",
 	},
 ];
 ---
 
 <BaseLayout ogImage={pageOgImage("about")} title="About | KICKS" description="Learn more about KICKS, UIUC's student-run futsal community. 축구·풋살을 좋아하는 사람들이 모인 UIUC 한인 풋살 동아리.">
-	<main>
-		<section class="content-section" aria-labelledby="about-page-title">
-			<div class="about-intro">
-				<div class="about-intro-text">
-					<p class="section-label"><T en="WHO WE ARE" ko="우리 이야기" /></p>
-					<h1 id="about-page-title"><T en="About KICKS" ko="KICKS 소개" /></h1>
-					<T
-						as="p"
-						class="about-description"
-						en="KICKS (Korean-Inspired Community for Kicking Sports) is a Korean-inspired futsal community at UIUC for people who love soccer and futsal. We run a weekly 7v7 futsal league, plus 11v11 event matches during the semester. Playing together every week, we get to know each other naturally and build a tight-knit team, on and off the field."
-						ko="KICKS(Korean-Inspired Community for Kicking Sports)는 축구와 풋살을 좋아하는 사람들이 모인 UIUC의 한인 풋살 동아리입니다. 매주 7대7 풋살 리그를 하고, 학기 중에는 11대11 이벤트 매치도 열어요. 매주 함께 뛰다 보면 자연스럽게 서로를 알게 되고, 필드 안팎에서 끈끈한 팀이 됩니다."
-					/>
-					<T
-						as="p"
-						class="about-description"
-						en="KICKS runs a competitive league, so we're looking for members with some prior game experience. It's best suited for players who love futsal and want to compete, improve, and grow alongside their teammates."
-						ko="KICKS는 실제로 경쟁하는 리그인 만큼, 어느 정도 경기 경험이 있는 멤버를 찾고 있습니다. 풋살을 좋아하고 팀원들과 함께 경쟁하며 성장하고 싶은 분께 잘 맞는 동아리입니다."
-					/>
-				</div>
-				<div class="split-photo about-photo">
-					<Image src={aboutImage} alt="KICKS club members playing futsal" width={1200} quality={85} />
-				</div>
+	<main class="k-page about">
+		<section class="about-intro" aria-labelledby="about-title">
+			<div class="about-intro-text">
+				<h1 class="k-h1" id="about-title"><T en="About" ko="소개" /></h1>
+				<T
+					as="p"
+					class="about-text"
+					en="KICKS (Korean-Inspired Community for Kicking Sports) is a Korean-inspired futsal club at UIUC for students who love soccer and futsal. Every Saturday, we play 7v7 in our own league. Each semester is one season with two leagues, and new teams are formed for each league. We also organize 11v11 matches and friendly games against other international student clubs. Through our weekly games and events, members get to know each other, build friendships, and connect on and off the field."
+					ko="KICKS는 축구와 풋살을 좋아하는 UIUC 학생들이 모인 한인 풋살 동아리입니다. 매주 토요일 7대7 리그 경기를 하며, 한 학기에 두 번 리그를 열고 리그마다 팀을 새로 구성합니다. 학기 중에는 11대11 경기와 다른 동아리와의 친선전도 진행합니다. 매주 함께 공을 차고 행사에 참여하면서 서로 가까워질 수 있습니다."
+				/>
+			</div>
+			<div class="about-photo">
+				<Image src={aboutImage} alt="KICKS members on the field" width={1400} quality={85} loading="eager" />
 			</div>
 		</section>
 
-		<section class="content-section" aria-labelledby="differences-title">
-			<h2 id="differences-title"><T en="What Makes KICKS Different" ko="KICKS만의 특별함" /></h2>
-			<div class="feature-grid">
+		<section class="k-section" aria-labelledby="different-title">
+			<div class="k-section-head">
+				<h2 class="k-h2" id="different-title"><T en="What Makes KICKS Different" ko="KICKS만의 특별함" /></h2>
+			</div>
+			<div class="about-features">
 				{
-					features.map((feature) => (
-						<div class="feature-card">
-							<T as="h3" en={feature.title} ko={feature.titleKo} />
+					features.map((feature, index) => (
+						<div class="about-feature k-card">
+							<span class="about-feature-number" aria-hidden="true">
+								{String(index + 1).padStart(2, "0")}
+							</span>
+							<T as="h3" class="k-h3" en={feature.title} ko={feature.titleKo} />
 							<T as="p" en={feature.description} ko={feature.descriptionKo} />
 						</div>
 					))
@@ -83,32 +78,89 @@ const features = [
 		</section>
 
 		<BoardSection />
-
-		<section class="content-section" aria-labelledby="who-should-join-title">
-			<h2 id="who-should-join-title"><T en="Who Should Join" ko="이런 분을 찾아요" /></h2>
-			{/* One sentence per line (each starts on its own line). */}
-			<T as="p" class="about-description">
-				<Fragment slot="en">
-					Freshmen, current students, transfer students, and graduate students are all welcome to apply.<br />
-					If you have game experience, love futsal, and want to compete, stay active, and make great memories in college, we'd love to have you.
-				</Fragment>
-				<Fragment slot="ko">
-					신입생, 재학생, 편입생, 대학원생 모두 지원할 수 있어요.<br />
-					경기 경험이 있고 풋살을 좋아하며, 대학&nbsp;생활 동안 함께 경쟁하고 좋은 추억을 만들어갈 분들의 지원을 기다립니다.
-				</Fragment>
-			</T>
-			<T as="p" class="about-description">
-				<Fragment slot="en">
-					Questions? Reach out on Instagram
-					<a href="https://www.instagram.com/kicks.uiuc" target="_blank" rel="noopener noreferrer">@kicks.uiuc</a>
-				</Fragment>
-				<Fragment slot="ko">
-					궁금한 점은 인스타그램
-					<a href="https://www.instagram.com/kicks.uiuc" target="_blank" rel="noopener noreferrer">@kicks.uiuc</a>로
-					연락주세요.
-				</Fragment>
-			</T>
-			<a class="button-primary" href="/join/"><T en="Join KICKS" ko="KICKS 가입하기" /></a>
-		</section>
 	</main>
 </BaseLayout>
+
+<style>
+	.about-intro {
+		display: grid;
+		grid-template-columns: minmax(0, 43fr) minmax(0, 57fr);
+		align-items: center;
+		gap: 48px;
+		padding-top: 24px;
+	}
+	.about-intro-text {
+		display: grid;
+		gap: 20px;
+	}
+	:global(.about-text) {
+		margin: 0;
+		color: #333;
+		font-size: 1.02rem;
+		line-height: 1.75;
+	}
+	.about-photo {
+		aspect-ratio: 16 / 10;
+		overflow: hidden;
+		background: #f0f0f0;
+	}
+	.about-photo :global(img) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		/* Trim only the grass at the bottom; keep both sides. */
+		object-position: center top;
+	}
+
+	.about-features {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 20px;
+	}
+	.about-feature {
+		display: grid;
+		align-content: start;
+		gap: 10px;
+		padding: 22px 20px 24px;
+		border-top: 3px solid var(--k-olive);
+	}
+	.about-feature :global(h3) {
+		margin: 0;
+	}
+	.about-feature-number {
+		color: var(--k-olive);
+		font-family: var(--k-font-display);
+		font-size: 0.85rem;
+		font-weight: 700;
+	}
+	.about-feature :global(p) {
+		margin: 0;
+		color: #444;
+		font-size: 0.92rem;
+		line-height: 1.6;
+	}
+
+	@media (max-width: 980px) {
+		.about-features {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 860px) {
+		.about-intro {
+			grid-template-columns: 1fr;
+			gap: 24px;
+			padding-top: 8px;
+		}
+		.about-photo {
+			order: -1;
+			margin: 0 calc(var(--k-gutter) * -1);
+		}
+	}
+	@media (max-width: 520px) {
+		.about-features {
+			grid-template-columns: 1fr;
+			gap: 12px;
+		}
+	}
+</style>
