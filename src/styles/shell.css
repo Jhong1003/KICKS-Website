@@ -76,7 +76,7 @@ h3 {
 	grid-template-columns: 1fr auto 1fr;
 	align-items: center;
 	max-width: calc(var(--k-max) + var(--k-gutter) * 2);
-	min-height: 84px;
+	min-height: 78px;
 	margin: 0 auto;
 	padding: 10px var(--k-gutter);
 
@@ -95,7 +95,7 @@ h3 {
 
 	display: block;
 	width: auto;
-	height: 64px;
+	height: 56px;
 
 }
 
@@ -374,7 +374,7 @@ html[lang="ko"] .k-lang [data-lang-option="ko"] {
 
 	.k-brand img {
 
-		height: 40px;
+		height: 37px;
 
 	}
 
