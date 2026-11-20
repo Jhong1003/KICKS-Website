@@ -830,8 +830,8 @@ What KakaoTalk, iMessage etc. show when a link is shared. Every page gets a
 `public/og/<dir>/`, and writes `src/data/og.json` (a hash per card, per kind — never
 hand-edit). Pages pick a card through [src/lib/og.ts](src/lib/og.ts) → `ogImage` on
 `BaseLayout` (default `homeOgImage()`), with `?v=<hash>` in the URL so a redrawn card
-isn't hidden behind a chat app's cache. The look is KICKS 2.0: white card, black logo
-top left, olive strip along the bottom (kicksuiuc.com · UIUC Korean futsal club),
+isn't hidden behind a chat app's cache. The look is KICKS 2.0 layout and type: white logo
+top left on the club olive (no strip or small print along the bottom),
 Inter Tight for titles and numbers and Pretendard for Korean — both embedded from
 `report/assets/` (`InterTight.woff2`, `Pretendard-subset.woff2`, the same 2,350
 syllables as the report's Noto subset), so CI needs no fonts. No small caps labels.
