@@ -920,3 +920,163 @@ a.k-chip:focus-visible {
 	display: none !important;
 
 }
+
+/* ---------- Mini games (Keeper Challenge, Free Kick) ---------- */
+
+.mg-back {
+
+	display: inline-block;
+	margin-bottom: 14px;
+
+}
+
+.mg .mg-intro {
+
+	margin: 10px 0 24px;
+	color: #444;
+	font-size: 1rem;
+
+}
+
+.mg-body {
+
+	display: grid;
+	grid-template-columns: minmax(0, 640px) minmax(0, 1fr);
+	gap: 40px;
+	align-items: start;
+
+}
+
+.mg .mg-game {
+
+	max-width: none;
+	margin: 0;
+	padding: 14px;
+	border: 1px solid var(--k-line);
+
+}
+
+.mg .button-primary {
+
+	border-radius: 0;
+	background: var(--k-olive);
+
+}
+
+.mg .mg-board {
+
+	max-width: none;
+	margin: 0;
+
+}
+
+.mg .mg-board h2 {
+
+	margin: 0;
+	padding-bottom: 10px;
+	border-bottom: 2px solid var(--k-olive);
+	font-family: var(--k-font-display);
+	font-size: 1.3rem;
+
+}
+
+.mg .mg-board [data-board-list] li {
+
+	grid-template-columns: 30px minmax(0, 1fr) auto;
+	grid-template-areas: "rank name score" "rank detail score";
+	align-items: center;
+	row-gap: 0;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--k-line);
+
+}
+
+.mg .mg-board [data-board-list] li > :nth-child(1) {
+
+	grid-area: rank;
+	display: grid;
+	place-items: center;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	color: var(--k-muted);
+	font-size: 0.82rem;
+
+}
+
+.mg .mg-board [data-board-list] li:nth-child(-n + 3) > :nth-child(1) {
+
+	color: #fff;
+
+}
+
+.mg .mg-board [data-board-list] li:nth-child(1) > :nth-child(1) {
+
+	background: #c9a227;
+
+}
+
+.mg .mg-board [data-board-list] li:nth-child(2) > :nth-child(1) {
+
+	background: #a7adb4;
+
+}
+
+.mg .mg-board [data-board-list] li:nth-child(3) > :nth-child(1) {
+
+	background: #b0754a;
+
+}
+
+.mg .mg-board [data-board-list] li > :nth-child(2) {
+
+	grid-area: name;
+
+}
+
+.mg .mg-board [data-board-list] li > :nth-child(3) {
+
+	grid-area: detail;
+
+}
+
+.mg .mg-board [data-board-list] li > strong {
+
+	grid-area: score;
+	font-family: var(--k-font-display);
+	font-size: 1.35rem;
+	font-weight: 800;
+	white-space: nowrap;
+
+}
+
+@media (max-width: 980px) {
+
+	.mg-body {
+
+		grid-template-columns: minmax(0, 1fr);
+
+	}
+
+	.mg .mg-game {
+
+		padding: 0;
+		border: 0;
+
+	}
+
+}
+
+.mg .mg-board > p {
+
+	margin: 12px 0 0;
+	color: var(--k-muted);
+	font-size: 0.85rem;
+
+}
+
+.mg [data-stage] {
+
+	border-radius: 0;
+
+}
