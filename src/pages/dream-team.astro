@@ -38,24 +38,23 @@ const players = (profilesData as PlayerProfile[])
 ---
 
 <BaseLayout ogImage={pageOgImage("dream-team")} title="Dream Team | KICKS" description="If you were the head coach: pick your own KICKS XI — drag up to eleven players onto the pitch.">
-	<main>
-		<section class="content-section" aria-labelledby="dream-team-title">
-			<a class="back-link" href="/players/"><T en="← All players" ko="← 전체 선수" /></a>
-			<p class="section-label">MY KICKS XI</p>
-			<h1 id="dream-team-title"><T en="If I Were the Head Coach" ko="내가 감독이라면" /></h1>
+	<main class="k-page dt">
+		<section aria-labelledby="dream-team-title">
+			<a class="k-link dt-back" href="/players/">← <T en="Players" ko="선수" /></a>
+			<h1 class="k-h1" id="dream-team-title"><T en="If I Were the Head Coach" ko="내가 감독이라면" /></h1>
 			<T
 				as="p"
-				class="about-description"
-				en="Drag up to eleven KICKS players onto the pitch and place them wherever you like. On a phone, press and hold a name, then drag."
-				ko="KICKS 선수를 최대 11명까지 경기장 위 원하는 자리로 끌어다 놓으세요. 휴대폰에서는 이름을 살짝 길게 누른 뒤 끌면 돼요."
+				class="dt-intro"
+				en="Drag up to 11 players onto the pitch. On a phone, press and hold a name first."
+				ko="KICKS 선수를 최대 11명까지 경기장 위로 끌어다 놓으세요. 휴대폰에서는 이름을 길게 누른 뒤 끌어주세요."
 			/>
 
 			<div class="dream-team" id="dream-team" data-players={JSON.stringify(players)}>
 				<div class="dream-pitch-col">
-					<div class="player-sort dream-squad-tabs" role="group" aria-label="Squad">
+					<div class="k-tabs dream-squad-tabs" role="group" aria-label="Squad">
 						{
 							[1, 2, 3].map((n) => (
-								<button class="player-sort-button" type="button" data-squad={n - 1} aria-pressed={n === 1 ? "true" : "false"}>
+								<button type="button" data-squad={n - 1} aria-pressed={n === 1 ? "true" : "false"}>
 									<T en={`Squad ${n}`} ko={`스쿼드 ${n}`} />
 									<span class="dream-squad-count" data-squad-count={n - 1}></span>
 								</button>
@@ -76,7 +75,7 @@ const players = (profilesData as PlayerProfile[])
 					</div>
 					<div class="dream-team-actions">
 						<span class="dream-count"><span data-count>0</span> / 11</span>
-						<button class="player-sort-button" type="button" data-clear>
+						<button class="k-btn k-btn--line" type="button" data-clear>
 							<T en="Clear" ko="모두 비우기" />
 						</button>
 					</div>
@@ -431,3 +430,47 @@ const players = (profilesData as PlayerProfile[])
 		render();
 	}
 </script>
+
+<style>
+	.dt-back {
+		display: inline-block;
+		margin-bottom: 14px;
+	}
+	:global(.dt-intro) {
+		margin: 10px 0 24px;
+		color: #444;
+	}
+	.dt :global(.dream-squad-tabs) {
+		margin-bottom: 14px;
+	}
+	.dt :global(.dream-squad-tabs [aria-pressed="true"]) {
+		color: var(--k-ink);
+	}
+	.dt :global(.dream-squad-tabs [aria-pressed="true"])::after {
+		content: "";
+		position: absolute;
+		right: 0;
+		bottom: -1px;
+		left: 0;
+		height: 3px;
+		background: var(--k-olive);
+	}
+	/* Olive pitch with white lines. */
+	.dt :global(.dream-pitch) {
+		border-radius: 0;
+		background: var(--k-olive);
+	}
+	.dt :global(.dream-pitch-lines span) {
+		border-color: rgba(255, 255, 255, 0.55) !important;
+	}
+	.dt :global(.dream-pitch-hint) {
+		color: rgba(255, 255, 255, 0.8);
+	}
+	.dt :global(.dream-bench-search) {
+		border-radius: 0;
+	}
+	.dt :global(.dream-bench-list li),
+	.dt :global(.dream-bench-list button) {
+		border-radius: 0;
+	}
+</style>
