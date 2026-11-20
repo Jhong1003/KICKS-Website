@@ -200,26 +200,6 @@ const careerRows = player.leagues.map((section) => {
 							</div>
 						</dl>
 
-						<div class="pp-badges k-card">
-							<div class="pp-badges-head">
-								<h2 class="k-h3"><T en="Badges" ko="배지" /></h2>
-								<button class="k-link pp-link-button" type="button" aria-haspopup="dialog" data-badge-guide-open={`badge-guide-${section.league}`}>
-									<T en="All badges" ko="배지 목록" /> →
-								</button>
-							</div>
-							<BadgeGuide id={`badge-guide-${section.league}`} league={section.league} playerBadges={section.badges} />
-							<ul class="pp-badge-list">
-								{sortBadges(section.badges).map((key) => (
-									<li class:list={["pp-badge", `pp-badge--${BADGES[key].tier}`, { "pp-badge--champion": key === FEATURED_BADGE }]}>
-										<span class="pp-badge-icon" aria-hidden="true">{BADGES[key].icon}</span>
-										<span class="pp-badge-text">
-											<span class="pp-badge-name"><T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} /></span>
-											<span class="pp-badge-tier"><T en={BADGE_TIER_LABELS[BADGES[key].tier]} ko={BADGE_TIER_LABELS_KO[BADGES[key].tier]} /></span>
-										</span>
-									</li>
-								))}
-							</ul>
-						</div>
 					</div>
 
 					<dl class="pp-numbers">
@@ -228,6 +208,28 @@ const careerRows = player.leagues.map((section) => {
 						<div><dt>G+A</dt><dd>{totals.goals + totals.assists}</dd></div>
 						<div><dt><T en="Weeks played" ko="출전 주" /></dt><dd>{totals.weeks_attended}</dd></div>
 					</dl>
+
+					<section class="k-section pp-badges" aria-label="Badges">
+						<div class="pp-badges-head">
+							<h2 class="k-h2"><T en="Badges" ko="배지" /></h2>
+							<button class="k-link pp-link-button" type="button" aria-haspopup="dialog" data-badge-guide-open={`badge-guide-${section.league}`}>
+								<T en="All badges" ko="배지 목록" /> →
+							</button>
+						</div>
+						<BadgeGuide id={`badge-guide-${section.league}`} league={section.league} playerBadges={section.badges} />
+						<ul class="pp-badge-list">
+							{sortBadges(section.badges).map((key) => (
+								<li class:list={["pp-badge", `pp-badge--${BADGES[key].tier}`, { "pp-badge--champion": key === FEATURED_BADGE }]}>
+									<span class="pp-badge-icon" aria-hidden="true">{BADGES[key].icon}</span>
+									<span class="pp-badge-text">
+										<span class="pp-badge-name"><T en={BADGES[key].label} ko={BADGES[key].labelKo ?? BADGES[key].label} /></span>
+										<span class="pp-badge-tier"><T en={BADGE_TIER_LABELS[BADGES[key].tier]} ko={BADGE_TIER_LABELS_KO[BADGES[key].tier]} /></span>
+										<span class="pp-badge-desc"><T en={BADGES[key].description} ko={BADGES[key].descriptionKo} /></span>
+									</span>
+								</li>
+							))}
+						</ul>
+					</section>
 
 					<section class="k-section pp-table" aria-label="Week by week">
 						<h2 class="k-h2"><T en="Week by week" ko="주차별 기록" /></h2>
@@ -445,25 +447,16 @@ const careerRows = player.leagues.map((section) => {
 		color: #fff;
 	}
 
-	.pp-top {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-		gap: 20px;
-	}
 	.pp-info {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-columns: repeat(6, minmax(0, 1fr));
 		margin: 0;
 	}
 	.pp-info div {
 		padding: 14px 18px;
-		border-bottom: 1px solid var(--k-line);
 	}
-	.pp-info div:nth-child(odd) {
-		border-right: 1px solid var(--k-line);
-	}
-	.pp-info div:nth-last-child(-n + 2) {
-		border-bottom: 0;
+	.pp-info div + div {
+		border-left: 1px solid var(--k-line);
 	}
 	.pp-info dt {
 		color: var(--k-muted);
@@ -477,14 +470,14 @@ const careerRows = player.leagues.map((section) => {
 	.pp-info dd a:hover {
 		text-decoration: underline;
 	}
-	.pp-badges {
-		padding: 16px 18px;
-	}
 	.pp-badges-head {
 		display: flex;
 		justify-content: space-between;
 		align-items: baseline;
-		margin-bottom: 12px;
+		margin-bottom: 18px;
+	}
+	.pp-badges-head .k-h2 {
+		margin: 0;
 	}
 	.pp-link-button {
 		padding: 0;
@@ -495,24 +488,26 @@ const careerRows = player.leagues.map((section) => {
 		font-weight: 600;
 		cursor: pointer;
 	}
+	/* Badges line up in three columns, each with what it was earned for. */
 	.pp-badge-list {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px 12px;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 22px 28px;
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
 	.pp-badge {
 		display: flex;
-		align-items: center;
-		gap: 8px;
+		align-items: flex-start;
+		gap: 12px;
 	}
 	.pp-badge-icon {
 		display: grid;
 		place-items: center;
 		width: 38px;
 		height: 38px;
+		flex: none;
 		border-radius: 50%;
 		background: #eef0e9;
 		font-size: 1.05rem;
@@ -534,13 +529,22 @@ const careerRows = player.leagues.map((section) => {
 		box-shadow: 0 0 0 2px #c9a227, 0 0 12px 2px rgba(233, 190, 60, 0.55);
 	}
 	.pp-badge-text {
-		display: grid;
-		gap: 1px;
-		line-height: 1.2;
+		display: block;
+		min-width: 0;
+		padding-top: 2px;
+		line-height: 1.3;
 	}
 	.pp-badge-name {
-		font-size: 0.85rem;
+		margin-right: 6px;
+		font-size: 0.92rem;
 		font-weight: 700;
+	}
+	.pp-badge-desc {
+		display: block;
+		margin-top: 3px;
+		color: var(--k-muted);
+		font-size: 0.8rem;
+		line-height: 1.45;
 	}
 	.pp-badge--champion .pp-badge-name {
 		color: #7a5f0e;
@@ -614,6 +618,20 @@ const careerRows = player.leagues.map((section) => {
 		font-weight: 700;
 	}
 
+	@media (max-width: 1100px) and (min-width: 861px) {
+		.pp-info {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+		}
+		.pp-info div:nth-child(4) {
+			border-left: 0;
+		}
+		.pp-info div:nth-child(n + 4) {
+			border-top: 1px solid var(--k-line);
+		}
+		.pp-badge-list {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
 	@media (max-width: 860px) {
 		.pp-head {
 			padding: 20px;
@@ -626,8 +644,21 @@ const careerRows = player.leagues.map((section) => {
 		.pp-name {
 			font-size: 2rem;
 		}
-		.pp-top {
+		.pp-info {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.pp-info div + div {
+			border-left: 0;
+		}
+		.pp-info div:nth-child(even) {
+			border-left: 1px solid var(--k-line);
+		}
+		.pp-info div:nth-child(n + 3) {
+			border-top: 1px solid var(--k-line);
+		}
+		.pp-badge-list {
 			grid-template-columns: minmax(0, 1fr);
+			gap: 16px;
 		}
 		.pp-numbers {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
