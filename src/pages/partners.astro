@@ -5,19 +5,38 @@ import PartnerGrid from "../components/PartnerGrid.astro";
 import PartnerInquiryForm from "../components/PartnerInquiryForm.astro";
 import T from "../components/T.astro";
 import partners from "../data/partners.json";
+import perks from "../data/perks.json";
+
+// Only some partners have a member deal: name exactly those (perks.json, active).
+const withDeals = perks.filter((perk) => perk.active);
+const joinNames = (names: string[], and: string) =>
+	names.length <= 1 ? names.join("") : `${names.slice(0, -1).join(", ")} ${and} ${names[names.length - 1]}`;
+const dealsEn = joinNames(withDeals.map((perk) => perk.short ?? perk.name), "and");
+// "소공동과 쿵푸티": 과 after a final consonant, 와 otherwise.
+const hasFinal = (word: string) => {
+	const code = word.charCodeAt(word.length - 1) - 0xac00;
+	return code >= 0 && code <= 11171 && code % 28 !== 0;
+};
+const namesKo = withDeals.map((perk) => perk.short_ko ?? perk.short ?? perk.name);
+const dealsKo =
+	namesKo.length <= 1
+		? namesKo.join("")
+		: `${namesKo.slice(0, -2).map((n) => `${n}, `).join("")}${namesKo.at(-2)}${hasFinal(namesKo.at(-2)!) ? "과" : "와"} ${namesKo.at(-1)}`;
 ---
 
 <BaseLayout ogImage={pageOgImage("partners")} title="Partners | KICKS" description="KICKS partners and sponsorship inquiries.">
 	<main class="k-page partners">
 		<div class="k-page-head partners-head">
 			<h1 class="k-h1"><T en="Partners" ko="파트너" /></h1>
+			{withDeals.length > 0 && (
 			<a class="partners-benefits" href="/benefits/">
 				<T
-					en="KICKS members get deals at all of these. Show your member screen at the counter."
-					ko="KICKS 멤버는 아래 모든 파트너 매장에서 혜택을 받을 수 있습니다. 계산할 때 멤버 화면을 보여주세요."
+					en={`KICKS members get a discount at ${dealsEn}. Show your member screen at the counter.`}
+					ko={`${dealsKo}에서 KICKS 멤버 할인을 받을 수 있습니다. 계산할 때 멤버 화면을 보여주세요.`}
 				/>
 				<span class="partners-benefits-link"><T en="Member benefits" ko="멤버 혜택" /> →</span>
 			</a>
+			)}
 		</div>
 
 		<PartnerGrid partners={partners} />

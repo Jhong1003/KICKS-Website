@@ -2,6 +2,8 @@
   {
     "perk_id": "sgd",
     "name": "So Gong Dong Tofu & Korean BBQ",
+    "short": "So Gong Dong",
+    "short_ko": "소공동",
     "offer_en": "10% off dine-in orders of $25+",
     "offer_ko": "매장 식사 $25 이상 10% 할인",
     "valid_until": "2026-12-31",
@@ -10,6 +12,8 @@
   {
     "perk_id": "kung-fu-tea",
     "name": "Kung Fu Tea",
+    "short": "Kung Fu Tea",
+    "short_ko": "쿵푸티",
     "offer_en": "10% off dine-in orders of $25+",
     "offer_ko": "매장 주문 $25 이상 10% 할인",
     "valid_until": "2026-12-31",
