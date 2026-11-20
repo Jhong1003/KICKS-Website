@@ -13,6 +13,9 @@ export interface ScheduleEvent {
 	/** Optional Korean title; falls back to `title` when missing. */
 	title_ko?: string;
 	type: ScheduleEventType;
+	/** Optional short name for tight spots (homepage chips, calendar cells), e.g. "Awards night". */
+	short?: string;
+	short_ko?: string;
 	/** For `league` entries: which league (e.g. "FA26-L1") and the week within it. */
 	league?: string;
 	week?: number;

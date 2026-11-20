@@ -65,6 +65,7 @@ const playerNames = new Map(profilesData.map((profile) => [profile.player_id, pr
 const standings = inLeague(leagueTableData).map((row) => ({
 	...row,
 	team: teamName(row.team_id),
+	color: getTeamColor(row.team_id, league),
 	href: `/league/${league.id}/team/${row.team_id}/`,
 }));
 const matches = inLeague(matchesData as MatchRecord[]).map((match) => ({
@@ -102,6 +103,7 @@ const placeholderStandings = league.teams.map((team) => ({
 	goal_difference: 0,
 	points: 0,
 	participation_rate: 0,
+	color: getTeamColor(team.team_id, league),
 	href: `/league/${league.id}/team/${team.team_id}/`,
 }));
 

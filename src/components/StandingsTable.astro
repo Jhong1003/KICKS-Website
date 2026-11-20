@@ -15,6 +15,8 @@ interface StandingsRow {
 	participation_rate: number;
 	/** The team's page (/league/<league>/team/<team_id>), when the caller knows the league. */
 	href?: string;
+	/** Team color (#rrggbb) for the square before the name. */
+	color?: string;
 }
 
 interface Props {
@@ -23,110 +25,108 @@ interface Props {
 	finished?: boolean;
 	/** Before the first result: show every team at zero without ranks or participation. */
 	placeholder?: boolean;
+	/** Fewer columns (the homepage): #, team, P, W, D, L, GD, Pts. */
+	compact?: boolean;
 }
 
-const { rows, finished = false, placeholder = false } = Astro.props;
+const { rows, finished = false, placeholder = false, compact = false } = Astro.props;
 
-const columns = [
-	["Rank", "순위"],
-	["Team", "팀"],
-	["Pts", "승점"],
-	["P", "경기"],
-	["W", "승"],
-	["D", "무"],
-	["L", "패"],
-	["GF", "득점"],
-	["GA", "실점"],
-	["GD", "득실"],
-	["Participation", "참여율"],
-] as const;
+const signed = (value: number) => (value > 0 ? `+${value}` : String(value));
+const isTied = (row: StandingsRow) => rows.filter((other) => other.rank === row.rank).length > 1;
 ---
 
-<div class="table-scroll">
-	<table class="standings-table">
+<div class="k-table-wrap">
+	<table class:list={["k-table", "k-standings", { "k-standings--compact": compact }]}>
 		<thead>
 			<tr>
-				{
-					columns.map(([en, ko]) => (
-						<th>
-							<T en={en} ko={ko} />
-						</th>
-					))
-				}
+				<th class="k-left">#</th>
+				<th class="k-left"><T en="Team" ko="팀" /></th>
+				<th><T en="P" ko="경기" /></th>
+				<th><T en="W" ko="승" /></th>
+				<th><T en="D" ko="무" /></th>
+				<th><T en="L" ko="패" /></th>
+				{!compact && <th><T en="GF" ko="득점" /></th>}
+				{!compact && <th><T en="GA" ko="실점" /></th>}
+				<th><T en="GD" ko="득실" /></th>
+				{!compact && <th><T en="Part." ko="참여율" /></th>}
+				<th class="k-standings-pts"><T en="Pts" ko="승점" /></th>
 			</tr>
 		</thead>
 		<tbody>
 			{
-				rows.map((row) => (
-					<tr class:list={{ "standings-champion": finished && row.rank === 1 }}>
-						<td>
-							{placeholder ? (
-								"–"
-							) : rows.filter((other) => other.rank === row.rank).length > 1 ? (
-								<T en={`T-${row.rank}`} ko={`공동 ${row.rank}`} />
-							) : (
-								row.rank
-							)}
-						</td>
-						<td class="team-name">
-							{finished && row.rank === 1 ? (
-								<span class="standings-champion-name">
-									<span aria-hidden="true">🏆</span> {row.href ? <a class="team-link" href={row.href}>{row.team}</a> : row.team}
-									<span class="standings-champion-chip">
-										<T en="Champion" ko="우승" />
-									</span>
+				rows.map((row) => {
+					const champion = finished && row.rank === 1;
+					return (
+						<tr>
+							<td class="k-left k-standings-rank">
+								{placeholder ? "–" : isTied(row) ? <T en={`T${row.rank}`} ko={`공동 ${row.rank}`} /> : row.rank}
+							</td>
+							<td class="k-left">
+								<span class="k-standings-team" style={row.color ? `--team-color: ${row.color}` : undefined}>
+									<span class="k-team-dot" aria-hidden="true" />
+									{row.href ? (
+										<a class="k-team-link" href={row.href}>
+											{row.team}
+										</a>
+									) : (
+										row.team
+									)}
+									{champion && (
+										<span class="k-standings-champion">
+											<T en="Champion" ko="우승" />
+										</span>
+									)}
 								</span>
-							) : row.href ? (
-								<a class="team-link" href={row.href}>{row.team}</a>
-							) : (
-								row.team
-							)}
-						</td>
-						<td class="points">{row.points}</td>
-						<td>{row.played}</td>
-						<td>{row.wins}</td>
-						<td>{row.draws}</td>
-						<td>{row.losses}</td>
-						<td>{row.goals_for}</td>
-						<td>{row.goals_against}</td>
-						<td>{row.goal_difference}</td>
-						<td>{placeholder ? "–" : `${(row.participation_rate * 100).toFixed(1)}%`}</td>
-					</tr>
-				))
+							</td>
+							<td>{row.played}</td>
+							<td>{row.wins}</td>
+							<td>{row.draws}</td>
+							<td>{row.losses}</td>
+							{!compact && <td>{row.goals_for}</td>}
+							{!compact && <td>{row.goals_against}</td>}
+							<td>{signed(row.goal_difference)}</td>
+							{!compact && <td>{placeholder ? "–" : `${(row.participation_rate * 100).toFixed(1)}%`}</td>}
+							<td class="k-standings-pts k-strong">{row.points}</td>
+						</tr>
+					);
+				})
 			}
 		</tbody>
 	</table>
 </div>
 
 <style>
-	.standings-table th:nth-child(3) { color: var(--color-green); }
-	@media (max-width: 767px) {
-		.standings-table { border-collapse: separate; border-spacing: 0; }
-		.standings-table th, .standings-table td { padding: 12px 8px; }
-		.standings-table th:nth-child(1), .standings-table td:nth-child(1) {
-			position: sticky;
-			left: 0;
-			width: 56px;
-			min-width: 56px;
-			max-width: 56px;
-			background: var(--color-background);
-			z-index: 2;
+	.k-standings-rank {
+		width: 44px;
+		color: var(--k-muted);
+		font-weight: 600;
+	}
+	.k-standings-team {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		font-weight: 600;
+	}
+	.k-standings-champion {
+		padding: 2px 7px;
+		border: 1px solid #b8892b;
+		color: #8a6418;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+	}
+	.k-standings-pts {
+		width: 64px;
+	}
+	td.k-standings-pts {
+		font-size: 1.05rem;
+	}
+	@media (max-width: 600px) {
+		.k-table th,
+		.k-table td {
+			padding-right: 7px;
+			padding-left: 7px;
 		}
-		.standings-table th:nth-child(2), .standings-table td:nth-child(2) {
-			position: sticky;
-			left: 56px;
-			/* Just wide enough for the longest team name, so the divider sits by
-			   the names rather than out by the points. */
-			width: 1%;
-			min-width: 0;
-			white-space: nowrap;
-			padding-right: 16px;
-			background: var(--color-background);
-			z-index: 2;
-			box-shadow: 2px 0 0 var(--color-sage);
-		}
-		.standings-table tr.standings-champion td:nth-child(-n+2) { background: #f6edcd; }
-		/* A little room between the divider and the points column. */
-		.standings-table th:nth-child(3), .standings-table td:nth-child(3) { padding-left: 18px; }
 	}
 </style>

@@ -568,3 +568,282 @@ html[lang="ko"] .k-lang [data-lang-option="ko"] {
 	}
 
 }
+
+/* ---------- Shared building blocks for KICKS 2.0 pages ---------- */
+
+.k-page {
+
+	width: 100%;
+	max-width: calc(var(--k-max) + var(--k-gutter) * 2);
+	margin: 0 auto;
+	padding: 40px var(--k-gutter) 0;
+
+}
+
+.k-h1 {
+
+	margin: 0;
+	font-family: var(--k-font-display);
+	font-size: var(--k-title);
+	font-weight: 800;
+	line-height: 1.05;
+	letter-spacing: -0.03em;
+
+}
+
+.k-h2 {
+
+	margin: 0;
+	font-family: var(--k-font-display);
+	font-size: 1.45rem;
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+
+}
+
+.k-h3 {
+
+	margin: 0;
+	font-family: var(--k-font-display);
+	font-size: 1.1rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+
+}
+
+.k-page-head {
+
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: flex-end;
+	gap: 12px 24px;
+	margin-bottom: 28px;
+
+}
+
+.k-section {
+
+	margin-top: 64px;
+
+}
+
+.k-section-head {
+
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px 24px;
+	margin-bottom: 16px;
+
+}
+
+.k-meta {
+
+	color: var(--k-muted);
+	font-size: 0.88rem;
+
+}
+
+.k-link {
+
+	color: var(--k-olive);
+	font-size: 0.9rem;
+	font-weight: 600;
+
+}
+
+.k-link:hover,
+.k-link:focus-visible {
+
+	text-decoration: underline;
+
+}
+
+.k-btn {
+
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 40px;
+	padding: 0 18px;
+	border: 1px solid var(--k-olive);
+	background: var(--k-olive);
+	color: #fff;
+	font: inherit;
+	font-family: var(--k-font-display);
+	font-size: 0.9rem;
+	font-weight: 700;
+	cursor: pointer;
+
+}
+
+.k-btn:hover,
+.k-btn:focus-visible {
+
+	border-color: var(--k-olive-dark);
+	background: var(--k-olive-dark);
+
+}
+
+.k-btn--line {
+
+	border-color: var(--k-line);
+	background: var(--k-paper);
+	color: var(--k-ink);
+
+}
+
+.k-btn--line:hover,
+.k-btn--line:focus-visible {
+
+	border-color: var(--k-ink);
+	background: var(--k-paper);
+
+}
+
+.k-chip {
+
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 36px;
+	padding: 0 14px;
+	border: 1px solid var(--k-line);
+	background: var(--k-paper);
+	color: var(--k-ink);
+	font-size: 0.88rem;
+	font-weight: 500;
+	white-space: nowrap;
+
+}
+
+a.k-chip:hover,
+a.k-chip:focus-visible {
+
+	border-color: var(--k-ink);
+
+}
+
+.k-card {
+
+	border: 1px solid var(--k-line);
+	background: var(--k-paper);
+
+}
+
+/* Team color square before a team name. */
+
+.k-team-dot {
+
+	display: inline-block;
+	flex: none;
+	width: 10px;
+	height: 10px;
+	background: var(--team-color, #999);
+
+}
+
+.k-team-link {
+
+	color: inherit;
+
+}
+
+.k-team-link:hover,
+.k-team-link:focus-visible {
+
+	text-decoration: underline;
+
+}
+
+/* Tables: olive rule under the header row. */
+
+.k-table-wrap {
+
+	overflow-x: auto;
+
+}
+
+.k-table {
+
+	width: 100%;
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+
+}
+
+.k-table th {
+
+	padding: 10px 12px;
+	border-bottom: 2px solid var(--k-olive);
+	color: var(--k-muted);
+	font-family: var(--k-font-display);
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	text-align: center;
+	white-space: nowrap;
+
+}
+
+.k-table td {
+
+	padding: 13px 12px;
+	border-bottom: 1px solid var(--k-line);
+	text-align: center;
+	white-space: nowrap;
+
+}
+
+.k-table th.k-left,
+.k-table td.k-left {
+
+	text-align: left;
+
+}
+
+.k-table .k-strong {
+
+	color: var(--k-ink);
+	font-weight: 700;
+
+}
+
+/* Phone: rows of cards/tiles scroll sideways instead of squeezing. */
+
+@media (max-width: 860px) {
+
+	.k-page {
+
+		padding-top: 28px;
+
+	}
+
+	.k-section {
+
+		margin-top: 48px;
+
+	}
+
+	.k-h2 {
+
+		font-size: 1.25rem;
+
+	}
+
+}
+
+.visually-hidden {
+
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+
+}

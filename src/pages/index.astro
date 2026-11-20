@@ -3,75 +3,118 @@ import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import StandingsTable from "../components/StandingsTable.astro";
 import T from "../components/T.astro";
-import LeagueFinaleBanner from "../components/LeagueFinaleBanner.astro";
-import LeagueStatusBanner from "../components/LeagueStatusBanner.astro";
 import TeamRevealPopup from "../components/TeamRevealPopup.astro";
 import TransferBanner from "../components/TransferBanner.astro";
 import ChampionPopup from "../components/ChampionPopup.astro";
 import EventPopup from "../components/EventPopup.astro";
 import leagueTable from "../data/league_table.json";
-import heroImage from "../assets/hero-wide.jpg";
 import scheduleData from "../data/schedule.json";
 import transferNews from "../data/transfer-news.json";
 import profilesData from "../data/player_profiles.json";
 import matchesData from "../data/matches.json";
-import goalEventsData from "../data/goal_events.json";
-import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";
-import { formatShortDate } from "../lib/i18n";
+import reportsData from "../data/reports.json";
+import recruitment from "../data/recruitment.json";
+import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
 import { albums } from "../lib/gallery";
 import { resolveTransfers, type PlayerProfile } from "../lib/players";
-import { latestLeague, currentLeague, getTeamName } from "../lib/leagues";
-import { halloweenFinal } from "../lib/season-theme";
-import { bannerMode, weekSummary, type BannerMatch, type BannerProfile } from "../lib/league-banner";
-import { titleHistory } from "../lib/forecasts";
+import { latestLeague, currentLeague, getTeamName, getTeamColor, leagueParts } from "../lib/leagues";
+import { bannerMode, type BannerMatch } from "../lib/league-banner";
 import { getLeagueFinale } from "../lib/finale";
-import { buildGoalCountdown, isCelebratingMilestone, milestoneScorer, type MatchScore, type MilestoneGoalEvent } from "../lib/goals";
+import { buildGoalCountdown, isCelebratingMilestone, type MatchScore } from "../lib/goals";
+import { nextUpChipText, monthYear, shortTitle } from "../lib/home-chips";
 
-const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
-const recentAlbums = albums.slice(0, 3);
+// KICKS 2.0 homepage, top to bottom: the three newest albums, a row of chips
+// (up to three that follow the season + three that are always there), the
+// standings, the two mini games. Nothing on it says the same thing twice.
+
+const latestAlbums = albums.slice(0, 3);
+
 // Transfers only make sense within one league (teams are reshuffled between
 // leagues), so the banner is tied to the league named in transfer-news.json and
 // goes away by itself once a newer league becomes the latest.
 const resolvedTransfers = resolveTransfers(transferNews.transfers, profilesData as PlayerProfile[], transferNews.league);
+const finale = getLeagueFinale(latestLeague);
+const showTransferBanner =
+	!finale && transferNews.enabled && transferNews.league === latestLeague.id && resolvedTransfers.length > 0;
+
 const standings = leagueTable
 	.filter((row) => row.league === latestLeague.id)
 	.map((row) => ({
 		...row,
 		team: getTeamName(row.team_id, latestLeague),
+		color: getTeamColor(row.team_id, latestLeague),
 		href: `/league/${latestLeague.id}/team/${row.team_id}/`,
 	}));
-// Once the latest league is finished, its results banner takes over the top
-// slot and the (now stale) transfer news steps aside.
-const finale = getLeagueFinale(latestLeague);
-const showTransferBanner =
-	!finale && transferNews.enabled && transferNews.league === latestLeague.id && resolvedTransfers.length > 0;
-// Club-wide all-time goals (every league summed). Celebration state is as of
-// build time here; the script below re-checks it against the visitor's date.
-const goalCountdown = buildGoalCountdown(matchesData as MatchScore[]);
-const celebratingMilestone = isCelebratingMilestone(goalCountdown);
-// Who scored that milestone goal (needs per-goal minutes, so FA26-L2 onward), linked to their page.
-const milestoneScorerId = goalCountdown.lastMilestone
-	? milestoneScorer(matchesData as MatchScore[], goalEventsData as MilestoneGoalEvent[], goalCountdown.lastMilestone)
-	: null;
-const milestoneHero = milestoneScorerId ? (profilesData as PlayerProfile[]).find((player) => player.player_id === milestoneScorerId) ?? null : null;
-// Seasonal (src/lib/season-theme.ts): rendered always, shown only while
-// <html data-season="halloween"> is set for the visitor's date.
-const halloweenFinalWeek = halloweenFinal(currentLeague, scheduleData as ScheduleEvent[]);
+const latestParts = leagueParts(latestLeague.id);
+const playedWeeks = (matchesData as BannerMatch[])
+	.filter((match) => match.league === latestLeague.id && match.home_score !== null)
+	.reduce((max, match) => Math.max(max, (match as BannerMatch & { week: number }).week), 0);
 
-// Top strip (src/lib/league-banner.ts): follows the newest league — kickoff,
-// then weekly results (Halloween Final in the days before it), then the gold
-// finale banner once it's finished.
-const leagueBannerMode = bannerMode(currentLeague.id, matchesData as BannerMatch[]);
-const currentFinale = leagueBannerMode === "finale" ? getLeagueFinale(currentLeague) : null;
-const kickoffDate =
-	(scheduleData as ScheduleEvent[]).find((event) => event.type === "league" && event.league === currentLeague.id && event.week === 1)?.date ?? null;
-const leagueWeekSummary = weekSummary(currentLeague.id, matchesData as BannerMatch[], leagueTable, profilesData as BannerProfile[]);
-const latestTitle = titleHistory(currentLeague.id).at(-1);
-const titleFavourite = latestTitle
-	? Object.entries(latestTitle.chances)
-			.map(([teamId, p]) => ({ teamId, p }))
-			.sort((a, b) => b.p - a.p)[0] ?? null
-	: null;
+// ---- Chips that follow the season (at most three, most important first) ----
+type Chip = { href: string; en: string; ko: string; id?: string };
+const seasonChips: Chip[] = [];
+
+// A club goal milestone in the last few days (src/lib/goals.ts).
+const goalCountdown = buildGoalCountdown(matchesData as MatchScore[]);
+if (goalCountdown.lastMilestone && isCelebratingMilestone(goalCountdown)) {
+	seasonChips.push({
+		href: `/league/${latestLeague.id}/`,
+		en: `KICKS hit ${goalCountdown.lastMilestone} goals`,
+		ko: `KICKS 통산 ${goalCountdown.lastMilestone}골`,
+	});
+}
+
+// What's next on the calendar. Re-picked in the browser below, since the
+// build date goes stale between deploys.
+const nextUpEvent = getNextUpEvent(scheduleData as ScheduleEvent[]);
+if (nextUpEvent) {
+	seasonChips.push({ id: "chip-next-up", href: "/schedule/", en: nextUpChipText(nextUpEvent, "en"), ko: nextUpChipText(nextUpEvent, "ko") });
+}
+
+// A finished league: everyone's Wrapped, then the final report slides.
+if (finale) {
+	seasonChips.push({ href: "/players/", en: `Your ${latestParts.season} Wrapped`, ko: `나의 ${latestParts.season} Wrapped` });
+	const reports = (reportsData as Record<string, Record<string, { final: boolean }>>)[latestLeague.id] ?? {};
+	const finalWeek = Object.entries(reports).find(([, report]) => report.final)?.[0];
+	if (finalWeek) {
+		seasonChips.push({
+			href: `/league/${latestLeague.id}/report/?week=${finalWeek}`,
+			en: `${latestParts.name} final report`,
+			ko: `${latestParts.name} 결산 리포트`,
+		});
+	}
+}
+
+// Teams of a new league are in, before its first game.
+if (bannerMode(currentLeague.id, matchesData as BannerMatch[]) === "kickoff") {
+	const { name } = leagueParts(currentLeague.id);
+	seasonChips.push({ href: `/players/?league=${currentLeague.id}`, en: `${name} teams are out`, ko: `${name} 팀 발표` });
+}
+
+// Applications open.
+if (recruitment.player_status === "open") {
+	seasonChips.push({ href: "/join/", en: `${recruitment.season} applications open`, ko: `${recruitment.season} 지원 시작` });
+}
+
+// A new album in the last two weeks.
+const newestAlbum = albums[0];
+if (newestAlbum?.date) {
+	const ageDays = (Date.now() - new Date(`${newestAlbum.date}T00:00:00`).getTime()) / 86_400_000;
+	if (ageDays >= 0 && ageDays <= 14) {
+		seasonChips.push({
+			href: `/gallery/${newestAlbum.id}/`,
+			en: `New album · ${newestAlbum.title.split(" · ")[0]}`,
+			ko: `새 앨범 · ${newestAlbum.titleKo.split(" · ")[0]}`,
+		});
+	}
+}
+
+const alwaysChips: Chip[] = [
+	{ href: "/keeper/", en: "Keeper Challenge", ko: "Keeper Challenge" },
+	{ href: "/freekick/", en: "Free Kick", ko: "Free Kick" },
+	{ href: "/benefits/", en: "Member benefits", ko: "멤버 혜택" },
+];
+const chips = [...seasonChips.slice(0, 3), ...alwaysChips];
 ---
 
 <BaseLayout
@@ -97,20 +140,7 @@ const titleFavourite = latestTitle
 			location: { "@type": "Place", name: "University of Illinois Urbana-Champaign", address: "Champaign, IL" },
 		})}
 	/>
-	<main>
-		{
-			leagueBannerMode === "finale"
-				? currentFinale && <LeagueFinaleBanner league={currentLeague} finale={currentFinale} />
-				: (
-						<LeagueStatusBanner
-							league={currentLeague}
-							mode={leagueBannerMode}
-							kickoffDate={kickoffDate}
-							summary={leagueWeekSummary}
-							halloween={halloweenFinalWeek ? { date: halloweenFinalWeek.date!, favourite: titleFavourite } : null}
-						/>
-					)
-		}
+	<main class="k-page home">
 		{
 			showTransferBanner && (
 				<TransferBanner
@@ -122,230 +152,122 @@ const titleFavourite = latestTitle
 			)
 		}
 
-		<div class="hero">
-			<div class="season-deco season-deco--bats" aria-hidden="true">
-				<span>🦇</span><span>🦇</span><span>🦇</span>
-			</div>
-			<section class="hero-content" aria-labelledby="hero-title">
-				<div class="hero-text">
-					<p class="eyebrow"><span class="eyebrow-part">KOREAN-INSPIRED FUTSAL COMMUNITY</span><span class="eyebrow-sep"> · </span><span class="eyebrow-part">UIUC</span></p>
-					<h1 id="hero-title">
-						Compete together.<br />
-						Grow together.
-					</h1>
-					<T
-						as="p"
-						class="hero-description"
-						en="A competitive season league where teams battle it out every week and build friendships on and off the field."
-						ko="매주 치열하게 맞붙는 시즌 리그를 치르며, 필드 안팎에서 우정을 쌓아갑니다."
-					/>
-					<ul class="hero-highlights" aria-label="KICKS at a glance" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "KICKS at a glance", ko: "KICKS 활동 한눈에 보기" } })}>
-						<li><T en="Weekly 7v7 league" ko="매주 7대7 리그" /></li>
-						<li><T en="Two leagues each semester" ko="학기당 두 리그" /></li>
-						<li><T en="Every match filmed" ko="모든 경기 영상 기록" /></li>
-					</ul>
-					<div class="hero-buttons">
-						<a class="hero-button" href="/join/">
-							<T en="Join KICKS" ko="KICKS 가입하기" />
-							<span aria-hidden="true">→</span>
-						</a>
-						<a class="hero-button hero-button--secondary" href="/league/">
-							<T en="View Standings" ko="순위 보기" />
-							<span aria-hidden="true">→</span>
-						</a>
-						{
-							/* While the latest league's results are up (same window as the finale
-							   banner), point people to their Wrapped from the first screen. */
-							finale && (
-								<a class="hero-button hero-button--wrapped" href="/players/">
-									<span>
-										<span aria-hidden="true">🎁 </span>
-										<T en={`${latestLeague.id} Wrapped is here`} ko={`${latestLeague.id} Wrapped가 나왔어요`} />
-									</span>
-									<span aria-hidden="true">→</span>
-								</a>
-							)
-						}
-					</div>
-					<a
-						class="hero-next-up"
-						id="hero-next-up"
-						href="/schedule/"
-						data-schedule-events={JSON.stringify(scheduleData)}
-						hidden={!nextUpEvent}
-					>
-						<span class="hero-next-up-dot" aria-hidden="true"></span>
-						<span class="hero-next-up-text">
-							<strong><T en="Next up" ko="다음 일정" /></strong> ·{" "}
-							<span id="hero-next-up-rest">
-								{nextUpEvent && (
-									<T
-										en={`${nextUpEvent.isToday ? "Today" : formatShortDate(nextUpEvent.date!, "en")} · ${eventTitle(nextUpEvent, "en")}`}
-										ko={`${nextUpEvent.isToday ? "오늘" : formatShortDate(nextUpEvent.date!, "ko")} · ${eventTitle(nextUpEvent, "ko")}`}
-									/>
-								)}
-							{/* The arrow sits right after the text (no space between, so it can't wrap onto a line of its own). */}
-							</span><span class="hero-next-up-arrow" aria-hidden="true">→</span>
-						</span>
-					</a>
-					{
-						goalCountdown.total > 0 && (
-							<p
-								class:list={["hero-goal-counter", { "hero-goal-counter--celebrate": celebratingMilestone }]}
-								id="hero-goal-counter"
-								data-countdown={JSON.stringify(goalCountdown)}
-							>
-								<span class="hero-goal-counter-icon" aria-hidden="true">
-									⚽
-								</span>
-								<span id="hero-goal-counter-default" hidden={celebratingMilestone}>
-									<span data-lang="en">
-										KICKS' {goalCountdown.nextMilestone}th goal is coming soon. We're at {goalCountdown.total}.
-									</span>
-									<span data-lang="ko" lang="ko">
-										KICKS 통산 <strong>{goalCountdown.total}골</strong> · {goalCountdown.nextMilestone}호 골까지{" "}
-										{goalCountdown.remaining}골
-									</span>
-								</span>
-								<span id="hero-goal-counter-celebrate" hidden={!celebratingMilestone}>
-									<span data-lang="en">
-										<strong>KICKS hit {goalCountdown.lastMilestone} all-time goals!</strong> 🎉 ·{" "}
-										{milestoneHero ? (
-											<>
-												{goalCountdown.lastMilestone}th goal by{" "}
-												<a class="hero-goal-counter-hero" href={`/players/${milestoneHero.id}/`}>{milestoneHero.name}</a>
-											</>
-										) : (
-											<>{goalCountdown.total} so far</>
-										)}
-									</span>
-									<span data-lang="ko" lang="ko">
-										<strong>KICKS 통산 {goalCountdown.lastMilestone}골 달성!</strong> 🎉 ·{" "}
-										{milestoneHero ? (
-											<>
-												{goalCountdown.lastMilestone}호 골{" "}
-												<a class="hero-goal-counter-hero" href={`/players/${milestoneHero.id}/`}>{milestoneHero.name}</a>
-											</>
-										) : (
-											<>지금까지 {goalCountdown.total}골</>
-										)}
-									</span>
-								</span>
-							</p>
-						)
-					}
-					{
-						halloweenFinalWeek && (
-							<a
-								class="season-only season-only--halloween hero-season-note"
-								id="hero-season-note"
-								data-date={halloweenFinalWeek.date}
-								href={`/league/${currentLeague.id}/?week=${currentLeague.rules.final_week}#results`}
-							>
-								<span class="hero-season-note-icon" aria-hidden="true">🎃</span>
-								<T
-									en={`Halloween Final · ${formatShortDate(halloweenFinalWeek.date!, "en")} · ${currentLeague.rules.final_win_points} pts per win`}
-									ko={`할로윈 파이널 · ${formatShortDate(halloweenFinalWeek.date!, "ko")} · 승리 시 ${currentLeague.rules.final_win_points}점`}
-								/>
-							</a>
-						)
-					}
-				</div>
-				<div class="split-photo split-photo--hero">
-					<Image
-						src={heroImage}
-						alt="KICKS players in action"
-						width={1400}
-						quality={85}
-					/>
-				</div>
-			</section>
-			<div class="hero-footer">
-				<span>Champaign–Urbana, Illinois</span>
-				<span>Student-run at UIUC</span>
-			</div>
-		</div>
+		<h1 class="visually-hidden">KICKS · UIUC Korean futsal club</h1>
 
-		<section class="content-section" aria-labelledby="standings-preview-title">
-			<p class="section-label"><T en="LEAGUE STANDINGS" ko="리그 순위" /> · {latestLeague.id}</p>
-			{/* Same "finished" rule as the finale banner: every fixture has a score. */}
-			<h2 id="standings-preview-title">
-				{finale ? <T en="Final Standings" ko="최종 순위" /> : <T en="Current League" ko="현재 리그" />}
-			</h2>
-			<StandingsTable rows={standings} />
-			<a class="section-link" href={`/league/${latestLeague.id}/`}><T en="View full league page →" ko="리그 페이지 전체 보기 →" /></a>
-		</section>
-		<section class="content-section" aria-labelledby="mini-games-label">
-			<p class="section-label" id="mini-games-label"><T en="MINI GAMES" ko="미니 게임" /></p>
-			<div class="game-promos">
-				<a class="keeper-promo" href="/keeper/">
-					<span class="keeper-promo-text">
-						<span class="keeper-promo-title"><T en="Keeper Challenge" ko="골키퍼 챌린지" /></span>
-						<T as="span" class="keeper-promo-description" en="Swipe to the corner the shot is going. It starts easy and gets faster every shot. Three goals and you're out." ko="공이 가는 모서리로 스와이프하세요. 처음엔 쉽고 슛마다 빨라져요. 3골 먹으면 끝이에요." />
-						<span class="keeper-promo-leader" data-game-leader="/api/keeper" hidden></span>
-						<span class="button-primary keeper-promo-button"><T en="Play now →" ko="도전하기 →" /></span>
-					</span>
-					<img class="keeper-promo-image" src="/keeper/card.webp" alt="" width="800" height="600" loading="lazy" />
-				</a>
-				<a class="keeper-promo" href="/freekick/">
-					<span class="keeper-promo-text">
-						<span class="keeper-promo-title"><T en="Free Kick Challenge" ko="프리킥 챌린지" /></span>
-						<T as="span" class="keeper-promo-description" en="Flick the ball over the wall and past the keeper. Ten kicks; curl it into the top corner for bonus points." ko="휙 쓸어 올려 벽을 넘기고 키퍼를 피하세요. 10번의 킥, 탑코너에 감아 차면 보너스 점수예요." />
-						<span class="keeper-promo-leader" data-game-leader="/api/freekick" hidden></span>
-						<span class="button-primary keeper-promo-button"><T en="Play now →" ko="도전하기 →" /></span>
-					</span>
-					<img class="keeper-promo-image crop-top" src="/freekick/card.webp" alt="" width="800" height="600" loading="lazy" />
-				</a>
-			</div>
-		</section>
-		{recentAlbums.length > 0 && (
-			<section class="content-section" aria-labelledby="recent-photos-title">
-				<p class="section-label"><T en="LATEST PHOTOS" ko="최근 사진" /></p>
-				<h2 id="recent-photos-title"><T en="Moments together" ko="함께한 순간들" /></h2>
-				<div class="album-grid">
-					{recentAlbums.map((album) => (
-						<a class="album-card" href={`/gallery/${album.id}/`}>
-							<span class="album-cover">
-								<Image src={album.cover.src} alt="" width={640} loading="lazy" />
+		{
+			latestAlbums.length > 0 && (
+				<section class="home-albums" aria-label="Latest photos" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Latest photos", ko: "최근 사진" } })}>
+					{latestAlbums.map((album, index) => (
+						<a class="home-album" href={`/gallery/${album.id}/`}>
+							<span class="home-album-photo">
+								<Image
+									src={album.cover.src}
+									alt=""
+									width={820}
+									quality={82}
+									loading={index === 0 ? "eager" : "lazy"}
+								/>
 							</span>
-							<span class="album-info">
-								<span class="album-title"><T en={album.title} ko={album.titleKo} /></span>
-								<span class="album-meta">
-									{album.date && (
-										<>
-											<time datetime={album.date}><T en={formatShortDate(album.date, "en")} ko={formatShortDate(album.date, "ko")} /></time>
-											<span aria-hidden="true"> · </span>
-										</>
-									)}
-									<T en={`${album.images.length} photos`} ko={`사진 ${album.images.length}장`} />
-								</span>
+							<span class="home-album-title">
+								<T en={album.title} ko={album.titleKo} />
+							</span>
+							<span class="home-album-meta">
+								{album.date && (
+									<>
+										<T en={monthYear(album.date, "en")} ko={monthYear(album.date, "ko")} />
+										<span aria-hidden="true"> · </span>
+									</>
+								)}
+								<T en={`${album.images.length} photos`} ko={`사진 ${album.images.length}장`} />
 							</span>
 						</a>
 					))}
-				</div>
-				<a class="section-link" href="/gallery/"><T en="View all photos →" ko="사진 전체 보기 →" /></a>
-			</section>
-		)}
+				</section>
+			)
+		}
+
+		<nav class="home-chips" aria-label="Quick links" data-i18n-attrs={JSON.stringify({ "aria-label": { en: "Quick links", ko: "바로가기" } })}>
+			{
+				chips.map((chip) => (
+					<a class="k-chip" href={chip.href} id={chip.id}>
+						<T en={chip.en} ko={chip.ko} />
+					</a>
+				))
+			}
+		</nav>
+		<script type="application/json" id="chip-schedule" set:html={JSON.stringify(scheduleData)} />
+
+		{
+			standings.length > 0 && (
+				<section class="home-standings" aria-labelledby="home-standings-title">
+					<div class="k-section-head">
+						<h2 class="k-h2" id="home-standings-title">
+							{finale ? (
+								<T en="Final standings" ko="최종 순위" />
+							) : (
+								<T
+									en={`${latestParts.name} · after ${playedWeeks ? `Week ${playedWeeks}` : "kickoff"}`}
+									ko={`${latestParts.name} · ${playedWeeks}주차까지`}
+								/>
+							)}
+						</h2>
+						<span class="home-standings-side">
+							{finale && <span class="k-meta">{latestParts.season} {latestParts.name}</span>}
+							<a class="k-link" href={`/league/${latestLeague.id}/`}>
+								<T en="League page" ko="리그 페이지" /> →
+							</a>
+						</span>
+					</div>
+					<StandingsTable rows={standings} finished={Boolean(finale)} compact />
+				</section>
+			)
+		}
+
+		<section class="k-section home-games" id="mini-games" aria-labelledby="mini-games-title">
+			<div class="k-section-head">
+				<h2 class="k-h2" id="mini-games-title"><T en="Mini games" ko="미니게임" /></h2>
+			</div>
+			<div class="home-games-grid">
+				<a class="home-game k-card" href="/keeper/">
+					<img class="home-game-image" src="/keeper/card.webp" alt="" width="800" height="600" loading="lazy" />
+					<span class="home-game-body">
+						<span class="k-h3">Keeper Challenge</span>
+						<T
+							as="span"
+							class="home-game-text"
+							en="Read the shot, dive at the right moment. Three goals and you're out."
+							ko="슈팅 방향을 읽고 타이밍에 맞춰 몸을 날리세요. 세 골을 먹으면 게임이 끝납니다."
+						/>
+						<span class="home-game-leader k-meta" data-game-leader="/api/keeper" hidden></span>
+						<span class="k-btn home-game-button"><T en="Play" ko="플레이" /></span>
+					</span>
+				</a>
+				<a class="home-game k-card" href="/freekick/">
+					<img class="home-game-image home-game-image--top" src="/freekick/card.webp" alt="" width="800" height="600" loading="lazy" />
+					<span class="home-game-body">
+						<span class="k-h3">Free Kick</span>
+						<T
+							as="span"
+							class="home-game-text"
+							en="Ten free kicks. Bend them over the wall and past the keeper."
+							ko="프리킥 기회는 10번. 수비벽을 넘기고 골키퍼를 피해 감아 차세요."
+						/>
+						<span class="home-game-leader k-meta" data-game-leader="/api/freekick" hidden></span>
+						<span class="k-btn home-game-button"><T en="Play" ko="플레이" /></span>
+					</span>
+				</a>
+			</div>
+		</section>
 	</main>
 </BaseLayout>
 
-<script>
-	// The Halloween Final line is only an invitation: once its day is over
-	// (visitor's date), hide it even though the theme runs a few days longer.
-	const seasonNote = document.getElementById("hero-season-note");
-	if (seasonNote) {
-		const now = new Date();
-		const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-		if (today > (seasonNote.dataset.date ?? "")) seasonNote.classList.add("hero-season-note--past");
-	}
-</script>
 
 <script>
-	import { getNextUpEvent, eventTitle, type ScheduleEvent } from "../lib/schedule";
-	import { isCelebratingMilestone, type GoalCountdown } from "../lib/goals";
-	import { bilingualHtml, formatShortDate } from "../lib/i18n";
+	import { getNextUpEvent, type ScheduleEvent } from "../lib/schedule";
+	import { nextUpChipText } from "../lib/home-chips";
+	import { bilingualHtml } from "../lib/i18n";
 
-	// Mini game cards: show each game's current #1 from its leaderboard.
+	// Mini game cards: each game's current #1 from its leaderboard.
 	// Silent on any failure (no DB locally, offline): the cards work without it.
 	for (const leader of document.querySelectorAll<HTMLElement>("[data-game-leader]")) {
 		fetch(leader.dataset.gameLeader!, { headers: { Accept: "application/json" } })
@@ -354,43 +276,161 @@ const titleFavourite = latestTitle
 				const top = data?.entries?.[0];
 				if (!top) return;
 				const score = top.score.toLocaleString("en-US");
-				leader.innerHTML = bilingualHtml(`Top: ${top.name} · ${score}`, `현재 1위 ${top.name} · ${score}점`);
+				leader.innerHTML = bilingualHtml(`#1 ${top.name} · ${score}`, `1위 ${top.name} · ${score}점`);
 				leader.hidden = false;
 			})
 			.catch(() => {});
 	}
 
-	// The link above reflects "today" as of the last build, which goes stale
-	// between deploys. Recompute against the visitor's actual current date
-	// and patch the text in place (or hide the link if nothing's upcoming).
-	const link = document.getElementById("hero-next-up");
-	const raw = link?.dataset.scheduleEvents;
-	if (link && raw) {
-		const events = JSON.parse(raw) as ScheduleEvent[];
-		const next = getNextUpEvent(events);
-
-		link.hidden = !next;
-		if (next) {
-			const restEl = document.getElementById("hero-next-up-rest");
-			if (restEl) {
-				restEl.innerHTML = bilingualHtml(
-					`${next.isToday ? "Today" : formatShortDate(next.date!, "en")} · ${eventTitle(next, "en")}`,
-					`${next.isToday ? "오늘" : formatShortDate(next.date!, "ko")} · ${eventTitle(next, "ko")}`,
-				);
-			}
-		}
-	}
-
-	// Same staleness problem for the milestone celebration: whether it was
-	// reached "recently" depends on today's date, not the build date.
-	const counter = document.getElementById("hero-goal-counter");
-	const rawCountdown = counter?.dataset.countdown;
-	if (counter && rawCountdown) {
-		const celebrate = isCelebratingMilestone(JSON.parse(rawCountdown) as GoalCountdown);
-		counter.classList.toggle("hero-goal-counter--celebrate", celebrate);
-		const defaultEl = document.getElementById("hero-goal-counter-default");
-		const celebrateEl = document.getElementById("hero-goal-counter-celebrate");
-		if (defaultEl) defaultEl.hidden = celebrate;
-		if (celebrateEl) celebrateEl.hidden = !celebrate;
+	// The next-up chip was picked on the build date; pick it again for today.
+	const chip = document.getElementById("chip-next-up");
+	const raw = document.getElementById("chip-schedule")?.textContent;
+	if (chip && raw) {
+		const next = getNextUpEvent(JSON.parse(raw) as ScheduleEvent[]);
+		if (next) chip.innerHTML = bilingualHtml(nextUpChipText(next, "en"), nextUpChipText(next, "ko"));
+		else chip.hidden = true;
 	}
 </script>
+
+<style>
+	.home-albums {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 20px;
+	}
+	.home-album {
+		display: grid;
+		gap: 6px;
+		min-width: 0;
+	}
+	.home-album-photo {
+		display: block;
+		aspect-ratio: 3 / 2;
+		overflow: hidden;
+		margin-bottom: 6px;
+		background: #f0f0f0;
+	}
+	.home-album-photo :global(img) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 0.4s ease;
+	}
+	.home-album:hover .home-album-photo :global(img) {
+		transform: scale(1.03);
+	}
+	.home-album-title {
+		font-family: var(--k-font-display);
+		font-size: 1.02rem;
+		font-weight: 700;
+		letter-spacing: -0.01em;
+	}
+	.home-album:hover .home-album-title {
+		text-decoration: underline;
+	}
+	.home-album-meta {
+		color: var(--k-muted);
+		font-size: 0.85rem;
+	}
+
+	.home-chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin: 28px 0 0;
+	}
+
+	.home-standings {
+		margin-top: 36px;
+	}
+	.home-standings-side {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 16px;
+	}
+
+	.home-games-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 20px;
+	}
+	.home-game {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+		min-height: 220px;
+	}
+	.home-game:hover {
+		border-color: #cfcfcf;
+	}
+	.home-game-image {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.home-game-image--top {
+		object-position: top;
+	}
+	.home-game-body {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+		padding: 22px;
+	}
+	.home-game-text {
+		color: #444;
+		font-size: 0.92rem;
+		line-height: 1.5;
+	}
+	.home-game-button {
+		margin-top: auto;
+	}
+
+	@media (max-width: 860px) {
+		.home-albums {
+			display: flex;
+			gap: 12px;
+			margin: 0 calc(var(--k-gutter) * -1);
+			padding: 0 var(--k-gutter);
+			overflow-x: auto;
+			scroll-snap-type: x mandatory;
+			scroll-padding: 0 var(--k-gutter);
+			scrollbar-width: none;
+		}
+		.home-albums::-webkit-scrollbar {
+			display: none;
+		}
+		.home-album {
+			flex: 0 0 78%;
+			scroll-snap-align: start;
+		}
+		.home-chips {
+			flex-wrap: nowrap;
+			margin-right: calc(var(--k-gutter) * -1);
+			margin-left: calc(var(--k-gutter) * -1);
+			padding: 0 var(--k-gutter);
+			overflow-x: auto;
+			scrollbar-width: none;
+		}
+		.home-chips::-webkit-scrollbar {
+			display: none;
+		}
+		.home-standings-side .k-meta {
+			display: none;
+		}
+		.home-games-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+	@media (max-width: 520px) {
+		.home-game {
+			grid-template-columns: 1fr;
+		}
+		.home-game-image {
+			aspect-ratio: 16 / 9;
+			height: auto;
+		}
+	}
+</style>
