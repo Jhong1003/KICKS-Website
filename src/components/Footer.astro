@@ -3,40 +3,41 @@ import T from "./T.astro";
 
 // The managers' match log (/match-log) is linked only from the league pages'
 // footer: small, out of the members' way, and still one tap from the site.
+// (It moves into the admin page later.)
 const onLeaguePage = /^\/league(\/|$)/.test(Astro.url.pathname);
 ---
 
-<footer class="site-footer">
-	<div class="site-footer-brand">
-		<span class="site-footer-name">KICKS</span>
-		<span class="site-footer-tagline">Korean-Inspired Community for Kicking Sports · UIUC</span>
-	</div>
+<footer class="k-footer">
+	<div class="k-footer-inner">
+		<div class="k-footer-top">
+			<div class="k-footer-brand">
+				<span class="k-footer-name">KICKS</span>
+				<span class="k-footer-tagline">Korean-Inspired Community for Kicking Sports · UIUC</span>
+			</div>
+			<a class="k-footer-link" href="https://www.instagram.com/kicks.uiuc" target="_blank" rel="noopener noreferrer">
+				Instagram @kicks.uiuc
+			</a>
+		</div>
 
-	<div class="site-footer-contact">
-		<a href="https://www.instagram.com/kicks.uiuc" target="_blank" rel="noopener noreferrer">
-			Instagram @kicks.uiuc
-		</a>
-		<span><T en="KakaoTalk" ko="카카오톡" />: ghd991003</span>
-	</div>
-
-	<div class="site-footer-copyright">
-		<span>
-			© {new Date().getFullYear()} KICKS. All rights reserved.
-			<span class="site-footer-sep" aria-hidden="true">·</span>
-			<a class="site-footer-manager" href="/app/"><T en="Get the app" ko="앱 설치" /></a>
-			{onLeaguePage && (
-				<>
-					<span class="site-footer-sep" aria-hidden="true">·</span>
-					<a class="site-footer-manager" href="/match-log/" rel="nofollow"><T en="Manager" ko="매니저" /></a>
-				</>
-			)}
-		</span>
-		<span id="daily-visits" hidden>
-			<T>
-				<Fragment slot="en"><span class="visits-heading">TODAY</span><br />👀 <span data-visit-count></span> visitors</Fragment>
-				<Fragment slot="ko">👀 오늘 방문자 · <span data-visit-count></span></Fragment>
-			</T>
-		</span>
+		<div class="k-footer-bottom">
+			<span>
+				© {new Date().getFullYear()} KICKS
+				<span class="k-footer-sep" aria-hidden="true">·</span>
+				<a class="k-footer-link k-footer-link--quiet" href="/app/"><T en="Get the app" ko="앱 설치" /></a>
+				{onLeaguePage && (
+					<>
+						<span class="k-footer-sep" aria-hidden="true">·</span>
+						<a class="k-footer-link k-footer-link--quiet" href="/match-log/" rel="nofollow"><T en="Manager" ko="매니저" /></a>
+					</>
+				)}
+			</span>
+			<span id="daily-visits" hidden>
+				<T>
+					<Fragment slot="en">Today · <span data-visit-count></span> visitors</Fragment>
+					<Fragment slot="ko">오늘 방문자 · <span data-visit-count></span></Fragment>
+				</T>
+			</span>
+		</div>
 	</div>
 </footer>
 
@@ -45,12 +46,3 @@ const onLeaguePage = /^\/league(\/|$)/.test(Astro.url.pathname);
 	const counter = document.getElementById("daily-visits");
 	if (counter) startVisitCounter(counter);
 </script>
-
-<style>
-	.site-footer-copyright { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; }
-	#daily-visits { white-space: nowrap; }
-	.site-footer-sep { margin: 0 6px; opacity: 0.6; }
-	.site-footer-manager { color: inherit; opacity: 0.75; text-decoration: none; }
-	.site-footer-manager:hover, .site-footer-manager:focus-visible { opacity: 1; text-decoration: underline; }
-	.visits-heading { font-size: 0.65rem; letter-spacing: 0.08em; }
-</style>

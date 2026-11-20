@@ -1,0 +1,570 @@
+/*
+	KICKS 2.0 — shared look for every page: colors, type, the header,
+	the notice strip and the footer. Loaded after global.css, so the values
+	here win where both set the same thing. Page-by-page styles still live
+	in global.css until each page is moved over.
+*/
+
+:root {
+
+	--k-olive: #3f5128;
+	--k-olive-dark: #33421f;
+	--k-ink: #111;
+	--k-text: #111;
+	--k-muted: #6b6b6b;
+	--k-line: #e5e5e5;
+	--k-paper: #fff;
+	--k-max: 1240px;
+	--k-gutter: 24px;
+	--k-title: 2.6rem;
+	--k-font-display: "Inter Tight Variable", "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	--k-font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+	/* Older page styles read these; white background from now on. */
+	--color-background: var(--k-paper);
+	--color-green: var(--k-olive);
+	--color-dark: var(--k-text);
+
+	font-family: var(--k-font-body);
+	color: var(--k-text);
+	background-color: var(--k-paper);
+
+}
+
+body {
+
+	background-color: var(--k-paper);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+}
+
+h1,
+h2,
+h3 {
+
+	font-family: var(--k-font-display);
+	letter-spacing: -0.02em;
+
+}
+
+/* One width for every page's content. */
+
+.k-container {
+
+	width: 100%;
+	max-width: calc(var(--k-max) + var(--k-gutter) * 2);
+	margin: 0 auto;
+	padding: 0 var(--k-gutter);
+
+}
+
+/* ---------- Header ---------- */
+
+.k-header {
+
+	position: relative;
+	z-index: 50;
+	background: var(--k-paper);
+	font-family: var(--k-font-display);
+
+}
+
+.k-header-top {
+
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	max-width: calc(var(--k-max) + var(--k-gutter) * 2);
+	min-height: 72px;
+	margin: 0 auto;
+	padding: 12px var(--k-gutter);
+
+}
+
+.k-brand {
+
+	grid-column: 2;
+	display: block;
+	line-height: 0;
+	-webkit-touch-callout: none;
+
+}
+
+.k-brand img {
+
+	display: block;
+	width: auto;
+	height: 46px;
+
+}
+
+.k-lang {
+
+	grid-column: 1;
+	justify-self: start;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 0;
+	border: 0;
+	background: none;
+	color: var(--k-muted);
+	font: inherit;
+	font-size: 0.82rem;
+	font-weight: 500;
+	letter-spacing: 0.04em;
+	cursor: pointer;
+
+}
+
+.k-lang-divider {
+
+	color: var(--k-line);
+
+}
+
+html:not([lang="ko"]) .k-lang [data-lang-option="en"],
+html[lang="ko"] .k-lang [data-lang-option="ko"] {
+
+	color: var(--k-olive);
+	font-weight: 700;
+
+}
+
+.k-join {
+
+	grid-column: 3;
+	justify-self: end;
+	display: inline-flex;
+	align-items: center;
+	min-height: 38px;
+	padding: 0 18px;
+	background: var(--k-olive);
+	color: #fff;
+	font-size: 0.88rem;
+	font-weight: 700;
+	white-space: nowrap;
+
+}
+
+.k-join:hover,
+.k-join:focus-visible,
+.k-join[aria-current="page"] {
+
+	background: var(--k-olive-dark);
+
+}
+
+.k-menu-toggle {
+
+	display: none;
+
+}
+
+/* Menu: one row under the logo. */
+
+.k-nav {
+
+	border-top: 1px solid var(--k-line);
+	border-bottom: 1px solid var(--k-line);
+
+}
+
+.k-nav-list {
+
+	display: flex;
+	justify-content: center;
+	gap: clamp(20px, 3.4vw, 44px);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+}
+
+.k-nav-list a {
+
+	position: relative;
+	display: block;
+	padding: 15px 0 14px;
+	color: var(--k-ink);
+	font-size: 0.95rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	white-space: nowrap;
+
+}
+
+.k-nav-list a::after {
+
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: -1px;
+	left: 0;
+	height: 3px;
+	background: transparent;
+
+}
+
+.k-nav-list a:hover {
+
+	color: var(--k-olive);
+
+}
+
+.k-nav-list a[aria-current="page"] {
+
+	color: var(--k-olive);
+
+}
+
+.k-nav-list a[aria-current="page"]::after {
+
+	background: var(--k-olive);
+
+}
+
+.k-nav-more {
+
+	display: none;
+
+}
+
+/* Notice strip */
+
+.k-notice {
+
+	padding: 9px var(--k-gutter);
+	background: var(--k-olive);
+	color: #fff;
+	font-size: 0.85rem;
+	font-weight: 500;
+	text-align: center;
+
+}
+
+/* ---------- Footer ---------- */
+
+.k-footer {
+
+	margin-top: 96px;
+	background: var(--k-olive);
+	color: #fff;
+
+}
+
+.k-footer-inner {
+
+	max-width: calc(var(--k-max) + var(--k-gutter) * 2);
+	margin: 0 auto;
+	padding: 40px var(--k-gutter) 28px;
+
+}
+
+.k-footer-top {
+
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 16px 32px;
+	padding-bottom: 24px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+
+}
+
+.k-footer-brand {
+
+	display: grid;
+	gap: 6px;
+
+}
+
+.k-footer-name {
+
+	font-family: var(--k-font-display);
+	font-size: 1.4rem;
+	font-weight: 800;
+	letter-spacing: -0.01em;
+
+}
+
+.k-footer-tagline {
+
+	font-size: 0.85rem;
+	opacity: 0.8;
+
+}
+
+.k-footer-link {
+
+	color: #fff;
+	font-size: 0.9rem;
+
+}
+
+.k-footer-link:hover,
+.k-footer-link:focus-visible {
+
+	text-decoration: underline;
+
+}
+
+.k-footer-bottom {
+
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 8px 24px;
+	padding-top: 18px;
+	font-size: 0.8rem;
+	opacity: 0.8;
+
+}
+
+.k-footer-link--quiet {
+
+	font-size: inherit;
+
+}
+
+.k-footer-sep {
+
+	margin: 0 6px;
+
+}
+
+#daily-visits {
+
+	white-space: nowrap;
+
+}
+
+/* ---------- Phone ---------- */
+
+@media (max-width: 860px) {
+
+	:root {
+
+		--k-gutter: 16px;
+		--k-title: 2rem;
+
+	}
+
+	.k-header {
+
+		border-bottom: 1px solid var(--k-line);
+
+	}
+
+	.k-header-top {
+
+		min-height: 60px;
+		padding-top: 8px;
+		padding-bottom: 8px;
+
+	}
+
+	.k-header-top > .k-lang {
+
+		display: none;
+
+	}
+
+	.k-brand img {
+
+		height: 34px;
+
+	}
+
+	.k-join {
+
+		min-height: 36px;
+		padding: 0 12px;
+		font-size: 0.8rem;
+
+	}
+
+	.k-menu-toggle {
+
+		grid-column: 1;
+		justify-self: start;
+		display: inline-flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 5px;
+		width: 44px;
+		height: 44px;
+		margin-left: -10px;
+		padding: 10px;
+		border: 0;
+		background: none;
+		cursor: pointer;
+
+	}
+
+	.k-menu-toggle span {
+
+		display: block;
+		height: 2px;
+		background: var(--k-ink);
+		transition: transform 0.2s ease, opacity 0.2s ease;
+
+	}
+
+	.k-menu-toggle[aria-expanded="true"] span:nth-child(1) {
+
+		transform: translateY(7px) rotate(45deg);
+
+	}
+
+	.k-menu-toggle[aria-expanded="true"] span:nth-child(2) {
+
+		opacity: 0;
+
+	}
+
+	.k-menu-toggle[aria-expanded="true"] span:nth-child(3) {
+
+		transform: translateY(-7px) rotate(-45deg);
+
+	}
+
+	/* The menu becomes a full panel under the header. */
+
+	.k-nav {
+
+		display: none;
+		position: absolute;
+		top: 100%;
+		right: 0;
+		left: 0;
+		height: calc(100dvh - 60px);
+		overflow-y: auto;
+		padding: 8px var(--k-gutter) 32px;
+		border: 0;
+		background: var(--k-paper);
+
+	}
+
+	.k-nav.is-open {
+
+		display: block;
+
+	}
+
+	html.k-menu-open,
+	html.k-menu-open body {
+
+		overflow: hidden;
+
+	}
+
+	.k-nav-list {
+
+		display: block;
+
+	}
+
+	.k-nav-list li {
+
+		border-bottom: 1px solid var(--k-line);
+
+	}
+
+	.k-nav-list a {
+
+		padding: 14px 0;
+		font-size: 1.6rem;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+
+	}
+
+	.k-nav-list a[aria-current="page"]::after {
+
+		display: none;
+
+	}
+
+	.k-nav-more {
+
+		display: block;
+		padding-top: 28px;
+
+	}
+
+	.k-nav-more-title {
+
+		margin: 0 0 6px;
+		color: var(--k-muted);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+
+	}
+
+	.k-nav-more ul {
+
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+	}
+
+	.k-nav-more a {
+
+		display: block;
+		padding: 10px 0;
+		color: var(--k-ink);
+		font-size: 1.05rem;
+		font-weight: 600;
+
+	}
+
+	.k-lang--menu {
+
+		margin-top: 28px;
+		font-size: 0.95rem;
+
+	}
+
+	.k-notice {
+
+		padding: 8px var(--k-gutter);
+		font-size: 0.8rem;
+
+	}
+
+	.k-footer {
+
+		margin-top: 64px;
+
+	}
+
+	.k-footer-bottom {
+
+		flex-direction: column;
+
+	}
+
+}
+
+@media (max-width: 380px) {
+
+	.k-brand img {
+
+		height: 28px;
+
+	}
+
+	.k-join {
+
+		padding: 0 10px;
+		font-size: 0.75rem;
+
+	}
+
+}

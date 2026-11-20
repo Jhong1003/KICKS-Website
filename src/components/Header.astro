@@ -1,77 +1,92 @@
 ---
 import T from "./T.astro";
-import { currentSeason } from "../lib/leagues";
 
-interface Props {
-	variant?: "hero" | "default";
-}
-
-const { variant = "default" } = Astro.props;
-
-// Full Matches (members only) isn't its own menu item: "Media" (사진·영상, /gallery)
-// covers both, with Photos | Full Matches tabs on top (MediaTabs.astro).
-// `also` lists other paths that light up the same item.
-const navLinks: { href: string; label: string; labelKo: string; locked?: boolean; cta?: boolean; also?: string[] }[] = [
+// KICKS 2.0 header: EN | 한 on the left, the black logo in the middle,
+// Join KICKS on the right, one row of menu links under them, then the olive
+// notice strip. On a phone the menu folds into ☰ and Join KICKS stays out.
+//
+// `also` lists other paths that light up the same menu item. Full Matches
+// isn't its own item: Media (/gallery) covers it with Photos | Full matches
+// tabs. Dream Team sits under Players, Member benefits under Partners.
+const navLinks: { href: string; label: string; labelKo: string; also?: string[] }[] = [
 	{ href: "/about", label: "About", labelKo: "소개" },
 	{ href: "/league", label: "League", labelKo: "리그" },
-	{ href: "/players", label: "Players", labelKo: "선수" },
+	{ href: "/players", label: "Players", labelKo: "선수", also: ["/dream-team"] },
 	{ href: "/schedule", label: "Schedule", labelKo: "일정" },
-	{ href: "/gallery", label: "Media", labelKo: "사진·영상", also: ["/full-matches"] },
+	{ href: "/gallery", label: "Media", labelKo: "미디어", also: ["/full-matches"] },
 	{ href: "/hall-of-fame", label: "Hall of Fame", labelKo: "명예의 전당" },
-	{ href: "/partners", label: "Partners", labelKo: "파트너" },
-	{ href: "/join", label: "Join", labelKo: "가입하기", cta: true },
+	{ href: "/partners", label: "Partners", labelKo: "파트너", also: ["/benefits"] },
+];
+
+// Only in the phone menu, under "More": pages with no menu item of their own.
+const moreLinks: { href: string; label: string; labelKo: string }[] = [
+	{ href: "/benefits/", label: "Member benefits", labelKo: "멤버 혜택" },
+	{ href: "/#mini-games", label: "Mini games", labelKo: "미니게임" },
+	{ href: "/dream-team/", label: "Dream Team", labelKo: "드림팀" },
 ];
 
 const currentPath = Astro.url.pathname;
+const isCurrent = (link: (typeof navLinks)[number]) =>
+	[link.href, ...(link.also ?? [])].some((path) => currentPath === path || currentPath.startsWith(`${path}/`));
+const onJoin = currentPath === "/join" || currentPath.startsWith("/join/");
 ---
 
-<header class={variant === "hero" ? "site-header" : "site-header site-header--bar"}>
-	<a class="brand" href="/" aria-label="KICKS home">
-		<img class="brand-logo" src="/kicks-logo-white.jpg" alt="KICKS" />
-	</a>
+<header class="k-header">
+	<div class="k-header-top">
+		<button class="k-menu-toggle" type="button" aria-expanded="false" aria-controls="k-menu" aria-label="Menu">
+			<span></span><span></span><span></span>
+		</button>
 
-	<nav class="nav-list" id="site-nav" aria-label="Main navigation">
-		{
-			navLinks.map((link) => (
-				<a
-						href={`${link.href}/`}
-						class={link.cta ? "nav-cta" : undefined}
-						aria-current={[link.href, ...(link.also ?? [])].some((path) => currentPath === path || currentPath.startsWith(`${path}/`)) ? "page" : undefined}
-					>
-					<T en={link.label} ko={link.labelKo} />
-					{link.locked && (
-						<svg class="nav-lock-icon" viewBox="0 0 16 16" aria-hidden="true">
-							<path
-								d="M4.5 7V5a3.5 3.5 0 0 1 7 0v2h.75c.414 0 .75.336.75.75v5.5a.75.75 0 0 1-.75.75h-8.5a.75.75 0 0 1-.75-.75v-5.5c0-.414.336-.75.75-.75H4.5Zm1.5 0h4V5a2 2 0 0 0-4 0v2Z"
-								fill="currentColor"
-							/>
-						</svg>
-					)}
-				</a>
-			))
-		}
+		<button class="k-lang" type="button" data-lang-toggle aria-label="Switch language / 언어 변경">
+			<span data-lang-option="en">EN</span>
+			<span class="k-lang-divider" aria-hidden="true">|</span>
+			<span data-lang-option="ko">한</span>
+		</button>
+
+		<a class="brand k-brand" href="/" aria-label="KICKS home">
+			<img src="/kicks-logo-black.webp" alt="KICKS" width="900" height="328" />
+		</a>
+
+		<a class="k-join" href="/join/" aria-current={onJoin ? "page" : undefined}>
+			<T en="Join KICKS" ko="KICKS 신청하기" />
+		</a>
+	</div>
+
+	<nav class="k-nav" id="k-menu" aria-label="Main navigation">
+		<ul class="k-nav-list">
+			{
+				navLinks.map((link) => (
+					<li>
+						<a href={`${link.href}/`} aria-current={isCurrent(link) ? "page" : undefined}>
+							<T en={link.label} ko={link.labelKo} />
+						</a>
+					</li>
+				))
+			}
+		</ul>
+		<div class="k-nav-more">
+			<p class="k-nav-more-title"><T en="More" ko="더보기" /></p>
+			<ul>
+				{
+					moreLinks.map((link) => (
+						<li>
+							<a href={link.href}><T en={link.label} ko={link.labelKo} /></a>
+						</li>
+					))
+				}
+			</ul>
+			<button class="k-lang k-lang--menu" type="button" data-lang-toggle aria-label="Switch language / 언어 변경">
+				<span data-lang-option="en">EN</span>
+				<span class="k-lang-divider" aria-hidden="true">|</span>
+				<span data-lang-option="ko">한</span>
+			</button>
+		</div>
 	</nav>
-
-	<button class="lang-toggle" type="button" data-lang-toggle aria-label="Switch language / 언어 변경">
-		<span class="lang-toggle-option" data-lang-option="en">EN</span>
-		<span class="lang-toggle-divider" aria-hidden="true">|</span>
-		<span class="lang-toggle-option" data-lang-option="ko">한</span>
-	</button>
-
-	<span class="season-label"><T en={`${currentSeason} SEASON`} ko={`${currentSeason} 시즌`} /></span>
-
-	<button
-		class="nav-toggle"
-		type="button"
-		aria-expanded="false"
-		aria-controls="site-nav"
-		aria-label="Toggle menu"
-	>
-		<span class="nav-toggle-bar"></span>
-		<span class="nav-toggle-bar"></span>
-		<span class="nav-toggle-bar"></span>
-	</button>
 </header>
+
+<div class="k-notice">
+	<T en="UIUC's Korean futsal club · 7v7 every Saturday" ko="UIUC 한인 풋살 동아리 · 매주 토요일 7대7" />
+</div>
 
 <div class="easter-egg-overlay" id="logo-easter-egg" role="status" hidden>
 	<div class="easter-egg">
@@ -84,39 +99,40 @@ const currentPath = Astro.url.pathname;
 <script>
 	// EN | 한 switch. The actual switching lives in BaseLayout.astro's inline
 	// script (window.kicksSetLang), which also picked the starting language.
-	document.querySelector<HTMLButtonElement>("[data-lang-toggle]")?.addEventListener("click", () => {
-		const next = document.documentElement.lang === "ko" ? "en" : "ko";
-		(window as unknown as { kicksSetLang: (lang: string, remember: boolean) => void }).kicksSetLang(next, true);
-	});
+	document.querySelectorAll<HTMLButtonElement>("[data-lang-toggle]").forEach((button) =>
+		button.addEventListener("click", () => {
+			const next = document.documentElement.lang === "ko" ? "en" : "ko";
+			(window as unknown as { kicksSetLang: (lang: string, remember: boolean) => void }).kicksSetLang(next, true);
+		}),
+	);
 
-	const toggle = document.querySelector<HTMLButtonElement>(".nav-toggle");
-	const nav = document.getElementById("site-nav");
+	// Phone menu (☰). Above the phone breakpoint the menu is always shown as
+	// the one-row nav, so the open state only matters below it.
+	const toggle = document.querySelector<HTMLButtonElement>(".k-menu-toggle");
+	const menu = document.getElementById("k-menu");
 	function closeMenu(restoreFocus = false) {
-		if (!nav?.classList.contains("is-open")) return;
-		nav.classList.remove("is-open");
+		if (!menu?.classList.contains("is-open")) return;
+		menu.classList.remove("is-open");
+		document.documentElement.classList.remove("k-menu-open");
 		toggle?.setAttribute("aria-expanded", "false");
 		if (restoreFocus) toggle?.focus();
 	}
 
 	toggle?.addEventListener("click", () => {
-		const isOpen = nav?.classList.toggle("is-open");
+		const isOpen = menu?.classList.toggle("is-open") ?? false;
+		document.documentElement.classList.toggle("k-menu-open", isOpen);
 		toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
 	});
-
-	nav?.addEventListener("click", (event) => {
+	menu?.addEventListener("click", (event) => {
 		if ((event.target as Element).closest("a")) closeMenu();
 	});
-	document.addEventListener("pointerdown", (event) => {
-		const target = event.target as Node;
-		if (!nav?.contains(target) && !toggle?.contains(target)) closeMenu();
-	});
 	document.addEventListener("keydown", (event) => {
-		if (event.key === "Escape" && nav?.classList.contains("is-open")) {
+		if (event.key === "Escape" && menu?.classList.contains("is-open")) {
 			event.preventDefault();
 			closeMenu(true);
 		}
 	});
-	matchMedia("(max-width: 1200px)").addEventListener("change", () => closeMenu());
+	matchMedia("(min-width: 861px)").addEventListener("change", () => closeMenu());
 	window.addEventListener("pagehide", () => closeMenu());
 
 	// Logo easter egg: 5 clicks within 3 seconds. Click timestamps live in

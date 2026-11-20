@@ -1,7 +1,6 @@
 ---
 import { Image } from "astro:assets";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Header from "../components/Header.astro";
 import StandingsTable from "../components/StandingsTable.astro";
 import T from "../components/T.astro";
 import LeagueFinaleBanner from "../components/LeagueFinaleBanner.astro";
@@ -78,7 +77,6 @@ const titleFavourite = latestTitle
 <BaseLayout
 	title="KICKS | UIUC Korean-Inspired Futsal Community"
 	description="KICKS is a student-run, Korean-inspired futsal community at the University of Illinois Urbana-Champaign (UIUC) — weekly league, standings, player stats, and events. 축구를 좋아하는 누구나 함께하는 UIUC 한인 풋살 동아리 — 매주 7대7 풋살 리그와 11대11 이벤트 매치."
-	header="custom"
 >
 	<EventPopup />
 	<TeamRevealPopup league={currentLeague} />
@@ -128,7 +126,6 @@ const titleFavourite = latestTitle
 			<div class="season-deco season-deco--bats" aria-hidden="true">
 				<span>🦇</span><span>🦇</span><span>🦇</span>
 			</div>
-			<Header variant="hero" />
 			<section class="hero-content" aria-labelledby="hero-title">
 				<div class="hero-text">
 					<p class="eyebrow"><span class="eyebrow-part">KOREAN-INSPIRED FUTSAL COMMUNITY</span><span class="eyebrow-sep"> · </span><span class="eyebrow-part">UIUC</span></p>
